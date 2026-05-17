@@ -23,6 +23,67 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module NonBlankString =
+  struct
+    type nonrec t = string
+    let context_ = "NonBlankString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NonBlankString" j
+    let to_json = simple_to_json to_value
+  end
+module Object =
+  struct
+    type nonrec t = string
+    let context_ = "Object"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9\\/\\._\\-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Object" j
+    let to_json = simple_to_json to_value
+  end
+module ApplicationTrustedSource =
+  struct
+    type nonrec t = string
+    let context_ = "ApplicationTrustedSource"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"^\\w+\\:\\/\\/.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ApplicationTrustedSource" j
+    let to_json = simple_to_json to_value
+  end
 module Source =
   struct
     type nonrec t = string
@@ -33,7 +94,9 @@ module Source =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:256) >>=
-                  (fun () -> check_pattern i ~pattern:"^aws\\.partner\\/.*$")));
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(aws\\.(partner\\/.*|cases|cases\\-test))|Pipe\\s.[a-zA-Z0-9\\/\\._\\-]+$|app\\-integrations\\.webhooks\\/[a-zA-Z0-9\\-_.\\/]+$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -78,24 +141,315 @@ module TagValue =
     let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
-module NonBlankString =
+module ExecutionMode =
+  struct
+    type nonrec t =
+      | ON_DEMAND 
+      | SCHEDULED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ON_DEMAND -> "ON_DEMAND"
+      | SCHEDULED -> "SCHEDULED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ON_DEMAND" -> ON_DEMAND
+      | "SCHEDULED" -> SCHEDULED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ExecutionMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ExecutionMode" j)
+    let to_json = simple_to_json to_value
+  end
+module OnDemandConfiguration =
+  struct
+    type nonrec t =
+      {
+      startTime: NonBlankString.t
+        [@ocaml.doc
+          "The start time for data pull from the source as an Unix/epoch string in milliseconds"];
+      endTime: NonBlankString.t option
+        [@ocaml.doc
+          "The end time for data pull from the source as an Unix/epoch string in milliseconds"]}
+    let context_ = "OnDemandConfiguration"
+    let make ?endTime = fun ~startTime -> fun () -> { endTime; startTime }
+    let to_value x =
+      structure_to_value
+        [("StartTime", (Some (NonBlankString.to_value x.startTime)));
+        ("EndTime", (Option.map x.endTime ~f:NonBlankString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTime =
+        (Option.map ~f:NonBlankString.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let startTime =
+        NonBlankString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StartTime") in
+      make ?endTime ~startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" NonBlankString.of_json in
+      let startTime = field_map_exn json__ "StartTime" NonBlankString.of_json in
+      make ?endTime ~startTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The start and end time for data pull from the source."]
+module ScheduleConfiguration =
+  struct
+    type nonrec t =
+      {
+      firstExecutionFrom: NonBlankString.t option
+        [@ocaml.doc
+          "The start date for objects to import in the first flow run as an Unix/epoch timestamp in milliseconds or in ISO-8601 format."];
+      object_: Object.t option
+        [@ocaml.doc "The name of the object to pull from the data source."];
+      scheduleExpression: NonBlankString.t
+        [@ocaml.doc "How often the data should be pulled from data source."]}
+    let context_ = "ScheduleConfiguration"
+    let make ?firstExecutionFrom =
+      fun ?object_ ->
+        fun ~scheduleExpression ->
+          fun () -> { firstExecutionFrom; object_; scheduleExpression }
+    let to_value x =
+      structure_to_value
+        [("FirstExecutionFrom",
+           (Option.map x.firstExecutionFrom ~f:NonBlankString.to_value));
+        ("Object", (Option.map x.object_ ~f:Object.to_value));
+        ("ScheduleExpression",
+          (Some (NonBlankString.to_value x.scheduleExpression)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scheduleExpression =
+        NonBlankString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ScheduleExpression") in
+      let object_ =
+        (Option.map ~f:Object.of_xml) (Xml.child xml_arg0 "Object") in
+      let firstExecutionFrom =
+        (Option.map ~f:NonBlankString.of_xml)
+          (Xml.child xml_arg0 "FirstExecutionFrom") in
+      make ~scheduleExpression ?object_ ?firstExecutionFrom ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scheduleExpression =
+        field_map_exn json__ "ScheduleExpression" NonBlankString.of_json in
+      let object_ = field_map json__ "Object" Object.of_json in
+      let firstExecutionFrom =
+        field_map json__ "FirstExecutionFrom" NonBlankString.of_json in
+      make ~scheduleExpression ?object_ ?firstExecutionFrom ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The name of the data and how often it should be pulled from the source."]
+module ExecutionStatus =
+  struct
+    type nonrec t =
+      | COMPLETED 
+      | IN_PROGRESS 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | COMPLETED -> "COMPLETED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "COMPLETED" -> COMPLETED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ExecutionStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ExecutionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module Fields =
   struct
     type nonrec t = string
-    let context_ = "NonBlankString"
+    let context_ = "Fields"
     let make i =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:255) >>=
-                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9\\/\\._\\-]+$")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NonBlankString" j
+    let of_json j = string_of_json ~kind:"Fields" j
+    let to_json = simple_to_json to_value
+  end
+module ContactHandlingScope =
+  struct
+    type nonrec t =
+      | CROSS_CONTACTS 
+      | PER_CONTACT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CROSS_CONTACTS -> "CROSS_CONTACTS"
+      | PER_CONTACT -> "PER_CONTACT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CROSS_CONTACTS" -> CROSS_CONTACTS
+      | "PER_CONTACT" -> PER_CONTACT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ContactHandlingScope" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ContactHandlingScope" j)
+    let to_json = simple_to_json to_value
+  end
+module ApplicationApprovedOrigins =
+  struct
+    type nonrec t = ApplicationTrustedSource.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ApplicationTrustedSource.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ApplicationTrustedSource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ApplicationApprovedOrigins"
+        ~of_json:ApplicationTrustedSource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module URL =
+  struct
+    type nonrec t = string
+    let context_ = "URL"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () -> check_pattern i ~pattern:"^\\w+\\:\\/\\/.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"URL" j
+    let to_json = simple_to_json to_value
+  end
+module IframePermission =
+  struct
+    type nonrec t = string[@@ocaml.doc "A permission for the iframe."]
+    let context_ = "IframePermission"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-z-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IframePermission" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "A permission for the iframe."]
+module Description =
+  struct
+    type nonrec t = string
+    let context_ = "Description"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Description" j
+    let to_json = simple_to_json to_value
+  end
+module EventDefinitionSchema =
+  struct
+    type nonrec t = string
+    let context_ = "EventDefinitionSchema"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:10240) >>=
+                  (fun () -> check_pattern i ~pattern:"^.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EventDefinitionSchema" j
+    let to_json = simple_to_json to_value
+  end
+module EventName =
+  struct
+    type nonrec t = string
+    let context_ = "EventName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9\\/\\._\\-]+::[a-zA-Z0-9\\/\\._\\-]+(?:\\*)?$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EventName" j
     let to_json = simple_to_json to_value
   end
 module Arn =
@@ -118,26 +472,6 @@ module Arn =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"Arn" j
-    let to_json = simple_to_json to_value
-  end
-module Description =
-  struct
-    type nonrec t = string
-    let context_ = "Description"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:1000) >>=
-                  (fun () -> check_pattern i ~pattern:".*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Description" j
     let to_json = simple_to_json to_value
   end
 module EventBridgeBus =
@@ -176,8 +510,8 @@ module EventFilter =
         Source.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Source") in
       make ~source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let source = field_map_exn json "Source" Source.of_json in
+    let of_json json__ =
+      let source = field_map_exn json__ "Source" Source.of_json in
       make ~source ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The event filter."]
@@ -228,6 +562,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -257,6 +593,8 @@ module ClientAssociationMetadata =
                        (NonBlankString.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -323,6 +661,279 @@ module UUID =
     let of_json j = string_of_json ~kind:"UUID" j
     let to_json = simple_to_json to_value
   end
+module SourceURI =
+  struct
+    type nonrec t = string
+    let context_ = "SourceURI"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(\\w+\\:\\/\\/[\\w.-]+[\\w/!@#+=.-]+$)|(\\w+\\:\\/\\/[\\w.-]+[\\w/!@#+=.-]+[\\w/!@#+=.-]+[\\w/!@#+=.,-]+$)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SourceURI" j
+    let to_json = simple_to_json to_value
+  end
+module DestinationURI =
+  struct
+    type nonrec t = string
+    let context_ = "DestinationURI"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(\\w+\\:\\/\\/[\\w.-]+[\\w/!@#+=.-]+$)|(\\w+\\:\\/\\/[\\w.-]+[\\w/!@#+=.-]+[\\w/!@#+=.-]+[\\w/!@#+=.,-]+$)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DestinationURI" j
+    let to_json = simple_to_json to_value
+  end
+module ExecutionConfiguration =
+  struct
+    type nonrec t =
+      {
+      executionMode: ExecutionMode.t
+        [@ocaml.doc "The mode for data import/export execution."];
+      onDemandConfiguration: OnDemandConfiguration.t option ;
+      scheduleConfiguration: ScheduleConfiguration.t option }
+    let context_ = "ExecutionConfiguration"
+    let make ?onDemandConfiguration =
+      fun ?scheduleConfiguration ->
+        fun ~executionMode ->
+          fun () ->
+            { onDemandConfiguration; scheduleConfiguration; executionMode }
+    let to_value x =
+      structure_to_value
+        [("ExecutionMode", (Some (ExecutionMode.to_value x.executionMode)));
+        ("OnDemandConfiguration",
+          (Option.map x.onDemandConfiguration
+             ~f:OnDemandConfiguration.to_value));
+        ("ScheduleConfiguration",
+          (Option.map x.scheduleConfiguration
+             ~f:ScheduleConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scheduleConfiguration =
+        (Option.map ~f:ScheduleConfiguration.of_xml)
+          (Xml.child xml_arg0 "ScheduleConfiguration") in
+      let onDemandConfiguration =
+        (Option.map ~f:OnDemandConfiguration.of_xml)
+          (Xml.child xml_arg0 "OnDemandConfiguration") in
+      let executionMode =
+        ExecutionMode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ExecutionMode") in
+      make ?scheduleConfiguration ?onDemandConfiguration ~executionMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scheduleConfiguration =
+        field_map json__ "ScheduleConfiguration"
+          ScheduleConfiguration.of_json in
+      let onDemandConfiguration =
+        field_map json__ "OnDemandConfiguration"
+          OnDemandConfiguration.of_json in
+      let executionMode =
+        field_map_exn json__ "ExecutionMode" ExecutionMode.of_json in
+      make ?scheduleConfiguration ?onDemandConfiguration ~executionMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for how the files should be pulled from the source."]
+module LastExecutionStatus =
+  struct
+    type nonrec t =
+      {
+      executionStatus: ExecutionStatus.t option
+        [@ocaml.doc "The job status enum string."];
+      statusMessage: NonBlankString.t option
+        [@ocaml.doc "The status message of a job."]}
+    let make ?executionStatus =
+      fun ?statusMessage -> fun () -> { executionStatus; statusMessage }
+    let to_value x =
+      structure_to_value
+        [("ExecutionStatus",
+           (Option.map x.executionStatus ~f:ExecutionStatus.to_value));
+        ("StatusMessage",
+          (Option.map x.statusMessage ~f:NonBlankString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusMessage =
+        (Option.map ~f:NonBlankString.of_xml)
+          (Xml.child xml_arg0 "StatusMessage") in
+      let executionStatus =
+        (Option.map ~f:ExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "ExecutionStatus") in
+      make ?statusMessage ?executionStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusMessage =
+        field_map json__ "StatusMessage" NonBlankString.of_json in
+      let executionStatus =
+        field_map json__ "ExecutionStatus" ExecutionStatus.of_json in
+      make ?statusMessage ?executionStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The execution status of the last job."]
+module ApplicationName =
+  struct
+    type nonrec t = string
+    let context_ = "ApplicationName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9\\/\\._ \\-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ApplicationName" j
+    let to_json = simple_to_json to_value
+  end
+module ApplicationNamespace =
+  struct
+    type nonrec t = string
+    let context_ = "ApplicationNamespace"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:211) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9\\/\\._\\-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ApplicationNamespace" j
+    let to_json = simple_to_json to_value
+  end
+module ApplicationType =
+  struct
+    type nonrec t =
+      | STANDARD 
+      | SERVICE 
+      | MCP_SERVER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | STANDARD -> "STANDARD"
+      | SERVICE -> "SERVICE"
+      | MCP_SERVER -> "MCP_SERVER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "STANDARD" -> STANDARD
+      | "SERVICE" -> SERVICE
+      | "MCP_SERVER" -> MCP_SERVER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ApplicationType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ApplicationType" j)
+    let to_json = simple_to_json to_value
+  end
+module Boolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module FieldsList =
+  struct
+    type nonrec t = Fields.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2048) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Fields.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Fields.of_xml)
+    let of_json j = list_of_json ~kind:"FieldsList" ~of_json:Fields.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NonBlankLongString =
+  struct
+    type nonrec t = string
+    let context_ = "NonBlankLongString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NonBlankLongString" j
+    let to_json = simple_to_json to_value
+  end
 module Message =
   struct
     type nonrec t = string
@@ -336,6 +947,182 @@ module Message =
     let of_json j = string_of_json ~kind:"Message" j
     let to_json = simple_to_json to_value
   end
+module ContactHandling =
+  struct
+    type nonrec t =
+      {
+      scope: ContactHandlingScope.t option
+        [@ocaml.doc
+          "Indicates whether the application refreshes for each contact or refreshes only with each new browser session."]}
+    let make ?scope = fun () -> { scope }
+    let to_value x =
+      structure_to_value
+        [("Scope", (Option.map x.scope ~f:ContactHandlingScope.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scope =
+        (Option.map ~f:ContactHandlingScope.of_xml)
+          (Xml.child xml_arg0 "Scope") in
+      make ?scope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scope = field_map json__ "Scope" ContactHandlingScope.of_json in
+      make ?scope ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The contact handling configuration for the application."]
+module ExternalUrlConfig =
+  struct
+    type nonrec t =
+      {
+      accessUrl: URL.t [@ocaml.doc "The URL to access the application."];
+      approvedOrigins: ApplicationApprovedOrigins.t option
+        [@ocaml.doc
+          "Additional URLs to allow list if different than the access URL."]}
+    let context_ = "ExternalUrlConfig"
+    let make ?approvedOrigins =
+      fun ~accessUrl -> fun () -> { approvedOrigins; accessUrl }
+    let to_value x =
+      structure_to_value
+        [("AccessUrl", (Some (URL.to_value x.accessUrl)));
+        ("ApprovedOrigins",
+          (Option.map x.approvedOrigins
+             ~f:ApplicationApprovedOrigins.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let approvedOrigins =
+        (Option.map ~f:ApplicationApprovedOrigins.of_xml)
+          (Xml.child xml_arg0 "ApprovedOrigins") in
+      let accessUrl =
+        URL.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AccessUrl") in
+      make ?approvedOrigins ~accessUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let approvedOrigins =
+        field_map json__ "ApprovedOrigins" ApplicationApprovedOrigins.of_json in
+      let accessUrl = field_map_exn json__ "AccessUrl" URL.of_json in
+      make ?approvedOrigins ~accessUrl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The external URL source for the application."]
+module IframePermissionList =
+  struct
+    type nonrec t = IframePermission.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IframePermission.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IframePermission.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IframePermissionList"
+        ~of_json:IframePermission.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Permission =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The permission of an event or request that the application has access to."]
+    let context_ = "Permission"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9\\/\\._\\-\\*]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Permission" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The permission of an event or request that the application has access to."]
+module Publication =
+  struct
+    type nonrec t =
+      {
+      event: EventName.t [@ocaml.doc "The name of the publication."];
+      schema: EventDefinitionSchema.t
+        [@ocaml.doc "The JSON schema of the publication event."];
+      description: Description.t option
+        [@ocaml.doc "The description of the publication."]}
+    let context_ = "Publication"
+    let make ?description =
+      fun ~event -> fun ~schema -> fun () -> { description; event; schema }
+    let to_value x =
+      structure_to_value
+        [("Event", (Some (EventName.to_value x.event)));
+        ("Schema", (Some (EventDefinitionSchema.to_value x.schema)));
+        ("Description", (Option.map x.description ~f:Description.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let schema =
+        EventDefinitionSchema.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Schema") in
+      let event =
+        EventName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Event") in
+      make ?description ~schema ~event ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description = field_map json__ "Description" Description.of_json in
+      let schema =
+        field_map_exn json__ "Schema" EventDefinitionSchema.of_json in
+      let event = field_map_exn json__ "Event" EventName.of_json in
+      make ?description ~schema ~event ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration of an event that the application publishes."]
+module Subscription =
+  struct
+    type nonrec t =
+      {
+      event: EventName.t [@ocaml.doc "The name of the subscription."];
+      description: Description.t option
+        [@ocaml.doc "The description of the subscription."]}
+    let context_ = "Subscription"
+    let make ?description = fun ~event -> fun () -> { description; event }
+    let to_value x =
+      structure_to_value
+        [("Event", (Some (EventName.to_value x.event)));
+        ("Description", (Option.map x.description ~f:Description.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let event =
+        EventName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Event") in
+      make ?description ~event ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description = field_map json__ "Description" Description.of_json in
+      let event = field_map_exn json__ "Event" EventName.of_json in
+      make ?description ~event ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration of an event that the application subscribes."]
 module EventIntegration =
   struct
     type nonrec t =
@@ -350,7 +1137,9 @@ module EventIntegration =
         [@ocaml.doc "The event integration filter."];
       eventBridgeBus: EventBridgeBus.t option
         [@ocaml.doc "The Amazon EventBridge bus for the event integration."];
-      tags: TagMap.t option [@ocaml.doc "The tags."]}
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The tags used to organize, track, or control access for this resource. For example, \\{ \"tags\": \\{\"key1\":\"value1\", \"key2\":\"value2\"\\} \\}."]}
     let make ?eventIntegrationArn =
       fun ?name ->
         fun ?description ->
@@ -392,15 +1181,15 @@ module EventIntegration =
       make ?tags ?eventBridgeBus ?eventFilter ?description ?name
         ?eventIntegrationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let eventBridgeBus =
-        field_map json "EventBridgeBus" EventBridgeBus.of_json in
-      let eventFilter = field_map json "EventFilter" EventFilter.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" Name.of_json in
+        field_map json__ "EventBridgeBus" EventBridgeBus.of_json in
+      let eventFilter = field_map json__ "EventFilter" EventFilter.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" Name.of_json in
       let eventIntegrationArn =
-        field_map json "EventIntegrationArn" Arn.of_json in
+        field_map json__ "EventIntegrationArn" Arn.of_json in
       make ?tags ?eventBridgeBus ?eventFilter ?description ?name
         ?eventIntegrationArn ()
     let to_json v = composed_to_json to_value v
@@ -475,19 +1264,19 @@ module EventIntegrationAssociation =
         ?eventIntegrationName ?eventIntegrationAssociationId
         ?eventIntegrationAssociationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientAssociationMetadata =
-        field_map json "ClientAssociationMetadata"
+        field_map json__ "ClientAssociationMetadata"
           ClientAssociationMetadata.of_json in
       let eventBridgeRuleName =
-        field_map json "EventBridgeRuleName" EventBridgeRuleName.of_json in
-      let clientId = field_map json "ClientId" ClientId.of_json in
+        field_map json__ "EventBridgeRuleName" EventBridgeRuleName.of_json in
+      let clientId = field_map json__ "ClientId" ClientId.of_json in
       let eventIntegrationName =
-        field_map json "EventIntegrationName" Name.of_json in
+        field_map json__ "EventIntegrationName" Name.of_json in
       let eventIntegrationAssociationId =
-        field_map json "EventIntegrationAssociationId" UUID.of_json in
+        field_map json__ "EventIntegrationAssociationId" UUID.of_json in
       let eventIntegrationAssociationArn =
-        field_map json "EventIntegrationAssociationArn" Arn.of_json in
+        field_map json__ "EventIntegrationAssociationArn" Arn.of_json in
       make ?clientAssociationMetadata ?eventBridgeRuleName ?clientId
         ?eventIntegrationName ?eventIntegrationAssociationId
         ?eventIntegrationAssociationArn ()
@@ -500,7 +1289,7 @@ module DataIntegrationSummary =
       arn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the DataIntegration."];
       name: Name.t option [@ocaml.doc "The name of the DataIntegration."];
-      sourceURI: NonBlankString.t option
+      sourceURI: SourceURI.t option
         [@ocaml.doc "The URI of the data source."]}
     let make ?arn =
       fun ?name -> fun ?sourceURI -> fun () -> { arn; name; sourceURI }
@@ -508,20 +1297,19 @@ module DataIntegrationSummary =
       structure_to_value
         [("Arn", (Option.map x.arn ~f:Arn.to_value));
         ("Name", (Option.map x.name ~f:Name.to_value));
-        ("SourceURI", (Option.map x.sourceURI ~f:NonBlankString.to_value))]
+        ("SourceURI", (Option.map x.sourceURI ~f:SourceURI.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let sourceURI =
-        (Option.map ~f:NonBlankString.of_xml)
-          (Xml.child xml_arg0 "SourceURI") in
+        (Option.map ~f:SourceURI.of_xml) (Xml.child xml_arg0 "SourceURI") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?sourceURI ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceURI = field_map json "SourceURI" NonBlankString.of_json in
-      let name = field_map json "Name" Name.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
+    let of_json json__ =
+      let sourceURI = field_map json__ "SourceURI" SourceURI.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
       make ?sourceURI ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about the DataIntegration."]
@@ -533,24 +1321,55 @@ module DataIntegrationAssociationSummary =
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the DataIntegration association."];
       dataIntegrationArn: Arn.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN)of the DataIntegration."];
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the DataIntegration."];
       clientId: ClientId.t option
         [@ocaml.doc
-          "The identifier for teh client that is associated with the DataIntegration association."]}
+          "The identifier for the client that is associated with the DataIntegration association."];
+      destinationURI: DestinationURI.t option
+        [@ocaml.doc "The URI of the data destination."];
+      lastExecutionStatus: LastExecutionStatus.t option
+        [@ocaml.doc "The execution status of the last job."];
+      executionConfiguration: ExecutionConfiguration.t option }
     let make ?dataIntegrationAssociationArn =
       fun ?dataIntegrationArn ->
         fun ?clientId ->
-          fun () ->
-            { dataIntegrationAssociationArn; dataIntegrationArn; clientId }
+          fun ?destinationURI ->
+            fun ?lastExecutionStatus ->
+              fun ?executionConfiguration ->
+                fun () ->
+                  {
+                    dataIntegrationAssociationArn;
+                    dataIntegrationArn;
+                    clientId;
+                    destinationURI;
+                    lastExecutionStatus;
+                    executionConfiguration
+                  }
     let to_value x =
       structure_to_value
         [("DataIntegrationAssociationArn",
            (Option.map x.dataIntegrationAssociationArn ~f:Arn.to_value));
         ("DataIntegrationArn",
           (Option.map x.dataIntegrationArn ~f:Arn.to_value));
-        ("ClientId", (Option.map x.clientId ~f:ClientId.to_value))]
+        ("ClientId", (Option.map x.clientId ~f:ClientId.to_value));
+        ("DestinationURI",
+          (Option.map x.destinationURI ~f:DestinationURI.to_value));
+        ("LastExecutionStatus",
+          (Option.map x.lastExecutionStatus ~f:LastExecutionStatus.to_value));
+        ("ExecutionConfiguration",
+          (Option.map x.executionConfiguration
+             ~f:ExecutionConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let executionConfiguration =
+        (Option.map ~f:ExecutionConfiguration.of_xml)
+          (Xml.child xml_arg0 "ExecutionConfiguration") in
+      let lastExecutionStatus =
+        (Option.map ~f:LastExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "LastExecutionStatus") in
+      let destinationURI =
+        (Option.map ~f:DestinationURI.of_xml)
+          (Xml.child xml_arg0 "DestinationURI") in
       let clientId =
         (Option.map ~f:ClientId.of_xml) (Xml.child xml_arg0 "ClientId") in
       let dataIntegrationArn =
@@ -558,59 +1377,220 @@ module DataIntegrationAssociationSummary =
       let dataIntegrationAssociationArn =
         (Option.map ~f:Arn.of_xml)
           (Xml.child xml_arg0 "DataIntegrationAssociationArn") in
-      make ?clientId ?dataIntegrationArn ?dataIntegrationAssociationArn ()
+      make ?executionConfiguration ?lastExecutionStatus ?destinationURI
+        ?clientId ?dataIntegrationArn ?dataIntegrationAssociationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientId = field_map json "ClientId" ClientId.of_json in
+    let of_json json__ =
+      let executionConfiguration =
+        field_map json__ "ExecutionConfiguration"
+          ExecutionConfiguration.of_json in
+      let lastExecutionStatus =
+        field_map json__ "LastExecutionStatus" LastExecutionStatus.of_json in
+      let destinationURI =
+        field_map json__ "DestinationURI" DestinationURI.of_json in
+      let clientId = field_map json__ "ClientId" ClientId.of_json in
       let dataIntegrationArn =
-        field_map json "DataIntegrationArn" Arn.of_json in
+        field_map json__ "DataIntegrationArn" Arn.of_json in
       let dataIntegrationAssociationArn =
-        field_map json "DataIntegrationAssociationArn" Arn.of_json in
-      make ?clientId ?dataIntegrationArn ?dataIntegrationAssociationArn ()
+        field_map json__ "DataIntegrationAssociationArn" Arn.of_json in
+      make ?executionConfiguration ?lastExecutionStatus ?destinationURI
+        ?clientId ?dataIntegrationArn ?dataIntegrationAssociationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Summary information about the DataIntegration association."]
-module Object =
+module ApplicationSummary =
   struct
-    type nonrec t = string
-    let context_ = "Object"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:255) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"^[a-zA-Z0-9\\/\\._\\-]+$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      arn: Arn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the Application."];
+      id: UUID.t option
+        [@ocaml.doc "A unique identifier for the Application."];
+      name: ApplicationName.t option
+        [@ocaml.doc "The name of the application."];
+      namespace: ApplicationNamespace.t option
+        [@ocaml.doc "The namespace of the application."];
+      createdTime: Timestamp.t option
+        [@ocaml.doc "The time when the application was created."];
+      lastModifiedTime: Timestamp.t option
+        [@ocaml.doc "The time when the application was last modified."];
+      isService: Boolean.t option
+        [@ocaml.doc "Indicates whether the application is a service."];
+      applicationType: ApplicationType.t option
+        [@ocaml.doc "The type of application."]}
+    let make ?arn =
+      fun ?id ->
+        fun ?name ->
+          fun ?namespace ->
+            fun ?createdTime ->
+              fun ?lastModifiedTime ->
+                fun ?isService ->
+                  fun ?applicationType ->
+                    fun () ->
+                      {
+                        arn;
+                        id;
+                        name;
+                        namespace;
+                        createdTime;
+                        lastModifiedTime;
+                        isService;
+                        applicationType
+                      }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("Id", (Option.map x.id ~f:UUID.to_value));
+        ("Name", (Option.map x.name ~f:ApplicationName.to_value));
+        ("Namespace",
+          (Option.map x.namespace ~f:ApplicationNamespace.to_value));
+        ("CreatedTime", (Option.map x.createdTime ~f:Timestamp.to_value));
+        ("LastModifiedTime",
+          (Option.map x.lastModifiedTime ~f:Timestamp.to_value));
+        ("IsService", (Option.map x.isService ~f:Boolean.to_value));
+        ("ApplicationType",
+          (Option.map x.applicationType ~f:ApplicationType.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Object" j
-    let to_json = simple_to_json to_value
+    let of_xml xml_arg0 =
+      let applicationType =
+        (Option.map ~f:ApplicationType.of_xml)
+          (Xml.child xml_arg0 "ApplicationType") in
+      let isService =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "IsService") in
+      let lastModifiedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModifiedTime") in
+      let createdTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedTime") in
+      let namespace =
+        (Option.map ~f:ApplicationNamespace.of_xml)
+          (Xml.child xml_arg0 "Namespace") in
+      let name =
+        (Option.map ~f:ApplicationName.of_xml) (Xml.child xml_arg0 "Name") in
+      let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "Id") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?applicationType ?isService ?lastModifiedTime ?createdTime
+        ?namespace ?name ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let applicationType =
+        field_map json__ "ApplicationType" ApplicationType.of_json in
+      let isService = field_map json__ "IsService" Boolean.of_json in
+      let lastModifiedTime =
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
+      let namespace =
+        field_map json__ "Namespace" ApplicationNamespace.of_json in
+      let name = field_map json__ "Name" ApplicationName.of_json in
+      let id = field_map json__ "Id" UUID.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?applicationType ?isService ?lastModifiedTime ?createdTime
+        ?namespace ?name ?id ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary information about the Application."]
+module ApplicationAssociationSummary =
+  struct
+    type nonrec t =
+      {
+      applicationAssociationArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Application Association."];
+      applicationArn: Arn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the Application."];
+      clientId: ClientId.t option
+        [@ocaml.doc
+          "The identifier for the client that is associated with the Application Association."]}
+    let make ?applicationAssociationArn =
+      fun ?applicationArn ->
+        fun ?clientId ->
+          fun () -> { applicationAssociationArn; applicationArn; clientId }
+    let to_value x =
+      structure_to_value
+        [("ApplicationAssociationArn",
+           (Option.map x.applicationAssociationArn ~f:Arn.to_value));
+        ("ApplicationArn", (Option.map x.applicationArn ~f:Arn.to_value));
+        ("ClientId", (Option.map x.clientId ~f:ClientId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientId =
+        (Option.map ~f:ClientId.of_xml) (Xml.child xml_arg0 "ClientId") in
+      let applicationArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ApplicationArn") in
+      let applicationAssociationArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "ApplicationAssociationArn") in
+      make ?clientId ?applicationArn ?applicationAssociationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientId = field_map json__ "ClientId" ClientId.of_json in
+      let applicationArn = field_map json__ "ApplicationArn" Arn.of_json in
+      let applicationAssociationArn =
+        field_map json__ "ApplicationAssociationArn" Arn.of_json in
+      make ?clientId ?applicationArn ?applicationAssociationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary information about the Application Association."]
+module FieldsMap =
+  struct
+    type nonrec t = (NonBlankString.t * FieldsList.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types NonBlankString FieldsList"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (NonBlankString.to_value x) |>
+                    (fun x -> (FieldsList.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:NonBlankString.of_string
+        ~of_json:FieldsList.of_json j
+    let to_json v = composed_to_json to_value v
   end
-module Schedule =
+module FolderList =
   struct
-    type nonrec t = string
-    let context_ = "Schedule"
+    type nonrec t = NonBlankLongString.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:255) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"^[a-zA-Z0-9\\/\\._\\-]+$")));
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NonBlankLongString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Schedule" j
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NonBlankLongString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FolderList" ~of_json:NonBlankLongString.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module AccessDeniedException =
   struct
@@ -626,8 +1606,8 @@ module AccessDeniedException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -646,8 +1626,8 @@ module InternalServiceError =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -666,8 +1646,8 @@ module InvalidRequestException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request is not valid."]
@@ -685,8 +1665,8 @@ module ResourceNotFoundException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource was not found."]
@@ -704,8 +1684,8 @@ module ThrottlingException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The throttling limit has been exceeded."]
@@ -729,6 +1709,239 @@ module Identifier =
     let of_json j = string_of_json ~kind:"Identifier" j
     let to_json = simple_to_json to_value
   end
+module UnsupportedOperationException =
+  struct
+    type nonrec t = {
+      message: Message.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Message.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The operation is not supported."]
+module ApplicationConfig =
+  struct
+    type nonrec t =
+      {
+      contactHandling: ContactHandling.t option
+        [@ocaml.doc
+          "The contact handling configuration for the application."]}
+    let make ?contactHandling = fun () -> { contactHandling }
+    let to_value x =
+      structure_to_value
+        [("ContactHandling",
+           (Option.map x.contactHandling ~f:ContactHandling.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let contactHandling =
+        (Option.map ~f:ContactHandling.of_xml)
+          (Xml.child xml_arg0 "ContactHandling") in
+      make ?contactHandling ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let contactHandling =
+        field_map json__ "ContactHandling" ContactHandling.of_json in
+      make ?contactHandling ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The configuration settings for the application."]
+module ApplicationSourceConfig =
+  struct
+    type nonrec t =
+      {
+      externalUrlConfig: ExternalUrlConfig.t option
+        [@ocaml.doc "The external URL source for the application."]}
+    let make ?externalUrlConfig = fun () -> { externalUrlConfig }
+    let to_value x =
+      structure_to_value
+        [("ExternalUrlConfig",
+           (Option.map x.externalUrlConfig ~f:ExternalUrlConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let externalUrlConfig =
+        (Option.map ~f:ExternalUrlConfig.of_xml)
+          (Xml.child xml_arg0 "ExternalUrlConfig") in
+      make ?externalUrlConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let externalUrlConfig =
+        field_map json__ "ExternalUrlConfig" ExternalUrlConfig.of_json in
+      make ?externalUrlConfig ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for where the application should be loaded from."]
+module ArnOrUUID =
+  struct
+    type nonrec t = string
+    let context_ = "ArnOrUUID"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(arn:aws:[A-Za-z0-9][A-Za-z0-9_/.-]{0,62}:[A-Za-z0-9_/.-]{0,63}:[A-Za-z0-9_/.-]{0,63}:[A-Za-z0-9][A-Za-z0-9:_/+=,@.-]{0,1023}|[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})(:[\\w\\$]+)?$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ArnOrUUID" j
+    let to_json = simple_to_json to_value
+  end
+module IframeConfig =
+  struct
+    type nonrec t =
+      {
+      allow: IframePermissionList.t option
+        [@ocaml.doc "The list of features that are allowed in the iframe."];
+      sandbox: IframePermissionList.t option
+        [@ocaml.doc "The list of sandbox attributes for the iframe."]}
+    let make ?allow = fun ?sandbox -> fun () -> { allow; sandbox }
+    let to_value x =
+      structure_to_value
+        [("Allow", (Option.map x.allow ~f:IframePermissionList.to_value));
+        ("Sandbox", (Option.map x.sandbox ~f:IframePermissionList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sandbox =
+        (Option.map ~f:IframePermissionList.of_xml)
+          (Xml.child xml_arg0 "Sandbox") in
+      let allow =
+        (Option.map ~f:IframePermissionList.of_xml)
+          (Xml.child xml_arg0 "Allow") in
+      make ?sandbox ?allow ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sandbox = field_map json__ "Sandbox" IframePermissionList.of_json in
+      let allow = field_map json__ "Allow" IframePermissionList.of_json in
+      make ?sandbox ?allow ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The iframe configuration for the application."]
+module InitializationTimeout =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:600000) >>=
+             (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for InitializationTimeout" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PermissionList =
+  struct
+    type nonrec t = Permission.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:150) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Permission.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Permission.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PermissionList" ~of_json:Permission.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PublicationList =
+  struct
+    type nonrec t = Publication.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Publication.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Publication.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PublicationList" ~of_json:Publication.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SubscriptionList =
+  struct
+    type nonrec t = Subscription.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Subscription.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Subscription.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SubscriptionList" ~of_json:Subscription.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
@@ -738,6 +1951,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -765,6 +1981,9 @@ module EventIntegrationsList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventIntegration.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -832,6 +2051,9 @@ module EventIntegrationAssociationsList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventIntegrationAssociation.to_value)) |>
         (fun x -> `List x)
@@ -862,6 +2084,9 @@ module DataIntegrationsList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataIntegrationSummary.to_value)) |>
         (fun x -> `List x)
@@ -892,6 +2117,9 @@ module DataIntegrationAssociationsList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataIntegrationAssociationSummary.to_value)) |>
         (fun x -> `List x)
@@ -915,50 +2143,135 @@ module DataIntegrationAssociationsList =
         ~of_json:DataIntegrationAssociationSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ScheduleConfiguration =
+module ApplicationsList =
+  struct
+    type nonrec t = ApplicationSummary.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ApplicationSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ApplicationSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ApplicationsList"
+        ~of_json:ApplicationSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ApplicationAssociationsList =
+  struct
+    type nonrec t = ApplicationAssociationSummary.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ApplicationAssociationSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ApplicationAssociationSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ApplicationAssociationsList"
+        ~of_json:ApplicationAssociationSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FileConfiguration =
   struct
     type nonrec t =
       {
-      firstExecutionFrom: NonBlankString.t option
+      folders: FolderList.t
         [@ocaml.doc
-          "The start date for objects to import in the first flow run."];
-      object_: Object.t option
-        [@ocaml.doc "The name of the object to pull from the data source."];
-      scheduleExpression: Schedule.t option
-        [@ocaml.doc "How often the data should be pulled from data source."]}
-    let make ?firstExecutionFrom =
-      fun ?object_ ->
-        fun ?scheduleExpression ->
-          fun () -> { firstExecutionFrom; object_; scheduleExpression }
+          "Identifiers for the source folders to pull all files from recursively."];
+      filters: FieldsMap.t option
+        [@ocaml.doc
+          "Restrictions for what files should be pulled from the source."]}
+    let context_ = "FileConfiguration"
+    let make ?filters = fun ~folders -> fun () -> { filters; folders }
     let to_value x =
       structure_to_value
-        [("FirstExecutionFrom",
-           (Option.map x.firstExecutionFrom ~f:NonBlankString.to_value));
-        ("Object", (Option.map x.object_ ~f:Object.to_value));
-        ("ScheduleExpression",
-          (Option.map x.scheduleExpression ~f:Schedule.to_value))]
+        [("Folders", (Some (FolderList.to_value x.folders)));
+        ("Filters", (Option.map x.filters ~f:FieldsMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let scheduleExpression =
-        (Option.map ~f:Schedule.of_xml)
-          (Xml.child xml_arg0 "ScheduleExpression") in
-      let object_ =
-        (Option.map ~f:Object.of_xml) (Xml.child xml_arg0 "Object") in
-      let firstExecutionFrom =
-        (Option.map ~f:NonBlankString.of_xml)
-          (Xml.child xml_arg0 "FirstExecutionFrom") in
-      make ?scheduleExpression ?object_ ?firstExecutionFrom ()
+      let filters =
+        (Option.map ~f:FieldsMap.of_xml) (Xml.child xml_arg0 "Filters") in
+      let folders =
+        FolderList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Folders") in
+      make ?filters ~folders ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let scheduleExpression =
-        field_map json "ScheduleExpression" Schedule.of_json in
-      let object_ = field_map json "Object" Object.of_json in
-      let firstExecutionFrom =
-        field_map json "FirstExecutionFrom" NonBlankString.of_json in
-      make ?scheduleExpression ?object_ ?firstExecutionFrom ()
+    let of_json json__ =
+      let filters = field_map json__ "Filters" FieldsMap.of_json in
+      let folders = field_map_exn json__ "Folders" FolderList.of_json in
+      make ?filters ~folders ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The name of the data and how often it should be pulled from the source."]
+       "The configuration for what files should be pulled from the source."]
+module ObjectConfiguration =
+  struct
+    type nonrec t = (NonBlankString.t * FieldsMap.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types NonBlankString FieldsMap"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (NonBlankString.to_value x) |>
+                    (fun x -> (FieldsMap.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:NonBlankString.of_string
+        ~of_json:FieldsMap.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DuplicateResourceException =
   struct
     type nonrec t = {
@@ -973,8 +2286,8 @@ module DuplicateResourceException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A resource with the specified name already exists."]
@@ -992,8 +2305,8 @@ module ResourceQuotaExceededException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The allowed quota for the resource has been exceeded."]
@@ -1098,7 +2411,7 @@ module UpdateEventIntegrationRequest =
       {
       name: Name.t [@ocaml.doc "The name of the event integration."];
       description: Description.t option
-        [@ocaml.doc "The description of the event inegration."]}
+        [@ocaml.doc "The description of the event integration."]}
     let context_ = "UpdateEventIntegrationRequest"
     let make ?description = fun ~name -> fun () -> { description; name }
     let to_value x =
@@ -1113,9 +2426,9 @@ module UpdateEventIntegrationRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map_exn json "Name" Name.of_json in
+    let of_json json__ =
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
       make ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the description of an event integration."]
@@ -1223,14 +2536,383 @@ module UpdateDataIntegrationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ?description ?name ~identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" Name.of_json in
-      let identifier = field_map_exn json "Identifier" Identifier.of_json in
+    let of_json json__ =
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let identifier = field_map_exn json__ "Identifier" Identifier.of_json in
       make ?description ?name ~identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the description of a DataIntegration. You cannot create a DataIntegration association for a DataIntegration that has been previously associated. Use a different DataIntegration, or recreate the DataIntegration using the CreateDataIntegration API."]
+module UpdateDataIntegrationAssociationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates and persists a DataIntegrationAssociation resource. Updating a DataIntegrationAssociation with ExecutionConfiguration will rerun the on-demand job."]
+module UpdateDataIntegrationAssociationRequest =
+  struct
+    type nonrec t =
+      {
+      dataIntegrationIdentifier: Identifier.t
+        [@ocaml.doc "A unique identifier for the DataIntegration."];
+      dataIntegrationAssociationIdentifier: Identifier.t
+        [@ocaml.doc
+          "A unique identifier. of the DataIntegrationAssociation resource"];
+      executionConfiguration: ExecutionConfiguration.t
+        [@ocaml.doc
+          "The configuration for how the files should be pulled from the source."]}
+    let context_ = "UpdateDataIntegrationAssociationRequest"
+    let make ~dataIntegrationIdentifier =
+      fun ~dataIntegrationAssociationIdentifier ->
+        fun ~executionConfiguration ->
+          fun () ->
+            {
+              dataIntegrationIdentifier;
+              dataIntegrationAssociationIdentifier;
+              executionConfiguration
+            }
+    let to_value x =
+      structure_to_value
+        [("Identifier",
+           (Some (Identifier.to_value x.dataIntegrationIdentifier)));
+        ("DataIntegrationAssociationIdentifier",
+          (Some (Identifier.to_value x.dataIntegrationAssociationIdentifier)));
+        ("ExecutionConfiguration",
+          (Some (ExecutionConfiguration.to_value x.executionConfiguration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let executionConfiguration =
+        ExecutionConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ExecutionConfiguration") in
+      let dataIntegrationAssociationIdentifier =
+        Identifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "DataIntegrationAssociationIdentifier") in
+      let dataIntegrationIdentifier =
+        Identifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      make ~executionConfiguration ~dataIntegrationAssociationIdentifier
+        ~dataIntegrationIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let executionConfiguration =
+        field_map_exn json__ "ExecutionConfiguration"
+          ExecutionConfiguration.of_json in
+      let dataIntegrationAssociationIdentifier =
+        field_map_exn json__ "DataIntegrationAssociationIdentifier"
+          Identifier.of_json in
+      let dataIntegrationIdentifier =
+        field_map_exn json__ "DataIntegrationIdentifier" Identifier.of_json in
+      make ~executionConfiguration ~dataIntegrationAssociationIdentifier
+        ~dataIntegrationIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates and persists a DataIntegrationAssociation resource. Updating a DataIntegrationAssociation with ExecutionConfiguration will rerun the on-demand job."]
+module UpdateApplicationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates and persists an Application resource."]
+module UpdateApplicationRequest =
+  struct
+    type nonrec t =
+      {
+      arn: ArnOrUUID.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the Application."];
+      name: ApplicationName.t option
+        [@ocaml.doc "The name of the application."];
+      description: Description.t option
+        [@ocaml.doc "The description of the application."];
+      applicationSourceConfig: ApplicationSourceConfig.t option
+        [@ocaml.doc
+          "The configuration for where the application should be loaded from."];
+      subscriptions: SubscriptionList.t option
+        [@ocaml.doc "The events that the application subscribes."];
+      publications: PublicationList.t option
+        [@ocaml.doc "The events that the application publishes."];
+      permissions: PermissionList.t option
+        [@ocaml.doc
+          "The configuration of events or requests that the application has access to."];
+      isService: Boolean.t option
+        [@ocaml.doc "Indicates whether the application is a service."];
+      initializationTimeout: InitializationTimeout.t option
+        [@ocaml.doc
+          "The maximum time in milliseconds allowed to establish a connection with the workspace."];
+      applicationConfig: ApplicationConfig.t option
+        [@ocaml.doc "The configuration settings for the application."];
+      iframeConfig: IframeConfig.t option
+        [@ocaml.doc "The iframe configuration for the application."];
+      applicationType: ApplicationType.t option
+        [@ocaml.doc "The type of application."]}
+    let context_ = "UpdateApplicationRequest"
+    let make ?name =
+      fun ?description ->
+        fun ?applicationSourceConfig ->
+          fun ?subscriptions ->
+            fun ?publications ->
+              fun ?permissions ->
+                fun ?isService ->
+                  fun ?initializationTimeout ->
+                    fun ?applicationConfig ->
+                      fun ?iframeConfig ->
+                        fun ?applicationType ->
+                          fun ~arn ->
+                            fun () ->
+                              {
+                                name;
+                                description;
+                                applicationSourceConfig;
+                                subscriptions;
+                                publications;
+                                permissions;
+                                isService;
+                                initializationTimeout;
+                                applicationConfig;
+                                iframeConfig;
+                                applicationType;
+                                arn
+                              }
+    let to_value x =
+      structure_to_value
+        [("ApplicationIdentifier", (Some (ArnOrUUID.to_value x.arn)));
+        ("Name", (Option.map x.name ~f:ApplicationName.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("ApplicationSourceConfig",
+          (Option.map x.applicationSourceConfig
+             ~f:ApplicationSourceConfig.to_value));
+        ("Subscriptions",
+          (Option.map x.subscriptions ~f:SubscriptionList.to_value));
+        ("Publications",
+          (Option.map x.publications ~f:PublicationList.to_value));
+        ("Permissions",
+          (Option.map x.permissions ~f:PermissionList.to_value));
+        ("IsService", (Option.map x.isService ~f:Boolean.to_value));
+        ("InitializationTimeout",
+          (Option.map x.initializationTimeout
+             ~f:InitializationTimeout.to_value));
+        ("ApplicationConfig",
+          (Option.map x.applicationConfig ~f:ApplicationConfig.to_value));
+        ("IframeConfig",
+          (Option.map x.iframeConfig ~f:IframeConfig.to_value));
+        ("ApplicationType",
+          (Option.map x.applicationType ~f:ApplicationType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let applicationType =
+        (Option.map ~f:ApplicationType.of_xml)
+          (Xml.child xml_arg0 "ApplicationType") in
+      let iframeConfig =
+        (Option.map ~f:IframeConfig.of_xml)
+          (Xml.child xml_arg0 "IframeConfig") in
+      let applicationConfig =
+        (Option.map ~f:ApplicationConfig.of_xml)
+          (Xml.child xml_arg0 "ApplicationConfig") in
+      let initializationTimeout =
+        (Option.map ~f:InitializationTimeout.of_xml)
+          (Xml.child xml_arg0 "InitializationTimeout") in
+      let isService =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "IsService") in
+      let permissions =
+        (Option.map ~f:PermissionList.of_xml)
+          (Xml.child xml_arg0 "Permissions") in
+      let publications =
+        (Option.map ~f:PublicationList.of_xml)
+          (Xml.child xml_arg0 "Publications") in
+      let subscriptions =
+        (Option.map ~f:SubscriptionList.of_xml)
+          (Xml.child xml_arg0 "Subscriptions") in
+      let applicationSourceConfig =
+        (Option.map ~f:ApplicationSourceConfig.of_xml)
+          (Xml.child xml_arg0 "ApplicationSourceConfig") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let name =
+        (Option.map ~f:ApplicationName.of_xml) (Xml.child xml_arg0 "Name") in
+      let arn =
+        ArnOrUUID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
+      make ?applicationType ?iframeConfig ?applicationConfig
+        ?initializationTimeout ?isService ?permissions ?publications
+        ?subscriptions ?applicationSourceConfig ?description ?name ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let applicationType =
+        field_map json__ "ApplicationType" ApplicationType.of_json in
+      let iframeConfig = field_map json__ "IframeConfig" IframeConfig.of_json in
+      let applicationConfig =
+        field_map json__ "ApplicationConfig" ApplicationConfig.of_json in
+      let initializationTimeout =
+        field_map json__ "InitializationTimeout"
+          InitializationTimeout.of_json in
+      let isService = field_map json__ "IsService" Boolean.of_json in
+      let permissions = field_map json__ "Permissions" PermissionList.of_json in
+      let publications =
+        field_map json__ "Publications" PublicationList.of_json in
+      let subscriptions =
+        field_map json__ "Subscriptions" SubscriptionList.of_json in
+      let applicationSourceConfig =
+        field_map json__ "ApplicationSourceConfig"
+          ApplicationSourceConfig.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" ApplicationName.of_json in
+      let arn = field_map_exn json__ "Arn" ArnOrUUID.of_json in
+      make ?applicationType ?iframeConfig ?applicationConfig
+        ?initializationTimeout ?isService ?permissions ?publications
+        ?subscriptions ?applicationSourceConfig ?description ?name ~arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates and persists an Application resource."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -1320,9 +3002,9 @@ module UntagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the specified tags from the specified resource."]
@@ -1398,7 +3080,9 @@ module TagResourceRequest =
       {
       resourceArn: Arn.t
         [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."];
-      tags: TagMap.t [@ocaml.doc "One or more tags."]}
+      tags: TagMap.t
+        [@ocaml.doc
+          "The tags used to organize, track, or control access for this resource. For example, \\{ \"tags\": \\{\"key1\":\"value1\", \"key2\":\"value2\"\\} \\}."]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
@@ -1413,9 +3097,9 @@ module TagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds the specified tags to the specified resource."]
@@ -1486,8 +3170,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for the specified resource."]
 module ListTagsForResourceRequest =
@@ -1507,8 +3191,8 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for the specified resource."]
@@ -1591,10 +3275,10 @@ module ListEventIntegrationsResponse =
           (Xml.child xml_arg0 "EventIntegrations") in
       make ?nextToken ?eventIntegrations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let eventIntegrations =
-        field_map json "EventIntegrations" EventIntegrationsList.of_json in
+        field_map json__ "EventIntegrations" EventIntegrationsList.of_json in
       make ?nextToken ?eventIntegrations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1622,9 +3306,9 @@ module ListEventIntegrationsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1718,10 +3402,10 @@ module ListEventIntegrationAssociationsResponse =
           (Xml.child xml_arg0 "EventIntegrationAssociations") in
       make ?nextToken ?eventIntegrationAssociations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let eventIntegrationAssociations =
-        field_map json "EventIntegrationAssociations"
+        field_map json__ "EventIntegrationAssociations"
           EventIntegrationAssociationsList.of_json in
       make ?nextToken ?eventIntegrationAssociations ()
     let to_json v = composed_to_json to_value v
@@ -1758,11 +3442,11 @@ module ListEventIntegrationAssociationsRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?maxResults ?nextToken ~eventIntegrationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let eventIntegrationName =
-        field_map_exn json "EventIntegrationName" Name.of_json in
+        field_map_exn json__ "EventIntegrationName" Name.of_json in
       make ?maxResults ?nextToken ~eventIntegrationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1846,10 +3530,10 @@ module ListDataIntegrationsResponse =
           (Xml.child xml_arg0 "DataIntegrations") in
       make ?nextToken ?dataIntegrations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let dataIntegrations =
-        field_map json "DataIntegrations" DataIntegrationsList.of_json in
+        field_map json__ "DataIntegrations" DataIntegrationsList.of_json in
       make ?nextToken ?dataIntegrations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1877,9 +3561,9 @@ module ListDataIntegrationsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1974,10 +3658,10 @@ module ListDataIntegrationAssociationsResponse =
           (Xml.child xml_arg0 "DataIntegrationAssociations") in
       make ?nextToken ?dataIntegrationAssociations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let dataIntegrationAssociations =
-        field_map json "DataIntegrationAssociations"
+        field_map json__ "DataIntegrationAssociations"
           DataIntegrationAssociationsList.of_json in
       make ?nextToken ?dataIntegrationAssociations ()
     let to_json v = composed_to_json to_value v
@@ -2016,15 +3700,281 @@ module ListDataIntegrationAssociationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ?maxResults ?nextToken ~dataIntegrationIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let dataIntegrationIdentifier =
-        field_map_exn json "DataIntegrationIdentifier" Identifier.of_json in
+        field_map_exn json__ "DataIntegrationIdentifier" Identifier.of_json in
       make ?maxResults ?nextToken ~dataIntegrationIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a paginated list of DataIntegration associations in the account. You cannot create a DataIntegration association for a DataIntegration that has been previously associated. Use a different DataIntegration, or recreate the DataIntegration using the CreateDataIntegration API."]
+module ListApplicationsResponse =
+  struct
+    type nonrec t =
+      {
+      applications: ApplicationsList.t option
+        [@ocaml.doc "The Applications associated with this account."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If there are additional results, this is the token for the next set of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?applications =
+      fun ?nextToken -> fun () -> { applications; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Applications",
+           (Option.map x.applications ~f:ApplicationsList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let applications =
+        (Option.map ~f:ApplicationsList.of_xml)
+          (Xml.child xml_arg0 "Applications") in
+      make ?nextToken ?applications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let applications =
+        field_map json__ "Applications" ApplicationsList.of_json in
+      make ?nextToken ?applications ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists applications in the account."]
+module ListApplicationsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of results to return per page."];
+      applicationType: ApplicationType.t option
+        [@ocaml.doc "The type of application."]}
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ?applicationType ->
+          fun () -> { nextToken; maxResults; applicationType }
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("applicationType",
+          (Option.map x.applicationType ~f:ApplicationType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let applicationType =
+        (Option.map ~f:ApplicationType.of_xml)
+          (Xml.child xml_arg0 "applicationType") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ?applicationType ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let applicationType =
+        field_map json__ "ApplicationType" ApplicationType.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?applicationType ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists applications in the account."]
+module ListApplicationAssociationsResponse =
+  struct
+    type nonrec t =
+      {
+      applicationAssociations: ApplicationAssociationsList.t option
+        [@ocaml.doc "List of Application Associations for the Application."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If there are additional results, this is the token for the next set of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?applicationAssociations =
+      fun ?nextToken -> fun () -> { applicationAssociations; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ApplicationAssociations",
+           (Option.map x.applicationAssociations
+              ~f:ApplicationAssociationsList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let applicationAssociations =
+        (Option.map ~f:ApplicationAssociationsList.of_xml)
+          (Xml.child xml_arg0 "ApplicationAssociations") in
+      make ?nextToken ?applicationAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let applicationAssociations =
+        field_map json__ "ApplicationAssociations"
+          ApplicationAssociationsList.of_json in
+      make ?nextToken ?applicationAssociations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a paginated list of application associations for an application."]
+module ListApplicationAssociationsRequest =
+  struct
+    type nonrec t =
+      {
+      applicationId: ArnOrUUID.t
+        [@ocaml.doc "A unique identifier for the Application."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of results to return per page."]}
+    let context_ = "ListApplicationAssociationsRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~applicationId ->
+          fun () -> { nextToken; maxResults; applicationId }
+    let to_value x =
+      structure_to_value
+        [("ApplicationIdentifier",
+           (Some (ArnOrUUID.to_value x.applicationId)));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let applicationId =
+        ArnOrUUID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
+      make ?maxResults ?nextToken ~applicationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let applicationId =
+        field_map_exn json__ "ApplicationId" ArnOrUUID.of_json in
+      make ?maxResults ?nextToken ~applicationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a paginated list of application associations for an application."]
 module GetEventIntegrationResponse =
   struct
     type nonrec t =
@@ -2038,7 +3988,9 @@ module GetEventIntegrationResponse =
       eventBridgeBus: EventBridgeBus.t option
         [@ocaml.doc "The EventBridge bus."];
       eventFilter: EventFilter.t option [@ocaml.doc "The event filter."];
-      tags: TagMap.t option [@ocaml.doc "One or more tags."]}
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The tags used to organize, track, or control access for this resource. For example, \\{ \"tags\": \\{\"key1\":\"value1\", \"key2\":\"value2\"\\} \\}."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServiceError of InternalServiceError.t 
@@ -2143,15 +4095,15 @@ module GetEventIntegrationResponse =
       make ?tags ?eventFilter ?eventBridgeBus ?eventIntegrationArn
         ?description ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let eventFilter = field_map json "EventFilter" EventFilter.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let eventFilter = field_map json__ "EventFilter" EventFilter.of_json in
       let eventBridgeBus =
-        field_map json "EventBridgeBus" EventBridgeBus.of_json in
+        field_map json__ "EventBridgeBus" EventBridgeBus.of_json in
       let eventIntegrationArn =
-        field_map json "EventIntegrationArn" Arn.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" Name.of_json in
+        field_map json__ "EventIntegrationArn" Arn.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" Name.of_json in
       make ?tags ?eventFilter ?eventBridgeBus ?eventIntegrationArn
         ?description ?name ()
     let to_json v = composed_to_json to_value v
@@ -2171,8 +4123,8 @@ module GetEventIntegrationRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" Name.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" Name.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about the event integration."]
 module GetDataIntegrationResponse =
@@ -2185,15 +4137,23 @@ module GetDataIntegrationResponse =
       id: UUID.t option [@ocaml.doc "A unique identifier."];
       name: Name.t option [@ocaml.doc "The name of the DataIntegration."];
       description: Description.t option
-        [@ocaml.doc "The KMS key for the DataIntegration."];
+        [@ocaml.doc "The KMS key ARN for the DataIntegration."];
       kmsKey: NonBlankString.t option
-        [@ocaml.doc "The KMS key for the DataIntegration."];
-      sourceURI: NonBlankString.t option
+        [@ocaml.doc "The KMS key ARN for the DataIntegration."];
+      sourceURI: SourceURI.t option
         [@ocaml.doc "The URI of the data source."];
       scheduleConfiguration: ScheduleConfiguration.t option
         [@ocaml.doc
           "The name of the data and how often it should be pulled from the source."];
-      tags: TagMap.t option [@ocaml.doc "One or more tags."]}
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The tags used to organize, track, or control access for this resource. For example, \\{ \"tags\": \\{\"key1\":\"value1\", \"key2\":\"value2\"\\} \\}."];
+      fileConfiguration: FileConfiguration.t option
+        [@ocaml.doc
+          "The configuration for what files should be pulled from the source."];
+      objectConfiguration: ObjectConfiguration.t option
+        [@ocaml.doc
+          "The configuration for what data should be pulled from the source."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServiceError of InternalServiceError.t 
@@ -2209,17 +4169,21 @@ module GetDataIntegrationResponse =
               fun ?sourceURI ->
                 fun ?scheduleConfiguration ->
                   fun ?tags ->
-                    fun () ->
-                      {
-                        arn;
-                        id;
-                        name;
-                        description;
-                        kmsKey;
-                        sourceURI;
-                        scheduleConfiguration;
-                        tags
-                      }
+                    fun ?fileConfiguration ->
+                      fun ?objectConfiguration ->
+                        fun () ->
+                          {
+                            arn;
+                            id;
+                            name;
+                            description;
+                            kmsKey;
+                            sourceURI;
+                            scheduleConfiguration;
+                            tags;
+                            fileConfiguration;
+                            objectConfiguration
+                          }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2283,20 +4247,29 @@ module GetDataIntegrationResponse =
         ("Name", (Option.map x.name ~f:Name.to_value));
         ("Description", (Option.map x.description ~f:Description.to_value));
         ("KmsKey", (Option.map x.kmsKey ~f:NonBlankString.to_value));
-        ("SourceURI", (Option.map x.sourceURI ~f:NonBlankString.to_value));
+        ("SourceURI", (Option.map x.sourceURI ~f:SourceURI.to_value));
         ("ScheduleConfiguration",
           (Option.map x.scheduleConfiguration
              ~f:ScheduleConfiguration.to_value));
-        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("FileConfiguration",
+          (Option.map x.fileConfiguration ~f:FileConfiguration.to_value));
+        ("ObjectConfiguration",
+          (Option.map x.objectConfiguration ~f:ObjectConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let objectConfiguration =
+        (Option.map ~f:ObjectConfiguration.of_xml)
+          (Xml.child xml_arg0 "ObjectConfiguration") in
+      let fileConfiguration =
+        (Option.map ~f:FileConfiguration.of_xml)
+          (Xml.child xml_arg0 "FileConfiguration") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       let scheduleConfiguration =
         (Option.map ~f:ScheduleConfiguration.of_xml)
           (Xml.child xml_arg0 "ScheduleConfiguration") in
       let sourceURI =
-        (Option.map ~f:NonBlankString.of_xml)
-          (Xml.child xml_arg0 "SourceURI") in
+        (Option.map ~f:SourceURI.of_xml) (Xml.child xml_arg0 "SourceURI") in
       let kmsKey =
         (Option.map ~f:NonBlankString.of_xml) (Xml.child xml_arg0 "KmsKey") in
       let description =
@@ -2304,21 +4277,28 @@ module GetDataIntegrationResponse =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
       let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "Id") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?tags ?scheduleConfiguration ?sourceURI ?kmsKey ?description ?name
-        ?id ?arn ()
+      make ?objectConfiguration ?fileConfiguration ?tags
+        ?scheduleConfiguration ?sourceURI ?kmsKey ?description ?name ?id ?arn
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let objectConfiguration =
+        field_map json__ "ObjectConfiguration" ObjectConfiguration.of_json in
+      let fileConfiguration =
+        field_map json__ "FileConfiguration" FileConfiguration.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let scheduleConfiguration =
-        field_map json "ScheduleConfiguration" ScheduleConfiguration.of_json in
-      let sourceURI = field_map json "SourceURI" NonBlankString.of_json in
-      let kmsKey = field_map json "KmsKey" NonBlankString.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" Name.of_json in
-      let id = field_map json "Id" UUID.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
-      make ?tags ?scheduleConfiguration ?sourceURI ?kmsKey ?description ?name
-        ?id ?arn ()
+        field_map json__ "ScheduleConfiguration"
+          ScheduleConfiguration.of_json in
+      let sourceURI = field_map json__ "SourceURI" SourceURI.of_json in
+      let kmsKey = field_map json__ "KmsKey" NonBlankString.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let id = field_map json__ "Id" UUID.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?objectConfiguration ?fileConfiguration ?tags
+        ?scheduleConfiguration ?sourceURI ?kmsKey ?description ?name ?id ?arn
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about the DataIntegration. You cannot create a DataIntegration association for a DataIntegration that has been previously associated. Use a different DataIntegration, or recreate the DataIntegration using the CreateDataIntegration API."]
@@ -2339,12 +4319,289 @@ module GetDataIntegrationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ~identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identifier = field_map_exn json "Identifier" Identifier.of_json in
+    let of_json json__ =
+      let identifier = field_map_exn json__ "Identifier" Identifier.of_json in
       make ~identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about the DataIntegration. You cannot create a DataIntegration association for a DataIntegration that has been previously associated. Use a different DataIntegration, or recreate the DataIntegration using the CreateDataIntegration API."]
+module GetApplicationResponse =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the Application."];
+      id: UUID.t option
+        [@ocaml.doc "A unique identifier for the Application."];
+      name: ApplicationName.t option
+        [@ocaml.doc "The name of the application."];
+      namespace: ApplicationNamespace.t option
+        [@ocaml.doc "The namespace of the application."];
+      description: Description.t option
+        [@ocaml.doc "The description of the application."];
+      applicationSourceConfig: ApplicationSourceConfig.t option
+        [@ocaml.doc
+          "The configuration for where the application should be loaded from."];
+      subscriptions: SubscriptionList.t option
+        [@ocaml.doc "The events that the application subscribes."];
+      publications: PublicationList.t option
+        [@ocaml.doc "The events that the application publishes."];
+      createdTime: Timestamp.t option
+        [@ocaml.doc "The created time of the Application."];
+      lastModifiedTime: Timestamp.t option
+        [@ocaml.doc "The last modified time of the Application."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The tags used to organize, track, or control access for this resource. For example, \\{ \"tags\": \\{\"key1\":\"value1\", \"key2\":\"value2\"\\} \\}."];
+      permissions: PermissionList.t option
+        [@ocaml.doc
+          "The configuration of events or requests that the application has access to."];
+      isService: Boolean.t option
+        [@ocaml.doc "Indicates whether the application is a service."];
+      initializationTimeout: InitializationTimeout.t option
+        [@ocaml.doc
+          "The maximum time in milliseconds allowed to establish a connection with the workspace."];
+      applicationConfig: ApplicationConfig.t option
+        [@ocaml.doc "The configuration settings for the application."];
+      iframeConfig: IframeConfig.t option
+        [@ocaml.doc "The iframe configuration for the application."];
+      applicationType: ApplicationType.t option
+        [@ocaml.doc "The type of application."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?arn =
+      fun ?id ->
+        fun ?name ->
+          fun ?namespace ->
+            fun ?description ->
+              fun ?applicationSourceConfig ->
+                fun ?subscriptions ->
+                  fun ?publications ->
+                    fun ?createdTime ->
+                      fun ?lastModifiedTime ->
+                        fun ?tags ->
+                          fun ?permissions ->
+                            fun ?isService ->
+                              fun ?initializationTimeout ->
+                                fun ?applicationConfig ->
+                                  fun ?iframeConfig ->
+                                    fun ?applicationType ->
+                                      fun () ->
+                                        {
+                                          arn;
+                                          id;
+                                          name;
+                                          namespace;
+                                          description;
+                                          applicationSourceConfig;
+                                          subscriptions;
+                                          publications;
+                                          createdTime;
+                                          lastModifiedTime;
+                                          tags;
+                                          permissions;
+                                          isService;
+                                          initializationTimeout;
+                                          applicationConfig;
+                                          iframeConfig;
+                                          applicationType
+                                        }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("Id", (Option.map x.id ~f:UUID.to_value));
+        ("Name", (Option.map x.name ~f:ApplicationName.to_value));
+        ("Namespace",
+          (Option.map x.namespace ~f:ApplicationNamespace.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("ApplicationSourceConfig",
+          (Option.map x.applicationSourceConfig
+             ~f:ApplicationSourceConfig.to_value));
+        ("Subscriptions",
+          (Option.map x.subscriptions ~f:SubscriptionList.to_value));
+        ("Publications",
+          (Option.map x.publications ~f:PublicationList.to_value));
+        ("CreatedTime", (Option.map x.createdTime ~f:Timestamp.to_value));
+        ("LastModifiedTime",
+          (Option.map x.lastModifiedTime ~f:Timestamp.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("Permissions",
+          (Option.map x.permissions ~f:PermissionList.to_value));
+        ("IsService", (Option.map x.isService ~f:Boolean.to_value));
+        ("InitializationTimeout",
+          (Option.map x.initializationTimeout
+             ~f:InitializationTimeout.to_value));
+        ("ApplicationConfig",
+          (Option.map x.applicationConfig ~f:ApplicationConfig.to_value));
+        ("IframeConfig",
+          (Option.map x.iframeConfig ~f:IframeConfig.to_value));
+        ("ApplicationType",
+          (Option.map x.applicationType ~f:ApplicationType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let applicationType =
+        (Option.map ~f:ApplicationType.of_xml)
+          (Xml.child xml_arg0 "ApplicationType") in
+      let iframeConfig =
+        (Option.map ~f:IframeConfig.of_xml)
+          (Xml.child xml_arg0 "IframeConfig") in
+      let applicationConfig =
+        (Option.map ~f:ApplicationConfig.of_xml)
+          (Xml.child xml_arg0 "ApplicationConfig") in
+      let initializationTimeout =
+        (Option.map ~f:InitializationTimeout.of_xml)
+          (Xml.child xml_arg0 "InitializationTimeout") in
+      let isService =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "IsService") in
+      let permissions =
+        (Option.map ~f:PermissionList.of_xml)
+          (Xml.child xml_arg0 "Permissions") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let lastModifiedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModifiedTime") in
+      let createdTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedTime") in
+      let publications =
+        (Option.map ~f:PublicationList.of_xml)
+          (Xml.child xml_arg0 "Publications") in
+      let subscriptions =
+        (Option.map ~f:SubscriptionList.of_xml)
+          (Xml.child xml_arg0 "Subscriptions") in
+      let applicationSourceConfig =
+        (Option.map ~f:ApplicationSourceConfig.of_xml)
+          (Xml.child xml_arg0 "ApplicationSourceConfig") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let namespace =
+        (Option.map ~f:ApplicationNamespace.of_xml)
+          (Xml.child xml_arg0 "Namespace") in
+      let name =
+        (Option.map ~f:ApplicationName.of_xml) (Xml.child xml_arg0 "Name") in
+      let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "Id") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?applicationType ?iframeConfig ?applicationConfig
+        ?initializationTimeout ?isService ?permissions ?tags
+        ?lastModifiedTime ?createdTime ?publications ?subscriptions
+        ?applicationSourceConfig ?description ?namespace ?name ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let applicationType =
+        field_map json__ "ApplicationType" ApplicationType.of_json in
+      let iframeConfig = field_map json__ "IframeConfig" IframeConfig.of_json in
+      let applicationConfig =
+        field_map json__ "ApplicationConfig" ApplicationConfig.of_json in
+      let initializationTimeout =
+        field_map json__ "InitializationTimeout"
+          InitializationTimeout.of_json in
+      let isService = field_map json__ "IsService" Boolean.of_json in
+      let permissions = field_map json__ "Permissions" PermissionList.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let lastModifiedTime =
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
+      let publications =
+        field_map json__ "Publications" PublicationList.of_json in
+      let subscriptions =
+        field_map json__ "Subscriptions" SubscriptionList.of_json in
+      let applicationSourceConfig =
+        field_map json__ "ApplicationSourceConfig"
+          ApplicationSourceConfig.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let namespace =
+        field_map json__ "Namespace" ApplicationNamespace.of_json in
+      let name = field_map json__ "Name" ApplicationName.of_json in
+      let id = field_map json__ "Id" UUID.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?applicationType ?iframeConfig ?applicationConfig
+        ?initializationTimeout ?isService ?permissions ?tags
+        ?lastModifiedTime ?createdTime ?publications ?subscriptions
+        ?applicationSourceConfig ?description ?namespace ?name ?id ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get an Application resource."]
+module GetApplicationRequest =
+  struct
+    type nonrec t =
+      {
+      arn: ArnOrUUID.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the Application."]}
+    let context_ = "GetApplicationRequest"
+    let make ~arn = fun () -> { arn }
+    let to_value x =
+      structure_to_value
+        [("ApplicationIdentifier", (Some (ArnOrUUID.to_value x.arn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn =
+        ArnOrUUID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
+      make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn = field_map_exn json__ "Arn" ArnOrUUID.of_json in make ~arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get an Application resource."]
 module DeleteEventIntegrationResponse =
   struct
     type nonrec t = unit
@@ -2436,8 +4693,8 @@ module DeleteEventIntegrationRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" Name.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" Name.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the specified existing event integration. If the event integration is associated with clients, the request is rejected."]
@@ -2537,13 +4794,112 @@ module DeleteDataIntegrationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ~dataIntegrationIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataIntegrationIdentifier =
-        field_map_exn json "DataIntegrationIdentifier" Identifier.of_json in
+        field_map_exn json__ "DataIntegrationIdentifier" Identifier.of_json in
       make ~dataIntegrationIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the DataIntegration. Only DataIntegrations that don't have any DataIntegrationAssociations can be deleted. Deleting a DataIntegration also deletes the underlying Amazon AppFlow flow and service linked role. You cannot create a DataIntegration association for a DataIntegration that has been previously associated. Use a different DataIntegration, or recreate the DataIntegration using the CreateDataIntegration API."]
+module DeleteApplicationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the Application. Only Applications that don't have any Application Associations can be deleted."]
+module DeleteApplicationRequest =
+  struct
+    type nonrec t =
+      {
+      arn: ArnOrUUID.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the Application."]}
+    let context_ = "DeleteApplicationRequest"
+    let make ~arn = fun () -> { arn }
+    let to_value x =
+      structure_to_value
+        [("ApplicationIdentifier", (Some (ArnOrUUID.to_value x.arn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn =
+        ArnOrUUID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationIdentifier") in
+      make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn = field_map_exn json__ "Arn" ArnOrUUID.of_json in make ~arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the Application. Only Applications that don't have any Application Associations can be deleted."]
 module CreateEventIntegrationResponse =
   struct
     type nonrec t =
@@ -2637,9 +4993,9 @@ module CreateEventIntegrationResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "EventIntegrationArn") in
       make ?eventIntegrationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventIntegrationArn =
-        field_map json "EventIntegrationArn" Arn.of_json in
+        field_map json__ "EventIntegrationArn" Arn.of_json in
       make ?eventIntegrationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2655,8 +5011,10 @@ module CreateEventIntegrationRequest =
       eventBridgeBus: EventBridgeBus.t [@ocaml.doc "The EventBridge bus."];
       clientToken: IdempotencyToken.t option
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
-      tags: TagMap.t option [@ocaml.doc "One or more tags."]}
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The tags used to organize, track, or control access for this resource. For example, \\{ \"tags\": \\{\"key1\":\"value1\", \"key2\":\"value2\"\\} \\}."]}
     let context_ = "CreateEventIntegrationRequest"
     let make ?description =
       fun ?clientToken ->
@@ -2701,14 +5059,16 @@ module CreateEventIntegrationRequest =
       make ?tags ?clientToken ~eventBridgeBus ~eventFilter ?description ~name
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let clientToken = field_map json "ClientToken" IdempotencyToken.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let clientToken =
+        field_map json__ "ClientToken" IdempotencyToken.of_json in
       let eventBridgeBus =
-        field_map_exn json "EventBridgeBus" EventBridgeBus.of_json in
-      let eventFilter = field_map_exn json "EventFilter" EventFilter.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map_exn json "Name" Name.of_json in
+        field_map_exn json__ "EventBridgeBus" EventBridgeBus.of_json in
+      let eventFilter =
+        field_map_exn json__ "EventFilter" EventFilter.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
       make ?tags ?clientToken ~eventBridgeBus ~eventFilter ?description ~name
         ()
     let to_json v = composed_to_json to_value v
@@ -2724,16 +5084,24 @@ module CreateDataIntegrationResponse =
       description: Description.t option
         [@ocaml.doc "A description of the DataIntegration."];
       kmsKey: NonBlankString.t option
-        [@ocaml.doc "The KMS key for the DataIntegration."];
-      sourceURI: NonBlankString.t option
+        [@ocaml.doc "The KMS key ARN for the DataIntegration."];
+      sourceURI: SourceURI.t option
         [@ocaml.doc "The URI of the data source."];
       scheduleConfiguration: ScheduleConfiguration.t option
         [@ocaml.doc
           "The name of the data and how often it should be pulled from the source."];
-      tags: TagMap.t option [@ocaml.doc "One or more tags."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The tags used to organize, track, or control access for this resource. For example, \\{ \"tags\": \\{\"key1\":\"value1\", \"key2\":\"value2\"\\} \\}."];
       clientToken: IdempotencyToken.t option
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
+      fileConfiguration: FileConfiguration.t option
+        [@ocaml.doc
+          "The configuration for what files should be pulled from the source."];
+      objectConfiguration: ObjectConfiguration.t option
+        [@ocaml.doc
+          "The configuration for what data should be pulled from the source."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `DuplicateResourceException of DuplicateResourceException.t 
@@ -2751,18 +5119,22 @@ module CreateDataIntegrationResponse =
                 fun ?scheduleConfiguration ->
                   fun ?tags ->
                     fun ?clientToken ->
-                      fun () ->
-                        {
-                          arn;
-                          id;
-                          name;
-                          description;
-                          kmsKey;
-                          sourceURI;
-                          scheduleConfiguration;
-                          tags;
-                          clientToken
-                        }
+                      fun ?fileConfiguration ->
+                        fun ?objectConfiguration ->
+                          fun () ->
+                            {
+                              arn;
+                              id;
+                              name;
+                              description;
+                              kmsKey;
+                              sourceURI;
+                              scheduleConfiguration;
+                              tags;
+                              clientToken;
+                              fileConfiguration;
+                              objectConfiguration
+                            }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2837,15 +5209,25 @@ module CreateDataIntegrationResponse =
         ("Name", (Option.map x.name ~f:Name.to_value));
         ("Description", (Option.map x.description ~f:Description.to_value));
         ("KmsKey", (Option.map x.kmsKey ~f:NonBlankString.to_value));
-        ("SourceURI", (Option.map x.sourceURI ~f:NonBlankString.to_value));
+        ("SourceURI", (Option.map x.sourceURI ~f:SourceURI.to_value));
         ("ScheduleConfiguration",
           (Option.map x.scheduleConfiguration
              ~f:ScheduleConfiguration.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
         ("ClientToken",
-          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value));
+        ("FileConfiguration",
+          (Option.map x.fileConfiguration ~f:FileConfiguration.to_value));
+        ("ObjectConfiguration",
+          (Option.map x.objectConfiguration ~f:ObjectConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let objectConfiguration =
+        (Option.map ~f:ObjectConfiguration.of_xml)
+          (Xml.child xml_arg0 "ObjectConfiguration") in
+      let fileConfiguration =
+        (Option.map ~f:FileConfiguration.of_xml)
+          (Xml.child xml_arg0 "FileConfiguration") in
       let clientToken =
         (Option.map ~f:IdempotencyToken.of_xml)
           (Xml.child xml_arg0 "ClientToken") in
@@ -2854,8 +5236,7 @@ module CreateDataIntegrationResponse =
         (Option.map ~f:ScheduleConfiguration.of_xml)
           (Xml.child xml_arg0 "ScheduleConfiguration") in
       let sourceURI =
-        (Option.map ~f:NonBlankString.of_xml)
-          (Xml.child xml_arg0 "SourceURI") in
+        (Option.map ~f:SourceURI.of_xml) (Xml.child xml_arg0 "SourceURI") in
       let kmsKey =
         (Option.map ~f:NonBlankString.of_xml) (Xml.child xml_arg0 "KmsKey") in
       let description =
@@ -2863,22 +5244,30 @@ module CreateDataIntegrationResponse =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
       let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "Id") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?clientToken ?tags ?scheduleConfiguration ?sourceURI ?kmsKey
-        ?description ?name ?id ?arn ()
+      make ?objectConfiguration ?fileConfiguration ?clientToken ?tags
+        ?scheduleConfiguration ?sourceURI ?kmsKey ?description ?name ?id ?arn
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "ClientToken" IdempotencyToken.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let objectConfiguration =
+        field_map json__ "ObjectConfiguration" ObjectConfiguration.of_json in
+      let fileConfiguration =
+        field_map json__ "FileConfiguration" FileConfiguration.of_json in
+      let clientToken =
+        field_map json__ "ClientToken" IdempotencyToken.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let scheduleConfiguration =
-        field_map json "ScheduleConfiguration" ScheduleConfiguration.of_json in
-      let sourceURI = field_map json "SourceURI" NonBlankString.of_json in
-      let kmsKey = field_map json "KmsKey" NonBlankString.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" Name.of_json in
-      let id = field_map json "Id" UUID.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
-      make ?clientToken ?tags ?scheduleConfiguration ?sourceURI ?kmsKey
-        ?description ?name ?id ?arn ()
+        field_map json__ "ScheduleConfiguration"
+          ScheduleConfiguration.of_json in
+      let sourceURI = field_map json__ "SourceURI" SourceURI.of_json in
+      let kmsKey = field_map json__ "KmsKey" NonBlankString.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let id = field_map json__ "Id" UUID.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?objectConfiguration ?fileConfiguration ?clientToken ?tags
+        ?scheduleConfiguration ?sourceURI ?kmsKey ?description ?name ?id ?arn
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates and persists a DataIntegration resource. You cannot create a DataIntegration association for a DataIntegration that has been previously associated. Use a different DataIntegration, or recreate the DataIntegration using the CreateDataIntegration API."]
@@ -2889,48 +5278,70 @@ module CreateDataIntegrationRequest =
       name: Name.t [@ocaml.doc "The name of the DataIntegration."];
       description: Description.t option
         [@ocaml.doc "A description of the DataIntegration."];
-      kmsKey: NonBlankString.t option
-        [@ocaml.doc "The KMS key for the DataIntegration."];
-      sourceURI: NonBlankString.t option
+      kmsKey: NonBlankString.t
+        [@ocaml.doc "The KMS key ARN for the DataIntegration."];
+      sourceURI: SourceURI.t option
         [@ocaml.doc "The URI of the data source."];
       scheduleConfig: ScheduleConfiguration.t option
         [@ocaml.doc
           "The name of the data and how often it should be pulled from the source."];
-      tags: TagMap.t option [@ocaml.doc "One or more tags."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The tags used to organize, track, or control access for this resource. For example, \\{ \"tags\": \\{\"key1\":\"value1\", \"key2\":\"value2\"\\} \\}."];
       clientToken: IdempotencyToken.t option
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
+      fileConfiguration: FileConfiguration.t option
+        [@ocaml.doc
+          "The configuration for what files should be pulled from the source."];
+      objectConfiguration: ObjectConfiguration.t option
+        [@ocaml.doc
+          "The configuration for what data should be pulled from the source."]}
     let context_ = "CreateDataIntegrationRequest"
     let make ?description =
-      fun ?kmsKey ->
-        fun ?sourceURI ->
-          fun ?scheduleConfig ->
-            fun ?tags ->
-              fun ?clientToken ->
-                fun ~name ->
-                  fun () ->
-                    {
-                      description;
-                      kmsKey;
-                      sourceURI;
-                      scheduleConfig;
-                      tags;
-                      clientToken;
-                      name
-                    }
+      fun ?sourceURI ->
+        fun ?scheduleConfig ->
+          fun ?tags ->
+            fun ?clientToken ->
+              fun ?fileConfiguration ->
+                fun ?objectConfiguration ->
+                  fun ~name ->
+                    fun ~kmsKey ->
+                      fun () ->
+                        {
+                          description;
+                          sourceURI;
+                          scheduleConfig;
+                          tags;
+                          clientToken;
+                          fileConfiguration;
+                          objectConfiguration;
+                          name;
+                          kmsKey
+                        }
     let to_value x =
       structure_to_value
         [("Name", (Some (Name.to_value x.name)));
         ("Description", (Option.map x.description ~f:Description.to_value));
-        ("KmsKey", (Option.map x.kmsKey ~f:NonBlankString.to_value));
-        ("SourceURI", (Option.map x.sourceURI ~f:NonBlankString.to_value));
+        ("KmsKey", (Some (NonBlankString.to_value x.kmsKey)));
+        ("SourceURI", (Option.map x.sourceURI ~f:SourceURI.to_value));
         ("ScheduleConfig",
           (Option.map x.scheduleConfig ~f:ScheduleConfiguration.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
         ("ClientToken",
-          (Option.map x.clientToken ~f:IdempotencyToken.to_value))]
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value));
+        ("FileConfiguration",
+          (Option.map x.fileConfiguration ~f:FileConfiguration.to_value));
+        ("ObjectConfiguration",
+          (Option.map x.objectConfiguration ~f:ObjectConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let objectConfiguration =
+        (Option.map ~f:ObjectConfiguration.of_xml)
+          (Xml.child xml_arg0 "ObjectConfiguration") in
+      let fileConfiguration =
+        (Option.map ~f:FileConfiguration.of_xml)
+          (Xml.child xml_arg0 "FileConfiguration") in
       let clientToken =
         (Option.map ~f:IdempotencyToken.of_xml)
           (Xml.child xml_arg0 "ClientToken") in
@@ -2939,28 +5350,527 @@ module CreateDataIntegrationRequest =
         (Option.map ~f:ScheduleConfiguration.of_xml)
           (Xml.child xml_arg0 "ScheduleConfig") in
       let sourceURI =
-        (Option.map ~f:NonBlankString.of_xml)
-          (Xml.child xml_arg0 "SourceURI") in
+        (Option.map ~f:SourceURI.of_xml) (Xml.child xml_arg0 "SourceURI") in
       let kmsKey =
-        (Option.map ~f:NonBlankString.of_xml) (Xml.child xml_arg0 "KmsKey") in
+        NonBlankString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "KmsKey") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?clientToken ?tags ?scheduleConfig ?sourceURI ?kmsKey ?description
-        ~name ()
+      make ?objectConfiguration ?fileConfiguration ?clientToken ?tags
+        ?scheduleConfig ?sourceURI ~kmsKey ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "ClientToken" IdempotencyToken.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let objectConfiguration =
+        field_map json__ "ObjectConfiguration" ObjectConfiguration.of_json in
+      let fileConfiguration =
+        field_map json__ "FileConfiguration" FileConfiguration.of_json in
+      let clientToken =
+        field_map json__ "ClientToken" IdempotencyToken.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let scheduleConfig =
-        field_map json "ScheduleConfig" ScheduleConfiguration.of_json in
-      let sourceURI = field_map json "SourceURI" NonBlankString.of_json in
-      let kmsKey = field_map json "KmsKey" NonBlankString.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map_exn json "Name" Name.of_json in
-      make ?clientToken ?tags ?scheduleConfig ?sourceURI ?kmsKey ?description
-        ~name ()
+        field_map json__ "ScheduleConfig" ScheduleConfiguration.of_json in
+      let sourceURI = field_map json__ "SourceURI" SourceURI.of_json in
+      let kmsKey = field_map_exn json__ "KmsKey" NonBlankString.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
+      make ?objectConfiguration ?fileConfiguration ?clientToken ?tags
+        ?scheduleConfig ?sourceURI ~kmsKey ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates and persists a DataIntegration resource. You cannot create a DataIntegration association for a DataIntegration that has been previously associated. Use a different DataIntegration, or recreate the DataIntegration using the CreateDataIntegration API."]
+module CreateDataIntegrationAssociationResponse =
+  struct
+    type nonrec t =
+      {
+      dataIntegrationAssociationId: UUID.t option
+        [@ocaml.doc
+          "A unique identifier. for the DataIntegrationAssociation."];
+      dataIntegrationArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the DataIntegration."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ResourceQuotaExceededException of ResourceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dataIntegrationAssociationId =
+      fun ?dataIntegrationArn ->
+        fun () -> { dataIntegrationAssociationId; dataIntegrationArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ResourceQuotaExceededException" ->
+          `ResourceQuotaExceededException
+            (ResourceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ResourceQuotaExceededException" ->
+          `ResourceQuotaExceededException
+            (ResourceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ResourceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceQuotaExceededException"));
+            ("details", (ResourceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DataIntegrationAssociationId",
+           (Option.map x.dataIntegrationAssociationId ~f:UUID.to_value));
+        ("DataIntegrationArn",
+          (Option.map x.dataIntegrationArn ~f:Arn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataIntegrationArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DataIntegrationArn") in
+      let dataIntegrationAssociationId =
+        (Option.map ~f:UUID.of_xml)
+          (Xml.child xml_arg0 "DataIntegrationAssociationId") in
+      make ?dataIntegrationArn ?dataIntegrationAssociationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataIntegrationArn =
+        field_map json__ "DataIntegrationArn" Arn.of_json in
+      let dataIntegrationAssociationId =
+        field_map json__ "DataIntegrationAssociationId" UUID.of_json in
+      make ?dataIntegrationArn ?dataIntegrationAssociationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates and persists a DataIntegrationAssociation resource."]
+module CreateDataIntegrationAssociationRequest =
+  struct
+    type nonrec t =
+      {
+      dataIntegrationIdentifier: Identifier.t
+        [@ocaml.doc "A unique identifier for the DataIntegration."];
+      clientId: ClientId.t option
+        [@ocaml.doc
+          "The identifier for the client that is associated with the DataIntegration association."];
+      objectConfiguration: ObjectConfiguration.t option ;
+      destinationURI: DestinationURI.t option
+        [@ocaml.doc "The URI of the data destination."];
+      clientAssociationMetadata: ClientAssociationMetadata.t option
+        [@ocaml.doc "The mapping of metadata to be extracted from the data."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
+      executionConfiguration: ExecutionConfiguration.t option
+        [@ocaml.doc
+          "The configuration for how the files should be pulled from the source."]}
+    let context_ = "CreateDataIntegrationAssociationRequest"
+    let make ?clientId =
+      fun ?objectConfiguration ->
+        fun ?destinationURI ->
+          fun ?clientAssociationMetadata ->
+            fun ?clientToken ->
+              fun ?executionConfiguration ->
+                fun ~dataIntegrationIdentifier ->
+                  fun () ->
+                    {
+                      clientId;
+                      objectConfiguration;
+                      destinationURI;
+                      clientAssociationMetadata;
+                      clientToken;
+                      executionConfiguration;
+                      dataIntegrationIdentifier
+                    }
+    let to_value x =
+      structure_to_value
+        [("Identifier",
+           (Some (Identifier.to_value x.dataIntegrationIdentifier)));
+        ("ClientId", (Option.map x.clientId ~f:ClientId.to_value));
+        ("ObjectConfiguration",
+          (Option.map x.objectConfiguration ~f:ObjectConfiguration.to_value));
+        ("DestinationURI",
+          (Option.map x.destinationURI ~f:DestinationURI.to_value));
+        ("ClientAssociationMetadata",
+          (Option.map x.clientAssociationMetadata
+             ~f:ClientAssociationMetadata.to_value));
+        ("ClientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value));
+        ("ExecutionConfiguration",
+          (Option.map x.executionConfiguration
+             ~f:ExecutionConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let executionConfiguration =
+        (Option.map ~f:ExecutionConfiguration.of_xml)
+          (Xml.child xml_arg0 "ExecutionConfiguration") in
+      let clientToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "ClientToken") in
+      let clientAssociationMetadata =
+        (Option.map ~f:ClientAssociationMetadata.of_xml)
+          (Xml.child xml_arg0 "ClientAssociationMetadata") in
+      let destinationURI =
+        (Option.map ~f:DestinationURI.of_xml)
+          (Xml.child xml_arg0 "DestinationURI") in
+      let objectConfiguration =
+        (Option.map ~f:ObjectConfiguration.of_xml)
+          (Xml.child xml_arg0 "ObjectConfiguration") in
+      let clientId =
+        (Option.map ~f:ClientId.of_xml) (Xml.child xml_arg0 "ClientId") in
+      let dataIntegrationIdentifier =
+        Identifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      make ?executionConfiguration ?clientToken ?clientAssociationMetadata
+        ?destinationURI ?objectConfiguration ?clientId
+        ~dataIntegrationIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let executionConfiguration =
+        field_map json__ "ExecutionConfiguration"
+          ExecutionConfiguration.of_json in
+      let clientToken =
+        field_map json__ "ClientToken" IdempotencyToken.of_json in
+      let clientAssociationMetadata =
+        field_map json__ "ClientAssociationMetadata"
+          ClientAssociationMetadata.of_json in
+      let destinationURI =
+        field_map json__ "DestinationURI" DestinationURI.of_json in
+      let objectConfiguration =
+        field_map json__ "ObjectConfiguration" ObjectConfiguration.of_json in
+      let clientId = field_map json__ "ClientId" ClientId.of_json in
+      let dataIntegrationIdentifier =
+        field_map_exn json__ "DataIntegrationIdentifier" Identifier.of_json in
+      make ?executionConfiguration ?clientToken ?clientAssociationMetadata
+        ?destinationURI ?objectConfiguration ?clientId
+        ~dataIntegrationIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates and persists a DataIntegrationAssociation resource."]
+module CreateApplicationResponse =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the Application."];
+      id: UUID.t option
+        [@ocaml.doc "A unique identifier for the Application."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `DuplicateResourceException of DuplicateResourceException.t 
+      | `InternalServiceError of InternalServiceError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceQuotaExceededException of ResourceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?arn = fun ?id -> fun () -> { arn; id }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "DuplicateResourceException" ->
+          `DuplicateResourceException
+            (DuplicateResourceException.of_json json)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceQuotaExceededException" ->
+          `ResourceQuotaExceededException
+            (ResourceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "DuplicateResourceException" ->
+          `DuplicateResourceException (DuplicateResourceException.of_xml xml)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceQuotaExceededException" ->
+          `ResourceQuotaExceededException
+            (ResourceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `DuplicateResourceException e ->
+          `Assoc
+            [("error", (`String "DuplicateResourceException"));
+            ("details", (DuplicateResourceException.to_json e))]
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceQuotaExceededException"));
+            ("details", (ResourceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("Id", (Option.map x.id ~f:UUID.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "Id") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?id ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map json__ "Id" UUID.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in make ?id ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates and persists an Application resource."]
+module CreateApplicationRequest =
+  struct
+    type nonrec t =
+      {
+      name: ApplicationName.t [@ocaml.doc "The name of the application."];
+      namespace: ApplicationNamespace.t
+        [@ocaml.doc "The namespace of the application."];
+      description: Description.t option
+        [@ocaml.doc "The description of the application."];
+      applicationSourceConfig: ApplicationSourceConfig.t
+        [@ocaml.doc
+          "The configuration for where the application should be loaded from."];
+      subscriptions: SubscriptionList.t option
+        [@ocaml.doc "The events that the application subscribes."];
+      publications: PublicationList.t option
+        [@ocaml.doc "The events that the application publishes."];
+      clientToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The tags used to organize, track, or control access for this resource. For example, \\{ \"tags\": \\{\"key1\":\"value1\", \"key2\":\"value2\"\\} \\}."];
+      permissions: PermissionList.t option
+        [@ocaml.doc
+          "The configuration of events or requests that the application has access to."];
+      isService: Boolean.t option
+        [@ocaml.doc "Indicates whether the application is a service."];
+      initializationTimeout: InitializationTimeout.t option
+        [@ocaml.doc
+          "The maximum time in milliseconds allowed to establish a connection with the workspace."];
+      applicationConfig: ApplicationConfig.t option
+        [@ocaml.doc "The configuration settings for the application."];
+      iframeConfig: IframeConfig.t option
+        [@ocaml.doc "The iframe configuration for the application."];
+      applicationType: ApplicationType.t option
+        [@ocaml.doc "The type of application."]}
+    let context_ = "CreateApplicationRequest"
+    let make ?description =
+      fun ?subscriptions ->
+        fun ?publications ->
+          fun ?clientToken ->
+            fun ?tags ->
+              fun ?permissions ->
+                fun ?isService ->
+                  fun ?initializationTimeout ->
+                    fun ?applicationConfig ->
+                      fun ?iframeConfig ->
+                        fun ?applicationType ->
+                          fun ~name ->
+                            fun ~namespace ->
+                              fun ~applicationSourceConfig ->
+                                fun () ->
+                                  {
+                                    description;
+                                    subscriptions;
+                                    publications;
+                                    clientToken;
+                                    tags;
+                                    permissions;
+                                    isService;
+                                    initializationTimeout;
+                                    applicationConfig;
+                                    iframeConfig;
+                                    applicationType;
+                                    name;
+                                    namespace;
+                                    applicationSourceConfig
+                                  }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (ApplicationName.to_value x.name)));
+        ("Namespace", (Some (ApplicationNamespace.to_value x.namespace)));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("ApplicationSourceConfig",
+          (Some (ApplicationSourceConfig.to_value x.applicationSourceConfig)));
+        ("Subscriptions",
+          (Option.map x.subscriptions ~f:SubscriptionList.to_value));
+        ("Publications",
+          (Option.map x.publications ~f:PublicationList.to_value));
+        ("ClientToken",
+          (Option.map x.clientToken ~f:IdempotencyToken.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("Permissions",
+          (Option.map x.permissions ~f:PermissionList.to_value));
+        ("IsService", (Option.map x.isService ~f:Boolean.to_value));
+        ("InitializationTimeout",
+          (Option.map x.initializationTimeout
+             ~f:InitializationTimeout.to_value));
+        ("ApplicationConfig",
+          (Option.map x.applicationConfig ~f:ApplicationConfig.to_value));
+        ("IframeConfig",
+          (Option.map x.iframeConfig ~f:IframeConfig.to_value));
+        ("ApplicationType",
+          (Option.map x.applicationType ~f:ApplicationType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let applicationType =
+        (Option.map ~f:ApplicationType.of_xml)
+          (Xml.child xml_arg0 "ApplicationType") in
+      let iframeConfig =
+        (Option.map ~f:IframeConfig.of_xml)
+          (Xml.child xml_arg0 "IframeConfig") in
+      let applicationConfig =
+        (Option.map ~f:ApplicationConfig.of_xml)
+          (Xml.child xml_arg0 "ApplicationConfig") in
+      let initializationTimeout =
+        (Option.map ~f:InitializationTimeout.of_xml)
+          (Xml.child xml_arg0 "InitializationTimeout") in
+      let isService =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "IsService") in
+      let permissions =
+        (Option.map ~f:PermissionList.of_xml)
+          (Xml.child xml_arg0 "Permissions") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let clientToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "ClientToken") in
+      let publications =
+        (Option.map ~f:PublicationList.of_xml)
+          (Xml.child xml_arg0 "Publications") in
+      let subscriptions =
+        (Option.map ~f:SubscriptionList.of_xml)
+          (Xml.child xml_arg0 "Subscriptions") in
+      let applicationSourceConfig =
+        ApplicationSourceConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationSourceConfig") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let namespace =
+        ApplicationNamespace.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Namespace") in
+      let name =
+        ApplicationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?applicationType ?iframeConfig ?applicationConfig
+        ?initializationTimeout ?isService ?permissions ?tags ?clientToken
+        ?publications ?subscriptions ~applicationSourceConfig ?description
+        ~namespace ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let applicationType =
+        field_map json__ "ApplicationType" ApplicationType.of_json in
+      let iframeConfig = field_map json__ "IframeConfig" IframeConfig.of_json in
+      let applicationConfig =
+        field_map json__ "ApplicationConfig" ApplicationConfig.of_json in
+      let initializationTimeout =
+        field_map json__ "InitializationTimeout"
+          InitializationTimeout.of_json in
+      let isService = field_map json__ "IsService" Boolean.of_json in
+      let permissions = field_map json__ "Permissions" PermissionList.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let clientToken =
+        field_map json__ "ClientToken" IdempotencyToken.of_json in
+      let publications =
+        field_map json__ "Publications" PublicationList.of_json in
+      let subscriptions =
+        field_map json__ "Subscriptions" SubscriptionList.of_json in
+      let applicationSourceConfig =
+        field_map_exn json__ "ApplicationSourceConfig"
+          ApplicationSourceConfig.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let namespace =
+        field_map_exn json__ "Namespace" ApplicationNamespace.of_json in
+      let name = field_map_exn json__ "Name" ApplicationName.of_json in
+      make ?applicationType ?iframeConfig ?applicationConfig
+        ?initializationTimeout ?isService ?permissions ?tags ?clientToken
+        ?publications ?subscriptions ~applicationSourceConfig ?description
+        ~namespace ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates and persists an Application resource."]

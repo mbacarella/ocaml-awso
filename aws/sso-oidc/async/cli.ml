@@ -38,28 +38,71 @@ let create_token =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and deviceCode =
+         flag "device-code" (optional string) ~doc:"STRING DeviceCode"
        and code = flag "code" (optional string) ~doc:"STRING AuthCode"
        and refreshToken =
          flag "refresh-token" (optional string) ~doc:"STRING RefreshToken"
        and scope = flag "scope" (optional json_arg) ~doc:"JSON Scopes"
        and redirectUri =
          flag "redirect-uri" (optional string) ~doc:"STRING URI"
+       and codeVerifier =
+         flag "code-verifier" (optional string) ~doc:"STRING CodeVerifier"
        and clientId =
          flag "client-id" (required string) ~doc:"STRING ClientId"
        and clientSecret =
          flag "client-secret" (required string) ~doc:"STRING ClientSecret"
        and grantType =
-         flag "grant-type" (required string) ~doc:"STRING GrantType"
-       and deviceCode =
-         flag "device-code" (required string) ~doc:"STRING DeviceCode" in
+         flag "grant-type" (required string) ~doc:"STRING GrantType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_token
-           (Values.CreateTokenRequest.make ?code ?refreshToken
+           (Values.CreateTokenRequest.make ?deviceCode ?code ?refreshToken
               ?scope:(Option.map ~f:Values.Scopes.of_json scope) ?redirectUri
-              ~clientId ~clientSecret ~grantType ~deviceCode ())
+              ?codeVerifier ~clientId ~clientSecret ~grantType ())
            (Some Values.CreateTokenResponse.to_json)
            (Some Values.CreateTokenResponse.error_to_json)])
+let create_token_with_i_a_m =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and code = flag "code" (optional string) ~doc:"STRING AuthCode"
+       and refreshToken =
+         flag "refresh-token" (optional string) ~doc:"STRING RefreshToken"
+       and assertion =
+         flag "assertion" (optional string) ~doc:"STRING Assertion"
+       and scope = flag "scope" (optional json_arg) ~doc:"JSON Scopes"
+       and redirectUri =
+         flag "redirect-uri" (optional string) ~doc:"STRING URI"
+       and subjectToken =
+         flag "subject-token" (optional string) ~doc:"STRING SubjectToken"
+       and subjectTokenType =
+         flag "subject-token-type" (optional string)
+           ~doc:"STRING TokenTypeURI"
+       and requestedTokenType =
+         flag "requested-token-type" (optional string)
+           ~doc:"STRING TokenTypeURI"
+       and codeVerifier =
+         flag "code-verifier" (optional string) ~doc:"STRING CodeVerifier"
+       and clientId =
+         flag "client-id" (required string) ~doc:"STRING ClientId"
+       and grantType =
+         flag "grant-type" (required string) ~doc:"STRING GrantType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_token_with_i_a_m
+           (Values.CreateTokenWithIAMRequest.make ?code ?refreshToken
+              ?assertion ?scope:(Option.map ~f:Values.Scopes.of_json scope)
+              ?redirectUri ?subjectToken ?subjectTokenType
+              ?requestedTokenType ?codeVerifier ~clientId ~grantType ())
+           (Some Values.CreateTokenWithIAMResponse.to_json)
+           (Some Values.CreateTokenWithIAMResponse.error_to_json)])
 let register_client =
   Command.async ~summary:""
     ([%map_open.Command
@@ -71,6 +114,14 @@ let register_client =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and scopes = flag "scopes" (optional json_arg) ~doc:"JSON Scopes"
+       and redirectUris =
+         flag "redirect-uris" (optional json_arg) ~doc:"JSON RedirectUris"
+       and grantTypes =
+         flag "grant-types" (optional json_arg) ~doc:"JSON GrantTypes"
+       and issuerUrl = flag "issuer-url" (optional string) ~doc:"STRING URI"
+       and entitledApplicationArn =
+         flag "entitled-application-arn" (optional string)
+           ~doc:"STRING ArnType"
        and clientName =
          flag "client-name" (required string) ~doc:"STRING ClientName"
        and clientType =
@@ -80,7 +131,10 @@ let register_client =
            Io.register_client
            (Values.RegisterClientRequest.make
               ?scopes:(Option.map ~f:Values.Scopes.of_json scopes)
-              ~clientName ~clientType ())
+              ?redirectUris:(Option.map ~f:Values.RedirectUris.of_json
+                               redirectUris)
+              ?grantTypes:(Option.map ~f:Values.GrantTypes.of_json grantTypes)
+              ?issuerUrl ?entitledApplicationArn ~clientName ~clientType ())
            (Some Values.RegisterClientResponse.to_json)
            (Some Values.RegisterClientResponse.error_to_json)])
 let start_device_authorization =
@@ -109,5 +163,6 @@ let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-token", create_token);
+    ("create-token-with-i-a-m", create_token_with_i_a_m);
     ("register-client", register_client);
     ("start-device-authorization", start_device_authorization)]

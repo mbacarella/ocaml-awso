@@ -1001,12 +1001,12 @@ let send_bulk_templated_email =
        and templateArn =
          flag "template-arn" (optional string)
            ~doc:"STRING AmazonResourceName"
-       and defaultTemplateData =
-         flag "default-template-data" (optional string)
-           ~doc:"STRING TemplateData"
        and source = flag "source" (required string) ~doc:"STRING Address"
        and template =
          flag "template" (required string) ~doc:"STRING TemplateName"
+       and defaultTemplateData =
+         flag "default-template-data" (required string)
+           ~doc:"STRING TemplateData"
        and destinations =
          flag "destinations" (required json_arg)
            ~doc:"JSON BulkEmailDestinationList" in
@@ -1018,8 +1018,8 @@ let send_bulk_templated_email =
                                    replyToAddresses) ?returnPath
               ?returnPathArn ?configurationSetName
               ?defaultTags:(Option.map ~f:Values.MessageTagList.of_json
-                              defaultTags) ?templateArn ?defaultTemplateData
-              ~source ~template
+                              defaultTags) ?templateArn ~source ~template
+              ~defaultTemplateData
               ~destinations:(Values.BulkEmailDestinationList.of_json
                                destinations) ())
            (Some Values.SendBulkTemplatedEmailResponse.to_json)

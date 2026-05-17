@@ -122,8 +122,8 @@ module TargetGroupInfo =
         (Option.map ~f:TargetGroupName.of_xml) (Xml.child xml_arg0 "name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "name" TargetGroupName.of_json in
+    let of_json json__ =
+      let name = field_map json__ "name" TargetGroupName.of_json in
       make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -132,6 +132,9 @@ module ListenerArnList =
   struct
     type nonrec t = ListenerArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListenerArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -176,10 +179,10 @@ module EC2TagFilter =
       let key = (Option.map ~f:Key.of_xml) (Xml.child xml_arg0 "Key") in
       make ?type_ ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" EC2TagFilterType.of_json in
-      let value = field_map json "Value" Value.of_json in
-      let key = field_map json "Key" Key.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" EC2TagFilterType.of_json in
+      let value = field_map json__ "Value" Value.of_json in
+      let key = field_map json__ "Key" Key.of_json in
       make ?type_ ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an EC2 tag filter."]
@@ -288,6 +291,19 @@ module TagFilterType =
     let of_json j = of_string (string_of_json ~kind:"TagFilterType" j)
     let to_json = simple_to_json to_value
   end
+module AlarmName =
+  struct
+    type nonrec t = string
+    let context_ = "AlarmName"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AlarmName" j
+    let to_json = simple_to_json to_value
+  end
 module ELBName =
   struct
     type nonrec t = string
@@ -305,6 +321,9 @@ module TargetGroupInfoList =
   struct
     type nonrec t = TargetGroupInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetGroupInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -345,9 +364,9 @@ module TrafficRoute =
           (Xml.child xml_arg0 "listenerArns") in
       make ?listenerArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let listenerArns =
-        field_map json "listenerArns" ListenerArnList.of_json in
+        field_map json__ "listenerArns" ListenerArnList.of_json in
       make ?listenerArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -356,6 +375,9 @@ module EC2TagFilterList =
   struct
     type nonrec t = EC2TagFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EC2TagFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -388,7 +410,7 @@ module Diagnostics =
         [@ocaml.doc "The message associated with the error."];
       logTail: LogTail.t option
         [@ocaml.doc
-          "The last portion of the diagnostic log. If available, AWS CodeDeploy returns up to the last 4 KB of the diagnostic log."]}
+          "The last portion of the diagnostic log. If available, CodeDeploy returns up to the last 4 KB of the diagnostic log."]}
     let make ?errorCode =
       fun ?scriptName ->
         fun ?message ->
@@ -415,11 +437,11 @@ module Diagnostics =
           (Xml.child xml_arg0 "errorCode") in
       make ?logTail ?message ?scriptName ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logTail = field_map json "logTail" LogTail.of_json in
-      let message = field_map json "message" LifecycleMessage.of_json in
-      let scriptName = field_map json "scriptName" ScriptName.of_json in
-      let errorCode = field_map json "errorCode" LifecycleErrorCode.of_json in
+    let of_json json__ =
+      let logTail = field_map json__ "logTail" LogTail.of_json in
+      let message = field_map json__ "message" LifecycleMessage.of_json in
+      let scriptName = field_map json__ "scriptName" ScriptName.of_json in
+      let errorCode = field_map json__ "errorCode" LifecycleErrorCode.of_json in
       make ?logTail ?message ?scriptName ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -558,19 +580,6 @@ module TrafficWeight =
     let of_json j = float_of_json ~kind:"a double" j
     let to_json = simple_to_json to_value
   end
-module AlarmName =
-  struct
-    type nonrec t = string
-    let context_ = "AlarmName"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AlarmName" j
-    let to_json = simple_to_json to_value
-  end
 module TagFilter =
   struct
     type nonrec t =
@@ -597,10 +606,10 @@ module TagFilter =
       let key = (Option.map ~f:Key.of_xml) (Xml.child xml_arg0 "Key") in
       make ?type_ ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" TagFilterType.of_json in
-      let value = field_map json "Value" Value.of_json in
-      let key = field_map json "Key" Key.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" TagFilterType.of_json in
+      let value = field_map json__ "Value" Value.of_json in
+      let key = field_map json__ "Key" Key.of_json in
       make ?type_ ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an on-premises instance tag filter."]
@@ -653,6 +662,26 @@ module TriggerEventType =
     let of_json j = of_string (string_of_json ~kind:"TriggerEventType" j)
     let to_json = simple_to_json to_value
   end
+module Alarm =
+  struct
+    type nonrec t =
+      {
+      name: AlarmName.t option
+        [@ocaml.doc
+          "The name of the alarm. Maximum length is 255 characters. Each alarm name can be used only once in a list of alarms."]}
+    let make ?name = fun () -> { name }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:AlarmName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name = (Option.map ~f:AlarmName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "name" AlarmName.of_json in make ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about an alarm."]
 module AutoRollbackEvent =
   struct
     type nonrec t =
@@ -781,7 +810,7 @@ module ELBInfo =
       {
       name: ELBName.t option
         [@ocaml.doc
-          "For blue/green deployments, the name of the load balancer that is used to route traffic from original instances to replacement instances in a blue/green deployment. For in-place deployments, the name of the load balancer that instances are deregistered from so they are not serving traffic during a deployment, and then re-registered with after the deployment is complete."]}
+          "For blue/green deployments, the name of the Classic Load Balancer that is used to route traffic from original instances to replacement instances in a blue/green deployment. For in-place deployments, the name of the Classic Load Balancer that instances are deregistered from so they are not serving traffic during a deployment, and then re-registered with after the deployment is complete."]}
     let make ?name = fun () -> { name }
     let to_value x =
       structure_to_value [("name", (Option.map x.name ~f:ELBName.to_value))]
@@ -790,11 +819,11 @@ module ELBInfo =
       let name = (Option.map ~f:ELBName.of_xml) (Xml.child xml_arg0 "name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "name" ELBName.of_json in make ?name ()
+    let of_json json__ =
+      let name = field_map json__ "name" ELBName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about a load balancer in Elastic Load Balancing to use in a deployment. Instances are registered directly with a load balancer, and traffic is routed to the load balancer."]
+       "Information about a Classic Load Balancer in Elastic Load Balancing to use in a deployment. Instances are registered directly with a load balancer, and traffic is routed to the load balancer."]
 module TargetGroupPairInfo =
   struct
     type nonrec t =
@@ -833,13 +862,13 @@ module TargetGroupPairInfo =
           (Xml.child xml_arg0 "targetGroups") in
       make ?testTrafficRoute ?prodTrafficRoute ?targetGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let testTrafficRoute =
-        field_map json "testTrafficRoute" TrafficRoute.of_json in
+        field_map json__ "testTrafficRoute" TrafficRoute.of_json in
       let prodTrafficRoute =
-        field_map json "prodTrafficRoute" TrafficRoute.of_json in
+        field_map json__ "prodTrafficRoute" TrafficRoute.of_json in
       let targetGroups =
-        field_map json "targetGroups" TargetGroupInfoList.of_json in
+        field_map json__ "targetGroups" TargetGroupInfoList.of_json in
       make ?testTrafficRoute ?prodTrafficRoute ?targetGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1012,6 +1041,9 @@ module EC2TagSetList =
   struct
     type nonrec t = EC2TagFilterList.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EC2TagFilterList.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1083,13 +1115,13 @@ module LifecycleEvent =
           (Xml.child xml_arg0 "lifecycleEventName") in
       make ?status ?endTime ?startTime ?diagnostics ?lifecycleEventName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" LifecycleEventStatus.of_json in
-      let endTime = field_map json "endTime" Timestamp.of_json in
-      let startTime = field_map json "startTime" Timestamp.of_json in
-      let diagnostics = field_map json "diagnostics" Diagnostics.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" LifecycleEventStatus.of_json in
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let diagnostics = field_map json__ "diagnostics" Diagnostics.of_json in
       let lifecycleEventName =
-        field_map json "lifecycleEventName" LifecycleEventName.of_json in
+        field_map json__ "lifecycleEventName" LifecycleEventName.of_json in
       make ?status ?endTime ?startTime ?diagnostics ?lifecycleEventName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a deployment lifecycle event."]
@@ -1115,7 +1147,7 @@ module ECSTaskSet =
         [@ocaml.doc "The percentage of traffic served by this task set."];
       targetGroup: TargetGroupInfo.t option
         [@ocaml.doc
-          "The target group associated with the task set. The target group is used by AWS CodeDeploy to manage traffic to a task set."];
+          "The target group associated with the task set. The target group is used by CodeDeploy to manage traffic to a task set."];
       taskSetLabel: TargetLabel.t option
         [@ocaml.doc
           "A label that identifies whether the ECS task set is an original target (BLUE) or a replacement target (GREEN)."]}
@@ -1182,24 +1214,26 @@ module ECSTaskSet =
       make ?taskSetLabel ?targetGroup ?trafficWeight ?status ?runningCount
         ?pendingCount ?desiredCount ?identifer ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskSetLabel = field_map json "taskSetLabel" TargetLabel.of_json in
-      let targetGroup = field_map json "targetGroup" TargetGroupInfo.of_json in
+    let of_json json__ =
+      let taskSetLabel = field_map json__ "taskSetLabel" TargetLabel.of_json in
+      let targetGroup =
+        field_map json__ "targetGroup" TargetGroupInfo.of_json in
       let trafficWeight =
-        field_map json "trafficWeight" TrafficWeight.of_json in
-      let status = field_map json "status" ECSTaskSetStatus.of_json in
+        field_map json__ "trafficWeight" TrafficWeight.of_json in
+      let status = field_map json__ "status" ECSTaskSetStatus.of_json in
       let runningCount =
-        field_map json "runningCount" ECSTaskSetCount.of_json in
+        field_map json__ "runningCount" ECSTaskSetCount.of_json in
       let pendingCount =
-        field_map json "pendingCount" ECSTaskSetCount.of_json in
+        field_map json__ "pendingCount" ECSTaskSetCount.of_json in
       let desiredCount =
-        field_map json "desiredCount" ECSTaskSetCount.of_json in
-      let identifer = field_map json "identifer" ECSTaskSetIdentifier.of_json in
+        field_map json__ "desiredCount" ECSTaskSetCount.of_json in
+      let identifer =
+        field_map json__ "identifer" ECSTaskSetIdentifier.of_json in
       make ?taskSetLabel ?targetGroup ?trafficWeight ?status ?runningCount
         ?pendingCount ?desiredCount ?identifer ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about a set of Amazon ECS tasks in an AWS CodeDeploy deployment. An Amazon ECS task set includes details such as the desired number of tasks, how many tasks are running, and whether the task set serves production traffic. An AWS CodeDeploy application that uses the Amazon ECS compute platform deploys a containerized application in an Amazon ECS service as a task set."]
+       "Information about a set of Amazon ECS tasks in an CodeDeploy deployment. An Amazon ECS task set includes details such as the desired number of tasks, how many tasks are running, and whether the task set serves production traffic. An CodeDeploy application that uses the Amazon ECS compute platform deploys a containerized application in an Amazon ECS service as a task set."]
 module LambdaFunctionAlias =
   struct
     type nonrec t = string
@@ -1239,26 +1273,6 @@ module Version =
     let of_json j = string_of_json ~kind:"Version" j
     let to_json = simple_to_json to_value
   end
-module Alarm =
-  struct
-    type nonrec t =
-      {
-      name: AlarmName.t option
-        [@ocaml.doc
-          "The name of the alarm. Maximum length is 255 characters. Each alarm name can be used only once in a list of alarms."]}
-    let make ?name = fun () -> { name }
-    let to_value x =
-      structure_to_value
-        [("name", (Option.map x.name ~f:AlarmName.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let name = (Option.map ~f:AlarmName.of_xml) (Xml.child xml_arg0 "name") in
-      make ?name ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "name" AlarmName.of_json in make ?name ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about an alarm."]
 module AutoScalingGroupHook =
   struct
     type nonrec t = string
@@ -1302,6 +1316,9 @@ module TagFilterList =
   struct
     type nonrec t = TagFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1326,6 +1343,9 @@ module TriggerEventTypeList =
   struct
     type nonrec t = TriggerEventType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TriggerEventType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1419,6 +1439,49 @@ module WaitTimeInMins =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module MinimumHealthyHostsPerZoneType =
+  struct
+    type nonrec t =
+      | HOST_COUNT 
+      | FLEET_PERCENT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | HOST_COUNT -> "HOST_COUNT"
+      | FLEET_PERCENT -> "FLEET_PERCENT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "HOST_COUNT" -> HOST_COUNT
+      | "FLEET_PERCENT" -> FLEET_PERCENT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MinimumHealthyHostsPerZoneType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MinimumHealthyHostsPerZoneType" j)
+    let to_json = simple_to_json to_value
+  end
+module MinimumHealthyHostsPerZoneValue =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MinimumHealthyHostsPerZoneValue"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module Tag =
   struct
     type nonrec t =
@@ -1436,15 +1499,57 @@ module Tag =
       let key = (Option.map ~f:Key.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" Value.of_json in
-      let key = field_map json "Key" Key.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" Value.of_json in
+      let key = field_map json__ "Key" Key.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a tag."]
+module AlarmList =
+  struct
+    type nonrec t = Alarm.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Alarm.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Alarm.of_xml)
+    let of_json j = list_of_json ~kind:"AlarmList" ~of_json:Alarm.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Boolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module AutoRollbackEventsList =
   struct
     type nonrec t = AutoRollbackEvent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AutoRollbackEvent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1465,19 +1570,6 @@ module AutoRollbackEventsList =
       list_of_json ~kind:"AutoRollbackEventsList"
         ~of_json:AutoRollbackEvent.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module Boolean =
-  struct
-    type nonrec t = bool
-    let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
-    let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
-    let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
-    let to_json = simple_to_json to_value
   end
 module BlueInstanceTerminationOption =
   struct
@@ -1506,10 +1598,10 @@ module BlueInstanceTerminationOption =
         (Option.map ~f:InstanceAction.of_xml) (Xml.child xml_arg0 "action") in
       make ?terminationWaitTimeInMinutes ?action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let terminationWaitTimeInMinutes =
-        field_map json "terminationWaitTimeInMinutes" Duration.of_json in
-      let action = field_map json "action" InstanceAction.of_json in
+        field_map json__ "terminationWaitTimeInMinutes" Duration.of_json in
+      let action = field_map json__ "action" InstanceAction.of_json in
       make ?terminationWaitTimeInMinutes ?action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1543,11 +1635,11 @@ module DeploymentReadyOption =
           (Xml.child xml_arg0 "actionOnTimeout") in
       make ?waitTimeInMinutes ?actionOnTimeout ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let waitTimeInMinutes =
-        field_map json "waitTimeInMinutes" Duration.of_json in
+        field_map json__ "waitTimeInMinutes" Duration.of_json in
       let actionOnTimeout =
-        field_map json "actionOnTimeout" DeploymentReadyAction.of_json in
+        field_map json__ "actionOnTimeout" DeploymentReadyAction.of_json in
       make ?waitTimeInMinutes ?actionOnTimeout ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1571,9 +1663,9 @@ module GreenFleetProvisioningOption =
           (Xml.child xml_arg0 "action") in
       make ?action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let action =
-        field_map json "action" GreenFleetProvisioningAction.of_json in
+        field_map json__ "action" GreenFleetProvisioningAction.of_json in
       make ?action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1785,6 +1877,9 @@ module ELBInfoList =
   struct
     type nonrec t = ELBInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ELBInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1809,6 +1904,9 @@ module TargetGroupPairInfoList =
   struct
     type nonrec t = TargetGroupPairInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetGroupPairInfo.to_value)) |>
         (fun x -> `List x)
@@ -1835,6 +1933,9 @@ module DeploymentsList =
   struct
     type nonrec t = DeploymentId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeploymentId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1861,7 +1962,7 @@ module AppSpecContent =
       {
       content: RawStringContent.t option
         [@ocaml.doc
-          "The YAML-formatted or JSON-formatted revision string. For an AWS Lambda deployment, the content includes a Lambda function name, the alias for its original version, and the alias for its replacement version. The deployment shifts traffic from the original version of the Lambda function to the replacement version. For an Amazon ECS deployment, the content includes the task name, information about the load balancer that serves traffic to the container, and more. For both types of deployments, the content can specify Lambda functions that run at specified hooks, such as BeforeInstall, during a deployment."];
+          "The YAML-formatted or JSON-formatted revision string. For an Lambda deployment, the content includes a Lambda function name, the alias for its original version, and the alias for its replacement version. The deployment shifts traffic from the original version of the Lambda function to the replacement version. For an Amazon ECS deployment, the content includes the task name, information about the load balancer that serves traffic to the container, and more. For both types of deployments, the content can specify Lambda functions that run at specified hooks, such as BeforeInstall, during a deployment."];
       sha256: RawStringSha256.t option
         [@ocaml.doc "The SHA256 hash value of the revision content."]}
     let make ?content = fun ?sha256 -> fun () -> { content; sha256 }
@@ -1878,13 +1979,13 @@ module AppSpecContent =
           (Xml.child xml_arg0 "content") in
       make ?sha256 ?content ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sha256 = field_map json "sha256" RawStringSha256.of_json in
-      let content = field_map json "content" RawStringContent.of_json in
+    let of_json json__ =
+      let sha256 = field_map json__ "sha256" RawStringSha256.of_json in
+      let content = field_map json__ "content" RawStringContent.of_json in
       make ?sha256 ?content ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A revision for an AWS Lambda or Amazon ECS deployment that is a YAML-formatted or JSON-formatted string. For AWS Lambda and Amazon ECS deployments, the revision is the same as the AppSpec file. This method replaces the deprecated RawString data type."]
+       "A revision for an Lambda or Amazon ECS deployment that is a YAML-formatted or JSON-formatted string. For Lambda and Amazon ECS deployments, the revision is the same as the AppSpec file. This method replaces the deprecated RawString data type."]
 module GitHubLocation =
   struct
     type nonrec t =
@@ -1909,9 +2010,9 @@ module GitHubLocation =
         (Option.map ~f:Repository.of_xml) (Xml.child xml_arg0 "repository") in
       make ?commitId ?repository ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let commitId = field_map json "commitId" CommitId.of_json in
-      let repository = field_map json "repository" Repository.of_json in
+    let of_json json__ =
+      let commitId = field_map json__ "commitId" CommitId.of_json in
+      let repository = field_map json__ "repository" Repository.of_json in
       make ?commitId ?repository ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1939,13 +2040,13 @@ module RawString =
           (Xml.child xml_arg0 "content") in
       make ?sha256 ?content ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sha256 = field_map json "sha256" RawStringSha256.of_json in
-      let content = field_map json "content" RawStringContent.of_json in
+    let of_json json__ =
+      let sha256 = field_map json__ "sha256" RawStringSha256.of_json in
+      let content = field_map json__ "content" RawStringContent.of_json in
       make ?sha256 ?content ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A revision for an AWS Lambda deployment that is a YAML-formatted or JSON-formatted string. For AWS Lambda deployments, the revision is the same as the AppSpec file."]
+       "A revision for an Lambda deployment that is a YAML-formatted or JSON-formatted string. For Lambda deployments, the revision is the same as the AppSpec file."]
 module RevisionLocationType =
   struct
     type nonrec t =
@@ -1990,7 +2091,7 @@ module S3Location =
           "The name of the Amazon S3 object that represents the bundled artifacts for the application revision."];
       bundleType: BundleType.t option
         [@ocaml.doc
-          "The file type of the application revision. Must be one of the following: tar: A tar archive file. tgz: A compressed tar archive file. zip: A zip archive file."];
+          "The file type of the application revision. Must be one of the following: tar: A tar archive file. tgz: A compressed tar archive file. zip: A zip archive file. YAML: A YAML-formatted file. JSON: A JSON-formatted file."];
       version: VersionId.t option
         [@ocaml.doc
           "A specific version of the Amazon S3 object that represents the bundled artifacts for the application revision. If the version is not specified, the system uses the most recent version by default."];
@@ -2021,12 +2122,12 @@ module S3Location =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?eTag ?version ?bundleType ?key ?bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let eTag = field_map json "eTag" ETag.of_json in
-      let version = field_map json "version" VersionId.of_json in
-      let bundleType = field_map json "bundleType" BundleType.of_json in
-      let key = field_map json "key" S3Key.of_json in
-      let bucket = field_map json "bucket" S3Bucket.of_json in
+    let of_json json__ =
+      let eTag = field_map json__ "eTag" ETag.of_json in
+      let version = field_map json__ "version" VersionId.of_json in
+      let bundleType = field_map json__ "bundleType" BundleType.of_json in
+      let key = field_map json__ "key" S3Key.of_json in
+      let bucket = field_map json__ "bucket" S3Bucket.of_json in
       make ?eTag ?version ?bundleType ?key ?bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2048,6 +2149,9 @@ module AutoScalingGroupNameList =
   struct
     type nonrec t = AutoScalingGroupName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AutoScalingGroupName.to_value)) |>
         (fun x -> `List x)
@@ -2076,7 +2180,7 @@ module EC2TagSet =
       {
       ec2TagSetList: EC2TagSetList.t option
         [@ocaml.doc
-          "A list that contains other lists of EC2 instance tag groups. For an instance to be included in the deployment group, it must be identified by all of the tag groups in the list."]}
+          "A list that contains other lists of Amazon EC2 instance tag groups. For an instance to be included in the deployment group, it must be identified by all of the tag groups in the list."]}
     let make ?ec2TagSetList = fun () -> { ec2TagSetList }
     let to_value x =
       structure_to_value
@@ -2089,12 +2193,12 @@ module EC2TagSet =
           (Xml.child xml_arg0 "ec2TagSetList") in
       make ?ec2TagSetList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ec2TagSetList =
-        field_map json "ec2TagSetList" EC2TagSetList.of_json in
+        field_map json__ "ec2TagSetList" EC2TagSetList.of_json in
       make ?ec2TagSetList ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about groups of EC2 instance tags."]
+  end[@@ocaml.doc "Information about groups of Amazon EC2 instance tags."]
 module CloudFormationResourceType =
   struct
     type nonrec t = string
@@ -2112,6 +2216,9 @@ module LifecycleEventList =
   struct
     type nonrec t = LifecycleEvent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LifecycleEvent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2202,6 +2309,9 @@ module ECSTaskSetList =
   struct
     type nonrec t = ECSTaskSet.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ECSTaskSet.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2243,7 +2353,7 @@ module LambdaFunctionInfo =
         [@ocaml.doc "The name of a Lambda function."];
       functionAlias: LambdaFunctionAlias.t option
         [@ocaml.doc
-          "The alias of a Lambda function. For more information, see AWS Lambda Function Aliases in the AWS Lambda Developer Guide."];
+          "The alias of a Lambda function. For more information, see Lambda Function Aliases in the Lambda Developer Guide."];
       currentVersion: Version.t option
         [@ocaml.doc
           "The version of a Lambda function that production traffic points to."];
@@ -2294,43 +2404,20 @@ module LambdaFunctionInfo =
       make ?targetVersionWeight ?targetVersion ?currentVersion ?functionAlias
         ?functionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetVersionWeight =
-        field_map json "targetVersionWeight" TrafficWeight.of_json in
-      let targetVersion = field_map json "targetVersion" Version.of_json in
-      let currentVersion = field_map json "currentVersion" Version.of_json in
+        field_map json__ "targetVersionWeight" TrafficWeight.of_json in
+      let targetVersion = field_map json__ "targetVersion" Version.of_json in
+      let currentVersion = field_map json__ "currentVersion" Version.of_json in
       let functionAlias =
-        field_map json "functionAlias" LambdaFunctionAlias.of_json in
+        field_map json__ "functionAlias" LambdaFunctionAlias.of_json in
       let functionName =
-        field_map json "functionName" LambdaFunctionName.of_json in
+        field_map json__ "functionName" LambdaFunctionName.of_json in
       make ?targetVersionWeight ?targetVersion ?currentVersion ?functionAlias
         ?functionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a Lambda function specified in a deployment."]
-module AlarmList =
-  struct
-    type nonrec t = Alarm.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Alarm.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Alarm.of_xml)
-    let of_json j = list_of_json ~kind:"AlarmList" ~of_json:Alarm.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module AutoScalingGroup =
   struct
     type nonrec t =
@@ -2338,26 +2425,39 @@ module AutoScalingGroup =
       name: AutoScalingGroupName.t option
         [@ocaml.doc "The Auto Scaling group name."];
       hook: AutoScalingGroupHook.t option
-        [@ocaml.doc "An Auto Scaling lifecycle event hook name."]}
-    let make ?name = fun ?hook -> fun () -> { name; hook }
+        [@ocaml.doc
+          "The name of the launch hook that CodeDeploy installed into the Auto Scaling group. For more information about the launch hook, see How Amazon EC2 Auto Scaling works with CodeDeploy in the CodeDeploy User Guide."];
+      terminationHook: AutoScalingGroupHook.t option
+        [@ocaml.doc
+          "The name of the termination hook that CodeDeploy installed into the Auto Scaling group. For more information about the termination hook, see Enabling termination deployments during Auto Scaling scale-in events in the CodeDeploy User Guide."]}
+    let make ?name =
+      fun ?hook ->
+        fun ?terminationHook -> fun () -> { name; hook; terminationHook }
     let to_value x =
       structure_to_value
         [("name", (Option.map x.name ~f:AutoScalingGroupName.to_value));
-        ("hook", (Option.map x.hook ~f:AutoScalingGroupHook.to_value))]
+        ("hook", (Option.map x.hook ~f:AutoScalingGroupHook.to_value));
+        ("terminationHook",
+          (Option.map x.terminationHook ~f:AutoScalingGroupHook.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let terminationHook =
+        (Option.map ~f:AutoScalingGroupHook.of_xml)
+          (Xml.child xml_arg0 "terminationHook") in
       let hook =
         (Option.map ~f:AutoScalingGroupHook.of_xml)
           (Xml.child xml_arg0 "hook") in
       let name =
         (Option.map ~f:AutoScalingGroupName.of_xml)
           (Xml.child xml_arg0 "name") in
-      make ?hook ?name ()
+      make ?terminationHook ?hook ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hook = field_map json "hook" AutoScalingGroupHook.of_json in
-      let name = field_map json "name" AutoScalingGroupName.of_json in
-      make ?hook ?name ()
+    let of_json json__ =
+      let terminationHook =
+        field_map json__ "terminationHook" AutoScalingGroupHook.of_json in
+      let hook = field_map json__ "hook" AutoScalingGroupHook.of_json in
+      let name = field_map json__ "name" AutoScalingGroupName.of_json in
+      make ?terminationHook ?hook ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an Auto Scaling group."]
 module ECSService =
@@ -2387,9 +2487,9 @@ module ECSService =
           (Xml.child xml_arg0 "serviceName") in
       make ?clusterName ?serviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterName = field_map json "clusterName" ECSClusterName.of_json in
-      let serviceName = field_map json "serviceName" ECSServiceName.of_json in
+    let of_json json__ =
+      let clusterName = field_map json__ "clusterName" ECSClusterName.of_json in
+      let serviceName = field_map json__ "serviceName" ECSServiceName.of_json in
       make ?clusterName ?serviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2441,6 +2541,9 @@ module OnPremisesTagSetList =
   struct
     type nonrec t = TagFilterList.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagFilterList.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2497,12 +2600,12 @@ module TriggerConfig =
         (Option.map ~f:TriggerName.of_xml) (Xml.child xml_arg0 "triggerName") in
       make ?triggerEvents ?triggerTargetArn ?triggerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let triggerEvents =
-        field_map json "triggerEvents" TriggerEventTypeList.of_json in
+        field_map json__ "triggerEvents" TriggerEventTypeList.of_json in
       let triggerTargetArn =
-        field_map json "triggerTargetArn" TriggerTargetArn.of_json in
-      let triggerName = field_map json "triggerName" TriggerName.of_json in
+        field_map json__ "triggerTargetArn" TriggerTargetArn.of_json in
+      let triggerName = field_map json__ "triggerName" TriggerName.of_json in
       make ?triggerEvents ?triggerTargetArn ?triggerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2511,6 +2614,9 @@ module DeploymentGroupsList =
   struct
     type nonrec t = DeploymentGroupName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeploymentGroupName.to_value)) |>
         (fun x -> `List x)
@@ -2616,15 +2722,15 @@ module TimeBasedCanary =
           (Xml.child xml_arg0 "canaryPercentage") in
       make ?canaryInterval ?canaryPercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let canaryInterval =
-        field_map json "canaryInterval" WaitTimeInMins.of_json in
+        field_map json__ "canaryInterval" WaitTimeInMins.of_json in
       let canaryPercentage =
-        field_map json "canaryPercentage" Percentage.of_json in
+        field_map json__ "canaryPercentage" Percentage.of_json in
       make ?canaryInterval ?canaryPercentage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A configuration that shifts traffic from one version of a Lambda function or ECS task set to another in two increments. The original and target Lambda function versions or ECS task sets are specified in the deployment's AppSpec file."]
+       "A configuration that shifts traffic from one version of a Lambda function or Amazon ECS task set to another in two increments. The original and target Lambda function versions or ECS task sets are specified in the deployment's AppSpec file."]
 module TimeBasedLinear =
   struct
     type nonrec t =
@@ -2653,11 +2759,11 @@ module TimeBasedLinear =
           (Xml.child xml_arg0 "linearPercentage") in
       make ?linearInterval ?linearPercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let linearInterval =
-        field_map json "linearInterval" WaitTimeInMins.of_json in
+        field_map json__ "linearInterval" WaitTimeInMins.of_json in
       let linearPercentage =
-        field_map json "linearPercentage" Percentage.of_json in
+        field_map json__ "linearPercentage" Percentage.of_json in
       make ?linearInterval ?linearPercentage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2689,6 +2795,55 @@ module TrafficRoutingType =
       of_string
         (string_of_xml ~kind:"enumeration TrafficRoutingType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"TrafficRoutingType" j)
+    let to_json = simple_to_json to_value
+  end
+module MinimumHealthyHostsPerZone =
+  struct
+    type nonrec t =
+      {
+      type_: MinimumHealthyHostsPerZoneType.t option
+        [@ocaml.doc
+          "The type associated with the MinimumHealthyHostsPerZone option."];
+      value: MinimumHealthyHostsPerZoneValue.t option
+        [@ocaml.doc
+          "The value associated with the MinimumHealthyHostsPerZone option."]}
+    let make ?type_ = fun ?value -> fun () -> { type_; value }
+    let to_value x =
+      structure_to_value
+        [("type",
+           (Option.map x.type_ ~f:MinimumHealthyHostsPerZoneType.to_value));
+        ("value",
+          (Option.map x.value ~f:MinimumHealthyHostsPerZoneValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:MinimumHealthyHostsPerZoneValue.of_xml)
+          (Xml.child xml_arg0 "value") in
+      let type_ =
+        (Option.map ~f:MinimumHealthyHostsPerZoneType.of_xml)
+          (Xml.child xml_arg0 "type") in
+      make ?value ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value =
+        field_map json__ "value" MinimumHealthyHostsPerZoneValue.of_json in
+      let type_ =
+        field_map json__ "type" MinimumHealthyHostsPerZoneType.of_json in
+      make ?value ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the minimum number of healthy instances per Availability Zone."]
+module WaitTimeInSeconds =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
 module IamSessionArn =
@@ -2747,6 +2902,9 @@ module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2779,6 +2937,47 @@ module AdditionalDeploymentStatusInfo =
     let of_json j = string_of_json ~kind:"AdditionalDeploymentStatusInfo" j
     let to_json = simple_to_json to_value
   end
+module AlarmConfiguration =
+  struct
+    type nonrec t =
+      {
+      enabled: Boolean.t option
+        [@ocaml.doc "Indicates whether the alarm configuration is enabled."];
+      ignorePollAlarmFailure: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether a deployment should continue if information about the current state of alarms cannot be retrieved from Amazon CloudWatch. The default value is false. true: The deployment proceeds even if alarm status information can't be retrieved from Amazon CloudWatch. false: The deployment stops if alarm status information can't be retrieved from Amazon CloudWatch."];
+      alarms: AlarmList.t option
+        [@ocaml.doc
+          "A list of alarms configured for the deployment or deployment group. A maximum of 10 alarms can be added."]}
+    let make ?enabled =
+      fun ?ignorePollAlarmFailure ->
+        fun ?alarms -> fun () -> { enabled; ignorePollAlarmFailure; alarms }
+    let to_value x =
+      structure_to_value
+        [("enabled", (Option.map x.enabled ~f:Boolean.to_value));
+        ("ignorePollAlarmFailure",
+          (Option.map x.ignorePollAlarmFailure ~f:Boolean.to_value));
+        ("alarms", (Option.map x.alarms ~f:AlarmList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let alarms =
+        (Option.map ~f:AlarmList.of_xml) (Xml.child xml_arg0 "alarms") in
+      let ignorePollAlarmFailure =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "ignorePollAlarmFailure") in
+      let enabled =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "enabled") in
+      make ?alarms ?ignorePollAlarmFailure ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let alarms = field_map json__ "alarms" AlarmList.of_json in
+      let ignorePollAlarmFailure =
+        field_map json__ "ignorePollAlarmFailure" Boolean.of_json in
+      let enabled = field_map json__ "enabled" Boolean.of_json in
+      make ?alarms ?ignorePollAlarmFailure ?enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about alarms associated with a deployment or deployment group."]
 module ApplicationName =
   struct
     type nonrec t = string
@@ -2820,9 +3019,9 @@ module AutoRollbackConfiguration =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "enabled") in
       make ?events ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let events = field_map json "events" AutoRollbackEventsList.of_json in
-      let enabled = field_map json "enabled" Boolean.of_json in
+    let of_json json__ =
+      let events = field_map json__ "events" AutoRollbackEventsList.of_json in
+      let enabled = field_map json__ "enabled" Boolean.of_json in
       make ?events ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2875,14 +3074,15 @@ module BlueGreenDeploymentConfiguration =
       make ?greenFleetProvisioningOption ?deploymentReadyOption
         ?terminateBlueInstancesOnDeploymentSuccess ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let greenFleetProvisioningOption =
-        field_map json "greenFleetProvisioningOption"
+        field_map json__ "greenFleetProvisioningOption"
           GreenFleetProvisioningOption.of_json in
       let deploymentReadyOption =
-        field_map json "deploymentReadyOption" DeploymentReadyOption.of_json in
+        field_map json__ "deploymentReadyOption"
+          DeploymentReadyOption.of_json in
       let terminateBlueInstancesOnDeploymentSuccess =
-        field_map json "terminateBlueInstancesOnDeploymentSuccess"
+        field_map json__ "terminateBlueInstancesOnDeploymentSuccess"
           BlueInstanceTerminationOption.of_json in
       make ?greenFleetProvisioningOption ?deploymentReadyOption
         ?terminateBlueInstancesOnDeploymentSuccess ()
@@ -2945,6 +3145,7 @@ module DeploymentCreator =
       | CodeDeployAutoUpdate 
       | CloudFormation 
       | CloudFormationRollback 
+      | AutoscalingTermination 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2956,6 +3157,7 @@ module DeploymentCreator =
       | CodeDeployAutoUpdate -> "CodeDeployAutoUpdate"
       | CloudFormation -> "CloudFormation"
       | CloudFormationRollback -> "CloudFormationRollback"
+      | AutoscalingTermination -> "autoscalingTermination"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2966,6 +3168,7 @@ module DeploymentCreator =
       | "CodeDeployAutoUpdate" -> CodeDeployAutoUpdate
       | "CloudFormation" -> CloudFormation
       | "CloudFormationRollback" -> CloudFormationRollback
+      | "autoscalingTermination" -> AutoscalingTermination
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3031,13 +3234,13 @@ module DeploymentOverview =
         (Option.map ~f:InstanceCount.of_xml) (Xml.child xml_arg0 "Pending") in
       make ?ready ?skipped ?failed ?succeeded ?inProgress ?pending ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ready = field_map json "Ready" InstanceCount.of_json in
-      let skipped = field_map json "Skipped" InstanceCount.of_json in
-      let failed = field_map json "Failed" InstanceCount.of_json in
-      let succeeded = field_map json "Succeeded" InstanceCount.of_json in
-      let inProgress = field_map json "InProgress" InstanceCount.of_json in
-      let pending = field_map json "Pending" InstanceCount.of_json in
+    let of_json json__ =
+      let ready = field_map json__ "Ready" InstanceCount.of_json in
+      let skipped = field_map json__ "Skipped" InstanceCount.of_json in
+      let failed = field_map json__ "Failed" InstanceCount.of_json in
+      let succeeded = field_map json__ "Succeeded" InstanceCount.of_json in
+      let inProgress = field_map json__ "InProgress" InstanceCount.of_json in
+      let pending = field_map json__ "Pending" InstanceCount.of_json in
       make ?ready ?skipped ?failed ?succeeded ?inProgress ?pending ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3046,6 +3249,9 @@ module DeploymentStatusMessageList =
   struct
     type nonrec t = ErrorMessage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ErrorMessage.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3095,11 +3301,11 @@ module DeploymentStyle =
           (Xml.child xml_arg0 "deploymentType") in
       make ?deploymentOption ?deploymentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentOption =
-        field_map json "deploymentOption" DeploymentOption.of_json in
+        field_map json__ "deploymentOption" DeploymentOption.of_json in
       let deploymentType =
-        field_map json "deploymentType" DeploymentType.of_json in
+        field_map json__ "deploymentType" DeploymentType.of_json in
       make ?deploymentOption ?deploymentType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3110,7 +3316,7 @@ module ErrorInformation =
       {
       code: ErrorCode.t option
         [@ocaml.doc
-          "For more information, see Error Codes for AWS CodeDeploy in the AWS CodeDeploy User Guide. The error code: APPLICATION_MISSING: The application was missing. This error code is most likely raised if the application is deleted after the deployment is created, but before it is started. DEPLOYMENT_GROUP_MISSING: The deployment group was missing. This error code is most likely raised if the deployment group is deleted after the deployment is created, but before it is started. HEALTH_CONSTRAINTS: The deployment failed on too many instances to be successfully deployed within the instance health constraints specified. HEALTH_CONSTRAINTS_INVALID: The revision cannot be successfully deployed within the instance health constraints specified. IAM_ROLE_MISSING: The service role cannot be accessed. IAM_ROLE_PERMISSIONS: The service role does not have the correct permissions. INTERNAL_ERROR: There was an internal error. NO_EC2_SUBSCRIPTION: The calling account is not subscribed to Amazon EC2. NO_INSTANCES: No instances were specified, or no instances can be found. OVER_MAX_INSTANCES: The maximum number of instances was exceeded. THROTTLED: The operation was throttled because the calling account exceeded the throttling limits of one or more AWS services. TIMEOUT: The deployment has timed out. REVISION_MISSING: The revision ID was missing. This error code is most likely raised if the revision is deleted after the deployment is created, but before it is started."];
+          "For more information, see Error Codes for CodeDeploy in the CodeDeploy User Guide. The error code: APPLICATION_MISSING: The application was missing. This error code is most likely raised if the application is deleted after the deployment is created, but before it is started. DEPLOYMENT_GROUP_MISSING: The deployment group was missing. This error code is most likely raised if the deployment group is deleted after the deployment is created, but before it is started. HEALTH_CONSTRAINTS: The deployment failed on too many instances to be successfully deployed within the instance health constraints specified. HEALTH_CONSTRAINTS_INVALID: The revision cannot be successfully deployed within the instance health constraints specified. IAM_ROLE_MISSING: The service role cannot be accessed. IAM_ROLE_PERMISSIONS: The service role does not have the correct permissions. INTERNAL_ERROR: There was an internal error. NO_EC2_SUBSCRIPTION: The calling account is not subscribed to Amazon EC2. NO_INSTANCES: No instances were specified, or no instances can be found. OVER_MAX_INSTANCES: The maximum number of instances was exceeded. THROTTLED: The operation was throttled because the calling account exceeded the throttling limits of one or more Amazon Web Services services. TIMEOUT: The deployment has timed out. REVISION_MISSING: The revision ID was missing. This error code is most likely raised if the revision is deleted after the deployment is created, but before it is started."];
       message: ErrorMessage.t option
         [@ocaml.doc "An accompanying error message."]}
     let make ?code = fun ?message -> fun () -> { code; message }
@@ -3125,9 +3331,9 @@ module ErrorInformation =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      let code = field_map json "code" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      let code = field_map json__ "code" ErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a deployment error."]
@@ -3179,10 +3385,10 @@ module LoadBalancerInfo =
       {
       elbInfoList: ELBInfoList.t option
         [@ocaml.doc
-          "An array that contains information about the load balancer to use for load balancing in a deployment. In Elastic Load Balancing, load balancers are used with Classic Load Balancers. Adding more than one load balancer to the array is not supported."];
+          "An array that contains information about the load balancers to use for load balancing in a deployment. If you're using Classic Load Balancers, specify those load balancers in this array. You can add up to 10 load balancers to the array. If you're using Application Load Balancers or Network Load Balancers, use the targetGroupInfoList array instead of this one."];
       targetGroupInfoList: TargetGroupInfoList.t option
         [@ocaml.doc
-          "An array that contains information about the target group to use for load balancing in a deployment. In Elastic Load Balancing, target groups are used with Application Load Balancers. Adding more than one target group to the array is not supported."];
+          "An array that contains information about the target groups to use for load balancing in a deployment. If you're using Application Load Balancers and Network Load Balancers, specify their associated target groups in this array. You can add up to 10 target groups to the array. If you're using Classic Load Balancers, use the elbInfoList array instead of this one."];
       targetGroupPairInfoList: TargetGroupPairInfoList.t option
         [@ocaml.doc
           "The target group pair information. This is an array of TargeGroupPairInfo objects with a maximum size of one."]}
@@ -3211,17 +3417,17 @@ module LoadBalancerInfo =
         (Option.map ~f:ELBInfoList.of_xml) (Xml.child xml_arg0 "elbInfoList") in
       make ?targetGroupPairInfoList ?targetGroupInfoList ?elbInfoList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetGroupPairInfoList =
-        field_map json "targetGroupPairInfoList"
+        field_map json__ "targetGroupPairInfoList"
           TargetGroupPairInfoList.of_json in
       let targetGroupInfoList =
-        field_map json "targetGroupInfoList" TargetGroupInfoList.of_json in
-      let elbInfoList = field_map json "elbInfoList" ELBInfoList.of_json in
+        field_map json__ "targetGroupInfoList" TargetGroupInfoList.of_json in
+      let elbInfoList = field_map json__ "elbInfoList" ELBInfoList.of_json in
       make ?targetGroupPairInfoList ?targetGroupInfoList ?elbInfoList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about the Elastic Load Balancing load balancer or target group used in a deployment."]
+       "Information about the Elastic Load Balancing load balancer or target group used in a deployment. You can use load balancers and target groups in combination. For example, if you have two Classic Load Balancers, and five target groups tied to an Application Load Balancer, you can specify the two Classic Load Balancers in elbInfoList, and the five target groups in targetGroupInfoList."]
 module RelatedDeployments =
   struct
     type nonrec t =
@@ -3258,12 +3464,12 @@ module RelatedDeployments =
       make ?autoUpdateOutdatedInstancesDeploymentIds
         ?autoUpdateOutdatedInstancesRootDeploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoUpdateOutdatedInstancesDeploymentIds =
-        field_map json "autoUpdateOutdatedInstancesDeploymentIds"
+        field_map json__ "autoUpdateOutdatedInstancesDeploymentIds"
           DeploymentsList.of_json in
       let autoUpdateOutdatedInstancesRootDeploymentId =
-        field_map json "autoUpdateOutdatedInstancesRootDeploymentId"
+        field_map json__ "autoUpdateOutdatedInstancesRootDeploymentId"
           DeploymentId.of_json in
       make ?autoUpdateOutdatedInstancesDeploymentIds
         ?autoUpdateOutdatedInstancesRootDeploymentId ()
@@ -3276,7 +3482,7 @@ module RevisionLocation =
       {
       revisionType: RevisionLocationType.t option
         [@ocaml.doc
-          "The type of application revision: S3: An application revision stored in Amazon S3. GitHub: An application revision stored in GitHub (EC2/On-premises deployments only). String: A YAML-formatted or JSON-formatted string (AWS Lambda deployments only). AppSpecContent: An AppSpecContent object that contains the contents of an AppSpec file for an AWS Lambda or Amazon ECS deployment. The content is formatted as JSON or YAML stored as a RawString."];
+          "The type of application revision: S3: An application revision stored in Amazon S3. GitHub: An application revision stored in GitHub (EC2/On-premises deployments only). String: A YAML-formatted or JSON-formatted string (Lambda deployments only). AppSpecContent: An AppSpecContent object that contains the contents of an AppSpec file for an Lambda or Amazon ECS deployment. The content is formatted as JSON or YAML stored as a RawString."];
       s3Location: S3Location.t option
         [@ocaml.doc
           "Information about the location of a revision stored in Amazon S3."];
@@ -3285,10 +3491,10 @@ module RevisionLocation =
           "Information about the location of application artifacts stored in GitHub."];
       string: RawString.t option
         [@ocaml.doc
-          "Information about the location of an AWS Lambda deployment revision stored as a RawString."];
+          "Information about the location of an Lambda deployment revision stored as a RawString."];
       appSpecContent: AppSpecContent.t option
         [@ocaml.doc
-          "The content of an AppSpec file for an AWS Lambda or Amazon ECS deployment. The content is formatted as JSON or YAML and stored as a RawString."]}
+          "The content of an AppSpec file for an Lambda or Amazon ECS deployment. The content is formatted as JSON or YAML and stored as a RawString."]}
     let make ?revisionType =
       fun ?s3Location ->
         fun ?gitHubLocation ->
@@ -3330,15 +3536,15 @@ module RevisionLocation =
       make ?appSpecContent ?string ?gitHubLocation ?s3Location ?revisionType
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appSpecContent =
-        field_map json "appSpecContent" AppSpecContent.of_json in
-      let string = field_map json "string" RawString.of_json in
+        field_map json__ "appSpecContent" AppSpecContent.of_json in
+      let string = field_map json__ "string" RawString.of_json in
       let gitHubLocation =
-        field_map json "gitHubLocation" GitHubLocation.of_json in
-      let s3Location = field_map json "s3Location" S3Location.of_json in
+        field_map json__ "gitHubLocation" GitHubLocation.of_json in
+      let s3Location = field_map json__ "s3Location" S3Location.of_json in
       let revisionType =
-        field_map json "revisionType" RevisionLocationType.of_json in
+        field_map json__ "revisionType" RevisionLocationType.of_json in
       make ?appSpecContent ?string ?gitHubLocation ?s3Location ?revisionType
         ()
     let to_json v = composed_to_json to_value v
@@ -3388,13 +3594,14 @@ module RollbackInfo =
       make ?rollbackMessage ?rollbackTriggeringDeploymentId
         ?rollbackDeploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let rollbackMessage =
-        field_map json "rollbackMessage" Description.of_json in
+        field_map json__ "rollbackMessage" Description.of_json in
       let rollbackTriggeringDeploymentId =
-        field_map json "rollbackTriggeringDeploymentId" DeploymentId.of_json in
+        field_map json__ "rollbackTriggeringDeploymentId"
+          DeploymentId.of_json in
       let rollbackDeploymentId =
-        field_map json "rollbackDeploymentId" DeploymentId.of_json in
+        field_map json__ "rollbackDeploymentId" DeploymentId.of_json in
       make ?rollbackMessage ?rollbackTriggeringDeploymentId
         ?rollbackDeploymentId ()
     let to_json v = composed_to_json to_value v
@@ -3411,7 +3618,7 @@ module TargetInstances =
           "The names of one or more Auto Scaling groups to identify a replacement environment for a blue/green deployment."];
       ec2TagSet: EC2TagSet.t option
         [@ocaml.doc
-          "Information about the groups of EC2 instance tags that an instance must be identified by in order for it to be included in the replacement environment for a blue/green deployment. Cannot be used in the same call as tagFilters."]}
+          "Information about the groups of Amazon EC2 instance tags that an instance must be identified by in order for it to be included in the replacement environment for a blue/green deployment. Cannot be used in the same call as tagFilters."]}
     let make ?tagFilters =
       fun ?autoScalingGroups ->
         fun ?ec2TagSet ->
@@ -3436,11 +3643,11 @@ module TargetInstances =
           (Xml.child xml_arg0 "tagFilters") in
       make ?ec2TagSet ?autoScalingGroups ?tagFilters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ec2TagSet = field_map json "ec2TagSet" EC2TagSet.of_json in
+    let of_json json__ =
+      let ec2TagSet = field_map json__ "ec2TagSet" EC2TagSet.of_json in
       let autoScalingGroups =
-        field_map json "autoScalingGroups" AutoScalingGroupNameList.of_json in
-      let tagFilters = field_map json "tagFilters" EC2TagFilterList.of_json in
+        field_map json__ "autoScalingGroups" AutoScalingGroupNameList.of_json in
+      let tagFilters = field_map json__ "tagFilters" EC2TagFilterList.of_json in
       make ?ec2TagSet ?autoScalingGroups ?tagFilters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3451,25 +3658,25 @@ module CloudFormationTarget =
       {
       deploymentId: DeploymentId.t option
         [@ocaml.doc
-          "The unique ID of an AWS CloudFormation blue/green deployment."];
+          "The unique ID of an CloudFormation blue/green deployment."];
       targetId: TargetId.t option
         [@ocaml.doc
           "The unique ID of a deployment target that has a type of\194\160CloudFormationTarget."];
       lastUpdatedAt: Time.t option
         [@ocaml.doc
-          "The date and time when the target application was updated by an AWS CloudFormation blue/green deployment."];
+          "The date and time when the target application was updated by an CloudFormation blue/green deployment."];
       lifecycleEvents: LifecycleEventList.t option
         [@ocaml.doc
-          "The lifecycle events of the AWS CloudFormation blue/green deployment to this target application."];
+          "The lifecycle events of the CloudFormation blue/green deployment to this target application."];
       status: TargetStatus.t option
         [@ocaml.doc
-          "The status of an AWS CloudFormation blue/green deployment's target application."];
+          "The status of an CloudFormation blue/green deployment's target application."];
       resourceType: CloudFormationResourceType.t option
         [@ocaml.doc
-          "The resource type for the AWS CloudFormation blue/green deployment."];
+          "The resource type for the CloudFormation blue/green deployment."];
       targetVersionWeight: TrafficWeight.t option
         [@ocaml.doc
-          "The percentage of production traffic that the target version of an AWS CloudFormation blue/green deployment receives."]}
+          "The percentage of production traffic that the target version of an CloudFormation blue/green deployment receives."]}
     let make ?deploymentId =
       fun ?targetId ->
         fun ?lastUpdatedAt ->
@@ -3523,22 +3730,22 @@ module CloudFormationTarget =
       make ?targetVersionWeight ?resourceType ?status ?lifecycleEvents
         ?lastUpdatedAt ?targetId ?deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetVersionWeight =
-        field_map json "targetVersionWeight" TrafficWeight.of_json in
+        field_map json__ "targetVersionWeight" TrafficWeight.of_json in
       let resourceType =
-        field_map json "resourceType" CloudFormationResourceType.of_json in
-      let status = field_map json "status" TargetStatus.of_json in
+        field_map json__ "resourceType" CloudFormationResourceType.of_json in
+      let status = field_map json__ "status" TargetStatus.of_json in
       let lifecycleEvents =
-        field_map json "lifecycleEvents" LifecycleEventList.of_json in
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Time.of_json in
-      let targetId = field_map json "targetId" TargetId.of_json in
-      let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
+        field_map json__ "lifecycleEvents" LifecycleEventList.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Time.of_json in
+      let targetId = field_map json__ "targetId" TargetId.of_json in
+      let deploymentId = field_map json__ "deploymentId" DeploymentId.of_json in
       make ?targetVersionWeight ?resourceType ?status ?lifecycleEvents
         ?lastUpdatedAt ?targetId ?deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about the target to be updated by an AWS CloudFormation blue/green deployment. This target type is used for all deployments initiated by a CloudFormation stack update."]
+       "Information about the target to be updated by an CloudFormation blue/green deployment. This target type is used for all deployments initiated by a CloudFormation stack update."]
 module DeploymentTargetType =
   struct
     type nonrec t =
@@ -3644,15 +3851,16 @@ module ECSTarget =
       make ?taskSetsInfo ?status ?lifecycleEvents ?lastUpdatedAt ?targetArn
         ?targetId ?deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskSetsInfo = field_map json "taskSetsInfo" ECSTaskSetList.of_json in
-      let status = field_map json "status" TargetStatus.of_json in
+    let of_json json__ =
+      let taskSetsInfo =
+        field_map json__ "taskSetsInfo" ECSTaskSetList.of_json in
+      let status = field_map json__ "status" TargetStatus.of_json in
       let lifecycleEvents =
-        field_map json "lifecycleEvents" LifecycleEventList.of_json in
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Time.of_json in
-      let targetArn = field_map json "targetArn" TargetArn.of_json in
-      let targetId = field_map json "targetId" TargetId.of_json in
-      let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
+        field_map json__ "lifecycleEvents" LifecycleEventList.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Time.of_json in
+      let targetArn = field_map json__ "targetArn" TargetArn.of_json in
+      let targetId = field_map json__ "targetId" TargetId.of_json in
+      let deploymentId = field_map json__ "deploymentId" DeploymentId.of_json in
       make ?taskSetsInfo ?status ?lifecycleEvents ?lastUpdatedAt ?targetArn
         ?targetId ?deploymentId ()
     let to_json v = composed_to_json to_value v
@@ -3732,15 +3940,16 @@ module InstanceTarget =
       make ?instanceLabel ?lifecycleEvents ?lastUpdatedAt ?status ?targetArn
         ?targetId ?deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceLabel = field_map json "instanceLabel" TargetLabel.of_json in
+    let of_json json__ =
+      let instanceLabel =
+        field_map json__ "instanceLabel" TargetLabel.of_json in
       let lifecycleEvents =
-        field_map json "lifecycleEvents" LifecycleEventList.of_json in
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Time.of_json in
-      let status = field_map json "status" TargetStatus.of_json in
-      let targetArn = field_map json "targetArn" TargetArn.of_json in
-      let targetId = field_map json "targetId" TargetId.of_json in
-      let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
+        field_map json__ "lifecycleEvents" LifecycleEventList.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Time.of_json in
+      let status = field_map json__ "status" TargetStatus.of_json in
+      let targetArn = field_map json__ "targetArn" TargetArn.of_json in
+      let targetId = field_map json__ "targetId" TargetId.of_json in
+      let deploymentId = field_map json__ "deploymentId" DeploymentId.of_json in
       make ?instanceLabel ?lifecycleEvents ?lastUpdatedAt ?status ?targetArn
         ?targetId ?deploymentId ()
     let to_json v = composed_to_json to_value v
@@ -3759,7 +3968,7 @@ module LambdaTarget =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the target."];
       status: TargetStatus.t option
         [@ocaml.doc
-          "The status an AWS Lambda deployment's target Lambda function."];
+          "The status an Lambda deployment's target Lambda function."];
       lastUpdatedAt: Time.t option
         [@ocaml.doc
           "The date and time when the target Lambda function was updated by a deployment."];
@@ -3820,21 +4029,21 @@ module LambdaTarget =
       make ?lambdaFunctionInfo ?lifecycleEvents ?lastUpdatedAt ?status
         ?targetArn ?targetId ?deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lambdaFunctionInfo =
-        field_map json "lambdaFunctionInfo" LambdaFunctionInfo.of_json in
+        field_map json__ "lambdaFunctionInfo" LambdaFunctionInfo.of_json in
       let lifecycleEvents =
-        field_map json "lifecycleEvents" LifecycleEventList.of_json in
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Time.of_json in
-      let status = field_map json "status" TargetStatus.of_json in
-      let targetArn = field_map json "targetArn" TargetArn.of_json in
-      let targetId = field_map json "targetId" TargetId.of_json in
-      let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
+        field_map json__ "lifecycleEvents" LifecycleEventList.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Time.of_json in
+      let status = field_map json__ "status" TargetStatus.of_json in
+      let targetArn = field_map json__ "targetArn" TargetArn.of_json in
+      let targetId = field_map json__ "targetId" TargetId.of_json in
+      let deploymentId = field_map json__ "deploymentId" DeploymentId.of_json in
       make ?lambdaFunctionInfo ?lifecycleEvents ?lastUpdatedAt ?status
         ?targetArn ?targetId ?deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about the target AWS Lambda function during an AWS Lambda deployment."]
+       "Information about the target Lambda function during an Lambda deployment."]
 module InstanceId =
   struct
     type nonrec t = string
@@ -3907,51 +4116,13 @@ module InstanceType =
     let of_json j = of_string (string_of_json ~kind:"InstanceType" j)
     let to_json = simple_to_json to_value
   end
-module AlarmConfiguration =
-  struct
-    type nonrec t =
-      {
-      enabled: Boolean.t option
-        [@ocaml.doc "Indicates whether the alarm configuration is enabled."];
-      ignorePollAlarmFailure: Boolean.t option
-        [@ocaml.doc
-          "Indicates whether a deployment should continue if information about the current state of alarms cannot be retrieved from Amazon CloudWatch. The default value is false. true: The deployment proceeds even if alarm status information can't be retrieved from Amazon CloudWatch. false: The deployment stops if alarm status information can't be retrieved from Amazon CloudWatch."];
-      alarms: AlarmList.t option
-        [@ocaml.doc
-          "A list of alarms configured for the deployment group. A maximum of 10 alarms can be added to a deployment group."]}
-    let make ?enabled =
-      fun ?ignorePollAlarmFailure ->
-        fun ?alarms -> fun () -> { enabled; ignorePollAlarmFailure; alarms }
-    let to_value x =
-      structure_to_value
-        [("enabled", (Option.map x.enabled ~f:Boolean.to_value));
-        ("ignorePollAlarmFailure",
-          (Option.map x.ignorePollAlarmFailure ~f:Boolean.to_value));
-        ("alarms", (Option.map x.alarms ~f:AlarmList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let alarms =
-        (Option.map ~f:AlarmList.of_xml) (Xml.child xml_arg0 "alarms") in
-      let ignorePollAlarmFailure =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "ignorePollAlarmFailure") in
-      let enabled =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "enabled") in
-      make ?alarms ?ignorePollAlarmFailure ?enabled ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let alarms = field_map json "alarms" AlarmList.of_json in
-      let ignorePollAlarmFailure =
-        field_map json "ignorePollAlarmFailure" Boolean.of_json in
-      let enabled = field_map json "enabled" Boolean.of_json in
-      make ?alarms ?ignorePollAlarmFailure ?enabled ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Information about alarms associated with the deployment group."]
 module AutoScalingGroupList =
   struct
     type nonrec t = AutoScalingGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AutoScalingGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3990,6 +4161,9 @@ module ECSServiceList =
   struct
     type nonrec t = ECSService.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ECSService.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4049,11 +4223,11 @@ module LastDeploymentInfo =
           (Xml.child xml_arg0 "deploymentId") in
       make ?createTime ?endTime ?status ?deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createTime = field_map json "createTime" Timestamp.of_json in
-      let endTime = field_map json "endTime" Timestamp.of_json in
-      let status = field_map json "status" DeploymentStatus.of_json in
-      let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
+    let of_json json__ =
+      let createTime = field_map json__ "createTime" Timestamp.of_json in
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let status = field_map json__ "status" DeploymentStatus.of_json in
+      let deploymentId = field_map json__ "deploymentId" DeploymentId.of_json in
       make ?createTime ?endTime ?status ?deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4078,9 +4252,9 @@ module OnPremisesTagSet =
           (Xml.child xml_arg0 "onPremisesTagSetList") in
       make ?onPremisesTagSetList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let onPremisesTagSetList =
-        field_map json "onPremisesTagSetList" OnPremisesTagSetList.of_json in
+        field_map json__ "onPremisesTagSetList" OnPremisesTagSetList.of_json in
       make ?onPremisesTagSetList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about groups of on-premises instance tags."]
@@ -4128,6 +4302,9 @@ module TriggerConfigList =
   struct
     type nonrec t = TriggerConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TriggerConfig.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4184,11 +4361,11 @@ module GenericRevisionInfo =
         [@ocaml.doc
           "The deployment groups for which this is the current target revision."];
       firstUsedTime: Timestamp.t option
-        [@ocaml.doc "When the revision was first used by AWS CodeDeploy."];
+        [@ocaml.doc "When the revision was first used by CodeDeploy."];
       lastUsedTime: Timestamp.t option
-        [@ocaml.doc "When the revision was last used by AWS CodeDeploy."];
+        [@ocaml.doc "When the revision was last used by CodeDeploy."];
       registerTime: Timestamp.t option
-        [@ocaml.doc "When the revision was registered with AWS CodeDeploy."]}
+        [@ocaml.doc "When the revision was registered with CodeDeploy."]}
     let make ?description =
       fun ?deploymentGroups ->
         fun ?firstUsedTime ->
@@ -4226,13 +4403,13 @@ module GenericRevisionInfo =
       make ?registerTime ?lastUsedTime ?firstUsedTime ?deploymentGroups
         ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let registerTime = field_map json "registerTime" Timestamp.of_json in
-      let lastUsedTime = field_map json "lastUsedTime" Timestamp.of_json in
-      let firstUsedTime = field_map json "firstUsedTime" Timestamp.of_json in
+    let of_json json__ =
+      let registerTime = field_map json__ "registerTime" Timestamp.of_json in
+      let lastUsedTime = field_map json__ "lastUsedTime" Timestamp.of_json in
+      let firstUsedTime = field_map json__ "firstUsedTime" Timestamp.of_json in
       let deploymentGroups =
-        field_map json "deploymentGroups" DeploymentGroupsList.of_json in
-      let description = field_map json "description" Description.of_json in
+        field_map json__ "deploymentGroups" DeploymentGroupsList.of_json in
+      let description = field_map json__ "description" Description.of_json in
       make ?registerTime ?lastUsedTime ?firstUsedTime ?deploymentGroups
         ?description ()
     let to_json v = composed_to_json to_value v
@@ -4241,6 +4418,9 @@ module FilterValueList =
   struct
     type nonrec t = FilterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FilterValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4305,7 +4485,7 @@ module MinimumHealthyHosts =
       {
       type_: MinimumHealthyHostsType.t option
         [@ocaml.doc
-          "The minimum healthy instance type: HOST_COUNT: The minimum number of healthy instances as an absolute value. FLEET_PERCENT: The minimum number of healthy instances as a percentage of the total number of instances in the deployment. In an example of nine instances, if a HOST_COUNT of six is specified, deploy to up to three instances at a time. The deployment is successful if six or more instances are deployed to successfully. Otherwise, the deployment fails. If a FLEET_PERCENT of 40 is specified, deploy to up to five instances at a time. The deployment is successful if four or more instances are deployed to successfully. Otherwise, the deployment fails. In a call to the GetDeploymentConfig, CodeDeployDefault.OneAtATime returns a minimum healthy instance type of MOST_CONCURRENCY and a value of 1. This means a deployment to only one instance at a time. (You cannot set the type to MOST_CONCURRENCY, only to HOST_COUNT or FLEET_PERCENT.) In addition, with CodeDeployDefault.OneAtATime, AWS CodeDeploy attempts to ensure that all instances but one are kept in a healthy state during the deployment. Although this allows one instance at a time to be taken offline for a new deployment, it also means that if the deployment to the last instance fails, the overall deployment is still successful. For more information, see AWS CodeDeploy Instance Health in the AWS CodeDeploy User Guide."];
+          "The minimum healthy instance type: HOST_COUNT: The minimum number of healthy instances as an absolute value. FLEET_PERCENT: The minimum number of healthy instances as a percentage of the total number of instances in the deployment. In an example of nine instances, if a HOST_COUNT of six is specified, deploy to up to three instances at a time. The deployment is successful if six or more instances are deployed to successfully. Otherwise, the deployment fails. If a FLEET_PERCENT of 40 is specified, deploy to up to five instances at a time. The deployment is successful if four or more instances are deployed to successfully. Otherwise, the deployment fails. In a call to the GetDeploymentConfig, CodeDeployDefault.OneAtATime returns a minimum healthy instance type of MOST_CONCURRENCY and a value of 1. This means a deployment to only one instance at a time. (You cannot set the type to MOST_CONCURRENCY, only to HOST_COUNT or FLEET_PERCENT.) In addition, with CodeDeployDefault.OneAtATime, CodeDeploy attempts to ensure that all instances but one are kept in a healthy state during the deployment. Although this allows one instance at a time to be taken offline for a new deployment, it also means that if the deployment to the last instance fails, the overall deployment is still successful. For more information, see CodeDeploy Instance Health in the CodeDeploy User Guide."];
       value: MinimumHealthyHostsValue.t option
         [@ocaml.doc "The minimum healthy instance value."]}
     let make ?type_ = fun ?value -> fun () -> { type_; value }
@@ -4323,12 +4503,13 @@ module MinimumHealthyHosts =
           (Xml.child xml_arg0 "type") in
       make ?value ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" MinimumHealthyHostsValue.of_json in
-      let type_ = field_map json "type" MinimumHealthyHostsType.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" MinimumHealthyHostsValue.of_json in
+      let type_ = field_map json__ "type" MinimumHealthyHostsType.of_json in
       make ?value ?type_ ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about minimum healthy instance."]
+  end[@@ocaml.doc
+       "Information about the minimum number of healthy instances."]
 module TrafficRoutingConfig =
   struct
     type nonrec t =
@@ -4341,7 +4522,7 @@ module TrafficRoutingConfig =
           "A configuration that shifts traffic from one version of a Lambda function or ECS task set to another in two increments. The original and target Lambda function versions or ECS task sets are specified in the deployment's AppSpec file."];
       timeBasedLinear: TimeBasedLinear.t option
         [@ocaml.doc
-          "A configuration that shifts traffic from one version of a Lambda function or ECS task set to another in equal increments, with an equal number of minutes between each increment. The original and target Lambda function versions or ECS task sets are specified in the deployment's AppSpec file."]}
+          "A configuration that shifts traffic from one version of a Lambda function or Amazon ECS task set to another in equal increments, with an equal number of minutes between each increment. The original and target Lambda function versions or Amazon ECS task sets are specified in the deployment's AppSpec file."]}
     let make ?type_ =
       fun ?timeBasedCanary ->
         fun ?timeBasedLinear ->
@@ -4365,16 +4546,77 @@ module TrafficRoutingConfig =
         (Option.map ~f:TrafficRoutingType.of_xml) (Xml.child xml_arg0 "type") in
       make ?timeBasedLinear ?timeBasedCanary ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timeBasedLinear =
-        field_map json "timeBasedLinear" TimeBasedLinear.of_json in
+        field_map json__ "timeBasedLinear" TimeBasedLinear.of_json in
       let timeBasedCanary =
-        field_map json "timeBasedCanary" TimeBasedCanary.of_json in
-      let type_ = field_map json "type" TrafficRoutingType.of_json in
+        field_map json__ "timeBasedCanary" TimeBasedCanary.of_json in
+      let type_ = field_map json__ "type" TrafficRoutingType.of_json in
       make ?timeBasedLinear ?timeBasedCanary ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration that specifies how traffic is shifted from one version of a Lambda function to another version during an AWS Lambda deployment, or from one Amazon ECS task set to another during an Amazon ECS deployment."]
+       "The configuration that specifies how traffic is shifted from one version of a Lambda function to another version during an Lambda deployment, or from one Amazon ECS task set to another during an Amazon ECS deployment."]
+module ZonalConfig =
+  struct
+    type nonrec t =
+      {
+      firstZoneMonitorDurationInSeconds: WaitTimeInSeconds.t option
+        [@ocaml.doc
+          "The period of time, in seconds, that CodeDeploy must wait after completing a deployment to the first Availability Zone. CodeDeploy will wait this amount of time before starting a deployment to the second Availability Zone. You might set this option if you want to allow extra bake time for the first Availability Zone. If you don't specify a value for firstZoneMonitorDurationInSeconds, then CodeDeploy uses the monitorDurationInSeconds value for the first Availability Zone. For more information about the zonal configuration feature, see zonal configuration in the CodeDeploy User Guide."];
+      monitorDurationInSeconds: WaitTimeInSeconds.t option
+        [@ocaml.doc
+          "The period of time, in seconds, that CodeDeploy must wait after completing a deployment to an Availability Zone. CodeDeploy will wait this amount of time before starting a deployment to the next Availability Zone. Consider adding a monitor duration to give the deployment some time to prove itself (or 'bake') in one Availability Zone before it is released in the next zone. If you don't specify a monitorDurationInSeconds, CodeDeploy starts deploying to the next Availability Zone immediately. For more information about the zonal configuration feature, see zonal configuration in the CodeDeploy User Guide."];
+      minimumHealthyHostsPerZone: MinimumHealthyHostsPerZone.t option
+        [@ocaml.doc
+          "The number or percentage of instances that must remain available per Availability Zone during a deployment. This option works in conjunction with the MinimumHealthyHosts option. For more information, see About the minimum number of healthy hosts per Availability Zone in the CodeDeploy User Guide. If you don't specify the minimumHealthyHostsPerZone option, then CodeDeploy uses a default value of 0 percent. For more information about the zonal configuration feature, see zonal configuration in the CodeDeploy User Guide."]}
+    let make ?firstZoneMonitorDurationInSeconds =
+      fun ?monitorDurationInSeconds ->
+        fun ?minimumHealthyHostsPerZone ->
+          fun () ->
+            {
+              firstZoneMonitorDurationInSeconds;
+              monitorDurationInSeconds;
+              minimumHealthyHostsPerZone
+            }
+    let to_value x =
+      structure_to_value
+        [("firstZoneMonitorDurationInSeconds",
+           (Option.map x.firstZoneMonitorDurationInSeconds
+              ~f:WaitTimeInSeconds.to_value));
+        ("monitorDurationInSeconds",
+          (Option.map x.monitorDurationInSeconds
+             ~f:WaitTimeInSeconds.to_value));
+        ("minimumHealthyHostsPerZone",
+          (Option.map x.minimumHealthyHostsPerZone
+             ~f:MinimumHealthyHostsPerZone.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let minimumHealthyHostsPerZone =
+        (Option.map ~f:MinimumHealthyHostsPerZone.of_xml)
+          (Xml.child xml_arg0 "minimumHealthyHostsPerZone") in
+      let monitorDurationInSeconds =
+        (Option.map ~f:WaitTimeInSeconds.of_xml)
+          (Xml.child xml_arg0 "monitorDurationInSeconds") in
+      let firstZoneMonitorDurationInSeconds =
+        (Option.map ~f:WaitTimeInSeconds.of_xml)
+          (Xml.child xml_arg0 "firstZoneMonitorDurationInSeconds") in
+      make ?minimumHealthyHostsPerZone ?monitorDurationInSeconds
+        ?firstZoneMonitorDurationInSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let minimumHealthyHostsPerZone =
+        field_map json__ "minimumHealthyHostsPerZone"
+          MinimumHealthyHostsPerZone.of_json in
+      let monitorDurationInSeconds =
+        field_map json__ "monitorDurationInSeconds" WaitTimeInSeconds.of_json in
+      let firstZoneMonitorDurationInSeconds =
+        field_map json__ "firstZoneMonitorDurationInSeconds"
+          WaitTimeInSeconds.of_json in
+      make ?minimumHealthyHostsPerZone ?monitorDurationInSeconds
+        ?firstZoneMonitorDurationInSeconds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configure the ZonalConfig object if you want CodeDeploy to deploy your application to one Availability Zone at a time, within an Amazon Web Services Region. By deploying to one Availability Zone at a time, you can expose your deployment to a progressively larger audience as confidence in the deployment's performance and viability grows. If you don't configure the ZonalConfig object, CodeDeploy deploys your application to a random selection of hosts across a Region. For more information about the zonal configuration feature, see zonal configuration in the CodeDeploy User Guide."]
 module InstanceInfo =
   struct
     type nonrec t =
@@ -4385,8 +4627,7 @@ module InstanceInfo =
         [@ocaml.doc
           "The ARN of the IAM session associated with the on-premises instance."];
       iamUserArn: IamUserArn.t option
-        [@ocaml.doc
-          "The IAM user ARN associated with the on-premises instance."];
+        [@ocaml.doc "The user ARN associated with the on-premises instance."];
       instanceArn: InstanceArn.t option
         [@ocaml.doc "The ARN of the on-premises instance."];
       registerTime: Timestamp.t option
@@ -4448,15 +4689,16 @@ module InstanceInfo =
       make ?tags ?deregisterTime ?registerTime ?instanceArn ?iamUserArn
         ?iamSessionArn ?instanceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let deregisterTime = field_map json "deregisterTime" Timestamp.of_json in
-      let registerTime = field_map json "registerTime" Timestamp.of_json in
-      let instanceArn = field_map json "instanceArn" InstanceArn.of_json in
-      let iamUserArn = field_map json "iamUserArn" IamUserArn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let deregisterTime =
+        field_map json__ "deregisterTime" Timestamp.of_json in
+      let registerTime = field_map json__ "registerTime" Timestamp.of_json in
+      let instanceArn = field_map json__ "instanceArn" InstanceArn.of_json in
+      let iamUserArn = field_map json__ "iamUserArn" IamUserArn.of_json in
       let iamSessionArn =
-        field_map json "iamSessionArn" IamSessionArn.of_json in
-      let instanceName = field_map json "instanceName" InstanceName.of_json in
+        field_map json__ "iamSessionArn" IamSessionArn.of_json in
+      let instanceName = field_map json__ "instanceName" InstanceName.of_json in
       make ?tags ?deregisterTime ?registerTime ?instanceArn ?iamUserArn
         ?iamSessionArn ?instanceName ()
     let to_json v = composed_to_json to_value v
@@ -4500,10 +4742,10 @@ module DeploymentInfo =
         [@ocaml.doc "A comment about the deployment."];
       creator: DeploymentCreator.t option
         [@ocaml.doc
-          "The means by which the deployment was created: user: A user created the deployment. autoscaling: Amazon EC2 Auto Scaling created the deployment. codeDeployRollback: A rollback process created the deployment. CodeDeployAutoUpdate: An auto-update process created the deployment when it detected outdated EC2 instances."];
+          "The means by which the deployment was created: user: A user created the deployment. autoscaling: Amazon EC2 Auto Scaling created the deployment. codeDeployRollback: A rollback process created the deployment. CodeDeployAutoUpdate: An auto-update process created the deployment when it detected outdated Amazon EC2 instances."];
       ignoreApplicationStopFailures: Boolean.t option
         [@ocaml.doc
-          "If true, then if an ApplicationStop, BeforeBlockTraffic, or AfterBlockTraffic deployment lifecycle event to an instance fails, then the deployment continues to the next deployment lifecycle event. For example, if ApplicationStop fails, the deployment continues with DownloadBundle. If BeforeBlockTraffic fails, the deployment continues with BlockTraffic. If AfterBlockTraffic fails, the deployment continues with ApplicationStop. If false or not specified, then if a lifecycle event fails during a deployment to an instance, that deployment fails. If deployment to that instance is part of an overall deployment and the number of healthy hosts is not less than the minimum number of healthy hosts, then a deployment to the next instance is attempted. During a deployment, the AWS CodeDeploy agent runs the scripts specified for ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic in the AppSpec file from the previous successful deployment. (All other scripts are run from the AppSpec file in the current deployment.) If one of these scripts contains an error and does not run successfully, the deployment can fail. If the cause of the failure is a script from the last successful deployment that will never run successfully, create a new deployment and use ignoreApplicationStopFailures to specify that the ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic failures should be ignored."];
+          "If true, then if an ApplicationStop, BeforeBlockTraffic, or AfterBlockTraffic deployment lifecycle event to an instance fails, then the deployment continues to the next deployment lifecycle event. For example, if ApplicationStop fails, the deployment continues with DownloadBundle. If BeforeBlockTraffic fails, the deployment continues with BlockTraffic. If AfterBlockTraffic fails, the deployment continues with ApplicationStop. If false or not specified, then if a lifecycle event fails during a deployment to an instance, that deployment fails. If deployment to that instance is part of an overall deployment and the number of healthy hosts is not less than the minimum number of healthy hosts, then a deployment to the next instance is attempted. During a deployment, the CodeDeploy agent runs the scripts specified for ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic in the AppSpec file from the previous successful deployment. (All other scripts are run from the AppSpec file in the current deployment.) If one of these scripts contains an error and does not run successfully, the deployment can fail. If the cause of the failure is a script from the last successful deployment that will never run successfully, create a new deployment and use ignoreApplicationStopFailures to specify that the ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic failures should be ignored."];
       autoRollbackConfiguration: AutoRollbackConfiguration.t option
         [@ocaml.doc
           "Information about the automatic rollback configuration associated with the deployment."];
@@ -4533,7 +4775,7 @@ module DeploymentInfo =
           "Provides information about the results of a deployment, such as whether instances in the original environment in a blue/green deployment were not terminated."];
       fileExistsBehavior: FileExistsBehavior.t option
         [@ocaml.doc
-          "Information about how AWS CodeDeploy handles files that already exist in a deployment target location but weren't part of the previous successful deployment. DISALLOW: The deployment fails. This is also the default behavior if no option is specified. OVERWRITE: The version of the file from the application revision currently being deployed replaces the version already on the instance. RETAIN: The version of the file already on the instance is kept and used as part of the new deployment."];
+          "Information about how CodeDeploy handles files that already exist in a deployment target location but weren't part of the previous successful deployment. DISALLOW: The deployment fails. This is also the default behavior if no option is specified. OVERWRITE: The version of the file from the application revision currently being deployed replaces the version already on the instance. RETAIN: The version of the file already on the instance is kept and used as part of the new deployment."];
       deploymentStatusMessages: DeploymentStatusMessageList.t option
         [@ocaml.doc
           "Messages that contain information about the status of a deployment."];
@@ -4543,7 +4785,8 @@ module DeploymentInfo =
       externalId: ExternalId.t option
         [@ocaml.doc
           "The unique ID for an external resource (for example, a CloudFormation stack ID) that is linked to this deployment."];
-      relatedDeployments: RelatedDeployments.t option }
+      relatedDeployments: RelatedDeployments.t option ;
+      overrideAlarmConfiguration: AlarmConfiguration.t option }
     let make ?applicationName =
       fun ?deploymentGroupName ->
         fun ?deploymentConfigName ->
@@ -4585,38 +4828,42 @@ module DeploymentInfo =
                                                             fun
                                                               ?relatedDeployments
                                                               ->
-                                                              fun () ->
-                                                                {
-                                                                  applicationName;
-                                                                  deploymentGroupName;
-                                                                  deploymentConfigName;
-                                                                  deploymentId;
-                                                                  previousRevision;
-                                                                  revision;
-                                                                  status;
-                                                                  errorInformation;
-                                                                  createTime;
-                                                                  startTime;
-                                                                  completeTime;
-                                                                  deploymentOverview;
-                                                                  description;
-                                                                  creator;
-                                                                  ignoreApplicationStopFailures;
-                                                                  autoRollbackConfiguration;
-                                                                  updateOutdatedInstancesOnly;
-                                                                  rollbackInfo;
-                                                                  deploymentStyle;
-                                                                  targetInstances;
-                                                                  instanceTerminationWaitTimeStarted;
-                                                                  blueGreenDeploymentConfiguration;
-                                                                  loadBalancerInfo;
-                                                                  additionalDeploymentStatusInfo;
-                                                                  fileExistsBehavior;
-                                                                  deploymentStatusMessages;
-                                                                  computePlatform;
-                                                                  externalId;
-                                                                  relatedDeployments
-                                                                }
+                                                              fun
+                                                                ?overrideAlarmConfiguration
+                                                                ->
+                                                                fun () ->
+                                                                  {
+                                                                    applicationName;
+                                                                    deploymentGroupName;
+                                                                    deploymentConfigName;
+                                                                    deploymentId;
+                                                                    previousRevision;
+                                                                    revision;
+                                                                    status;
+                                                                    errorInformation;
+                                                                    createTime;
+                                                                    startTime;
+                                                                    completeTime;
+                                                                    deploymentOverview;
+                                                                    description;
+                                                                    creator;
+                                                                    ignoreApplicationStopFailures;
+                                                                    autoRollbackConfiguration;
+                                                                    updateOutdatedInstancesOnly;
+                                                                    rollbackInfo;
+                                                                    deploymentStyle;
+                                                                    targetInstances;
+                                                                    instanceTerminationWaitTimeStarted;
+                                                                    blueGreenDeploymentConfiguration;
+                                                                    loadBalancerInfo;
+                                                                    additionalDeploymentStatusInfo;
+                                                                    fileExistsBehavior;
+                                                                    deploymentStatusMessages;
+                                                                    computePlatform;
+                                                                    externalId;
+                                                                    relatedDeployments;
+                                                                    overrideAlarmConfiguration
+                                                                  }
     let to_value x =
       structure_to_value
         [("applicationName",
@@ -4673,9 +4920,15 @@ module DeploymentInfo =
           (Option.map x.computePlatform ~f:ComputePlatform.to_value));
         ("externalId", (Option.map x.externalId ~f:ExternalId.to_value));
         ("relatedDeployments",
-          (Option.map x.relatedDeployments ~f:RelatedDeployments.to_value))]
+          (Option.map x.relatedDeployments ~f:RelatedDeployments.to_value));
+        ("overrideAlarmConfiguration",
+          (Option.map x.overrideAlarmConfiguration
+             ~f:AlarmConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let overrideAlarmConfiguration =
+        (Option.map ~f:AlarmConfiguration.of_xml)
+          (Xml.child xml_arg0 "overrideAlarmConfiguration") in
       let relatedDeployments =
         (Option.map ~f:RelatedDeployments.of_xml)
           (Xml.child xml_arg0 "relatedDeployments") in
@@ -4757,8 +5010,8 @@ module DeploymentInfo =
       let applicationName =
         (Option.map ~f:ApplicationName.of_xml)
           (Xml.child xml_arg0 "applicationName") in
-      make ?relatedDeployments ?externalId ?computePlatform
-        ?deploymentStatusMessages ?fileExistsBehavior
+      make ?overrideAlarmConfiguration ?relatedDeployments ?externalId
+        ?computePlatform ?deploymentStatusMessages ?fileExistsBehavior
         ?additionalDeploymentStatusInfo ?loadBalancerInfo
         ?blueGreenDeploymentConfiguration ?instanceTerminationWaitTimeStarted
         ?targetInstances ?deploymentStyle ?rollbackInfo
@@ -4768,61 +5021,64 @@ module DeploymentInfo =
         ?errorInformation ?status ?revision ?previousRevision ?deploymentId
         ?deploymentConfigName ?deploymentGroupName ?applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let overrideAlarmConfiguration =
+        field_map json__ "overrideAlarmConfiguration"
+          AlarmConfiguration.of_json in
       let relatedDeployments =
-        field_map json "relatedDeployments" RelatedDeployments.of_json in
-      let externalId = field_map json "externalId" ExternalId.of_json in
+        field_map json__ "relatedDeployments" RelatedDeployments.of_json in
+      let externalId = field_map json__ "externalId" ExternalId.of_json in
       let computePlatform =
-        field_map json "computePlatform" ComputePlatform.of_json in
+        field_map json__ "computePlatform" ComputePlatform.of_json in
       let deploymentStatusMessages =
-        field_map json "deploymentStatusMessages"
+        field_map json__ "deploymentStatusMessages"
           DeploymentStatusMessageList.of_json in
       let fileExistsBehavior =
-        field_map json "fileExistsBehavior" FileExistsBehavior.of_json in
+        field_map json__ "fileExistsBehavior" FileExistsBehavior.of_json in
       let additionalDeploymentStatusInfo =
-        field_map json "additionalDeploymentStatusInfo"
+        field_map json__ "additionalDeploymentStatusInfo"
           AdditionalDeploymentStatusInfo.of_json in
       let loadBalancerInfo =
-        field_map json "loadBalancerInfo" LoadBalancerInfo.of_json in
+        field_map json__ "loadBalancerInfo" LoadBalancerInfo.of_json in
       let blueGreenDeploymentConfiguration =
-        field_map json "blueGreenDeploymentConfiguration"
+        field_map json__ "blueGreenDeploymentConfiguration"
           BlueGreenDeploymentConfiguration.of_json in
       let instanceTerminationWaitTimeStarted =
-        field_map json "instanceTerminationWaitTimeStarted" Boolean.of_json in
+        field_map json__ "instanceTerminationWaitTimeStarted" Boolean.of_json in
       let targetInstances =
-        field_map json "targetInstances" TargetInstances.of_json in
+        field_map json__ "targetInstances" TargetInstances.of_json in
       let deploymentStyle =
-        field_map json "deploymentStyle" DeploymentStyle.of_json in
-      let rollbackInfo = field_map json "rollbackInfo" RollbackInfo.of_json in
+        field_map json__ "deploymentStyle" DeploymentStyle.of_json in
+      let rollbackInfo = field_map json__ "rollbackInfo" RollbackInfo.of_json in
       let updateOutdatedInstancesOnly =
-        field_map json "updateOutdatedInstancesOnly" Boolean.of_json in
+        field_map json__ "updateOutdatedInstancesOnly" Boolean.of_json in
       let autoRollbackConfiguration =
-        field_map json "autoRollbackConfiguration"
+        field_map json__ "autoRollbackConfiguration"
           AutoRollbackConfiguration.of_json in
       let ignoreApplicationStopFailures =
-        field_map json "ignoreApplicationStopFailures" Boolean.of_json in
-      let creator = field_map json "creator" DeploymentCreator.of_json in
-      let description = field_map json "description" Description.of_json in
+        field_map json__ "ignoreApplicationStopFailures" Boolean.of_json in
+      let creator = field_map json__ "creator" DeploymentCreator.of_json in
+      let description = field_map json__ "description" Description.of_json in
       let deploymentOverview =
-        field_map json "deploymentOverview" DeploymentOverview.of_json in
-      let completeTime = field_map json "completeTime" Timestamp.of_json in
-      let startTime = field_map json "startTime" Timestamp.of_json in
-      let createTime = field_map json "createTime" Timestamp.of_json in
+        field_map json__ "deploymentOverview" DeploymentOverview.of_json in
+      let completeTime = field_map json__ "completeTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let createTime = field_map json__ "createTime" Timestamp.of_json in
       let errorInformation =
-        field_map json "errorInformation" ErrorInformation.of_json in
-      let status = field_map json "status" DeploymentStatus.of_json in
-      let revision = field_map json "revision" RevisionLocation.of_json in
+        field_map json__ "errorInformation" ErrorInformation.of_json in
+      let status = field_map json__ "status" DeploymentStatus.of_json in
+      let revision = field_map json__ "revision" RevisionLocation.of_json in
       let previousRevision =
-        field_map json "previousRevision" RevisionLocation.of_json in
-      let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
+        field_map json__ "previousRevision" RevisionLocation.of_json in
+      let deploymentId = field_map json__ "deploymentId" DeploymentId.of_json in
       let deploymentConfigName =
-        field_map json "deploymentConfigName" DeploymentConfigName.of_json in
+        field_map json__ "deploymentConfigName" DeploymentConfigName.of_json in
       let deploymentGroupName =
-        field_map json "deploymentGroupName" DeploymentGroupName.of_json in
+        field_map json__ "deploymentGroupName" DeploymentGroupName.of_json in
       let applicationName =
-        field_map json "applicationName" ApplicationName.of_json in
-      make ?relatedDeployments ?externalId ?computePlatform
-        ?deploymentStatusMessages ?fileExistsBehavior
+        field_map json__ "applicationName" ApplicationName.of_json in
+      make ?overrideAlarmConfiguration ?relatedDeployments ?externalId
+        ?computePlatform ?deploymentStatusMessages ?fileExistsBehavior
         ?additionalDeploymentStatusInfo ?loadBalancerInfo
         ?blueGreenDeploymentConfiguration ?instanceTerminationWaitTimeStarted
         ?targetInstances ?deploymentStyle ?rollbackInfo
@@ -4845,7 +5101,7 @@ module DeploymentTarget =
           "Information about the target for a deployment that uses the EC2/On-premises compute platform."];
       lambdaTarget: LambdaTarget.t option
         [@ocaml.doc
-          "Information about the target for a deployment that uses the AWS Lambda compute platform."];
+          "Information about the target for a deployment that uses the Lambda compute platform."];
       ecsTarget: ECSTarget.t option
         [@ocaml.doc
           "Information about the target for a deployment that uses the Amazon ECS compute platform."];
@@ -4894,15 +5150,15 @@ module DeploymentTarget =
       make ?cloudFormationTarget ?ecsTarget ?lambdaTarget ?instanceTarget
         ?deploymentTargetType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cloudFormationTarget =
-        field_map json "cloudFormationTarget" CloudFormationTarget.of_json in
-      let ecsTarget = field_map json "ecsTarget" ECSTarget.of_json in
-      let lambdaTarget = field_map json "lambdaTarget" LambdaTarget.of_json in
+        field_map json__ "cloudFormationTarget" CloudFormationTarget.of_json in
+      let ecsTarget = field_map json__ "ecsTarget" ECSTarget.of_json in
+      let lambdaTarget = field_map json__ "lambdaTarget" LambdaTarget.of_json in
       let instanceTarget =
-        field_map json "instanceTarget" InstanceTarget.of_json in
+        field_map json__ "instanceTarget" InstanceTarget.of_json in
       let deploymentTargetType =
-        field_map json "deploymentTargetType" DeploymentTargetType.of_json in
+        field_map json__ "deploymentTargetType" DeploymentTargetType.of_json in
       make ?cloudFormationTarget ?ecsTarget ?lambdaTarget ?instanceTarget
         ?deploymentTargetType ()
     let to_json v = composed_to_json to_value v
@@ -4971,14 +5227,14 @@ module InstanceSummary =
       make ?instanceType ?lifecycleEvents ?lastUpdatedAt ?status ?instanceId
         ?deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceType = field_map json "instanceType" InstanceType.of_json in
+    let of_json json__ =
+      let instanceType = field_map json__ "instanceType" InstanceType.of_json in
       let lifecycleEvents =
-        field_map json "lifecycleEvents" LifecycleEventList.of_json in
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Timestamp.of_json in
-      let status = field_map json "status" InstanceStatus.of_json in
-      let instanceId = field_map json "instanceId" InstanceId.of_json in
-      let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
+        field_map json__ "lifecycleEvents" LifecycleEventList.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
+      let status = field_map json__ "status" InstanceStatus.of_json in
+      let instanceId = field_map json__ "instanceId" InstanceId.of_json in
+      let deploymentId = field_map json__ "deploymentId" DeploymentId.of_json in
       make ?instanceType ?lifecycleEvents ?lastUpdatedAt ?status ?instanceId
         ?deploymentId ()
     let to_json v = composed_to_json to_value v
@@ -5005,7 +5261,7 @@ module DeploymentGroupInfo =
         [@ocaml.doc "A list of associated Auto Scaling groups."];
       serviceRoleArn: Role.t option
         [@ocaml.doc
-          "A service role Amazon Resource Name (ARN) that grants CodeDeploy permission to make calls to AWS services on your behalf. For more information, see Create a Service Role for AWS CodeDeploy in the AWS CodeDeploy User Guide."];
+          "A service role Amazon Resource Name (ARN) that grants CodeDeploy permission to make calls to Amazon Web Services services on your behalf. For more information, see Create a Service Role for CodeDeploy in the CodeDeploy User Guide."];
       targetRevision: RevisionLocation.t option
         [@ocaml.doc
           "Information about the deployment group's target revision, including type and location."];
@@ -5022,7 +5278,7 @@ module DeploymentGroupInfo =
           "Information about the type of deployment, either in-place or blue/green, you want to run and whether to route deployment traffic behind a load balancer."];
       outdatedInstancesStrategy: OutdatedInstancesStrategy.t option
         [@ocaml.doc
-          "Indicates what happens when new EC2 instances are launched mid-deployment and do not receive the deployed application revision. If this option is set to UPDATE or is unspecified, CodeDeploy initiates one or more 'auto-update outdated instances' deployments to apply the deployed application revision to the new EC2 instances. If this option is set to IGNORE, CodeDeploy does not initiate a deployment to update the new EC2 instances. This may result in instances having different revisions."];
+          "Indicates what happens when new Amazon EC2 instances are launched mid-deployment and do not receive the deployed application revision. If this option is set to UPDATE or is unspecified, CodeDeploy initiates one or more 'auto-update outdated instances' deployments to apply the deployed application revision to the new Amazon EC2 instances. If this option is set to IGNORE, CodeDeploy does not initiate a deployment to update the new Amazon EC2 instances. This may result in instances having different revisions."];
       blueGreenDeploymentConfiguration:
         BlueGreenDeploymentConfiguration.t option
         [@ocaml.doc
@@ -5038,7 +5294,7 @@ module DeploymentGroupInfo =
           "Information about the most recent attempted deployment to the deployment group."];
       ec2TagSet: EC2TagSet.t option
         [@ocaml.doc
-          "Information about groups of tags applied to an EC2 instance. The deployment group includes only EC2 instances identified by all of the tag groups. Cannot be used in the same call as ec2TagFilters."];
+          "Information about groups of tags applied to an Amazon EC2 instance. The deployment group includes only Amazon EC2 instances identified by all of the tag groups. Cannot be used in the same call as ec2TagFilters."];
       onPremisesTagSet: OnPremisesTagSet.t option
         [@ocaml.doc
           "Information about groups of tags applied to an on-premises instance. The deployment group includes only on-premises instances identified by all the tag groups. Cannot be used in the same call as onPremisesInstanceTagFilters."];
@@ -5047,7 +5303,10 @@ module DeploymentGroupInfo =
           "The destination platform type for the deployment (Lambda, Server, or ECS)."];
       ecsServices: ECSServiceList.t option
         [@ocaml.doc
-          "The target Amazon ECS services in the deployment group. This applies only to deployment groups that use the Amazon ECS compute platform. A target Amazon ECS service is specified as an Amazon ECS cluster and service name pair using the format <clustername>:<servicename>."]}
+          "The target Amazon ECS services in the deployment group. This applies only to deployment groups that use the Amazon ECS compute platform. A target Amazon ECS service is specified as an Amazon ECS cluster and service name pair using the format <clustername>:<servicename>."];
+      terminationHookEnabled: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the deployment group was configured to have CodeDeploy install a termination hook into an Auto Scaling group. For more information about the termination hook, see How Amazon EC2 Auto Scaling works with CodeDeploy in the CodeDeploy User Guide."]}
     let make ?applicationName =
       fun ?deploymentGroupId ->
         fun ?deploymentGroupName ->
@@ -5070,31 +5329,34 @@ module DeploymentGroupInfo =
                                           fun ?onPremisesTagSet ->
                                             fun ?computePlatform ->
                                               fun ?ecsServices ->
-                                                fun () ->
-                                                  {
-                                                    applicationName;
-                                                    deploymentGroupId;
-                                                    deploymentGroupName;
-                                                    deploymentConfigName;
-                                                    ec2TagFilters;
-                                                    onPremisesInstanceTagFilters;
-                                                    autoScalingGroups;
-                                                    serviceRoleArn;
-                                                    targetRevision;
-                                                    triggerConfigurations;
-                                                    alarmConfiguration;
-                                                    autoRollbackConfiguration;
-                                                    deploymentStyle;
-                                                    outdatedInstancesStrategy;
-                                                    blueGreenDeploymentConfiguration;
-                                                    loadBalancerInfo;
-                                                    lastSuccessfulDeployment;
-                                                    lastAttemptedDeployment;
-                                                    ec2TagSet;
-                                                    onPremisesTagSet;
-                                                    computePlatform;
-                                                    ecsServices
-                                                  }
+                                                fun ?terminationHookEnabled
+                                                  ->
+                                                  fun () ->
+                                                    {
+                                                      applicationName;
+                                                      deploymentGroupId;
+                                                      deploymentGroupName;
+                                                      deploymentConfigName;
+                                                      ec2TagFilters;
+                                                      onPremisesInstanceTagFilters;
+                                                      autoScalingGroups;
+                                                      serviceRoleArn;
+                                                      targetRevision;
+                                                      triggerConfigurations;
+                                                      alarmConfiguration;
+                                                      autoRollbackConfiguration;
+                                                      deploymentStyle;
+                                                      outdatedInstancesStrategy;
+                                                      blueGreenDeploymentConfiguration;
+                                                      loadBalancerInfo;
+                                                      lastSuccessfulDeployment;
+                                                      lastAttemptedDeployment;
+                                                      ec2TagSet;
+                                                      onPremisesTagSet;
+                                                      computePlatform;
+                                                      ecsServices;
+                                                      terminationHookEnabled
+                                                    }
     let to_value x =
       structure_to_value
         [("applicationName",
@@ -5144,9 +5406,14 @@ module DeploymentGroupInfo =
         ("computePlatform",
           (Option.map x.computePlatform ~f:ComputePlatform.to_value));
         ("ecsServices",
-          (Option.map x.ecsServices ~f:ECSServiceList.to_value))]
+          (Option.map x.ecsServices ~f:ECSServiceList.to_value));
+        ("terminationHookEnabled",
+          (Option.map x.terminationHookEnabled ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let terminationHookEnabled =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "terminationHookEnabled") in
       let ecsServices =
         (Option.map ~f:ECSServiceList.of_xml)
           (Xml.child xml_arg0 "ecsServices") in
@@ -5211,8 +5478,9 @@ module DeploymentGroupInfo =
       let applicationName =
         (Option.map ~f:ApplicationName.of_xml)
           (Xml.child xml_arg0 "applicationName") in
-      make ?ecsServices ?computePlatform ?onPremisesTagSet ?ec2TagSet
-        ?lastAttemptedDeployment ?lastSuccessfulDeployment ?loadBalancerInfo
+      make ?terminationHookEnabled ?ecsServices ?computePlatform
+        ?onPremisesTagSet ?ec2TagSet ?lastAttemptedDeployment
+        ?lastSuccessfulDeployment ?loadBalancerInfo
         ?blueGreenDeploymentConfiguration ?outdatedInstancesStrategy
         ?deploymentStyle ?autoRollbackConfiguration ?alarmConfiguration
         ?triggerConfigurations ?targetRevision ?serviceRoleArn
@@ -5220,53 +5488,57 @@ module DeploymentGroupInfo =
         ?deploymentConfigName ?deploymentGroupName ?deploymentGroupId
         ?applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ecsServices = field_map json "ecsServices" ECSServiceList.of_json in
+    let of_json json__ =
+      let terminationHookEnabled =
+        field_map json__ "terminationHookEnabled" Boolean.of_json in
+      let ecsServices = field_map json__ "ecsServices" ECSServiceList.of_json in
       let computePlatform =
-        field_map json "computePlatform" ComputePlatform.of_json in
+        field_map json__ "computePlatform" ComputePlatform.of_json in
       let onPremisesTagSet =
-        field_map json "onPremisesTagSet" OnPremisesTagSet.of_json in
-      let ec2TagSet = field_map json "ec2TagSet" EC2TagSet.of_json in
+        field_map json__ "onPremisesTagSet" OnPremisesTagSet.of_json in
+      let ec2TagSet = field_map json__ "ec2TagSet" EC2TagSet.of_json in
       let lastAttemptedDeployment =
-        field_map json "lastAttemptedDeployment" LastDeploymentInfo.of_json in
+        field_map json__ "lastAttemptedDeployment" LastDeploymentInfo.of_json in
       let lastSuccessfulDeployment =
-        field_map json "lastSuccessfulDeployment" LastDeploymentInfo.of_json in
+        field_map json__ "lastSuccessfulDeployment"
+          LastDeploymentInfo.of_json in
       let loadBalancerInfo =
-        field_map json "loadBalancerInfo" LoadBalancerInfo.of_json in
+        field_map json__ "loadBalancerInfo" LoadBalancerInfo.of_json in
       let blueGreenDeploymentConfiguration =
-        field_map json "blueGreenDeploymentConfiguration"
+        field_map json__ "blueGreenDeploymentConfiguration"
           BlueGreenDeploymentConfiguration.of_json in
       let outdatedInstancesStrategy =
-        field_map json "outdatedInstancesStrategy"
+        field_map json__ "outdatedInstancesStrategy"
           OutdatedInstancesStrategy.of_json in
       let deploymentStyle =
-        field_map json "deploymentStyle" DeploymentStyle.of_json in
+        field_map json__ "deploymentStyle" DeploymentStyle.of_json in
       let autoRollbackConfiguration =
-        field_map json "autoRollbackConfiguration"
+        field_map json__ "autoRollbackConfiguration"
           AutoRollbackConfiguration.of_json in
       let alarmConfiguration =
-        field_map json "alarmConfiguration" AlarmConfiguration.of_json in
+        field_map json__ "alarmConfiguration" AlarmConfiguration.of_json in
       let triggerConfigurations =
-        field_map json "triggerConfigurations" TriggerConfigList.of_json in
+        field_map json__ "triggerConfigurations" TriggerConfigList.of_json in
       let targetRevision =
-        field_map json "targetRevision" RevisionLocation.of_json in
-      let serviceRoleArn = field_map json "serviceRoleArn" Role.of_json in
+        field_map json__ "targetRevision" RevisionLocation.of_json in
+      let serviceRoleArn = field_map json__ "serviceRoleArn" Role.of_json in
       let autoScalingGroups =
-        field_map json "autoScalingGroups" AutoScalingGroupList.of_json in
+        field_map json__ "autoScalingGroups" AutoScalingGroupList.of_json in
       let onPremisesInstanceTagFilters =
-        field_map json "onPremisesInstanceTagFilters" TagFilterList.of_json in
+        field_map json__ "onPremisesInstanceTagFilters" TagFilterList.of_json in
       let ec2TagFilters =
-        field_map json "ec2TagFilters" EC2TagFilterList.of_json in
+        field_map json__ "ec2TagFilters" EC2TagFilterList.of_json in
       let deploymentConfigName =
-        field_map json "deploymentConfigName" DeploymentConfigName.of_json in
+        field_map json__ "deploymentConfigName" DeploymentConfigName.of_json in
       let deploymentGroupName =
-        field_map json "deploymentGroupName" DeploymentGroupName.of_json in
+        field_map json__ "deploymentGroupName" DeploymentGroupName.of_json in
       let deploymentGroupId =
-        field_map json "deploymentGroupId" DeploymentGroupId.of_json in
+        field_map json__ "deploymentGroupId" DeploymentGroupId.of_json in
       let applicationName =
-        field_map json "applicationName" ApplicationName.of_json in
-      make ?ecsServices ?computePlatform ?onPremisesTagSet ?ec2TagSet
-        ?lastAttemptedDeployment ?lastSuccessfulDeployment ?loadBalancerInfo
+        field_map json__ "applicationName" ApplicationName.of_json in
+      make ?terminationHookEnabled ?ecsServices ?computePlatform
+        ?onPremisesTagSet ?ec2TagSet ?lastAttemptedDeployment
+        ?lastSuccessfulDeployment ?loadBalancerInfo
         ?blueGreenDeploymentConfiguration ?outdatedInstancesStrategy
         ?deploymentStyle ?autoRollbackConfiguration ?alarmConfiguration
         ?triggerConfigurations ?targetRevision ?serviceRoleArn
@@ -5341,17 +5613,17 @@ module ApplicationInfo =
       make ?computePlatform ?gitHubAccountName ?linkedToGitHub ?createTime
         ?applicationName ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let computePlatform =
-        field_map json "computePlatform" ComputePlatform.of_json in
+        field_map json__ "computePlatform" ComputePlatform.of_json in
       let gitHubAccountName =
-        field_map json "gitHubAccountName" GitHubAccountTokenName.of_json in
-      let linkedToGitHub = field_map json "linkedToGitHub" Boolean.of_json in
-      let createTime = field_map json "createTime" Timestamp.of_json in
+        field_map json__ "gitHubAccountName" GitHubAccountTokenName.of_json in
+      let linkedToGitHub = field_map json__ "linkedToGitHub" Boolean.of_json in
+      let createTime = field_map json__ "createTime" Timestamp.of_json in
       let applicationName =
-        field_map json "applicationName" ApplicationName.of_json in
+        field_map json__ "applicationName" ApplicationName.of_json in
       let applicationId =
-        field_map json "applicationId" ApplicationId.of_json in
+        field_map json__ "applicationId" ApplicationId.of_json in
       make ?computePlatform ?gitHubAccountName ?linkedToGitHub ?createTime
         ?applicationName ?applicationId ()
     let to_json v = composed_to_json to_value v
@@ -5385,11 +5657,11 @@ module RevisionInfo =
           (Xml.child xml_arg0 "revisionLocation") in
       make ?genericRevisionInfo ?revisionLocation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let genericRevisionInfo =
-        field_map json "genericRevisionInfo" GenericRevisionInfo.of_json in
+        field_map json__ "genericRevisionInfo" GenericRevisionInfo.of_json in
       let revisionLocation =
-        field_map json "revisionLocation" RevisionLocation.of_json in
+        field_map json__ "revisionLocation" RevisionLocation.of_json in
       make ?genericRevisionInfo ?revisionLocation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an application revision."]
@@ -5418,7 +5690,7 @@ module ApplicationDoesNotExistException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The application does not exist with the IAM user or AWS account."]
+       "The application does not exist with the user or Amazon Web Services account."]
 module ApplicationNameRequiredException =
   struct
     type nonrec t = unit
@@ -5444,7 +5716,7 @@ module DeploymentConfigDoesNotExistException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The deployment configuration does not exist with the IAM user or AWS account."]
+       "The deployment configuration does not exist with the user or Amazon Web Services account."]
 module DeploymentGroupAlreadyExistsException =
   struct
     type nonrec t = unit
@@ -5457,7 +5729,7 @@ module DeploymentGroupAlreadyExistsException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A deployment group with the specified name with the IAM user or AWS account already exists."]
+       "A deployment group with the specified name with the user or Amazon Web Services account already exists."]
 module DeploymentGroupDoesNotExistException =
   struct
     type nonrec t = unit
@@ -5470,7 +5742,7 @@ module DeploymentGroupDoesNotExistException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The named deployment group with the IAM user or AWS account does not exist."]
+       "The named deployment group with the user or Amazon Web Services account does not exist."]
 module DeploymentGroupNameRequiredException =
   struct
     type nonrec t = unit
@@ -5786,6 +6058,19 @@ module TriggerTargetsLimitExceededException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The maximum allowed number of triggers was exceeded."]
+module NullableBoolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module ArnNotSupportedException =
   struct
     type nonrec t = unit
@@ -5869,6 +6154,9 @@ module TagKeyList =
   struct
     type nonrec t = Key.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Key.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5912,7 +6200,7 @@ module DeploymentDoesNotExistException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The deployment with the IAM user or AWS account does not exist."]
+       "The deployment with the user or Amazon Web Services account does not exist."]
 module DeploymentIdRequiredException =
   struct
     type nonrec t = unit
@@ -5989,23 +6277,13 @@ module UnsupportedActionForDeploymentTypeException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A call was submitted that is not supported for the specified deployment type."]
-module NullableBoolean =
-  struct
-    type nonrec t = bool
-    let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
-    let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
-    let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
-    let to_json = simple_to_json to_value
-  end
 module InstanceNameList =
   struct
     type nonrec t = InstanceName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6158,6 +6436,9 @@ module GitHubAccountTokenNameList =
   struct
     type nonrec t = GitHubAccountTokenName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GitHubAccountTokenName.to_value)) |>
         (fun x -> `List x)
@@ -6246,6 +6527,9 @@ module DeploymentStatusList =
   struct
     type nonrec t = DeploymentStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeploymentStatus.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6289,9 +6573,9 @@ module TimeRange =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "start") in
       make ?end_ ?start ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let end_ = field_map json "end" Timestamp.of_json in
-      let start = field_map json "start" Timestamp.of_json in
+    let of_json json__ =
+      let end_ = field_map json__ "end" Timestamp.of_json in
+      let start = field_map json__ "start" Timestamp.of_json in
       make ?end_ ?start ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a time range."]
@@ -6345,10 +6629,25 @@ module InvalidInstanceTypeException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An invalid instance type was specified for instances in a blue/green deployment. Valid values include \"Blue\" for an original environment and \"Green\" for a replacement environment."]
+module InvalidTargetFilterNameException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The target filter name is invalid."]
 module TargetIdList =
   struct
     type nonrec t = TargetId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6393,6 +6692,8 @@ module TargetFilters =
                        (FilterValueList.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -6404,6 +6705,9 @@ module InstancesList =
   struct
     type nonrec t = InstanceId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6437,22 +6741,13 @@ module InvalidComputePlatformException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The computePlatform is invalid. The computePlatform should be Lambda, Server, or ECS."]
-module InvalidTargetFilterNameException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The target filter name is invalid."]
 module InstanceStatusList =
   struct
     type nonrec t = InstanceStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceStatus.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6478,6 +6773,9 @@ module InstanceTypeList =
   struct
     type nonrec t = InstanceType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6502,6 +6800,9 @@ module DeploymentConfigsList =
   struct
     type nonrec t = DeploymentConfigName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeploymentConfigName.to_value)) |>
         (fun x -> `List x)
@@ -6528,6 +6829,9 @@ module ApplicationsList =
   struct
     type nonrec t = ApplicationName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6629,6 +6933,9 @@ module RevisionLocationList =
   struct
     type nonrec t = RevisionLocation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RevisionLocation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6844,7 +7151,7 @@ module DeploymentConfigInfo =
         [@ocaml.doc "The deployment configuration name."];
       minimumHealthyHosts: MinimumHealthyHosts.t option
         [@ocaml.doc
-          "Information about the number or percentage of minimum healthy instance."];
+          "Information about the number or percentage of minimum healthy instances."];
       createTime: Timestamp.t option
         [@ocaml.doc
           "The time at which the deployment configuration was created."];
@@ -6853,22 +7160,26 @@ module DeploymentConfigInfo =
           "The destination platform type for the deployment (Lambda, Server, or ECS)."];
       trafficRoutingConfig: TrafficRoutingConfig.t option
         [@ocaml.doc
-          "The configuration that specifies how the deployment traffic is routed. Used for deployments with a Lambda or ECS compute platform only."]}
+          "The configuration that specifies how the deployment traffic is routed. Used for deployments with a Lambda or Amazon ECS compute platform only."];
+      zonalConfig: ZonalConfig.t option
+        [@ocaml.doc "Information about a zonal configuration."]}
     let make ?deploymentConfigId =
       fun ?deploymentConfigName ->
         fun ?minimumHealthyHosts ->
           fun ?createTime ->
             fun ?computePlatform ->
               fun ?trafficRoutingConfig ->
-                fun () ->
-                  {
-                    deploymentConfigId;
-                    deploymentConfigName;
-                    minimumHealthyHosts;
-                    createTime;
-                    computePlatform;
-                    trafficRoutingConfig
-                  }
+                fun ?zonalConfig ->
+                  fun () ->
+                    {
+                      deploymentConfigId;
+                      deploymentConfigName;
+                      minimumHealthyHosts;
+                      createTime;
+                      computePlatform;
+                      trafficRoutingConfig;
+                      zonalConfig
+                    }
     let to_value x =
       structure_to_value
         [("deploymentConfigId",
@@ -6881,9 +7192,12 @@ module DeploymentConfigInfo =
         ("computePlatform",
           (Option.map x.computePlatform ~f:ComputePlatform.to_value));
         ("trafficRoutingConfig",
-          (Option.map x.trafficRoutingConfig ~f:TrafficRoutingConfig.to_value))]
+          (Option.map x.trafficRoutingConfig ~f:TrafficRoutingConfig.to_value));
+        ("zonalConfig", (Option.map x.zonalConfig ~f:ZonalConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let zonalConfig =
+        (Option.map ~f:ZonalConfig.of_xml) (Xml.child xml_arg0 "zonalConfig") in
       let trafficRoutingConfig =
         (Option.map ~f:TrafficRoutingConfig.of_xml)
           (Xml.child xml_arg0 "trafficRoutingConfig") in
@@ -6901,22 +7215,23 @@ module DeploymentConfigInfo =
       let deploymentConfigId =
         (Option.map ~f:DeploymentConfigId.of_xml)
           (Xml.child xml_arg0 "deploymentConfigId") in
-      make ?trafficRoutingConfig ?computePlatform ?createTime
+      make ?zonalConfig ?trafficRoutingConfig ?computePlatform ?createTime
         ?minimumHealthyHosts ?deploymentConfigName ?deploymentConfigId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let zonalConfig = field_map json__ "zonalConfig" ZonalConfig.of_json in
       let trafficRoutingConfig =
-        field_map json "trafficRoutingConfig" TrafficRoutingConfig.of_json in
+        field_map json__ "trafficRoutingConfig" TrafficRoutingConfig.of_json in
       let computePlatform =
-        field_map json "computePlatform" ComputePlatform.of_json in
-      let createTime = field_map json "createTime" Timestamp.of_json in
+        field_map json__ "computePlatform" ComputePlatform.of_json in
+      let createTime = field_map json__ "createTime" Timestamp.of_json in
       let minimumHealthyHosts =
-        field_map json "minimumHealthyHosts" MinimumHealthyHosts.of_json in
+        field_map json__ "minimumHealthyHosts" MinimumHealthyHosts.of_json in
       let deploymentConfigName =
-        field_map json "deploymentConfigName" DeploymentConfigName.of_json in
+        field_map json__ "deploymentConfigName" DeploymentConfigName.of_json in
       let deploymentConfigId =
-        field_map json "deploymentConfigId" DeploymentConfigId.of_json in
-      make ?trafficRoutingConfig ?computePlatform ?createTime
+        field_map json__ "deploymentConfigId" DeploymentConfigId.of_json in
+      make ?zonalConfig ?trafficRoutingConfig ?computePlatform ?createTime
         ?minimumHealthyHosts ?deploymentConfigName ?deploymentConfigId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a deployment configuration."]
@@ -6956,7 +7271,7 @@ module RevisionDoesNotExistException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The named revision does not exist with the IAM user or AWS account."]
+       "The named revision does not exist with the user or Amazon Web Services account."]
 module RevisionRequiredException =
   struct
     type nonrec t = unit
@@ -7044,7 +7359,7 @@ module InvalidFileExistsBehaviorException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An invalid fileExistsBehavior option was specified to determine how AWS CodeDeploy handles files or directories that already exist in a deployment target location, but weren't part of the previous successful deployment. Valid values include \"DISALLOW,\" \"OVERWRITE,\" and \"RETAIN.\""]
+       "An invalid fileExistsBehavior option was specified to determine how CodeDeploy handles files or directories that already exist in a deployment target location, but weren't part of the previous successful deployment. Valid values include \"DISALLOW,\" \"OVERWRITE,\" and \"RETAIN.\""]
 module InvalidGitHubAccountTokenException =
   struct
     type nonrec t = unit
@@ -7069,7 +7384,7 @@ module InvalidIgnoreApplicationStopFailuresValueException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The IgnoreApplicationStopFailures value is invalid. For AWS Lambda deployments, false is expected. For EC2/On-premises deployments, true or false is expected."]
+       "The IgnoreApplicationStopFailures value is invalid. For Lambda deployments, false is expected. For EC2/On-premises deployments, true or false is expected."]
 module InvalidTargetInstancesException =
   struct
     type nonrec t = unit
@@ -7095,7 +7410,7 @@ module InvalidUpdateOutdatedInstancesOnlyValueException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The UpdateOutdatedInstancesOnly value is invalid. For AWS Lambda deployments, false is expected. For EC2/On-premises deployments, true or false is expected."]
+       "The UpdateOutdatedInstancesOnly value is invalid. For Lambda deployments, false is expected. For EC2/On-premises deployments, true or false is expected."]
 module DeploymentGroupLimitExceededException =
   struct
     type nonrec t = unit
@@ -7132,7 +7447,7 @@ module DeploymentConfigAlreadyExistsException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A deployment configuration with the specified name with the IAM user or AWS account already exists."]
+       "A deployment configuration with the specified name with the user or Amazon Web Services account already exists."]
 module DeploymentConfigLimitExceededException =
   struct
     type nonrec t = unit
@@ -7158,6 +7473,18 @@ module InvalidMinimumHealthyHostValueException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The minimum healthy instance value was specified in an invalid format."]
+module InvalidZonalDeploymentConfigurationException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The ZonalConfig object is not valid."]
 module ApplicationAlreadyExistsException =
   struct
     type nonrec t = unit
@@ -7170,7 +7497,7 @@ module ApplicationAlreadyExistsException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An application with the specified name with the IAM user or AWS account already exists."]
+       "An application with the specified name with the user or Amazon Web Services account already exists."]
 module ApplicationLimitExceededException =
   struct
     type nonrec t = unit
@@ -7227,6 +7554,9 @@ module InstanceInfoList =
   struct
     type nonrec t = InstanceInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7251,6 +7581,9 @@ module DeploymentsInfoList =
   struct
     type nonrec t = DeploymentInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeploymentInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7276,6 +7609,9 @@ module DeploymentTargetList =
   struct
     type nonrec t = DeploymentTarget.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeploymentTarget.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7309,11 +7645,14 @@ module DeploymentTargetListSizeExceededException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The maximum number of targets that can be associated with an Amazon ECS or AWS Lambda deployment was exceeded. The target list of both types of deployments must have exactly one item. This exception does not apply to EC2/On-premises deployments."]
+       "The maximum number of targets that can be associated with an Amazon ECS or Lambda deployment was exceeded. The target list of both types of deployments must have exactly one item. This exception does not apply to EC2/On-premises deployments."]
 module InstanceSummaryList =
   struct
     type nonrec t = InstanceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7339,6 +7678,9 @@ module DeploymentGroupInfoList =
   struct
     type nonrec t = DeploymentGroupInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeploymentGroupInfo.to_value)) |>
         (fun x -> `List x)
@@ -7365,6 +7707,9 @@ module ApplicationsInfoList =
   struct
     type nonrec t = ApplicationInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7390,6 +7735,9 @@ module RevisionInfoList =
   struct
     type nonrec t = RevisionInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RevisionInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7416,7 +7764,7 @@ module UpdateDeploymentGroupOutput =
       {
       hooksNotCleanedUp: AutoScalingGroupList.t option
         [@ocaml.doc
-          "If the output contains no data, and the corresponding deployment group contained at least one Auto Scaling group, AWS CodeDeploy successfully removed all corresponding Auto Scaling lifecycle event hooks from the AWS account. If the output contains data, AWS CodeDeploy could not remove some Auto Scaling lifecycle event hooks from the AWS account."]}
+          "If the output contains no data, and the corresponding deployment group contained at least one Auto Scaling group, CodeDeploy successfully removed all corresponding Auto Scaling lifecycle event hooks from the Amazon Web Services account. If the output contains data, CodeDeploy could not remove some Auto Scaling lifecycle event hooks from the Amazon Web Services account."]}
     type nonrec error =
       [ `AlarmsLimitExceededException of AlarmsLimitExceededException.t 
       | `ApplicationDoesNotExistException of
@@ -7800,9 +8148,9 @@ module UpdateDeploymentGroupOutput =
           (Xml.child xml_arg0 "hooksNotCleanedUp") in
       make ?hooksNotCleanedUp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hooksNotCleanedUp =
-        field_map json "hooksNotCleanedUp" AutoScalingGroupList.of_json in
+        field_map json__ "hooksNotCleanedUp" AutoScalingGroupList.of_json in
       make ?hooksNotCleanedUp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7830,13 +8178,13 @@ module UpdateDeploymentGroupInput =
           "The replacement set of on-premises instance tags on which to filter, if you want to change them. To keep the existing tags, enter their names. To remove tags, do not enter any tag names."];
       autoScalingGroups: AutoScalingGroupNameList.t option
         [@ocaml.doc
-          "The replacement list of Auto Scaling groups to be included in the deployment group, if you want to change them. To keep the Auto Scaling groups, enter their names. To remove Auto Scaling groups, do not enter any Auto Scaling group names."];
+          "The replacement list of Auto Scaling groups to be included in the deployment group, if you want to change them. To keep the Auto Scaling groups, enter their names or do not specify this parameter. To remove Auto Scaling groups, specify a non-null empty list of Auto Scaling group names to detach all CodeDeploy-managed Auto Scaling lifecycle hooks. For examples, see Amazon EC2 instances in an Amazon EC2 Auto Scaling group fail to launch and receive the error \"Heartbeat Timeout\" in the CodeDeploy User Guide."];
       serviceRoleArn: Role.t option
         [@ocaml.doc
           "A replacement ARN for the service role, if you want to change it."];
       triggerConfigurations: TriggerConfigList.t option
         [@ocaml.doc
-          "Information about triggers to change when the deployment group is updated. For examples, see Edit a Trigger in a CodeDeploy Deployment Group in the AWS CodeDeploy User Guide."];
+          "Information about triggers to change when the deployment group is updated. For examples, see Edit a Trigger in a CodeDeploy Deployment Group in the CodeDeploy User Guide."];
       alarmConfiguration: AlarmConfiguration.t option
         [@ocaml.doc
           "Information to add or change about Amazon CloudWatch alarms when the deployment group is updated."];
@@ -7845,7 +8193,7 @@ module UpdateDeploymentGroupInput =
           "Information for an automatic rollback configuration that is added or changed when a deployment group is updated."];
       outdatedInstancesStrategy: OutdatedInstancesStrategy.t option
         [@ocaml.doc
-          "Indicates what happens when new EC2 instances are launched mid-deployment and do not receive the deployed application revision. If this option is set to UPDATE or is unspecified, CodeDeploy initiates one or more 'auto-update outdated instances' deployments to apply the deployed application revision to the new EC2 instances. If this option is set to IGNORE, CodeDeploy does not initiate a deployment to update the new EC2 instances. This may result in instances having different revisions."];
+          "Indicates what happens when new Amazon EC2 instances are launched mid-deployment and do not receive the deployed application revision. If this option is set to UPDATE or is unspecified, CodeDeploy initiates one or more 'auto-update outdated instances' deployments to apply the deployed application revision to the new Amazon EC2 instances. If this option is set to IGNORE, CodeDeploy does not initiate a deployment to update the new Amazon EC2 instances. This may result in instances having different revisions."];
       deploymentStyle: DeploymentStyle.t option
         [@ocaml.doc
           "Information about the type of deployment, either in-place or blue/green, you want to run and whether to route deployment traffic behind a load balancer."];
@@ -7858,13 +8206,16 @@ module UpdateDeploymentGroupInput =
           "Information about the load balancer used in a deployment."];
       ec2TagSet: EC2TagSet.t option
         [@ocaml.doc
-          "Information about groups of tags applied to on-premises instances. The deployment group includes only EC2 instances identified by all the tag groups."];
+          "Information about groups of tags applied to on-premises instances. The deployment group includes only Amazon EC2 instances identified by all the tag groups."];
       ecsServices: ECSServiceList.t option
         [@ocaml.doc
           "The target Amazon ECS services in the deployment group. This applies only to deployment groups that use the Amazon ECS compute platform. A target Amazon ECS service is specified as an Amazon ECS cluster and service name pair using the format <clustername>:<servicename>."];
       onPremisesTagSet: OnPremisesTagSet.t option
         [@ocaml.doc
-          "Information about an on-premises instance tag set. The deployment group includes only on-premises instances identified by all the tag groups."]}
+          "Information about an on-premises instance tag set. The deployment group includes only on-premises instances identified by all the tag groups."];
+      terminationHookEnabled: NullableBoolean.t option
+        [@ocaml.doc
+          "This parameter only applies if you are using CodeDeploy with Amazon EC2 Auto Scaling. For more information, see Integrating CodeDeploy with Amazon EC2 Auto Scaling in the CodeDeploy User Guide. Set terminationHookEnabled to true to have CodeDeploy install a termination hook into your Auto Scaling group when you update a deployment group. When this hook is installed, CodeDeploy will perform termination deployments. For information about termination deployments, see Enabling termination deployments during Auto Scaling scale-in events in the CodeDeploy User Guide. For more information about Auto Scaling scale-in events, see the Scale in topic in the Amazon EC2 Auto Scaling User Guide."]}
     let context_ = "UpdateDeploymentGroupInput"
     let make ?newDeploymentGroupName =
       fun ?deploymentConfigName ->
@@ -7882,29 +8233,31 @@ module UpdateDeploymentGroupInput =
                               fun ?ec2TagSet ->
                                 fun ?ecsServices ->
                                   fun ?onPremisesTagSet ->
-                                    fun ~applicationName ->
-                                      fun ~currentDeploymentGroupName ->
-                                        fun () ->
-                                          {
-                                            newDeploymentGroupName;
-                                            deploymentConfigName;
-                                            ec2TagFilters;
-                                            onPremisesInstanceTagFilters;
-                                            autoScalingGroups;
-                                            serviceRoleArn;
-                                            triggerConfigurations;
-                                            alarmConfiguration;
-                                            autoRollbackConfiguration;
-                                            outdatedInstancesStrategy;
-                                            deploymentStyle;
-                                            blueGreenDeploymentConfiguration;
-                                            loadBalancerInfo;
-                                            ec2TagSet;
-                                            ecsServices;
-                                            onPremisesTagSet;
-                                            applicationName;
-                                            currentDeploymentGroupName
-                                          }
+                                    fun ?terminationHookEnabled ->
+                                      fun ~applicationName ->
+                                        fun ~currentDeploymentGroupName ->
+                                          fun () ->
+                                            {
+                                              newDeploymentGroupName;
+                                              deploymentConfigName;
+                                              ec2TagFilters;
+                                              onPremisesInstanceTagFilters;
+                                              autoScalingGroups;
+                                              serviceRoleArn;
+                                              triggerConfigurations;
+                                              alarmConfiguration;
+                                              autoRollbackConfiguration;
+                                              outdatedInstancesStrategy;
+                                              deploymentStyle;
+                                              blueGreenDeploymentConfiguration;
+                                              loadBalancerInfo;
+                                              ec2TagSet;
+                                              ecsServices;
+                                              onPremisesTagSet;
+                                              terminationHookEnabled;
+                                              applicationName;
+                                              currentDeploymentGroupName
+                                            }
     let to_value x =
       structure_to_value
         [("applicationName",
@@ -7946,9 +8299,14 @@ module UpdateDeploymentGroupInput =
         ("ecsServices",
           (Option.map x.ecsServices ~f:ECSServiceList.to_value));
         ("onPremisesTagSet",
-          (Option.map x.onPremisesTagSet ~f:OnPremisesTagSet.to_value))]
+          (Option.map x.onPremisesTagSet ~f:OnPremisesTagSet.to_value));
+        ("terminationHookEnabled",
+          (Option.map x.terminationHookEnabled ~f:NullableBoolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let terminationHookEnabled =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "terminationHookEnabled") in
       let onPremisesTagSet =
         (Option.map ~f:OnPremisesTagSet.of_xml)
           (Xml.child xml_arg0 "onPremisesTagSet") in
@@ -8002,54 +8360,56 @@ module UpdateDeploymentGroupInput =
       let applicationName =
         ApplicationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
-      make ?onPremisesTagSet ?ecsServices ?ec2TagSet ?loadBalancerInfo
-        ?blueGreenDeploymentConfiguration ?deploymentStyle
+      make ?terminationHookEnabled ?onPremisesTagSet ?ecsServices ?ec2TagSet
+        ?loadBalancerInfo ?blueGreenDeploymentConfiguration ?deploymentStyle
         ?outdatedInstancesStrategy ?autoRollbackConfiguration
         ?alarmConfiguration ?triggerConfigurations ?serviceRoleArn
         ?autoScalingGroups ?onPremisesInstanceTagFilters ?ec2TagFilters
         ?deploymentConfigName ?newDeploymentGroupName
         ~currentDeploymentGroupName ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let terminationHookEnabled =
+        field_map json__ "terminationHookEnabled" NullableBoolean.of_json in
       let onPremisesTagSet =
-        field_map json "onPremisesTagSet" OnPremisesTagSet.of_json in
-      let ecsServices = field_map json "ecsServices" ECSServiceList.of_json in
-      let ec2TagSet = field_map json "ec2TagSet" EC2TagSet.of_json in
+        field_map json__ "onPremisesTagSet" OnPremisesTagSet.of_json in
+      let ecsServices = field_map json__ "ecsServices" ECSServiceList.of_json in
+      let ec2TagSet = field_map json__ "ec2TagSet" EC2TagSet.of_json in
       let loadBalancerInfo =
-        field_map json "loadBalancerInfo" LoadBalancerInfo.of_json in
+        field_map json__ "loadBalancerInfo" LoadBalancerInfo.of_json in
       let blueGreenDeploymentConfiguration =
-        field_map json "blueGreenDeploymentConfiguration"
+        field_map json__ "blueGreenDeploymentConfiguration"
           BlueGreenDeploymentConfiguration.of_json in
       let deploymentStyle =
-        field_map json "deploymentStyle" DeploymentStyle.of_json in
+        field_map json__ "deploymentStyle" DeploymentStyle.of_json in
       let outdatedInstancesStrategy =
-        field_map json "outdatedInstancesStrategy"
+        field_map json__ "outdatedInstancesStrategy"
           OutdatedInstancesStrategy.of_json in
       let autoRollbackConfiguration =
-        field_map json "autoRollbackConfiguration"
+        field_map json__ "autoRollbackConfiguration"
           AutoRollbackConfiguration.of_json in
       let alarmConfiguration =
-        field_map json "alarmConfiguration" AlarmConfiguration.of_json in
+        field_map json__ "alarmConfiguration" AlarmConfiguration.of_json in
       let triggerConfigurations =
-        field_map json "triggerConfigurations" TriggerConfigList.of_json in
-      let serviceRoleArn = field_map json "serviceRoleArn" Role.of_json in
+        field_map json__ "triggerConfigurations" TriggerConfigList.of_json in
+      let serviceRoleArn = field_map json__ "serviceRoleArn" Role.of_json in
       let autoScalingGroups =
-        field_map json "autoScalingGroups" AutoScalingGroupNameList.of_json in
+        field_map json__ "autoScalingGroups" AutoScalingGroupNameList.of_json in
       let onPremisesInstanceTagFilters =
-        field_map json "onPremisesInstanceTagFilters" TagFilterList.of_json in
+        field_map json__ "onPremisesInstanceTagFilters" TagFilterList.of_json in
       let ec2TagFilters =
-        field_map json "ec2TagFilters" EC2TagFilterList.of_json in
+        field_map json__ "ec2TagFilters" EC2TagFilterList.of_json in
       let deploymentConfigName =
-        field_map json "deploymentConfigName" DeploymentConfigName.of_json in
+        field_map json__ "deploymentConfigName" DeploymentConfigName.of_json in
       let newDeploymentGroupName =
-        field_map json "newDeploymentGroupName" DeploymentGroupName.of_json in
+        field_map json__ "newDeploymentGroupName" DeploymentGroupName.of_json in
       let currentDeploymentGroupName =
-        field_map_exn json "currentDeploymentGroupName"
+        field_map_exn json__ "currentDeploymentGroupName"
           DeploymentGroupName.of_json in
       let applicationName =
-        field_map_exn json "applicationName" ApplicationName.of_json in
-      make ?onPremisesTagSet ?ecsServices ?ec2TagSet ?loadBalancerInfo
-        ?blueGreenDeploymentConfiguration ?deploymentStyle
+        field_map_exn json__ "applicationName" ApplicationName.of_json in
+      make ?terminationHookEnabled ?onPremisesTagSet ?ecsServices ?ec2TagSet
+        ?loadBalancerInfo ?blueGreenDeploymentConfiguration ?deploymentStyle
         ?outdatedInstancesStrategy ?autoRollbackConfiguration
         ?alarmConfiguration ?triggerConfigurations ?serviceRoleArn
         ?autoScalingGroups ?onPremisesInstanceTagFilters ?ec2TagFilters
@@ -8086,11 +8446,11 @@ module UpdateApplicationInput =
           (Xml.child xml_arg0 "applicationName") in
       make ?newApplicationName ?applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let newApplicationName =
-        field_map json "newApplicationName" ApplicationName.of_json in
+        field_map json__ "newApplicationName" ApplicationName.of_json in
       let applicationName =
-        field_map json "applicationName" ApplicationName.of_json in
+        field_map json__ "applicationName" ApplicationName.of_json in
       make ?newApplicationName ?applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of an UpdateApplication operation."]
@@ -8235,9 +8595,9 @@ module UntagResourceInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8381,9 +8741,9 @@ module TagResourceInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8513,9 +8873,9 @@ module StopDeploymentOutput =
         (Option.map ~f:StopStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?statusMessage ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statusMessage = field_map json "statusMessage" Message.of_json in
-      let status = field_map json "status" StopStatus.of_json in
+    let of_json json__ =
+      let statusMessage = field_map json__ "statusMessage" Message.of_json in
+      let status = field_map json__ "status" StopStatus.of_json in
       make ?statusMessage ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a StopDeployment operation."]
@@ -8546,11 +8906,11 @@ module StopDeploymentInput =
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentId") in
       make ?autoRollbackEnabled ~deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoRollbackEnabled =
-        field_map json "autoRollbackEnabled" NullableBoolean.of_json in
+        field_map json__ "autoRollbackEnabled" NullableBoolean.of_json in
       let deploymentId =
-        field_map_exn json "deploymentId" DeploymentId.of_json in
+        field_map_exn json__ "deploymentId" DeploymentId.of_json in
       make ?autoRollbackEnabled ~deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a StopDeployment operation."]
@@ -8573,8 +8933,8 @@ module SkipWaitTimeForInstanceTerminationInput =
           (Xml.child xml_arg0 "deploymentId") in
       make ?deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
+    let of_json json__ =
+      let deploymentId = field_map json__ "deploymentId" DeploymentId.of_json in
       make ?deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8604,10 +8964,10 @@ module RemoveTagsFromOnPremisesInstancesInput =
         TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tags") in
       make ~instanceNames ~tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceNames =
-        field_map_exn json "instanceNames" InstanceNameList.of_json in
-      let tags = field_map_exn json "tags" TagList.of_json in
+        field_map_exn json__ "instanceNames" InstanceNameList.of_json in
+      let tags = field_map_exn json__ "tags" TagList.of_json in
       make ~instanceNames ~tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8623,7 +8983,7 @@ module RegisterOnPremisesInstanceInput =
           "The ARN of the IAM session to associate with the on-premises instance."];
       iamUserArn: IamUserArn.t option
         [@ocaml.doc
-          "The ARN of the IAM user to associate with the on-premises instance."]}
+          "The ARN of the user to associate with the on-premises instance."]}
     let context_ = "RegisterOnPremisesInstanceInput"
     let make ?iamSessionArn =
       fun ?iamUserArn ->
@@ -8647,12 +9007,12 @@ module RegisterOnPremisesInstanceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "instanceName") in
       make ?iamUserArn ?iamSessionArn ~instanceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let iamUserArn = field_map json "iamUserArn" IamUserArn.of_json in
+    let of_json json__ =
+      let iamUserArn = field_map json__ "iamUserArn" IamUserArn.of_json in
       let iamSessionArn =
-        field_map json "iamSessionArn" IamSessionArn.of_json in
+        field_map json__ "iamSessionArn" IamSessionArn.of_json in
       let instanceName =
-        field_map_exn json "instanceName" InstanceName.of_json in
+        field_map_exn json__ "instanceName" InstanceName.of_json in
       make ?iamUserArn ?iamSessionArn ~instanceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8663,7 +9023,7 @@ module RegisterApplicationRevisionInput =
       {
       applicationName: ApplicationName.t
         [@ocaml.doc
-          "The name of an AWS CodeDeploy application associated with the IAM user or AWS account."];
+          "The name of an CodeDeploy application associated with the user or Amazon Web Services account."];
       description: Description.t option
         [@ocaml.doc "A comment about the revision."];
       revision: RevisionLocation.t
@@ -8691,11 +9051,11 @@ module RegisterApplicationRevisionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ~revision ?description ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revision = field_map_exn json "revision" RevisionLocation.of_json in
-      let description = field_map json "description" Description.of_json in
+    let of_json json__ =
+      let revision = field_map_exn json__ "revision" RevisionLocation.of_json in
+      let description = field_map json__ "description" Description.of_json in
       let applicationName =
-        field_map_exn json "applicationName" ApplicationName.of_json in
+        field_map_exn json__ "applicationName" ApplicationName.of_json in
       make ~revision ?description ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8827,14 +9187,14 @@ module PutLifecycleEventHookExecutionStatusOutput =
           (Xml.child xml_arg0 "lifecycleEventHookExecutionId") in
       make ?lifecycleEventHookExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lifecycleEventHookExecutionId =
-        field_map json "lifecycleEventHookExecutionId"
+        field_map json__ "lifecycleEventHookExecutionId"
           LifecycleEventHookExecutionId.of_json in
       make ?lifecycleEventHookExecutionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sets the result of a Lambda validation function. The function validates lifecycle hooks during a deployment that uses the AWS Lambda or Amazon ECS compute platform. For AWS Lambda deployments, the available lifecycle hooks are BeforeAllowTraffic and AfterAllowTraffic. For Amazon ECS deployments, the available lifecycle hooks are BeforeInstall, AfterInstall, AfterAllowTestTraffic, BeforeAllowTraffic, and AfterAllowTraffic. Lambda validation functions return Succeeded or Failed. For more information, see AppSpec 'hooks' Section for an AWS Lambda Deployment and AppSpec 'hooks' Section for an Amazon ECS Deployment."]
+       "Sets the result of a Lambda validation function. The function validates lifecycle hooks during a deployment that uses the Lambda or Amazon ECS compute platform. For Lambda deployments, the available lifecycle hooks are BeforeAllowTraffic and AfterAllowTraffic. For Amazon ECS deployments, the available lifecycle hooks are BeforeInstall, AfterInstall, AfterAllowTestTraffic, BeforeAllowTraffic, and AfterAllowTraffic. Lambda validation functions return Succeeded or Failed. For more information, see AppSpec 'hooks' Section for an Lambda Deployment and AppSpec 'hooks' Section for an Amazon ECS Deployment."]
 module PutLifecycleEventHookExecutionStatusInput =
   struct
     type nonrec t =
@@ -8847,7 +9207,7 @@ module PutLifecycleEventHookExecutionStatusInput =
           "The execution ID of a deployment's lifecycle hook. A deployment lifecycle hook is specified in the hooks section of the AppSpec file."];
       status: LifecycleEventStatus.t option
         [@ocaml.doc
-          "The result of a Lambda function that validates a deployment lifecycle event. Succeeded and Failed are the only valid values for status."]}
+          "The result of a Lambda function that validates a deployment lifecycle event. The values listed in Valid Values are valid for lifecycle statuses in general; however, only Succeeded and Failed can be passed successfully in your API call."]}
     let make ?deploymentId =
       fun ?lifecycleEventHookExecutionId ->
         fun ?status ->
@@ -8873,16 +9233,16 @@ module PutLifecycleEventHookExecutionStatusInput =
           (Xml.child xml_arg0 "deploymentId") in
       make ?status ?lifecycleEventHookExecutionId ?deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" LifecycleEventStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" LifecycleEventStatus.of_json in
       let lifecycleEventHookExecutionId =
-        field_map json "lifecycleEventHookExecutionId"
+        field_map json__ "lifecycleEventHookExecutionId"
           LifecycleEventHookExecutionId.of_json in
-      let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
+      let deploymentId = field_map json__ "deploymentId" DeploymentId.of_json in
       make ?status ?lifecycleEventHookExecutionId ?deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sets the result of a Lambda validation function. The function validates lifecycle hooks during a deployment that uses the AWS Lambda or Amazon ECS compute platform. For AWS Lambda deployments, the available lifecycle hooks are BeforeAllowTraffic and AfterAllowTraffic. For Amazon ECS deployments, the available lifecycle hooks are BeforeInstall, AfterInstall, AfterAllowTestTraffic, BeforeAllowTraffic, and AfterAllowTraffic. Lambda validation functions return Succeeded or Failed. For more information, see AppSpec 'hooks' Section for an AWS Lambda Deployment and AppSpec 'hooks' Section for an Amazon ECS Deployment."]
+       "Sets the result of a Lambda validation function. The function validates lifecycle hooks during a deployment that uses the Lambda or Amazon ECS compute platform. For Lambda deployments, the available lifecycle hooks are BeforeAllowTraffic and AfterAllowTraffic. For Amazon ECS deployments, the available lifecycle hooks are BeforeInstall, AfterInstall, AfterAllowTestTraffic, BeforeAllowTraffic, and AfterAllowTraffic. Lambda validation functions return Succeeded or Failed. For more information, see AppSpec 'hooks' Section for an Lambda Deployment and AppSpec 'hooks' Section for an Amazon ECS Deployment."]
 module MultipleIamArnsProvidedException =
   struct
     type nonrec t = unit
@@ -8895,7 +9255,7 @@ module MultipleIamArnsProvidedException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Both an IAM user ARN and an IAM session ARN were included in the request. Use only one ARN type."]
+       "Both an user ARN and an IAM session ARN were included in the request. Use only one ARN type."]
 module ListTagsForResourceOutput =
   struct
     type nonrec t =
@@ -8965,9 +9325,9 @@ module ListTagsForResourceOutput =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       make ?nextToken ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8997,9 +9357,9 @@ module ListTagsForResourceInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?nextToken ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ?nextToken ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9077,10 +9437,10 @@ module ListOnPremisesInstancesOutput =
           (Xml.child xml_arg0 "instanceNames") in
       make ?nextToken ?instanceNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let instanceNames =
-        field_map json "instanceNames" InstanceNameList.of_json in
+        field_map json__ "instanceNames" InstanceNameList.of_json in
       make ?nextToken ?instanceNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9120,11 +9480,11 @@ module ListOnPremisesInstancesInput =
           (Xml.child xml_arg0 "registrationStatus") in
       make ?nextToken ?tagFilters ?registrationStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let tagFilters = field_map json "tagFilters" TagFilterList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let tagFilters = field_map json__ "tagFilters" TagFilterList.of_json in
       let registrationStatus =
-        field_map json "registrationStatus" RegistrationStatus.of_json in
+        field_map json__ "registrationStatus" RegistrationStatus.of_json in
       make ?nextToken ?tagFilters ?registrationStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9203,10 +9563,10 @@ module ListGitHubAccountTokenNamesOutput =
           (Xml.child xml_arg0 "tokenNameList") in
       make ?nextToken ?tokenNameList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let tokenNameList =
-        field_map json "tokenNameList" GitHubAccountTokenNameList.of_json in
+        field_map json__ "tokenNameList" GitHubAccountTokenNameList.of_json in
       make ?nextToken ?tokenNameList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9228,8 +9588,8 @@ module ListGitHubAccountTokenNamesInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9398,9 +9758,10 @@ module ListDeploymentsOutput =
           (Xml.child xml_arg0 "deployments") in
       make ?nextToken ?deployments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let deployments = field_map json "deployments" DeploymentsList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let deployments =
+        field_map json__ "deployments" DeploymentsList.of_json in
       make ?nextToken ?deployments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a ListDeployments operation."]
@@ -9410,7 +9771,7 @@ module ListDeploymentsInput =
       {
       applicationName: ApplicationName.t option
         [@ocaml.doc
-          "The name of an AWS CodeDeploy application associated with the IAM user or AWS account. If applicationName is specified, then deploymentGroupName must be specified. If it is not specified, then deploymentGroupName must not be specified."];
+          "The name of an CodeDeploy application associated with the user or Amazon Web Services account. If applicationName is specified, then deploymentGroupName must be specified. If it is not specified, then deploymentGroupName must not be specified."];
       deploymentGroupName: DeploymentGroupName.t option
         [@ocaml.doc
           "The name of a deployment group for the specified application. If deploymentGroupName is specified, then applicationName must be specified. If it is not specified, then applicationName must not be specified."];
@@ -9474,17 +9835,17 @@ module ListDeploymentsInput =
       make ?nextToken ?createTimeRange ?includeOnlyStatuses ?externalId
         ?deploymentGroupName ?applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let createTimeRange =
-        field_map json "createTimeRange" TimeRange.of_json in
+        field_map json__ "createTimeRange" TimeRange.of_json in
       let includeOnlyStatuses =
-        field_map json "includeOnlyStatuses" DeploymentStatusList.of_json in
-      let externalId = field_map json "externalId" ExternalId.of_json in
+        field_map json__ "includeOnlyStatuses" DeploymentStatusList.of_json in
+      let externalId = field_map json__ "externalId" ExternalId.of_json in
       let deploymentGroupName =
-        field_map json "deploymentGroupName" DeploymentGroupName.of_json in
+        field_map json__ "deploymentGroupName" DeploymentGroupName.of_json in
       let applicationName =
-        field_map json "applicationName" ApplicationName.of_json in
+        field_map json__ "applicationName" ApplicationName.of_json in
       make ?nextToken ?createTimeRange ?includeOnlyStatuses ?externalId
         ?deploymentGroupName ?applicationName ()
     let to_json v = composed_to_json to_value v
@@ -9509,6 +9870,8 @@ module ListDeploymentTargetsOutput =
       | `InvalidInstanceStatusException of InvalidInstanceStatusException.t 
       | `InvalidInstanceTypeException of InvalidInstanceTypeException.t 
       | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidTargetFilterNameException of
+          InvalidTargetFilterNameException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?targetIds =
       fun ?nextToken -> fun () -> { targetIds; nextToken }
@@ -9537,6 +9900,9 @@ module ListDeploymentTargetsOutput =
             (InvalidInstanceTypeException.of_json json)
       | "InvalidNextTokenException" ->
           `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidTargetFilterNameException" ->
+          `InvalidTargetFilterNameException
+            (InvalidTargetFilterNameException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -9565,6 +9931,9 @@ module ListDeploymentTargetsOutput =
             (InvalidInstanceTypeException.of_xml xml)
       | "InvalidNextTokenException" ->
           `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidTargetFilterNameException" ->
+          `InvalidTargetFilterNameException
+            (InvalidTargetFilterNameException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -9601,6 +9970,10 @@ module ListDeploymentTargetsOutput =
           `Assoc
             [("error", (`String "InvalidNextTokenException"));
             ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidTargetFilterNameException e ->
+          `Assoc
+            [("error", (`String "InvalidTargetFilterNameException"));
+            ("details", (InvalidTargetFilterNameException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -9618,9 +9991,9 @@ module ListDeploymentTargetsOutput =
         (Option.map ~f:TargetIdList.of_xml) (Xml.child xml_arg0 "targetIds") in
       make ?nextToken ?targetIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let targetIds = field_map json "targetIds" TargetIdList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let targetIds = field_map json__ "targetIds" TargetIdList.of_json in
       make ?nextToken ?targetIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9629,7 +10002,7 @@ module ListDeploymentTargetsInput =
   struct
     type nonrec t =
       {
-      deploymentId: DeploymentId.t option
+      deploymentId: DeploymentId.t
         [@ocaml.doc "The unique ID of a deployment."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -9637,14 +10010,14 @@ module ListDeploymentTargetsInput =
       targetFilters: TargetFilters.t option
         [@ocaml.doc
           "A key used to filter the returned targets. The two valid values are: TargetStatus - A TargetStatus filter string can be Failed, InProgress, Pending, Ready, Skipped, Succeeded, or Unknown. ServerInstanceLabel - A ServerInstanceLabel filter string can be Blue or Green."]}
-    let make ?deploymentId =
-      fun ?nextToken ->
-        fun ?targetFilters ->
-          fun () -> { deploymentId; nextToken; targetFilters }
+    let context_ = "ListDeploymentTargetsInput"
+    let make ?nextToken =
+      fun ?targetFilters ->
+        fun ~deploymentId ->
+          fun () -> { nextToken; targetFilters; deploymentId }
     let to_value x =
       structure_to_value
-        [("deploymentId",
-           (Option.map x.deploymentId ~f:DeploymentId.to_value));
+        [("deploymentId", (Some (DeploymentId.to_value x.deploymentId)));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("targetFilters",
           (Option.map x.targetFilters ~f:TargetFilters.to_value))]
@@ -9656,16 +10029,17 @@ module ListDeploymentTargetsInput =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let deploymentId =
-        (Option.map ~f:DeploymentId.of_xml)
-          (Xml.child xml_arg0 "deploymentId") in
-      make ?targetFilters ?nextToken ?deploymentId ()
+        DeploymentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "deploymentId") in
+      make ?targetFilters ?nextToken ~deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetFilters =
-        field_map json "targetFilters" TargetFilters.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
-      make ?targetFilters ?nextToken ?deploymentId ()
+        field_map json__ "targetFilters" TargetFilters.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let deploymentId =
+        field_map_exn json__ "deploymentId" DeploymentId.of_json in
+      make ?targetFilters ?nextToken ~deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns an array of target IDs that are associated a deployment."]
@@ -9823,10 +10197,10 @@ module ListDeploymentInstancesOutput =
           (Xml.child xml_arg0 "instancesList") in
       make ?nextToken ?instancesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let instancesList =
-        field_map json "instancesList" InstancesList.of_json in
+        field_map json__ "instancesList" InstancesList.of_json in
       make ?nextToken ?instancesList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9882,14 +10256,14 @@ module ListDeploymentInstancesInput =
       make ?instanceTypeFilter ?instanceStatusFilter ?nextToken ~deploymentId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceTypeFilter =
-        field_map json "instanceTypeFilter" InstanceTypeList.of_json in
+        field_map json__ "instanceTypeFilter" InstanceTypeList.of_json in
       let instanceStatusFilter =
-        field_map json "instanceStatusFilter" InstanceStatusList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+        field_map json__ "instanceStatusFilter" InstanceStatusList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let deploymentId =
-        field_map_exn json "deploymentId" DeploymentId.of_json in
+        field_map_exn json__ "deploymentId" DeploymentId.of_json in
       make ?instanceTypeFilter ?instanceStatusFilter ?nextToken ~deploymentId
         ()
     let to_json v = composed_to_json to_value v
@@ -9992,12 +10366,12 @@ module ListDeploymentGroupsOutput =
           (Xml.child xml_arg0 "applicationName") in
       make ?nextToken ?deploymentGroups ?applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let deploymentGroups =
-        field_map json "deploymentGroups" DeploymentGroupsList.of_json in
+        field_map json__ "deploymentGroups" DeploymentGroupsList.of_json in
       let applicationName =
-        field_map json "applicationName" ApplicationName.of_json in
+        field_map json__ "applicationName" ApplicationName.of_json in
       make ?nextToken ?deploymentGroups ?applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10008,7 +10382,7 @@ module ListDeploymentGroupsInput =
       {
       applicationName: ApplicationName.t
         [@ocaml.doc
-          "The name of an AWS CodeDeploy application associated with the IAM user or AWS account."];
+          "The name of an CodeDeploy application associated with the user or Amazon Web Services account."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "An identifier returned from the previous list deployment groups call. It can be used to return the next set of deployment groups in the list."]}
@@ -10029,10 +10403,10 @@ module ListDeploymentGroupsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ?nextToken ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let applicationName =
-        field_map_exn json "applicationName" ApplicationName.of_json in
+        field_map_exn json__ "applicationName" ApplicationName.of_json in
       make ?nextToken ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10091,10 +10465,11 @@ module ListDeploymentConfigsOutput =
           (Xml.child xml_arg0 "deploymentConfigsList") in
       make ?nextToken ?deploymentConfigsList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let deploymentConfigsList =
-        field_map json "deploymentConfigsList" DeploymentConfigsList.of_json in
+        field_map json__ "deploymentConfigsList"
+          DeploymentConfigsList.of_json in
       make ?nextToken ?deploymentConfigsList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10116,8 +10491,8 @@ module ListDeploymentConfigsInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10174,10 +10549,10 @@ module ListApplicationsOutput =
           (Xml.child xml_arg0 "applications") in
       make ?nextToken ?applications ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let applications =
-        field_map json "applications" ApplicationsList.of_json in
+        field_map json__ "applications" ApplicationsList.of_json in
       make ?nextToken ?applications ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a ListApplications operation."]
@@ -10198,8 +10573,8 @@ module ListApplicationsInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a ListApplications operation."]
@@ -10357,9 +10732,10 @@ module ListApplicationRevisionsOutput =
           (Xml.child xml_arg0 "revisions") in
       make ?nextToken ?revisions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let revisions = field_map json "revisions" RevisionLocationList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let revisions =
+        field_map json__ "revisions" RevisionLocationList.of_json in
       make ?nextToken ?revisions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10370,10 +10746,10 @@ module ListApplicationRevisionsInput =
       {
       applicationName: ApplicationName.t
         [@ocaml.doc
-          "The name of an AWS CodeDeploy application associated with the IAM user or AWS account."];
+          "The name of an CodeDeploy application associated with the user or Amazon Web Services account."];
       sortBy: ApplicationRevisionSortBy.t option
         [@ocaml.doc
-          "The column name to use to sort the list results: registerTime: Sort by the time the revisions were registered with AWS CodeDeploy. firstUsedTime: Sort by the time the revisions were first used in a deployment. lastUsedTime: Sort by the time the revisions were last used in a deployment. If not specified or set to null, the results are returned in an arbitrary order."];
+          "The column name to use to sort the list results: registerTime: Sort by the time the revisions were registered with CodeDeploy. firstUsedTime: Sort by the time the revisions were first used in a deployment. lastUsedTime: Sort by the time the revisions were last used in a deployment. If not specified or set to null, the results are returned in an arbitrary order."];
       sortOrder: SortOrder.t option
         [@ocaml.doc
           "The order in which to sort the list results: ascending: ascending order. descending: descending order. If not specified, the results are sorted in ascending order. If set to null, the results are sorted in an arbitrary order."];
@@ -10441,15 +10817,17 @@ module ListApplicationRevisionsInput =
       make ?nextToken ?deployed ?s3KeyPrefix ?s3Bucket ?sortOrder ?sortBy
         ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let deployed = field_map json "deployed" ListStateFilterAction.of_json in
-      let s3KeyPrefix = field_map json "s3KeyPrefix" S3Key.of_json in
-      let s3Bucket = field_map json "s3Bucket" S3Bucket.of_json in
-      let sortOrder = field_map json "sortOrder" SortOrder.of_json in
-      let sortBy = field_map json "sortBy" ApplicationRevisionSortBy.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let deployed =
+        field_map json__ "deployed" ListStateFilterAction.of_json in
+      let s3KeyPrefix = field_map json__ "s3KeyPrefix" S3Key.of_json in
+      let s3Bucket = field_map json__ "s3Bucket" S3Bucket.of_json in
+      let sortOrder = field_map json__ "sortOrder" SortOrder.of_json in
+      let sortBy =
+        field_map json__ "sortBy" ApplicationRevisionSortBy.of_json in
       let applicationName =
-        field_map_exn json "applicationName" ApplicationName.of_json in
+        field_map_exn json__ "applicationName" ApplicationName.of_json in
       make ?nextToken ?deployed ?s3KeyPrefix ?s3Bucket ?sortOrder ?sortBy
         ~applicationName ()
     let to_json v = composed_to_json to_value v
@@ -10502,7 +10880,7 @@ module InvalidIamUserArnException =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The IAM user ARN was specified in an invalid format."]
+  end[@@ocaml.doc "The user ARN was specified in an invalid format."]
 module InvalidIamSessionArnException =
   struct
     type nonrec t = unit
@@ -10564,7 +10942,7 @@ module IamUserArnRequiredException =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An IAM user ARN was not specified."]
+  end[@@ocaml.doc "An user ARN was not specified."]
 module IamUserArnAlreadyRegisteredException =
   struct
     type nonrec t = unit
@@ -10577,7 +10955,7 @@ module IamUserArnAlreadyRegisteredException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified IAM user ARN is already registered with an on-premises instance."]
+       "The specified user ARN is already registered with an on-premises instance."]
 module IamSessionArnAlreadyRegisteredException =
   struct
     type nonrec t = unit
@@ -10603,7 +10981,7 @@ module IamArnRequiredException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "No IAM ARN was included in the request. You must use an IAM session ARN or IAM user ARN in the request."]
+       "No IAM ARN was included in the request. You must use an IAM session ARN or user ARN in the request."]
 module GetOnPremisesInstanceOutput =
   struct
     type nonrec t =
@@ -10673,8 +11051,8 @@ module GetOnPremisesInstanceOutput =
           (Xml.child xml_arg0 "instanceInfo") in
       make ?instanceInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceInfo = field_map json "instanceInfo" InstanceInfo.of_json in
+    let of_json json__ =
+      let instanceInfo = field_map json__ "instanceInfo" InstanceInfo.of_json in
       make ?instanceInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10698,9 +11076,9 @@ module GetOnPremisesInstanceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "instanceName") in
       make ~instanceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceName =
-        field_map_exn json "instanceName" InstanceName.of_json in
+        field_map_exn json__ "instanceName" InstanceName.of_json in
       make ~instanceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10834,9 +11212,9 @@ module GetDeploymentTargetOutput =
           (Xml.child xml_arg0 "deploymentTarget") in
       make ?deploymentTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentTarget =
-        field_map json "deploymentTarget" DeploymentTarget.of_json in
+        field_map json__ "deploymentTarget" DeploymentTarget.of_json in
       make ?deploymentTarget ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a deployment target."]
@@ -10844,30 +11222,31 @@ module GetDeploymentTargetInput =
   struct
     type nonrec t =
       {
-      deploymentId: DeploymentId.t option
+      deploymentId: DeploymentId.t
         [@ocaml.doc "The unique ID of a deployment."];
-      targetId: TargetId.t option
+      targetId: TargetId.t
         [@ocaml.doc "The unique ID of a deployment target."]}
-    let make ?deploymentId =
-      fun ?targetId -> fun () -> { deploymentId; targetId }
+    let context_ = "GetDeploymentTargetInput"
+    let make ~deploymentId =
+      fun ~targetId -> fun () -> { deploymentId; targetId }
     let to_value x =
       structure_to_value
-        [("deploymentId",
-           (Option.map x.deploymentId ~f:DeploymentId.to_value));
-        ("targetId", (Option.map x.targetId ~f:TargetId.to_value))]
+        [("deploymentId", (Some (DeploymentId.to_value x.deploymentId)));
+        ("targetId", (Some (TargetId.to_value x.targetId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let targetId =
-        (Option.map ~f:TargetId.of_xml) (Xml.child xml_arg0 "targetId") in
+        TargetId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "targetId") in
       let deploymentId =
-        (Option.map ~f:DeploymentId.of_xml)
-          (Xml.child xml_arg0 "deploymentId") in
-      make ?targetId ?deploymentId ()
+        DeploymentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "deploymentId") in
+      make ~targetId ~deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetId = field_map json "targetId" TargetId.of_json in
-      let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
-      make ?targetId ?deploymentId ()
+    let of_json json__ =
+      let targetId = field_map_exn json__ "targetId" TargetId.of_json in
+      let deploymentId =
+        field_map_exn json__ "deploymentId" DeploymentId.of_json in
+      make ~targetId ~deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a deployment target."]
 module GetDeploymentOutput =
@@ -10940,9 +11319,9 @@ module GetDeploymentOutput =
           (Xml.child xml_arg0 "deploymentInfo") in
       make ?deploymentInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentInfo =
-        field_map json "deploymentInfo" DeploymentInfo.of_json in
+        field_map json__ "deploymentInfo" DeploymentInfo.of_json in
       make ?deploymentInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a GetDeployment operation."]
@@ -11060,9 +11439,9 @@ module GetDeploymentInstanceOutput =
           (Xml.child xml_arg0 "instanceSummary") in
       make ?instanceSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceSummary =
-        field_map json "instanceSummary" InstanceSummary.of_json in
+        field_map json__ "instanceSummary" InstanceSummary.of_json in
       make ?instanceSummary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11092,10 +11471,10 @@ module GetDeploymentInstanceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentId") in
       make ~instanceId ~deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceId = field_map_exn json "instanceId" InstanceId.of_json in
+    let of_json json__ =
+      let instanceId = field_map_exn json__ "instanceId" InstanceId.of_json in
       let deploymentId =
-        field_map_exn json "deploymentId" DeploymentId.of_json in
+        field_map_exn json__ "deploymentId" DeploymentId.of_json in
       make ~instanceId ~deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11106,7 +11485,7 @@ module GetDeploymentInput =
       {
       deploymentId: DeploymentId.t
         [@ocaml.doc
-          "The unique ID of a deployment associated with the IAM user or AWS account."]}
+          "The unique ID of a deployment associated with the user or Amazon Web Services account."]}
     let context_ = "GetDeploymentInput"
     let make ~deploymentId = fun () -> { deploymentId }
     let to_value x =
@@ -11119,9 +11498,9 @@ module GetDeploymentInput =
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentId") in
       make ~deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentId =
-        field_map_exn json "deploymentId" DeploymentId.of_json in
+        field_map_exn json__ "deploymentId" DeploymentId.of_json in
       make ~deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a GetDeployment operation."]
@@ -11245,9 +11624,9 @@ module GetDeploymentGroupOutput =
           (Xml.child xml_arg0 "deploymentGroupInfo") in
       make ?deploymentGroupInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentGroupInfo =
-        field_map json "deploymentGroupInfo" DeploymentGroupInfo.of_json in
+        field_map json__ "deploymentGroupInfo" DeploymentGroupInfo.of_json in
       make ?deploymentGroupInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a GetDeploymentGroup operation."]
@@ -11257,7 +11636,7 @@ module GetDeploymentGroupInput =
       {
       applicationName: ApplicationName.t
         [@ocaml.doc
-          "The name of an AWS CodeDeploy application associated with the IAM user or AWS account."];
+          "The name of an CodeDeploy application associated with the user or Amazon Web Services account."];
       deploymentGroupName: DeploymentGroupName.t
         [@ocaml.doc
           "The name of a deployment group for the specified application."]}
@@ -11281,11 +11660,12 @@ module GetDeploymentGroupInput =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ~deploymentGroupName ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentGroupName =
-        field_map_exn json "deploymentGroupName" DeploymentGroupName.of_json in
+        field_map_exn json__ "deploymentGroupName"
+          DeploymentGroupName.of_json in
       let applicationName =
-        field_map_exn json "applicationName" ApplicationName.of_json in
+        field_map_exn json__ "applicationName" ApplicationName.of_json in
       make ~deploymentGroupName ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a GetDeploymentGroup operation."]
@@ -11374,9 +11754,9 @@ module GetDeploymentConfigOutput =
           (Xml.child xml_arg0 "deploymentConfigInfo") in
       make ?deploymentConfigInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentConfigInfo =
-        field_map json "deploymentConfigInfo" DeploymentConfigInfo.of_json in
+        field_map json__ "deploymentConfigInfo" DeploymentConfigInfo.of_json in
       make ?deploymentConfigInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11387,7 +11767,7 @@ module GetDeploymentConfigInput =
       {
       deploymentConfigName: DeploymentConfigName.t
         [@ocaml.doc
-          "The name of a deployment configuration associated with the IAM user or AWS account."]}
+          "The name of a deployment configuration associated with the user or Amazon Web Services account."]}
     let context_ = "GetDeploymentConfigInput"
     let make ~deploymentConfigName = fun () -> { deploymentConfigName }
     let to_value x =
@@ -11401,9 +11781,9 @@ module GetDeploymentConfigInput =
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentConfigName") in
       make ~deploymentConfigName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentConfigName =
-        field_map_exn json "deploymentConfigName"
+        field_map_exn json__ "deploymentConfigName"
           DeploymentConfigName.of_json in
       make ~deploymentConfigName ()
     let to_json v = composed_to_json to_value v
@@ -11527,12 +11907,12 @@ module GetApplicationRevisionOutput =
           (Xml.child xml_arg0 "applicationName") in
       make ?revisionInfo ?revision ?applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let revisionInfo =
-        field_map json "revisionInfo" GenericRevisionInfo.of_json in
-      let revision = field_map json "revision" RevisionLocation.of_json in
+        field_map json__ "revisionInfo" GenericRevisionInfo.of_json in
+      let revision = field_map json__ "revision" RevisionLocation.of_json in
       let applicationName =
-        field_map json "applicationName" ApplicationName.of_json in
+        field_map json__ "applicationName" ApplicationName.of_json in
       make ?revisionInfo ?revision ?applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11565,10 +11945,10 @@ module GetApplicationRevisionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ~revision ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revision = field_map_exn json "revision" RevisionLocation.of_json in
+    let of_json json__ =
+      let revision = field_map_exn json__ "revision" RevisionLocation.of_json in
       let applicationName =
-        field_map_exn json "applicationName" ApplicationName.of_json in
+        field_map_exn json__ "applicationName" ApplicationName.of_json in
       make ~revision ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11645,8 +12025,9 @@ module GetApplicationOutput =
           (Xml.child xml_arg0 "application") in
       make ?application ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let application = field_map json "application" ApplicationInfo.of_json in
+    let of_json json__ =
+      let application =
+        field_map json__ "application" ApplicationInfo.of_json in
       make ?application ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a GetApplication operation."]
@@ -11656,7 +12037,7 @@ module GetApplicationInput =
       {
       applicationName: ApplicationName.t
         [@ocaml.doc
-          "The name of an AWS CodeDeploy application associated with the IAM user or AWS account."]}
+          "The name of an CodeDeploy application associated with the user or Amazon Web Services account."]}
     let context_ = "GetApplicationInput"
     let make ~applicationName = fun () -> { applicationName }
     let to_value x =
@@ -11670,9 +12051,9 @@ module GetApplicationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationName =
-        field_map_exn json "applicationName" ApplicationName.of_json in
+        field_map_exn json__ "applicationName" ApplicationName.of_json in
       make ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a GetApplication operation."]
@@ -11694,9 +12075,9 @@ module DeregisterOnPremisesInstanceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "instanceName") in
       make ~instanceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceName =
-        field_map_exn json "instanceName" InstanceName.of_json in
+        field_map_exn json__ "instanceName" InstanceName.of_json in
       make ~instanceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11768,7 +12149,8 @@ module DeleteResourcesByExternalIdOutput =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes resources linked to an external ID."]
+  end[@@ocaml.doc
+       "Deletes resources linked to an external ID. This action only applies if you have configured blue/green deployments through CloudFormation. It is not necessary to call this action directly. CloudFormation calls it on your behalf when it needs to delete stack resources. This action is offered publicly in case you need to delete resources to comply with General Data Protection Regulation (GDPR) requirements."]
 module DeleteResourcesByExternalIdInput =
   struct
     type nonrec t =
@@ -11786,11 +12168,12 @@ module DeleteResourcesByExternalIdInput =
         (Option.map ~f:ExternalId.of_xml) (Xml.child xml_arg0 "externalId") in
       make ?externalId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let externalId = field_map json "externalId" ExternalId.of_json in
+    let of_json json__ =
+      let externalId = field_map json__ "externalId" ExternalId.of_json in
       make ?externalId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes resources linked to an external ID."]
+  end[@@ocaml.doc
+       "Deletes resources linked to an external ID. This action only applies if you have configured blue/green deployments through CloudFormation. It is not necessary to call this action directly. CloudFormation calls it on your behalf when it needs to delete stack resources. This action is offered publicly in case you need to delete resources to comply with General Data Protection Regulation (GDPR) requirements."]
 module DeleteGitHubAccountTokenOutput =
   struct
     type nonrec t =
@@ -11887,9 +12270,9 @@ module DeleteGitHubAccountTokenOutput =
           (Xml.child xml_arg0 "tokenName") in
       make ?tokenName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tokenName =
-        field_map json "tokenName" GitHubAccountTokenName.of_json in
+        field_map json__ "tokenName" GitHubAccountTokenName.of_json in
       make ?tokenName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11912,9 +12295,9 @@ module DeleteGitHubAccountTokenInput =
           (Xml.child xml_arg0 "tokenName") in
       make ?tokenName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tokenName =
-        field_map json "tokenName" GitHubAccountTokenName.of_json in
+        field_map json__ "tokenName" GitHubAccountTokenName.of_json in
       make ?tokenName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a DeleteGitHubAccount operation."]
@@ -11924,7 +12307,7 @@ module DeleteDeploymentGroupOutput =
       {
       hooksNotCleanedUp: AutoScalingGroupList.t option
         [@ocaml.doc
-          "If the output contains no data, and the corresponding deployment group contained at least one Auto Scaling group, AWS CodeDeploy successfully removed all corresponding Auto Scaling lifecycle event hooks from the Amazon EC2 instances in the Auto Scaling group. If the output contains data, AWS CodeDeploy could not remove some Auto Scaling lifecycle event hooks from the Amazon EC2 instances in the Auto Scaling group."]}
+          "If the output contains no data, and the corresponding deployment group contained at least one Auto Scaling group, CodeDeploy successfully removed all corresponding Auto Scaling lifecycle event hooks from the Amazon EC2 instances in the Auto Scaling group. If the output contains data, CodeDeploy could not remove some Auto Scaling lifecycle event hooks from the Amazon EC2 instances in the Auto Scaling group."]}
     type nonrec error =
       [
         `ApplicationNameRequiredException of
@@ -12012,9 +12395,9 @@ module DeleteDeploymentGroupOutput =
           (Xml.child xml_arg0 "hooksNotCleanedUp") in
       make ?hooksNotCleanedUp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hooksNotCleanedUp =
-        field_map json "hooksNotCleanedUp" AutoScalingGroupList.of_json in
+        field_map json__ "hooksNotCleanedUp" AutoScalingGroupList.of_json in
       make ?hooksNotCleanedUp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12025,7 +12408,7 @@ module DeleteDeploymentGroupInput =
       {
       applicationName: ApplicationName.t
         [@ocaml.doc
-          "The name of an AWS CodeDeploy application associated with the IAM user or AWS account."];
+          "The name of an CodeDeploy application associated with the user or Amazon Web Services account."];
       deploymentGroupName: DeploymentGroupName.t
         [@ocaml.doc
           "The name of a deployment group for the specified application."]}
@@ -12049,11 +12432,12 @@ module DeleteDeploymentGroupInput =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ~deploymentGroupName ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentGroupName =
-        field_map_exn json "deploymentGroupName" DeploymentGroupName.of_json in
+        field_map_exn json__ "deploymentGroupName"
+          DeploymentGroupName.of_json in
       let applicationName =
-        field_map_exn json "applicationName" ApplicationName.of_json in
+        field_map_exn json__ "applicationName" ApplicationName.of_json in
       make ~deploymentGroupName ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12064,7 +12448,7 @@ module DeleteDeploymentConfigInput =
       {
       deploymentConfigName: DeploymentConfigName.t
         [@ocaml.doc
-          "The name of a deployment configuration associated with the IAM user or AWS account."]}
+          "The name of a deployment configuration associated with the user or Amazon Web Services account."]}
     let context_ = "DeleteDeploymentConfigInput"
     let make ~deploymentConfigName = fun () -> { deploymentConfigName }
     let to_value x =
@@ -12078,9 +12462,9 @@ module DeleteDeploymentConfigInput =
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentConfigName") in
       make ~deploymentConfigName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentConfigName =
-        field_map_exn json "deploymentConfigName"
+        field_map_exn json__ "deploymentConfigName"
           DeploymentConfigName.of_json in
       make ~deploymentConfigName ()
     let to_json v = composed_to_json to_value v
@@ -12092,7 +12476,7 @@ module DeleteApplicationInput =
       {
       applicationName: ApplicationName.t
         [@ocaml.doc
-          "The name of an AWS CodeDeploy application associated with the IAM user or AWS account."]}
+          "The name of an CodeDeploy application associated with the user or Amazon Web Services account."]}
     let context_ = "DeleteApplicationInput"
     let make ~applicationName = fun () -> { applicationName }
     let to_value x =
@@ -12106,9 +12490,9 @@ module DeleteApplicationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationName =
-        field_map_exn json "applicationName" ApplicationName.of_json in
+        field_map_exn json__ "applicationName" ApplicationName.of_json in
       make ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a DeleteApplication operation."]
@@ -12119,8 +12503,8 @@ module CreateDeploymentOutput =
       deploymentId: DeploymentId.t option
         [@ocaml.doc "The unique ID of a deployment."]}
     type nonrec error =
-      [
-        `ApplicationDoesNotExistException of
+      [ `AlarmsLimitExceededException of AlarmsLimitExceededException.t 
+      | `ApplicationDoesNotExistException of
           ApplicationDoesNotExistException.t 
       | `ApplicationNameRequiredException of
           ApplicationNameRequiredException.t 
@@ -12133,6 +12517,7 @@ module CreateDeploymentOutput =
       | `DeploymentLimitExceededException of
           DeploymentLimitExceededException.t 
       | `DescriptionTooLongException of DescriptionTooLongException.t 
+      | `InvalidAlarmConfigException of InvalidAlarmConfigException.t 
       | `InvalidApplicationNameException of InvalidApplicationNameException.t 
       | `InvalidAutoRollbackConfigException of
           InvalidAutoRollbackConfigException.t 
@@ -12164,6 +12549,9 @@ module CreateDeploymentOutput =
     let make ?deploymentId = fun () -> { deploymentId }
     let error_of_json name json =
       match name with
+      | "AlarmsLimitExceededException" ->
+          `AlarmsLimitExceededException
+            (AlarmsLimitExceededException.of_json json)
       | "ApplicationDoesNotExistException" ->
           `ApplicationDoesNotExistException
             (ApplicationDoesNotExistException.of_json json)
@@ -12185,6 +12573,9 @@ module CreateDeploymentOutput =
       | "DescriptionTooLongException" ->
           `DescriptionTooLongException
             (DescriptionTooLongException.of_json json)
+      | "InvalidAlarmConfigException" ->
+          `InvalidAlarmConfigException
+            (InvalidAlarmConfigException.of_json json)
       | "InvalidApplicationNameException" ->
           `InvalidApplicationNameException
             (InvalidApplicationNameException.of_json json)
@@ -12237,6 +12628,9 @@ module CreateDeploymentOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AlarmsLimitExceededException" ->
+          `AlarmsLimitExceededException
+            (AlarmsLimitExceededException.of_xml xml)
       | "ApplicationDoesNotExistException" ->
           `ApplicationDoesNotExistException
             (ApplicationDoesNotExistException.of_xml xml)
@@ -12258,6 +12652,9 @@ module CreateDeploymentOutput =
       | "DescriptionTooLongException" ->
           `DescriptionTooLongException
             (DescriptionTooLongException.of_xml xml)
+      | "InvalidAlarmConfigException" ->
+          `InvalidAlarmConfigException
+            (InvalidAlarmConfigException.of_xml xml)
       | "InvalidApplicationNameException" ->
           `InvalidApplicationNameException
             (InvalidApplicationNameException.of_xml xml)
@@ -12309,6 +12706,10 @@ module CreateDeploymentOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AlarmsLimitExceededException e ->
+          `Assoc
+            [("error", (`String "AlarmsLimitExceededException"));
+            ("details", (AlarmsLimitExceededException.to_json e))]
       | `ApplicationDoesNotExistException e ->
           `Assoc
             [("error", (`String "ApplicationDoesNotExistException"));
@@ -12337,6 +12738,10 @@ module CreateDeploymentOutput =
           `Assoc
             [("error", (`String "DescriptionTooLongException"));
             ("details", (DescriptionTooLongException.to_json e))]
+      | `InvalidAlarmConfigException e ->
+          `Assoc
+            [("error", (`String "InvalidAlarmConfigException"));
+            ("details", (InvalidAlarmConfigException.to_json e))]
       | `InvalidApplicationNameException e ->
           `Assoc
             [("error", (`String "InvalidApplicationNameException"));
@@ -12427,8 +12832,8 @@ module CreateDeploymentOutput =
           (Xml.child xml_arg0 "deploymentId") in
       make ?deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
+    let of_json json__ =
+      let deploymentId = field_map json__ "deploymentId" DeploymentId.of_json in
       make ?deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a CreateDeployment operation."]
@@ -12438,19 +12843,19 @@ module CreateDeploymentInput =
       {
       applicationName: ApplicationName.t
         [@ocaml.doc
-          "The name of an AWS CodeDeploy application associated with the IAM user or AWS account."];
+          "The name of an CodeDeploy application associated with the user or Amazon Web Services account."];
       deploymentGroupName: DeploymentGroupName.t option
         [@ocaml.doc "The name of the deployment group."];
       revision: RevisionLocation.t option
         [@ocaml.doc "The type and location of the revision to deploy."];
       deploymentConfigName: DeploymentConfigName.t option
         [@ocaml.doc
-          "The name of a deployment configuration associated with the IAM user or AWS account. If not specified, the value configured in the deployment group is used as the default. If the deployment group does not have a deployment configuration associated with it, CodeDeployDefault.OneAtATime is used by default."];
+          "The name of a deployment configuration associated with the user or Amazon Web Services account. If not specified, the value configured in the deployment group is used as the default. If the deployment group does not have a deployment configuration associated with it, CodeDeployDefault.OneAtATime is used by default."];
       description: Description.t option
         [@ocaml.doc "A comment about the deployment."];
       ignoreApplicationStopFailures: Boolean.t option
         [@ocaml.doc
-          "If true, then if an ApplicationStop, BeforeBlockTraffic, or AfterBlockTraffic deployment lifecycle event to an instance fails, then the deployment continues to the next deployment lifecycle event. For example, if ApplicationStop fails, the deployment continues with DownloadBundle. If BeforeBlockTraffic fails, the deployment continues with BlockTraffic. If AfterBlockTraffic fails, the deployment continues with ApplicationStop. If false or not specified, then if a lifecycle event fails during a deployment to an instance, that deployment fails. If deployment to that instance is part of an overall deployment and the number of healthy hosts is not less than the minimum number of healthy hosts, then a deployment to the next instance is attempted. During a deployment, the AWS CodeDeploy agent runs the scripts specified for ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic in the AppSpec file from the previous successful deployment. (All other scripts are run from the AppSpec file in the current deployment.) If one of these scripts contains an error and does not run successfully, the deployment can fail. If the cause of the failure is a script from the last successful deployment that will never run successfully, create a new deployment and use ignoreApplicationStopFailures to specify that the ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic failures should be ignored."];
+          "If true, then if an ApplicationStop, BeforeBlockTraffic, or AfterBlockTraffic deployment lifecycle event to an instance fails, then the deployment continues to the next deployment lifecycle event. For example, if ApplicationStop fails, the deployment continues with DownloadBundle. If BeforeBlockTraffic fails, the deployment continues with BlockTraffic. If AfterBlockTraffic fails, the deployment continues with ApplicationStop. If false or not specified, then if a lifecycle event fails during a deployment to an instance, that deployment fails. If deployment to that instance is part of an overall deployment and the number of healthy hosts is not less than the minimum number of healthy hosts, then a deployment to the next instance is attempted. During a deployment, the CodeDeploy agent runs the scripts specified for ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic in the AppSpec file from the previous successful deployment. (All other scripts are run from the AppSpec file in the current deployment.) If one of these scripts contains an error and does not run successfully, the deployment can fail. If the cause of the failure is a script from the last successful deployment that will never run successfully, create a new deployment and use ignoreApplicationStopFailures to specify that the ApplicationStop, BeforeBlockTraffic, and AfterBlockTraffic failures should be ignored."];
       targetInstances: TargetInstances.t option
         [@ocaml.doc
           "Information about the instances that belong to the replacement environment in a blue/green deployment."];
@@ -12462,7 +12867,10 @@ module CreateDeploymentInput =
           "Indicates whether to deploy to all instances or only to instances that are not running the latest application revision."];
       fileExistsBehavior: FileExistsBehavior.t option
         [@ocaml.doc
-          "Information about how AWS CodeDeploy handles files that already exist in a deployment target location but weren't part of the previous successful deployment. The fileExistsBehavior parameter takes any of the following values: DISALLOW: The deployment fails. This is also the default behavior if no option is specified. OVERWRITE: The version of the file from the application revision currently being deployed replaces the version already on the instance. RETAIN: The version of the file already on the instance is kept and used as part of the new deployment."]}
+          "Information about how CodeDeploy handles files that already exist in a deployment target location but weren't part of the previous successful deployment. The fileExistsBehavior parameter takes any of the following values: DISALLOW: The deployment fails. This is also the default behavior if no option is specified. OVERWRITE: The version of the file from the application revision currently being deployed replaces the version already on the instance. RETAIN: The version of the file already on the instance is kept and used as part of the new deployment."];
+      overrideAlarmConfiguration: AlarmConfiguration.t option
+        [@ocaml.doc
+          "Allows you to specify information about alarms associated with a deployment. The alarm configuration that you specify here will override the alarm configuration at the deployment group level. Consider overriding the alarm configuration if you have set up alarms at the deployment group level that are causing deployment failures. In this case, you would call CreateDeployment to create a new deployment that uses a previous application revision that is known to work, and set its alarm configuration to turn off alarm polling. Turning off alarm polling ensures that the new deployment proceeds without being blocked by the alarm that was generated by the previous, failed, deployment. If you specify an overrideAlarmConfiguration, you need the UpdateDeploymentGroup IAM permission when calling CreateDeployment."]}
     let context_ = "CreateDeploymentInput"
     let make ?deploymentGroupName =
       fun ?revision ->
@@ -12473,20 +12881,22 @@ module CreateDeploymentInput =
                 fun ?autoRollbackConfiguration ->
                   fun ?updateOutdatedInstancesOnly ->
                     fun ?fileExistsBehavior ->
-                      fun ~applicationName ->
-                        fun () ->
-                          {
-                            deploymentGroupName;
-                            revision;
-                            deploymentConfigName;
-                            description;
-                            ignoreApplicationStopFailures;
-                            targetInstances;
-                            autoRollbackConfiguration;
-                            updateOutdatedInstancesOnly;
-                            fileExistsBehavior;
-                            applicationName
-                          }
+                      fun ?overrideAlarmConfiguration ->
+                        fun ~applicationName ->
+                          fun () ->
+                            {
+                              deploymentGroupName;
+                              revision;
+                              deploymentConfigName;
+                              description;
+                              ignoreApplicationStopFailures;
+                              targetInstances;
+                              autoRollbackConfiguration;
+                              updateOutdatedInstancesOnly;
+                              fileExistsBehavior;
+                              overrideAlarmConfiguration;
+                              applicationName
+                            }
     let to_value x =
       structure_to_value
         [("applicationName",
@@ -12507,9 +12917,15 @@ module CreateDeploymentInput =
         ("updateOutdatedInstancesOnly",
           (Option.map x.updateOutdatedInstancesOnly ~f:Boolean.to_value));
         ("fileExistsBehavior",
-          (Option.map x.fileExistsBehavior ~f:FileExistsBehavior.to_value))]
+          (Option.map x.fileExistsBehavior ~f:FileExistsBehavior.to_value));
+        ("overrideAlarmConfiguration",
+          (Option.map x.overrideAlarmConfiguration
+             ~f:AlarmConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let overrideAlarmConfiguration =
+        (Option.map ~f:AlarmConfiguration.of_xml)
+          (Xml.child xml_arg0 "overrideAlarmConfiguration") in
       let fileExistsBehavior =
         (Option.map ~f:FileExistsBehavior.of_xml)
           (Xml.child xml_arg0 "fileExistsBehavior") in
@@ -12539,35 +12955,40 @@ module CreateDeploymentInput =
       let applicationName =
         ApplicationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
-      make ?fileExistsBehavior ?updateOutdatedInstancesOnly
-        ?autoRollbackConfiguration ?targetInstances
-        ?ignoreApplicationStopFailures ?description ?deploymentConfigName
-        ?revision ?deploymentGroupName ~applicationName ()
+      make ?overrideAlarmConfiguration ?fileExistsBehavior
+        ?updateOutdatedInstancesOnly ?autoRollbackConfiguration
+        ?targetInstances ?ignoreApplicationStopFailures ?description
+        ?deploymentConfigName ?revision ?deploymentGroupName ~applicationName
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let overrideAlarmConfiguration =
+        field_map json__ "overrideAlarmConfiguration"
+          AlarmConfiguration.of_json in
       let fileExistsBehavior =
-        field_map json "fileExistsBehavior" FileExistsBehavior.of_json in
+        field_map json__ "fileExistsBehavior" FileExistsBehavior.of_json in
       let updateOutdatedInstancesOnly =
-        field_map json "updateOutdatedInstancesOnly" Boolean.of_json in
+        field_map json__ "updateOutdatedInstancesOnly" Boolean.of_json in
       let autoRollbackConfiguration =
-        field_map json "autoRollbackConfiguration"
+        field_map json__ "autoRollbackConfiguration"
           AutoRollbackConfiguration.of_json in
       let targetInstances =
-        field_map json "targetInstances" TargetInstances.of_json in
+        field_map json__ "targetInstances" TargetInstances.of_json in
       let ignoreApplicationStopFailures =
-        field_map json "ignoreApplicationStopFailures" Boolean.of_json in
-      let description = field_map json "description" Description.of_json in
+        field_map json__ "ignoreApplicationStopFailures" Boolean.of_json in
+      let description = field_map json__ "description" Description.of_json in
       let deploymentConfigName =
-        field_map json "deploymentConfigName" DeploymentConfigName.of_json in
-      let revision = field_map json "revision" RevisionLocation.of_json in
+        field_map json__ "deploymentConfigName" DeploymentConfigName.of_json in
+      let revision = field_map json__ "revision" RevisionLocation.of_json in
       let deploymentGroupName =
-        field_map json "deploymentGroupName" DeploymentGroupName.of_json in
+        field_map json__ "deploymentGroupName" DeploymentGroupName.of_json in
       let applicationName =
-        field_map_exn json "applicationName" ApplicationName.of_json in
-      make ?fileExistsBehavior ?updateOutdatedInstancesOnly
-        ?autoRollbackConfiguration ?targetInstances
-        ?ignoreApplicationStopFailures ?description ?deploymentConfigName
-        ?revision ?deploymentGroupName ~applicationName ()
+        field_map_exn json__ "applicationName" ApplicationName.of_json in
+      make ?overrideAlarmConfiguration ?fileExistsBehavior
+        ?updateOutdatedInstancesOnly ?autoRollbackConfiguration
+        ?targetInstances ?ignoreApplicationStopFailures ?description
+        ?deploymentConfigName ?revision ?deploymentGroupName ~applicationName
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a CreateDeployment operation."]
 module CreateDeploymentGroupOutput =
@@ -12977,9 +13398,9 @@ module CreateDeploymentGroupOutput =
           (Xml.child xml_arg0 "deploymentGroupId") in
       make ?deploymentGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentGroupId =
-        field_map json "deploymentGroupId" DeploymentGroupId.of_json in
+        field_map json__ "deploymentGroupId" DeploymentGroupId.of_json in
       make ?deploymentGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12990,16 +13411,16 @@ module CreateDeploymentGroupInput =
       {
       applicationName: ApplicationName.t
         [@ocaml.doc
-          "The name of an AWS CodeDeploy application associated with the IAM user or AWS account."];
+          "The name of an CodeDeploy application associated with the user or Amazon Web Services account."];
       deploymentGroupName: DeploymentGroupName.t
         [@ocaml.doc
           "The name of a new deployment group for the specified application."];
       deploymentConfigName: DeploymentConfigName.t option
         [@ocaml.doc
-          "If specified, the deployment configuration name can be either one of the predefined configurations provided with AWS CodeDeploy or a custom deployment configuration that you create by calling the create deployment configuration operation. CodeDeployDefault.OneAtATime is the default deployment configuration. It is used if a configuration isn't specified for the deployment or deployment group. For more information about the predefined deployment configurations in AWS CodeDeploy, see Working with Deployment Configurations in CodeDeploy in the AWS CodeDeploy User Guide."];
+          "If specified, the deployment configuration name can be either one of the predefined configurations provided with CodeDeploy or a custom deployment configuration that you create by calling the create deployment configuration operation. CodeDeployDefault.OneAtATime is the default deployment configuration. It is used if a configuration isn't specified for the deployment or deployment group. For more information about the predefined deployment configurations in CodeDeploy, see Working with Deployment Configurations in CodeDeploy in the CodeDeploy User Guide."];
       ec2TagFilters: EC2TagFilterList.t option
         [@ocaml.doc
-          "The Amazon EC2 tags on which to filter. The deployment group includes EC2 instances with any of the specified tags. Cannot be used in the same call as ec2TagSet."];
+          "The Amazon EC2 tags on which to filter. The deployment group includes Amazon EC2 instances with any of the specified tags. Cannot be used in the same call as ec2TagSet."];
       onPremisesInstanceTagFilters: TagFilterList.t option
         [@ocaml.doc
           "The on-premises instance tags on which to filter. The deployment group includes on-premises instances with any of the specified tags. Cannot be used in the same call as OnPremisesTagSet."];
@@ -13007,10 +13428,10 @@ module CreateDeploymentGroupInput =
         [@ocaml.doc "A list of associated Amazon EC2 Auto Scaling groups."];
       serviceRoleArn: Role.t
         [@ocaml.doc
-          "A service role Amazon Resource Name (ARN) that allows AWS CodeDeploy to act on the user's behalf when interacting with AWS services."];
+          "A service role Amazon Resource Name (ARN) that allows CodeDeploy to act on the user's behalf when interacting with Amazon Web Services services."];
       triggerConfigurations: TriggerConfigList.t option
         [@ocaml.doc
-          "Information about triggers to create when the deployment group is created. For examples, see Create a Trigger for an AWS CodeDeploy Event in the AWS CodeDeploy User Guide."];
+          "Information about triggers to create when the deployment group is created. For examples, see Create a Trigger for an CodeDeploy Event in the CodeDeploy User Guide."];
       alarmConfiguration: AlarmConfiguration.t option
         [@ocaml.doc
           "Information to add about Amazon CloudWatch alarms when the deployment group is created."];
@@ -13019,7 +13440,7 @@ module CreateDeploymentGroupInput =
           "Configuration information for an automatic rollback that is added when a deployment group is created."];
       outdatedInstancesStrategy: OutdatedInstancesStrategy.t option
         [@ocaml.doc
-          "Indicates what happens when new EC2 instances are launched mid-deployment and do not receive the deployed application revision. If this option is set to UPDATE or is unspecified, CodeDeploy initiates one or more 'auto-update outdated instances' deployments to apply the deployed application revision to the new EC2 instances. If this option is set to IGNORE, CodeDeploy does not initiate a deployment to update the new EC2 instances. This may result in instances having different revisions."];
+          "Indicates what happens when new Amazon EC2 instances are launched mid-deployment and do not receive the deployed application revision. If this option is set to UPDATE or is unspecified, CodeDeploy initiates one or more 'auto-update outdated instances' deployments to apply the deployed application revision to the new Amazon EC2 instances. If this option is set to IGNORE, CodeDeploy does not initiate a deployment to update the new Amazon EC2 instances. This may result in instances having different revisions."];
       deploymentStyle: DeploymentStyle.t option
         [@ocaml.doc
           "Information about the type of deployment, in-place or blue/green, that you want to run and whether to route deployment traffic behind a load balancer."];
@@ -13032,7 +13453,7 @@ module CreateDeploymentGroupInput =
           "Information about the load balancer used in a deployment."];
       ec2TagSet: EC2TagSet.t option
         [@ocaml.doc
-          "Information about groups of tags applied to EC2 instances. The deployment group includes only EC2 instances identified by all the tag groups. Cannot be used in the same call as ec2TagFilters."];
+          "Information about groups of tags applied to Amazon EC2 instances. The deployment group includes only Amazon EC2 instances identified by all the tag groups. Cannot be used in the same call as ec2TagFilters."];
       ecsServices: ECSServiceList.t option
         [@ocaml.doc
           "The target Amazon ECS services in the deployment group. This applies only to deployment groups that use the Amazon ECS compute platform. A target Amazon ECS service is specified as an Amazon ECS cluster and service name pair using the format <clustername>:<servicename>."];
@@ -13041,7 +13462,10 @@ module CreateDeploymentGroupInput =
           "Information about groups of tags applied to on-premises instances. The deployment group includes only on-premises instances identified by all of the tag groups. Cannot be used in the same call as onPremisesInstanceTagFilters."];
       tags: TagList.t option
         [@ocaml.doc
-          "The metadata that you apply to CodeDeploy deployment groups to help you organize and categorize them. Each tag consists of a key and an optional value, both of which you define."]}
+          "The metadata that you apply to CodeDeploy deployment groups to help you organize and categorize them. Each tag consists of a key and an optional value, both of which you define."];
+      terminationHookEnabled: NullableBoolean.t option
+        [@ocaml.doc
+          "This parameter only applies if you are using CodeDeploy with Amazon EC2 Auto Scaling. For more information, see Integrating CodeDeploy with Amazon EC2 Auto Scaling in the CodeDeploy User Guide. Set terminationHookEnabled to true to have CodeDeploy install a termination hook into your Auto Scaling group when you create a deployment group. When this hook is installed, CodeDeploy will perform termination deployments. For information about termination deployments, see Enabling termination deployments during Auto Scaling scale-in events in the CodeDeploy User Guide. For more information about Auto Scaling scale-in events, see the Scale in topic in the Amazon EC2 Auto Scaling User Guide."]}
     let context_ = "CreateDeploymentGroupInput"
     let make ?deploymentConfigName =
       fun ?ec2TagFilters ->
@@ -13058,30 +13482,32 @@ module CreateDeploymentGroupInput =
                             fun ?ecsServices ->
                               fun ?onPremisesTagSet ->
                                 fun ?tags ->
-                                  fun ~applicationName ->
-                                    fun ~deploymentGroupName ->
-                                      fun ~serviceRoleArn ->
-                                        fun () ->
-                                          {
-                                            deploymentConfigName;
-                                            ec2TagFilters;
-                                            onPremisesInstanceTagFilters;
-                                            autoScalingGroups;
-                                            triggerConfigurations;
-                                            alarmConfiguration;
-                                            autoRollbackConfiguration;
-                                            outdatedInstancesStrategy;
-                                            deploymentStyle;
-                                            blueGreenDeploymentConfiguration;
-                                            loadBalancerInfo;
-                                            ec2TagSet;
-                                            ecsServices;
-                                            onPremisesTagSet;
-                                            tags;
-                                            applicationName;
-                                            deploymentGroupName;
-                                            serviceRoleArn
-                                          }
+                                  fun ?terminationHookEnabled ->
+                                    fun ~applicationName ->
+                                      fun ~deploymentGroupName ->
+                                        fun ~serviceRoleArn ->
+                                          fun () ->
+                                            {
+                                              deploymentConfigName;
+                                              ec2TagFilters;
+                                              onPremisesInstanceTagFilters;
+                                              autoScalingGroups;
+                                              triggerConfigurations;
+                                              alarmConfiguration;
+                                              autoRollbackConfiguration;
+                                              outdatedInstancesStrategy;
+                                              deploymentStyle;
+                                              blueGreenDeploymentConfiguration;
+                                              loadBalancerInfo;
+                                              ec2TagSet;
+                                              ecsServices;
+                                              onPremisesTagSet;
+                                              tags;
+                                              terminationHookEnabled;
+                                              applicationName;
+                                              deploymentGroupName;
+                                              serviceRoleArn
+                                            }
     let to_value x =
       structure_to_value
         [("applicationName",
@@ -13121,9 +13547,14 @@ module CreateDeploymentGroupInput =
           (Option.map x.ecsServices ~f:ECSServiceList.to_value));
         ("onPremisesTagSet",
           (Option.map x.onPremisesTagSet ~f:OnPremisesTagSet.to_value));
-        ("tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("tags", (Option.map x.tags ~f:TagList.to_value));
+        ("terminationHookEnabled",
+          (Option.map x.terminationHookEnabled ~f:NullableBoolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let terminationHookEnabled =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "terminationHookEnabled") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       let onPremisesTagSet =
         (Option.map ~f:OnPremisesTagSet.of_xml)
@@ -13175,55 +13606,60 @@ module CreateDeploymentGroupInput =
       let applicationName =
         ApplicationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
-      make ?tags ?onPremisesTagSet ?ecsServices ?ec2TagSet ?loadBalancerInfo
-        ?blueGreenDeploymentConfiguration ?deploymentStyle
-        ?outdatedInstancesStrategy ?autoRollbackConfiguration
-        ?alarmConfiguration ?triggerConfigurations ~serviceRoleArn
-        ?autoScalingGroups ?onPremisesInstanceTagFilters ?ec2TagFilters
-        ?deploymentConfigName ~deploymentGroupName ~applicationName ()
+      make ?terminationHookEnabled ?tags ?onPremisesTagSet ?ecsServices
+        ?ec2TagSet ?loadBalancerInfo ?blueGreenDeploymentConfiguration
+        ?deploymentStyle ?outdatedInstancesStrategy
+        ?autoRollbackConfiguration ?alarmConfiguration ?triggerConfigurations
+        ~serviceRoleArn ?autoScalingGroups ?onPremisesInstanceTagFilters
+        ?ec2TagFilters ?deploymentConfigName ~deploymentGroupName
+        ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let terminationHookEnabled =
+        field_map json__ "terminationHookEnabled" NullableBoolean.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let onPremisesTagSet =
-        field_map json "onPremisesTagSet" OnPremisesTagSet.of_json in
-      let ecsServices = field_map json "ecsServices" ECSServiceList.of_json in
-      let ec2TagSet = field_map json "ec2TagSet" EC2TagSet.of_json in
+        field_map json__ "onPremisesTagSet" OnPremisesTagSet.of_json in
+      let ecsServices = field_map json__ "ecsServices" ECSServiceList.of_json in
+      let ec2TagSet = field_map json__ "ec2TagSet" EC2TagSet.of_json in
       let loadBalancerInfo =
-        field_map json "loadBalancerInfo" LoadBalancerInfo.of_json in
+        field_map json__ "loadBalancerInfo" LoadBalancerInfo.of_json in
       let blueGreenDeploymentConfiguration =
-        field_map json "blueGreenDeploymentConfiguration"
+        field_map json__ "blueGreenDeploymentConfiguration"
           BlueGreenDeploymentConfiguration.of_json in
       let deploymentStyle =
-        field_map json "deploymentStyle" DeploymentStyle.of_json in
+        field_map json__ "deploymentStyle" DeploymentStyle.of_json in
       let outdatedInstancesStrategy =
-        field_map json "outdatedInstancesStrategy"
+        field_map json__ "outdatedInstancesStrategy"
           OutdatedInstancesStrategy.of_json in
       let autoRollbackConfiguration =
-        field_map json "autoRollbackConfiguration"
+        field_map json__ "autoRollbackConfiguration"
           AutoRollbackConfiguration.of_json in
       let alarmConfiguration =
-        field_map json "alarmConfiguration" AlarmConfiguration.of_json in
+        field_map json__ "alarmConfiguration" AlarmConfiguration.of_json in
       let triggerConfigurations =
-        field_map json "triggerConfigurations" TriggerConfigList.of_json in
-      let serviceRoleArn = field_map_exn json "serviceRoleArn" Role.of_json in
+        field_map json__ "triggerConfigurations" TriggerConfigList.of_json in
+      let serviceRoleArn = field_map_exn json__ "serviceRoleArn" Role.of_json in
       let autoScalingGroups =
-        field_map json "autoScalingGroups" AutoScalingGroupNameList.of_json in
+        field_map json__ "autoScalingGroups" AutoScalingGroupNameList.of_json in
       let onPremisesInstanceTagFilters =
-        field_map json "onPremisesInstanceTagFilters" TagFilterList.of_json in
+        field_map json__ "onPremisesInstanceTagFilters" TagFilterList.of_json in
       let ec2TagFilters =
-        field_map json "ec2TagFilters" EC2TagFilterList.of_json in
+        field_map json__ "ec2TagFilters" EC2TagFilterList.of_json in
       let deploymentConfigName =
-        field_map json "deploymentConfigName" DeploymentConfigName.of_json in
+        field_map json__ "deploymentConfigName" DeploymentConfigName.of_json in
       let deploymentGroupName =
-        field_map_exn json "deploymentGroupName" DeploymentGroupName.of_json in
+        field_map_exn json__ "deploymentGroupName"
+          DeploymentGroupName.of_json in
       let applicationName =
-        field_map_exn json "applicationName" ApplicationName.of_json in
-      make ?tags ?onPremisesTagSet ?ecsServices ?ec2TagSet ?loadBalancerInfo
-        ?blueGreenDeploymentConfiguration ?deploymentStyle
-        ?outdatedInstancesStrategy ?autoRollbackConfiguration
-        ?alarmConfiguration ?triggerConfigurations ~serviceRoleArn
-        ?autoScalingGroups ?onPremisesInstanceTagFilters ?ec2TagFilters
-        ?deploymentConfigName ~deploymentGroupName ~applicationName ()
+        field_map_exn json__ "applicationName" ApplicationName.of_json in
+      make ?terminationHookEnabled ?tags ?onPremisesTagSet ?ecsServices
+        ?ec2TagSet ?loadBalancerInfo ?blueGreenDeploymentConfiguration
+        ?deploymentStyle ?outdatedInstancesStrategy
+        ?autoRollbackConfiguration ?alarmConfiguration ?triggerConfigurations
+        ~serviceRoleArn ?autoScalingGroups ?onPremisesInstanceTagFilters
+        ?ec2TagFilters ?deploymentConfigName ~deploymentGroupName
+        ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the input of a CreateDeploymentGroup operation."]
@@ -13248,6 +13684,8 @@ module CreateDeploymentConfigOutput =
           InvalidMinimumHealthyHostValueException.t 
       | `InvalidTrafficRoutingConfigurationException of
           InvalidTrafficRoutingConfigurationException.t 
+      | `InvalidZonalDeploymentConfigurationException of
+          InvalidZonalDeploymentConfigurationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?deploymentConfigId = fun () -> { deploymentConfigId }
     let error_of_json name json =
@@ -13273,6 +13711,9 @@ module CreateDeploymentConfigOutput =
       | "InvalidTrafficRoutingConfigurationException" ->
           `InvalidTrafficRoutingConfigurationException
             (InvalidTrafficRoutingConfigurationException.of_json json)
+      | "InvalidZonalDeploymentConfigurationException" ->
+          `InvalidZonalDeploymentConfigurationException
+            (InvalidZonalDeploymentConfigurationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -13299,6 +13740,9 @@ module CreateDeploymentConfigOutput =
       | "InvalidTrafficRoutingConfigurationException" ->
           `InvalidTrafficRoutingConfigurationException
             (InvalidTrafficRoutingConfigurationException.of_xml xml)
+      | "InvalidZonalDeploymentConfigurationException" ->
+          `InvalidZonalDeploymentConfigurationException
+            (InvalidZonalDeploymentConfigurationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -13333,6 +13777,12 @@ module CreateDeploymentConfigOutput =
                (`String "InvalidTrafficRoutingConfigurationException"));
             ("details",
               (InvalidTrafficRoutingConfigurationException.to_json e))]
+      | `InvalidZonalDeploymentConfigurationException e ->
+          `Assoc
+            [("error",
+               (`String "InvalidZonalDeploymentConfigurationException"));
+            ("details",
+              (InvalidZonalDeploymentConfigurationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -13349,9 +13799,9 @@ module CreateDeploymentConfigOutput =
           (Xml.child xml_arg0 "deploymentConfigId") in
       make ?deploymentConfigId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentConfigId =
-        field_map json "deploymentConfigId" DeploymentConfigId.of_json in
+        field_map json__ "deploymentConfigId" DeploymentConfigId.of_json in
       make ?deploymentConfigId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13364,25 +13814,30 @@ module CreateDeploymentConfigInput =
         [@ocaml.doc "The name of the deployment configuration to create."];
       minimumHealthyHosts: MinimumHealthyHosts.t option
         [@ocaml.doc
-          "The minimum number of healthy instances that should be available at any time during the deployment. There are two parameters expected in the input: type and value. The type parameter takes either of the following values: HOST_COUNT: The value parameter represents the minimum number of healthy instances as an absolute value. FLEET_PERCENT: The value parameter represents the minimum number of healthy instances as a percentage of the total number of instances in the deployment. If you specify FLEET_PERCENT, at the start of the deployment, AWS CodeDeploy converts the percentage to the equivalent number of instances and rounds up fractional instances. The value parameter takes an integer. For example, to set a minimum of 95% healthy instance, specify a type of FLEET_PERCENT and a value of 95."];
+          "The minimum number of healthy instances that should be available at any time during the deployment. There are two parameters expected in the input: type and value. The type parameter takes either of the following values: HOST_COUNT: The value parameter represents the minimum number of healthy instances as an absolute value. FLEET_PERCENT: The value parameter represents the minimum number of healthy instances as a percentage of the total number of instances in the deployment. If you specify FLEET_PERCENT, at the start of the deployment, CodeDeploy converts the percentage to the equivalent number of instances and rounds up fractional instances. The value parameter takes an integer. For example, to set a minimum of 95% healthy instance, specify a type of FLEET_PERCENT and a value of 95."];
       trafficRoutingConfig: TrafficRoutingConfig.t option
         [@ocaml.doc
           "The configuration that specifies how the deployment traffic is routed."];
       computePlatform: ComputePlatform.t option
         [@ocaml.doc
-          "The destination platform type for the deployment (Lambda, Server, or ECS)."]}
+          "The destination platform type for the deployment (Lambda, Server, or ECS)."];
+      zonalConfig: ZonalConfig.t option
+        [@ocaml.doc
+          "Configure the ZonalConfig object if you want CodeDeploy to deploy your application to one Availability Zone at a time, within an Amazon Web Services Region. For more information about the zonal configuration feature, see zonal configuration in the CodeDeploy User Guide."]}
     let context_ = "CreateDeploymentConfigInput"
     let make ?minimumHealthyHosts =
       fun ?trafficRoutingConfig ->
         fun ?computePlatform ->
-          fun ~deploymentConfigName ->
-            fun () ->
-              {
-                minimumHealthyHosts;
-                trafficRoutingConfig;
-                computePlatform;
-                deploymentConfigName
-              }
+          fun ?zonalConfig ->
+            fun ~deploymentConfigName ->
+              fun () ->
+                {
+                  minimumHealthyHosts;
+                  trafficRoutingConfig;
+                  computePlatform;
+                  zonalConfig;
+                  deploymentConfigName
+                }
     let to_value x =
       structure_to_value
         [("deploymentConfigName",
@@ -13392,9 +13847,12 @@ module CreateDeploymentConfigInput =
         ("trafficRoutingConfig",
           (Option.map x.trafficRoutingConfig ~f:TrafficRoutingConfig.to_value));
         ("computePlatform",
-          (Option.map x.computePlatform ~f:ComputePlatform.to_value))]
+          (Option.map x.computePlatform ~f:ComputePlatform.to_value));
+        ("zonalConfig", (Option.map x.zonalConfig ~f:ZonalConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let zonalConfig =
+        (Option.map ~f:ZonalConfig.of_xml) (Xml.child xml_arg0 "zonalConfig") in
       let computePlatform =
         (Option.map ~f:ComputePlatform.of_xml)
           (Xml.child xml_arg0 "computePlatform") in
@@ -13407,21 +13865,22 @@ module CreateDeploymentConfigInput =
       let deploymentConfigName =
         DeploymentConfigName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentConfigName") in
-      make ?computePlatform ?trafficRoutingConfig ?minimumHealthyHosts
-        ~deploymentConfigName ()
+      make ?zonalConfig ?computePlatform ?trafficRoutingConfig
+        ?minimumHealthyHosts ~deploymentConfigName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let zonalConfig = field_map json__ "zonalConfig" ZonalConfig.of_json in
       let computePlatform =
-        field_map json "computePlatform" ComputePlatform.of_json in
+        field_map json__ "computePlatform" ComputePlatform.of_json in
       let trafficRoutingConfig =
-        field_map json "trafficRoutingConfig" TrafficRoutingConfig.of_json in
+        field_map json__ "trafficRoutingConfig" TrafficRoutingConfig.of_json in
       let minimumHealthyHosts =
-        field_map json "minimumHealthyHosts" MinimumHealthyHosts.of_json in
+        field_map json__ "minimumHealthyHosts" MinimumHealthyHosts.of_json in
       let deploymentConfigName =
-        field_map_exn json "deploymentConfigName"
+        field_map_exn json__ "deploymentConfigName"
           DeploymentConfigName.of_json in
-      make ?computePlatform ?trafficRoutingConfig ?minimumHealthyHosts
-        ~deploymentConfigName ()
+      make ?zonalConfig ?computePlatform ?trafficRoutingConfig
+        ?minimumHealthyHosts ~deploymentConfigName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the input of a CreateDeploymentConfig operation."]
@@ -13529,9 +13988,9 @@ module CreateApplicationOutput =
           (Xml.child xml_arg0 "applicationId") in
       make ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationId =
-        field_map json "applicationId" ApplicationId.of_json in
+        field_map json__ "applicationId" ApplicationId.of_json in
       make ?applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a CreateApplication operation."]
@@ -13541,7 +14000,7 @@ module CreateApplicationInput =
       {
       applicationName: ApplicationName.t
         [@ocaml.doc
-          "The name of the application. This name must be unique with the applicable IAM user or AWS account."];
+          "The name of the application. This name must be unique with the applicable user or Amazon Web Services account."];
       computePlatform: ComputePlatform.t option
         [@ocaml.doc
           "The destination platform type for the deployment (Lambda, Server, or ECS)."];
@@ -13571,12 +14030,12 @@ module CreateApplicationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ?tags ?computePlatform ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
       let computePlatform =
-        field_map json "computePlatform" ComputePlatform.of_json in
+        field_map json__ "computePlatform" ComputePlatform.of_json in
       let applicationName =
-        field_map_exn json "applicationName" ApplicationName.of_json in
+        field_map_exn json__ "applicationName" ApplicationName.of_json in
       make ?tags ?computePlatform ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a CreateApplication operation."]
@@ -13609,10 +14068,10 @@ module ContinueDeploymentInput =
           (Xml.child xml_arg0 "deploymentId") in
       make ?deploymentWaitType ?deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentWaitType =
-        field_map json "deploymentWaitType" DeploymentWaitType.of_json in
-      let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
+        field_map json__ "deploymentWaitType" DeploymentWaitType.of_json in
+      let deploymentId = field_map json__ "deploymentId" DeploymentId.of_json in
       make ?deploymentWaitType ?deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13686,9 +14145,9 @@ module BatchGetOnPremisesInstancesOutput =
           (Xml.child xml_arg0 "instanceInfos") in
       make ?instanceInfos ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceInfos =
-        field_map json "instanceInfos" InstanceInfoList.of_json in
+        field_map json__ "instanceInfos" InstanceInfoList.of_json in
       make ?instanceInfos ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13713,9 +14172,9 @@ module BatchGetOnPremisesInstancesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "instanceNames") in
       make ~instanceNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceNames =
-        field_map_exn json "instanceNames" InstanceNameList.of_json in
+        field_map_exn json__ "instanceNames" InstanceNameList.of_json in
       make ~instanceNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13789,9 +14248,9 @@ module BatchGetDeploymentsOutput =
           (Xml.child xml_arg0 "deploymentsInfo") in
       make ?deploymentsInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentsInfo =
-        field_map json "deploymentsInfo" DeploymentsInfoList.of_json in
+        field_map json__ "deploymentsInfo" DeploymentsInfoList.of_json in
       make ?deploymentsInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13815,9 +14274,9 @@ module BatchGetDeploymentsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentIds") in
       make ~deploymentIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentIds =
-        field_map_exn json "deploymentIds" DeploymentsList.of_json in
+        field_map_exn json__ "deploymentIds" DeploymentsList.of_json in
       make ~deploymentIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a BatchGetDeployments operation."]
@@ -13827,7 +14286,7 @@ module BatchGetDeploymentTargetsOutput =
       {
       deploymentTargets: DeploymentTargetList.t option
         [@ocaml.doc
-          "A list of target objects for a deployment. Each target object contains details about the target, such as its status and lifecycle events. The type of the target objects depends on the deployment' compute platform. EC2/On-premises: Each target object is an EC2 or on-premises instance. AWS Lambda: The target object is a specific version of an AWS Lambda function. Amazon ECS: The target object is an Amazon ECS service. CloudFormation: The target object is an AWS CloudFormation blue/green deployment."]}
+          "A list of target objects for a deployment. Each target object contains details about the target, such as its status and lifecycle events. The type of the target objects depends on the deployment' compute platform. EC2/On-premises: Each target object is an Amazon EC2 or on-premises instance. Lambda: The target object is a specific version of an Lambda function. Amazon ECS: The target object is an Amazon ECS service. CloudFormation: The target object is an CloudFormation blue/green deployment."]}
     type nonrec error =
       [
         `DeploymentDoesNotExistException of DeploymentDoesNotExistException.t 
@@ -13963,45 +14422,47 @@ module BatchGetDeploymentTargetsOutput =
           (Xml.child xml_arg0 "deploymentTargets") in
       make ?deploymentTargets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentTargets =
-        field_map json "deploymentTargets" DeploymentTargetList.of_json in
+        field_map json__ "deploymentTargets" DeploymentTargetList.of_json in
       make ?deploymentTargets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns an array of one or more targets associated with a deployment. This method works with all compute types and should be used instead of the deprecated BatchGetDeploymentInstances. The maximum number of targets that can be returned is 25. The type of targets returned depends on the deployment's compute platform or deployment method: EC2/On-premises: Information about EC2 instance targets. AWS Lambda: Information about Lambda functions targets. Amazon ECS: Information about Amazon ECS service targets. CloudFormation: Information about targets of blue/green deployments initiated by a CloudFormation stack update."]
+       "Returns an array of one or more targets associated with a deployment. This method works with all compute types and should be used instead of the deprecated BatchGetDeploymentInstances. The maximum number of targets that can be returned is 25. The type of targets returned depends on the deployment's compute platform or deployment method: EC2/On-premises: Information about Amazon EC2 instance targets. Lambda: Information about Lambda functions targets. Amazon ECS: Information about Amazon ECS service targets. CloudFormation: Information about targets of blue/green deployments initiated by a CloudFormation stack update."]
 module BatchGetDeploymentTargetsInput =
   struct
     type nonrec t =
       {
-      deploymentId: DeploymentId.t option
+      deploymentId: DeploymentId.t
         [@ocaml.doc "The unique ID of a deployment."];
-      targetIds: TargetIdList.t option
+      targetIds: TargetIdList.t
         [@ocaml.doc
-          "The unique IDs of the deployment targets. The compute platform of the deployment determines the type of the targets and their formats. The maximum number of deployment target IDs you can specify is 25. For deployments that use the EC2/On-premises compute platform, the target IDs are EC2 or on-premises instances IDs, and their target type is instanceTarget. For deployments that use the AWS Lambda compute platform, the target IDs are the names of Lambda functions, and their target type is instanceTarget. For deployments that use the Amazon ECS compute platform, the target IDs are pairs of Amazon ECS clusters and services specified using the format <clustername>:<servicename>. Their target type is ecsTarget. For deployments that are deployed with AWS CloudFormation, the target IDs are CloudFormation stack IDs. Their target type is cloudFormationTarget."]}
-    let make ?deploymentId =
-      fun ?targetIds -> fun () -> { deploymentId; targetIds }
+          "The unique IDs of the deployment targets. The compute platform of the deployment determines the type of the targets and their formats. The maximum number of deployment target IDs you can specify is 25. For deployments that use the EC2/On-premises compute platform, the target IDs are Amazon EC2 or on-premises instances IDs, and their target type is instanceTarget. For deployments that use the Lambda compute platform, the target IDs are the names of Lambda functions, and their target type is instanceTarget. For deployments that use the Amazon ECS compute platform, the target IDs are pairs of Amazon ECS clusters and services specified using the format <clustername>:<servicename>. Their target type is ecsTarget. For deployments that are deployed with CloudFormation, the target IDs are CloudFormation stack IDs. Their target type is cloudFormationTarget."]}
+    let context_ = "BatchGetDeploymentTargetsInput"
+    let make ~deploymentId =
+      fun ~targetIds -> fun () -> { deploymentId; targetIds }
     let to_value x =
       structure_to_value
-        [("deploymentId",
-           (Option.map x.deploymentId ~f:DeploymentId.to_value));
-        ("targetIds", (Option.map x.targetIds ~f:TargetIdList.to_value))]
+        [("deploymentId", (Some (DeploymentId.to_value x.deploymentId)));
+        ("targetIds", (Some (TargetIdList.to_value x.targetIds)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let targetIds =
-        (Option.map ~f:TargetIdList.of_xml) (Xml.child xml_arg0 "targetIds") in
+        TargetIdList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "targetIds") in
       let deploymentId =
-        (Option.map ~f:DeploymentId.of_xml)
-          (Xml.child xml_arg0 "deploymentId") in
-      make ?targetIds ?deploymentId ()
+        DeploymentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "deploymentId") in
+      make ~targetIds ~deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetIds = field_map json "targetIds" TargetIdList.of_json in
-      let deploymentId = field_map json "deploymentId" DeploymentId.of_json in
-      make ?targetIds ?deploymentId ()
+    let of_json json__ =
+      let targetIds = field_map_exn json__ "targetIds" TargetIdList.of_json in
+      let deploymentId =
+        field_map_exn json__ "deploymentId" DeploymentId.of_json in
+      make ~targetIds ~deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns an array of one or more targets associated with a deployment. This method works with all compute types and should be used instead of the deprecated BatchGetDeploymentInstances. The maximum number of targets that can be returned is 25. The type of targets returned depends on the deployment's compute platform or deployment method: EC2/On-premises: Information about EC2 instance targets. AWS Lambda: Information about Lambda functions targets. Amazon ECS: Information about Amazon ECS service targets. CloudFormation: Information about targets of blue/green deployments initiated by a CloudFormation stack update."]
+       "Returns an array of one or more targets associated with a deployment. This method works with all compute types and should be used instead of the deprecated BatchGetDeploymentInstances. The maximum number of targets that can be returned is 25. The type of targets returned depends on the deployment's compute platform or deployment method: EC2/On-premises: Information about Amazon EC2 instance targets. Lambda: Information about Lambda functions targets. Amazon ECS: Information about Amazon ECS service targets. CloudFormation: Information about targets of blue/green deployments initiated by a CloudFormation stack update."]
 module BatchGetDeploymentInstancesOutput =
   struct
     type nonrec t =
@@ -14124,10 +14585,10 @@ module BatchGetDeploymentInstancesOutput =
           (Xml.child xml_arg0 "instancesSummary") in
       make ?errorMessage ?instancesSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "errorMessage" ErrorMessage.of_json in
       let instancesSummary =
-        field_map json "instancesSummary" InstanceSummaryList.of_json in
+        field_map json__ "instancesSummary" InstanceSummaryList.of_json in
       make ?errorMessage ?instancesSummary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14158,11 +14619,11 @@ module BatchGetDeploymentInstancesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "deploymentId") in
       make ~instanceIds ~deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceIds =
-        field_map_exn json "instanceIds" InstancesList.of_json in
+        field_map_exn json__ "instanceIds" InstancesList.of_json in
       let deploymentId =
-        field_map_exn json "deploymentId" DeploymentId.of_json in
+        field_map_exn json__ "deploymentId" DeploymentId.of_json in
       make ~instanceIds ~deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14296,10 +14757,11 @@ module BatchGetDeploymentGroupsOutput =
           (Xml.child xml_arg0 "deploymentGroupsInfo") in
       make ?errorMessage ?deploymentGroupsInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "errorMessage" ErrorMessage.of_json in
       let deploymentGroupsInfo =
-        field_map json "deploymentGroupsInfo" DeploymentGroupInfoList.of_json in
+        field_map json__ "deploymentGroupsInfo"
+          DeploymentGroupInfoList.of_json in
       make ?errorMessage ?deploymentGroupsInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14310,7 +14772,7 @@ module BatchGetDeploymentGroupsInput =
       {
       applicationName: ApplicationName.t
         [@ocaml.doc
-          "The name of an AWS CodeDeploy application associated with the applicable IAM user or AWS account."];
+          "The name of an CodeDeploy application associated with the applicable user or Amazon Web Services account."];
       deploymentGroupNames: DeploymentGroupsList.t
         [@ocaml.doc "The names of the deployment groups."]}
     let context_ = "BatchGetDeploymentGroupsInput"
@@ -14333,12 +14795,12 @@ module BatchGetDeploymentGroupsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ~deploymentGroupNames ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deploymentGroupNames =
-        field_map_exn json "deploymentGroupNames"
+        field_map_exn json__ "deploymentGroupNames"
           DeploymentGroupsList.of_json in
       let applicationName =
-        field_map_exn json "applicationName" ApplicationName.of_json in
+        field_map_exn json__ "applicationName" ApplicationName.of_json in
       make ~deploymentGroupNames ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14426,9 +14888,9 @@ module BatchGetApplicationsOutput =
           (Xml.child xml_arg0 "applicationsInfo") in
       make ?applicationsInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationsInfo =
-        field_map json "applicationsInfo" ApplicationsInfoList.of_json in
+        field_map json__ "applicationsInfo" ApplicationsInfoList.of_json in
       make ?applicationsInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14453,9 +14915,9 @@ module BatchGetApplicationsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationNames") in
       make ~applicationNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationNames =
-        field_map_exn json "applicationNames" ApplicationsList.of_json in
+        field_map_exn json__ "applicationNames" ApplicationsList.of_json in
       make ~applicationNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14580,11 +15042,11 @@ module BatchGetApplicationRevisionsOutput =
           (Xml.child xml_arg0 "applicationName") in
       make ?revisions ?errorMessage ?applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revisions = field_map json "revisions" RevisionInfoList.of_json in
-      let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
+    let of_json json__ =
+      let revisions = field_map json__ "revisions" RevisionInfoList.of_json in
+      let errorMessage = field_map json__ "errorMessage" ErrorMessage.of_json in
       let applicationName =
-        field_map json "applicationName" ApplicationName.of_json in
+        field_map json__ "applicationName" ApplicationName.of_json in
       make ?revisions ?errorMessage ?applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14595,7 +15057,7 @@ module BatchGetApplicationRevisionsInput =
       {
       applicationName: ApplicationName.t
         [@ocaml.doc
-          "The name of an AWS CodeDeploy application about which to get revision information."];
+          "The name of an CodeDeploy application about which to get revision information."];
       revisions: RevisionLocationList.t
         [@ocaml.doc
           "An array of RevisionLocation objects that specify information to get about the application revisions, including type and location. The maximum number of RevisionLocation objects you can specify is 25."]}
@@ -14617,11 +15079,11 @@ module BatchGetApplicationRevisionsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationName") in
       make ~revisions ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let revisions =
-        field_map_exn json "revisions" RevisionLocationList.of_json in
+        field_map_exn json__ "revisions" RevisionLocationList.of_json in
       let applicationName =
-        field_map_exn json "applicationName" ApplicationName.of_json in
+        field_map_exn json__ "applicationName" ApplicationName.of_json in
       make ~revisions ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14651,10 +15113,10 @@ module AddTagsToOnPremisesInstancesInput =
         TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tags") in
       make ~instanceNames ~tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceNames =
-        field_map_exn json "instanceNames" InstanceNameList.of_json in
-      let tags = field_map_exn json "tags" TagList.of_json in
+        field_map_exn json__ "instanceNames" InstanceNameList.of_json in
+      let tags = field_map_exn json__ "tags" TagList.of_json in
       make ~instanceNames ~tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

@@ -9,6 +9,8 @@ type ('i, 'o, 'e) t =
   CopyPackageVersionsResult.t, CopyPackageVersionsResult.error) t 
   | CreateDomain: (CreateDomainRequest.t, CreateDomainResult.t,
   CreateDomainResult.error) t 
+  | CreatePackageGroup: (CreatePackageGroupRequest.t,
+  CreatePackageGroupResult.t, CreatePackageGroupResult.error) t 
   | CreateRepository: (CreateRepositoryRequest.t, CreateRepositoryResult.t,
   CreateRepositoryResult.error) t 
   | DeleteDomain: (DeleteDomainRequest.t, DeleteDomainResult.t,
@@ -16,6 +18,10 @@ type ('i, 'o, 'e) t =
   | DeleteDomainPermissionsPolicy: (DeleteDomainPermissionsPolicyRequest.t,
   DeleteDomainPermissionsPolicyResult.t,
   DeleteDomainPermissionsPolicyResult.error) t 
+  | DeletePackage: (DeletePackageRequest.t, DeletePackageResult.t,
+  DeletePackageResult.error) t 
+  | DeletePackageGroup: (DeletePackageGroupRequest.t,
+  DeletePackageGroupResult.t, DeletePackageGroupResult.error) t 
   | DeletePackageVersions: (DeletePackageVersionsRequest.t,
   DeletePackageVersionsResult.t, DeletePackageVersionsResult.error) t 
   | DeleteRepository: (DeleteRepositoryRequest.t, DeleteRepositoryResult.t,
@@ -26,6 +32,10 @@ type ('i, 'o, 'e) t =
   DeleteRepositoryPermissionsPolicyResult.error) t 
   | DescribeDomain: (DescribeDomainRequest.t, DescribeDomainResult.t,
   DescribeDomainResult.error) t 
+  | DescribePackage: (DescribePackageRequest.t, DescribePackageResult.t,
+  DescribePackageResult.error) t 
+  | DescribePackageGroup: (DescribePackageGroupRequest.t,
+  DescribePackageGroupResult.t, DescribePackageGroupResult.error) t 
   | DescribePackageVersion: (DescribePackageVersionRequest.t,
   DescribePackageVersionResult.t, DescribePackageVersionResult.error) t 
   | DescribeRepository: (DescribeRepositoryRequest.t,
@@ -35,6 +45,9 @@ type ('i, 'o, 'e) t =
   DisassociateExternalConnectionResult.error) t 
   | DisposePackageVersions: (DisposePackageVersionsRequest.t,
   DisposePackageVersionsResult.t, DisposePackageVersionsResult.error) t 
+  | GetAssociatedPackageGroup: (GetAssociatedPackageGroupRequest.t,
+  GetAssociatedPackageGroupResult.t, GetAssociatedPackageGroupResult.error) t
+  
   | GetAuthorizationToken: (GetAuthorizationTokenRequest.t,
   GetAuthorizationTokenResult.t, GetAuthorizationTokenResult.error) t 
   | GetDomainPermissionsPolicy: (GetDomainPermissionsPolicyRequest.t,
@@ -49,8 +62,16 @@ type ('i, 'o, 'e) t =
   | GetRepositoryPermissionsPolicy: (GetRepositoryPermissionsPolicyRequest.t,
   GetRepositoryPermissionsPolicyResult.t,
   GetRepositoryPermissionsPolicyResult.error) t 
+  | ListAllowedRepositoriesForGroup:
+  (ListAllowedRepositoriesForGroupRequest.t,
+  ListAllowedRepositoriesForGroupResult.t,
+  ListAllowedRepositoriesForGroupResult.error) t 
+  | ListAssociatedPackages: (ListAssociatedPackagesRequest.t,
+  ListAssociatedPackagesResult.t, ListAssociatedPackagesResult.error) t 
   | ListDomains: (ListDomainsRequest.t, ListDomainsResult.t,
   ListDomainsResult.error) t 
+  | ListPackageGroups: (ListPackageGroupsRequest.t,
+  ListPackageGroupsResult.t, ListPackageGroupsResult.error) t 
   | ListPackageVersionAssets: (ListPackageVersionAssetsRequest.t,
   ListPackageVersionAssetsResult.t, ListPackageVersionAssetsResult.error) t 
   | ListPackageVersionDependencies: (ListPackageVersionDependenciesRequest.t,
@@ -64,11 +85,18 @@ type ('i, 'o, 'e) t =
   ListRepositoriesResult.error) t 
   | ListRepositoriesInDomain: (ListRepositoriesInDomainRequest.t,
   ListRepositoriesInDomainResult.t, ListRepositoriesInDomainResult.error) t 
+  | ListSubPackageGroups: (ListSubPackageGroupsRequest.t,
+  ListSubPackageGroupsResult.t, ListSubPackageGroupsResult.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResult.t, ListTagsForResourceResult.error) t 
+  | PublishPackageVersion: (PublishPackageVersionRequest.t,
+  PublishPackageVersionResult.t, PublishPackageVersionResult.error) t 
   | PutDomainPermissionsPolicy: (PutDomainPermissionsPolicyRequest.t,
   PutDomainPermissionsPolicyResult.t, PutDomainPermissionsPolicyResult.error)
   t 
+  | PutPackageOriginConfiguration: (PutPackageOriginConfigurationRequest.t,
+  PutPackageOriginConfigurationResult.t,
+  PutPackageOriginConfigurationResult.error) t 
   | PutRepositoryPermissionsPolicy: (PutRepositoryPermissionsPolicyRequest.t,
   PutRepositoryPermissionsPolicyResult.t,
   PutRepositoryPermissionsPolicyResult.error) t 
@@ -76,6 +104,12 @@ type ('i, 'o, 'e) t =
   TagResourceResult.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResult.t,
   UntagResourceResult.error) t 
+  | UpdatePackageGroup: (UpdatePackageGroupRequest.t,
+  UpdatePackageGroupResult.t, UpdatePackageGroupResult.error) t 
+  | UpdatePackageGroupOriginConfiguration:
+  (UpdatePackageGroupOriginConfigurationRequest.t,
+  UpdatePackageGroupOriginConfigurationResult.t,
+  UpdatePackageGroupOriginConfigurationResult.error) t 
   | UpdatePackageVersionsStatus: (UpdatePackageVersionsStatusRequest.t,
   UpdatePackageVersionsStatusResult.t,
   UpdatePackageVersionsStatusResult.error) t 
@@ -86,35 +120,49 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | AssociateExternalConnection -> `POST
   | CopyPackageVersions -> `POST
   | CreateDomain -> `POST
+  | CreatePackageGroup -> `POST
   | CreateRepository -> `POST
   | DeleteDomain -> `DELETE
   | DeleteDomainPermissionsPolicy -> `DELETE
+  | DeletePackage -> `DELETE
+  | DeletePackageGroup -> `DELETE
   | DeletePackageVersions -> `POST
   | DeleteRepository -> `DELETE
   | DeleteRepositoryPermissionsPolicy -> `DELETE
   | DescribeDomain -> `GET
+  | DescribePackage -> `GET
+  | DescribePackageGroup -> `GET
   | DescribePackageVersion -> `GET
   | DescribeRepository -> `GET
   | DisassociateExternalConnection -> `DELETE
   | DisposePackageVersions -> `POST
+  | GetAssociatedPackageGroup -> `GET
   | GetAuthorizationToken -> `POST
   | GetDomainPermissionsPolicy -> `GET
   | GetPackageVersionAsset -> `GET
   | GetPackageVersionReadme -> `GET
   | GetRepositoryEndpoint -> `GET
   | GetRepositoryPermissionsPolicy -> `GET
+  | ListAllowedRepositoriesForGroup -> `GET
+  | ListAssociatedPackages -> `GET
   | ListDomains -> `POST
+  | ListPackageGroups -> `POST
   | ListPackageVersionAssets -> `POST
   | ListPackageVersionDependencies -> `POST
   | ListPackageVersions -> `POST
   | ListPackages -> `POST
   | ListRepositories -> `POST
   | ListRepositoriesInDomain -> `POST
+  | ListSubPackageGroups -> `POST
   | ListTagsForResource -> `POST
+  | PublishPackageVersion -> `POST
   | PutDomainPermissionsPolicy -> `PUT
+  | PutPackageOriginConfiguration -> `POST
   | PutRepositoryPermissionsPolicy -> `PUT
   | TagResource -> `POST
   | UntagResource -> `POST
+  | UpdatePackageGroup -> `PUT
+  | UpdatePackageGroupOriginConfiguration -> `PUT
   | UpdatePackageVersionsStatus -> `POST
   | UpdateRepository -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
@@ -157,6 +205,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             ((Format.kasprintf Uri.of_string) "/v1/domain")
             (List.filter_opt
                [Some ("domain", (DomainName.to_header x.domain))])
+      | CreatePackageGroup ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/v1/package-group")
+            (List.filter_opt
+               [Some ("domain", (DomainName.to_header x.domain));
+               Option.map
+                 ~f:(fun v -> ("domain-owner", (AccountId.to_header v)))
+                 x.domainOwner])
       | CreateRepository ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/v1/repository")
@@ -186,6 +242,29 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v ->
                        ("policy-revision", (PolicyRevision.to_header v)))
                  x.policyRevision])
+      | DeletePackage ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/v1/package")
+            (List.filter_opt
+               [Some ("domain", (DomainName.to_header x.domain));
+               Option.map
+                 ~f:(fun v -> ("domain-owner", (AccountId.to_header v)))
+                 x.domainOwner;
+               Some ("repository", (RepositoryName.to_header x.repository));
+               Some ("format", (PackageFormat.to_header x.format));
+               Option.map
+                 ~f:(fun v -> ("namespace", (PackageNamespace.to_header v)))
+                 x.namespace;
+               Some ("package", (PackageName.to_header x.package))])
+      | DeletePackageGroup ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/v1/package-group")
+            (List.filter_opt
+               [Some ("domain", (DomainName.to_header x.domain));
+               Option.map
+                 ~f:(fun v -> ("domain-owner", (AccountId.to_header v)))
+                 x.domainOwner;
+               Some ("package-group", (String_.to_header x.packageGroup))])
       | DeletePackageVersions ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/v1/package/versions/delete")
@@ -231,6 +310,31 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("domain-owner", (AccountId.to_header v)))
                  x.domainOwner])
+      | DescribePackage ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/v1/package")
+            (List.filter_opt
+               [Some ("domain", (DomainName.to_header x.domain));
+               Option.map
+                 ~f:(fun v -> ("domain-owner", (AccountId.to_header v)))
+                 x.domainOwner;
+               Some ("repository", (RepositoryName.to_header x.repository));
+               Some ("format", (PackageFormat.to_header x.format));
+               Option.map
+                 ~f:(fun v -> ("namespace", (PackageNamespace.to_header v)))
+                 x.namespace;
+               Some ("package", (PackageName.to_header x.package))])
+      | DescribePackageGroup ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/v1/package-group")
+            (List.filter_opt
+               [Some ("domain", (DomainName.to_header x.domain));
+               Option.map
+                 ~f:(fun v -> ("domain-owner", (AccountId.to_header v)))
+                 x.domainOwner;
+               Some
+                 ("package-group",
+                   (PackageGroupPattern.to_header x.packageGroup))])
       | DescribePackageVersion ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/v1/package/version")
@@ -277,6 +381,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v -> ("domain-owner", (AccountId.to_header v)))
                  x.domainOwner;
                Some ("repository", (RepositoryName.to_header x.repository));
+               Some ("format", (PackageFormat.to_header x.format));
+               Option.map
+                 ~f:(fun v -> ("namespace", (PackageNamespace.to_header v)))
+                 x.namespace;
+               Some ("package", (PackageName.to_header x.package))])
+      | GetAssociatedPackageGroup ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/v1/get-associated-package-group")
+            (List.filter_opt
+               [Some ("domain", (DomainName.to_header x.domain));
+               Option.map
+                 ~f:(fun v -> ("domain-owner", (AccountId.to_header v)))
+                 x.domainOwner;
                Some ("format", (PackageFormat.to_header x.format));
                Option.map
                  ~f:(fun v -> ("namespace", (PackageNamespace.to_header v)))
@@ -347,7 +465,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v -> ("domain-owner", (AccountId.to_header v)))
                  x.domainOwner;
                Some ("repository", (RepositoryName.to_header x.repository));
-               Some ("format", (PackageFormat.to_header x.format))])
+               Some ("format", (PackageFormat.to_header x.format));
+               Option.map
+                 ~f:(fun v -> ("endpointType", (EndpointType.to_header v)))
+                 x.endpointType])
       | GetRepositoryPermissionsPolicy ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -358,7 +479,72 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v -> ("domain-owner", (AccountId.to_header v)))
                  x.domainOwner;
                Some ("repository", (RepositoryName.to_header x.repository))])
+      | ListAllowedRepositoriesForGroup ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/v1/package-group-allowed-repositories")
+            (List.filter_opt
+               [Some ("domain", (DomainName.to_header x.domain));
+               Option.map
+                 ~f:(fun v -> ("domain-owner", (AccountId.to_header v)))
+                 x.domainOwner;
+               Some
+                 ("package-group",
+                   (PackageGroupPattern.to_header x.packageGroup));
+               Some
+                 ("originRestrictionType",
+                   (PackageGroupOriginRestrictionType.to_header
+                      x.originRestrictionType));
+               Option.map
+                 ~f:(fun v ->
+                       ("max-results",
+                         (ListAllowedRepositoriesForGroupMaxResults.to_header
+                            v))) x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("next-token", (PaginationToken.to_header v)))
+                 x.nextToken])
+      | ListAssociatedPackages ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/v1/list-associated-packages")
+            (List.filter_opt
+               [Some ("domain", (DomainName.to_header x.domain));
+               Option.map
+                 ~f:(fun v -> ("domain-owner", (AccountId.to_header v)))
+                 x.domainOwner;
+               Some
+                 ("package-group",
+                   (PackageGroupPattern.to_header x.packageGroup));
+               Option.map
+                 ~f:(fun v ->
+                       ("max-results", (ListPackagesMaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("next-token", (PaginationToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("preview", (BooleanOptional.to_header v)))
+                 x.preview])
       | ListDomains -> (Format.kasprintf Uri.of_string) "/v1/domains"
+      | ListPackageGroups ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/v1/package-groups")
+            (List.filter_opt
+               [Some ("domain", (DomainName.to_header x.domain));
+               Option.map
+                 ~f:(fun v -> ("domain-owner", (AccountId.to_header v)))
+                 x.domainOwner;
+               Option.map
+                 ~f:(fun v ->
+                       ("max-results",
+                         (ListPackageGroupsMaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("next-token", (PaginationToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("prefix", (PackageGroupPatternPrefix.to_header v)))
+                 x.prefix])
       | ListPackageVersionAssets ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/v1/package/version/assets")
@@ -429,7 +615,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.maxResults;
                Option.map
                  ~f:(fun v -> ("next-token", (PaginationToken.to_header v)))
-                 x.nextToken])
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("originType", (PackageVersionOriginType.to_header v)))
+                 x.originType])
       | ListPackages ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/v1/packages")
@@ -454,7 +644,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.maxResults;
                Option.map
                  ~f:(fun v -> ("next-token", (PaginationToken.to_header v)))
-                 x.nextToken])
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("publish", (AllowPublish.to_header v)))
+                 x.publish;
+               Option.map
+                 ~f:(fun v -> ("upstream", (AllowUpstream.to_header v)))
+                 x.upstream])
       | ListRepositories ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/v1/repositories")
@@ -495,12 +691,64 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("next-token", (PaginationToken.to_header v)))
                  x.nextToken])
+      | ListSubPackageGroups ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/v1/package-groups/sub-groups")
+            (List.filter_opt
+               [Some ("domain", (DomainName.to_header x.domain));
+               Option.map
+                 ~f:(fun v -> ("domain-owner", (AccountId.to_header v)))
+                 x.domainOwner;
+               Some
+                 ("package-group",
+                   (PackageGroupPattern.to_header x.packageGroup));
+               Option.map
+                 ~f:(fun v ->
+                       ("max-results",
+                         (ListPackageGroupsMaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("next-token", (PaginationToken.to_header v)))
+                 x.nextToken])
       | ListTagsForResource ->
           Uri.add_query_params' ((Format.kasprintf Uri.of_string) "/v1/tags")
             (List.filter_opt
                [Some ("resourceArn", (Arn.to_header x.resourceArn))])
+      | PublishPackageVersion ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/v1/package/version/publish")
+            (List.filter_opt
+               [Some ("domain", (DomainName.to_header x.domain));
+               Option.map
+                 ~f:(fun v -> ("domain-owner", (AccountId.to_header v)))
+                 x.domainOwner;
+               Some ("repository", (RepositoryName.to_header x.repository));
+               Some ("format", (PackageFormat.to_header x.format));
+               Option.map
+                 ~f:(fun v -> ("namespace", (PackageNamespace.to_header v)))
+                 x.namespace;
+               Some ("package", (PackageName.to_header x.package));
+               Some ("version", (PackageVersion.to_header x.packageVersion));
+               Some ("asset", (AssetName.to_header x.assetName));
+               Option.map
+                 ~f:(fun v -> ("unfinished", (BooleanOptional.to_header v)))
+                 x.unfinished])
       | PutDomainPermissionsPolicy ->
           (Format.kasprintf Uri.of_string) "/v1/domain/permissions/policy"
+      | PutPackageOriginConfiguration ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/v1/package")
+            (List.filter_opt
+               [Some ("domain", (DomainName.to_header x.domain));
+               Option.map
+                 ~f:(fun v -> ("domain-owner", (AccountId.to_header v)))
+                 x.domainOwner;
+               Some ("repository", (RepositoryName.to_header x.repository));
+               Some ("format", (PackageFormat.to_header x.format));
+               Option.map
+                 ~f:(fun v -> ("namespace", (PackageNamespace.to_header v)))
+                 x.namespace;
+               Some ("package", (PackageName.to_header x.package))])
       | PutRepositoryPermissionsPolicy ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -520,6 +768,26 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             ((Format.kasprintf Uri.of_string) "/v1/untag")
             (List.filter_opt
                [Some ("resourceArn", (Arn.to_header x.resourceArn))])
+      | UpdatePackageGroup ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/v1/package-group")
+            (List.filter_opt
+               [Some ("domain", (DomainName.to_header x.domain));
+               Option.map
+                 ~f:(fun v -> ("domain-owner", (AccountId.to_header v)))
+                 x.domainOwner])
+      | UpdatePackageGroupOriginConfiguration ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/v1/package-group-origin-configuration")
+            (List.filter_opt
+               [Some ("domain", (DomainName.to_header x.domain));
+               Option.map
+                 ~f:(fun v -> ("domain-owner", (AccountId.to_header v)))
+                 x.domainOwner;
+               Some
+                 ("package-group",
+                   (PackageGroupPattern.to_header x.packageGroup))])
       | UpdatePackageVersionsStatus ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -605,6 +873,35 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreatePackageGroup ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("packageGroup",
+                           (PackageGroupPattern.to_value
+                              req.CreatePackageGroupRequest.packageGroup));
+                      Option.map req.CreatePackageGroupRequest.contactInfo
+                        ~f:(fun x ->
+                              ("contactInfo",
+                                (PackageGroupContactInfo.to_value x)));
+                      Option.map req.CreatePackageGroupRequest.description
+                        ~f:(fun x ->
+                              ("description", (Description.to_value x)));
+                      Option.map req.CreatePackageGroupRequest.tags
+                        ~f:(fun x -> ("tags", (TagList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateRepository ->
       let (headers, body) =
         let headers =
@@ -633,6 +930,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteDomain -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteDomainPermissionsPolicy ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeletePackage -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeletePackageGroup -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeletePackageVersions ->
       let (headers, body) =
         let headers =
@@ -662,6 +961,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteRepositoryPermissionsPolicy ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DescribeDomain ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribePackage ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribePackageGroup ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribePackageVersion ->
@@ -702,6 +1007,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetAssociatedPackageGroup ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetAuthorizationToken ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -718,6 +1026,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetRepositoryPermissionsPolicy ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAllowedRepositoriesForGroup ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAssociatedPackages ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListDomains ->
@@ -743,6 +1057,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListPackageGroups ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListPackageVersionAssets ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -761,11 +1078,45 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListRepositoriesInDomain ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListSubPackageGroups ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PublishPackageVersion ->
+      let headers =
+        Some
+          ((List.filter_opt
+              [Some
+                 ("x-amz-content-sha256",
+                   (SHA256.to_header
+                      req.PublishPackageVersionRequest.assetSHA256))])
+             |> Awso.Http.Headers.of_list) in
+      let body = Asset.to_header req.assetContent in
+      Awso.Http.Request.make ?headers ~body (method_of_endpoint endp)
   | PutDomainPermissionsPolicy ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | PutPackageOriginConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("restrictions",
+                           (PackageOriginRestrictions.to_value
+                              req.PutPackageOriginConfigurationRequest.restrictions))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | PutRepositoryPermissionsPolicy ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | TagResource ->
@@ -807,6 +1158,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdatePackageGroup -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdatePackageGroupOriginConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdatePackageVersionsStatus ->
       let (headers, body) =
         let headers =
@@ -909,6 +1263,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (CreateDomainResult.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateDomainResult.error_of_json))
+  | CreatePackageGroup ->
+      if is_success
+      then Ok (CreatePackageGroupResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreatePackageGroupResult.error_of_json))
   | CreateRepository ->
       if is_success
       then Ok (CreateRepositoryResult.of_json (response_to_json resp))
@@ -928,6 +1287,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteDomainPermissionsPolicyResult.error_of_json))
+  | DeletePackage ->
+      if is_success
+      then Ok (DeletePackageResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeletePackageResult.error_of_json))
+  | DeletePackageGroup ->
+      if is_success
+      then Ok (DeletePackageGroupResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeletePackageGroupResult.error_of_json))
   | DeletePackageVersions ->
       if is_success
       then Ok (DeletePackageVersionsResult.of_json (response_to_json resp))
@@ -953,6 +1321,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (DescribeDomainResult.of_json (response_to_json resp))
       else Error (parse_aws_error (Some DescribeDomainResult.error_of_json))
+  | DescribePackage ->
+      if is_success
+      then Ok (DescribePackageResult.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribePackageResult.error_of_json))
+  | DescribePackageGroup ->
+      if is_success
+      then Ok (DescribePackageGroupResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribePackageGroupResult.error_of_json))
   | DescribePackageVersion ->
       if is_success
       then Ok (DescribePackageVersionResult.of_json (response_to_json resp))
@@ -980,6 +1358,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DisposePackageVersionsResult.error_of_json))
+  | GetAssociatedPackageGroup ->
+      if is_success
+      then
+        Ok (GetAssociatedPackageGroupResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetAssociatedPackageGroupResult.error_of_json))
   | GetAuthorizationToken ->
       if is_success
       then Ok (GetAuthorizationTokenResult.of_json (response_to_json resp))
@@ -1026,10 +1412,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetRepositoryPermissionsPolicyResult.error_of_json))
+  | ListAllowedRepositoriesForGroup ->
+      if is_success
+      then
+        Ok
+          (ListAllowedRepositoriesForGroupResult.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAllowedRepositoriesForGroupResult.error_of_json))
+  | ListAssociatedPackages ->
+      if is_success
+      then Ok (ListAssociatedPackagesResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAssociatedPackagesResult.error_of_json))
   | ListDomains ->
       if is_success
       then Ok (ListDomainsResult.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListDomainsResult.error_of_json))
+  | ListPackageGroups ->
+      if is_success
+      then Ok (ListPackageGroupsResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListPackageGroupsResult.error_of_json))
   | ListPackageVersionAssets ->
       if is_success
       then
@@ -1071,12 +1478,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListRepositoriesInDomainResult.error_of_json))
+  | ListSubPackageGroups ->
+      if is_success
+      then Ok (ListSubPackageGroupsResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListSubPackageGroupsResult.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResult.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResult.error_of_json))
+  | PublishPackageVersion ->
+      if is_success
+      then Ok (PublishPackageVersionResult.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some PublishPackageVersionResult.error_of_json))
   | PutDomainPermissionsPolicy ->
       if is_success
       then
@@ -1085,6 +1504,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some PutDomainPermissionsPolicyResult.error_of_json))
+  | PutPackageOriginConfiguration ->
+      if is_success
+      then
+        Ok
+          (PutPackageOriginConfigurationResult.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutPackageOriginConfigurationResult.error_of_json))
   | PutRepositoryPermissionsPolicy ->
       if is_success
       then
@@ -1109,6 +1538,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (UntagResourceResult.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some UntagResourceResult.error_of_json))
+  | UpdatePackageGroup ->
+      if is_success
+      then Ok (UpdatePackageGroupResult.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdatePackageGroupResult.error_of_json))
+  | UpdatePackageGroupOriginConfiguration ->
+      if is_success
+      then
+        Ok
+          (UpdatePackageGroupOriginConfigurationResult.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdatePackageGroupOriginConfigurationResult.error_of_json))
   | UpdatePackageVersionsStatus ->
       if is_success
       then

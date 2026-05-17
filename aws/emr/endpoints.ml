@@ -11,6 +11,8 @@ type ('i, 'o, 'e) t =
   | AddTags: (AddTagsInput.t, AddTagsOutput.t, AddTagsOutput.error) t 
   | CancelSteps: (CancelStepsInput.t, CancelStepsOutput.t,
   CancelStepsOutput.error) t 
+  | CreatePersistentAppUI: (CreatePersistentAppUIInput.t,
+  CreatePersistentAppUIOutput.t, CreatePersistentAppUIOutput.error) t 
   | CreateSecurityConfiguration: (CreateSecurityConfigurationInput.t,
   CreateSecurityConfigurationOutput.t,
   CreateSecurityConfigurationOutput.error) t 
@@ -31,6 +33,8 @@ type ('i, 'o, 'e) t =
   | DescribeNotebookExecution: (DescribeNotebookExecutionInput.t,
   DescribeNotebookExecutionOutput.t, DescribeNotebookExecutionOutput.error) t
   
+  | DescribePersistentAppUI: (DescribePersistentAppUIInput.t,
+  DescribePersistentAppUIOutput.t, DescribePersistentAppUIOutput.error) t 
   | DescribeReleaseLabel: (DescribeReleaseLabelInput.t,
   DescribeReleaseLabelOutput.t, DescribeReleaseLabelOutput.error) t 
   | DescribeSecurityConfiguration: (DescribeSecurityConfigurationInput.t,
@@ -46,8 +50,17 @@ type ('i, 'o, 'e) t =
   (GetBlockPublicAccessConfigurationInput.t,
   GetBlockPublicAccessConfigurationOutput.t,
   GetBlockPublicAccessConfigurationOutput.error) t 
+  | GetClusterSessionCredentials: (GetClusterSessionCredentialsInput.t,
+  GetClusterSessionCredentialsOutput.t,
+  GetClusterSessionCredentialsOutput.error) t 
   | GetManagedScalingPolicy: (GetManagedScalingPolicyInput.t,
   GetManagedScalingPolicyOutput.t, GetManagedScalingPolicyOutput.error) t 
+  | GetOnClusterAppUIPresignedURL: (GetOnClusterAppUIPresignedURLInput.t,
+  GetOnClusterAppUIPresignedURLOutput.t,
+  GetOnClusterAppUIPresignedURLOutput.error) t 
+  | GetPersistentAppUIPresignedURL: (GetPersistentAppUIPresignedURLInput.t,
+  GetPersistentAppUIPresignedURLOutput.t,
+  GetPersistentAppUIPresignedURLOutput.error) t 
   | GetStudioSessionMapping: (GetStudioSessionMappingInput.t,
   GetStudioSessionMappingOutput.t, GetStudioSessionMappingOutput.error) t 
   | ListBootstrapActions: (ListBootstrapActionsInput.t,
@@ -74,6 +87,9 @@ type ('i, 'o, 'e) t =
   
   | ListStudios: (ListStudiosInput.t, ListStudiosOutput.t,
   ListStudiosOutput.error) t 
+  | ListSupportedInstanceTypes: (ListSupportedInstanceTypesInput.t,
+  ListSupportedInstanceTypesOutput.t, ListSupportedInstanceTypesOutput.error)
+  t 
   | ModifyCluster: (ModifyClusterInput.t, ModifyClusterOutput.t,
   ModifyClusterOutput.error) t 
   | ModifyInstanceFleet: (ModifyInstanceFleetInput.t, unit, unit) t 
@@ -100,8 +116,12 @@ type ('i, 'o, 'e) t =
   RemoveTagsOutput.error) t 
   | RunJobFlow: (RunJobFlowInput.t, RunJobFlowOutput.t,
   RunJobFlowOutput.error) t 
+  | SetKeepJobFlowAliveWhenNoSteps: (SetKeepJobFlowAliveWhenNoStepsInput.t,
+  unit, unit) t 
   | SetTerminationProtection: (SetTerminationProtectionInput.t, unit, 
   unit) t 
+  | SetUnhealthyNodeReplacement: (SetUnhealthyNodeReplacementInput.t, 
+  unit, unit) t 
   | SetVisibleToAllUsers: (SetVisibleToAllUsersInput.t, unit, unit) t 
   | StartNotebookExecution: (StartNotebookExecutionInput.t,
   StartNotebookExecutionOutput.t, StartNotebookExecutionOutput.error) t 
@@ -117,6 +137,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | AddJobFlowSteps -> `POST
   | AddTags -> `POST
   | CancelSteps -> `POST
+  | CreatePersistentAppUI -> `POST
   | CreateSecurityConfiguration -> `POST
   | CreateStudio -> `POST
   | CreateStudioSessionMapping -> `POST
@@ -126,13 +147,17 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeCluster -> `POST
   | DescribeJobFlows -> `POST
   | DescribeNotebookExecution -> `POST
+  | DescribePersistentAppUI -> `POST
   | DescribeReleaseLabel -> `POST
   | DescribeSecurityConfiguration -> `POST
   | DescribeStep -> `POST
   | DescribeStudio -> `POST
   | GetAutoTerminationPolicy -> `POST
   | GetBlockPublicAccessConfiguration -> `POST
+  | GetClusterSessionCredentials -> `POST
   | GetManagedScalingPolicy -> `POST
+  | GetOnClusterAppUIPresignedURL -> `POST
+  | GetPersistentAppUIPresignedURL -> `POST
   | GetStudioSessionMapping -> `POST
   | ListBootstrapActions -> `POST
   | ListClusters -> `POST
@@ -145,6 +170,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListSteps -> `POST
   | ListStudioSessionMappings -> `POST
   | ListStudios -> `POST
+  | ListSupportedInstanceTypes -> `POST
   | ModifyCluster -> `POST
   | ModifyInstanceFleet -> `POST
   | ModifyInstanceGroups -> `POST
@@ -157,7 +183,9 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | RemoveManagedScalingPolicy -> `POST
   | RemoveTags -> `POST
   | RunJobFlow -> `POST
+  | SetKeepJobFlowAliveWhenNoSteps -> `POST
   | SetTerminationProtection -> `POST
+  | SetUnhealthyNodeReplacement -> `POST
   | SetVisibleToAllUsers -> `POST
   | StartNotebookExecution -> `POST
   | StopNotebookExecution -> `POST
@@ -172,6 +200,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | AddJobFlowSteps -> (Format.kasprintf Uri.of_string) "/"
       | AddTags -> (Format.kasprintf Uri.of_string) "/"
       | CancelSteps -> (Format.kasprintf Uri.of_string) "/"
+      | CreatePersistentAppUI -> (Format.kasprintf Uri.of_string) "/"
       | CreateSecurityConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | CreateStudio -> (Format.kasprintf Uri.of_string) "/"
       | CreateStudioSessionMapping -> (Format.kasprintf Uri.of_string) "/"
@@ -181,6 +210,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeCluster -> (Format.kasprintf Uri.of_string) "/"
       | DescribeJobFlows -> (Format.kasprintf Uri.of_string) "/"
       | DescribeNotebookExecution -> (Format.kasprintf Uri.of_string) "/"
+      | DescribePersistentAppUI -> (Format.kasprintf Uri.of_string) "/"
       | DescribeReleaseLabel -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSecurityConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | DescribeStep -> (Format.kasprintf Uri.of_string) "/"
@@ -188,7 +218,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetAutoTerminationPolicy -> (Format.kasprintf Uri.of_string) "/"
       | GetBlockPublicAccessConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
+      | GetClusterSessionCredentials -> (Format.kasprintf Uri.of_string) "/"
       | GetManagedScalingPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | GetOnClusterAppUIPresignedURL -> (Format.kasprintf Uri.of_string) "/"
+      | GetPersistentAppUIPresignedURL ->
+          (Format.kasprintf Uri.of_string) "/"
       | GetStudioSessionMapping -> (Format.kasprintf Uri.of_string) "/"
       | ListBootstrapActions -> (Format.kasprintf Uri.of_string) "/"
       | ListClusters -> (Format.kasprintf Uri.of_string) "/"
@@ -201,6 +235,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListSteps -> (Format.kasprintf Uri.of_string) "/"
       | ListStudioSessionMappings -> (Format.kasprintf Uri.of_string) "/"
       | ListStudios -> (Format.kasprintf Uri.of_string) "/"
+      | ListSupportedInstanceTypes -> (Format.kasprintf Uri.of_string) "/"
       | ModifyCluster -> (Format.kasprintf Uri.of_string) "/"
       | ModifyInstanceFleet -> (Format.kasprintf Uri.of_string) "/"
       | ModifyInstanceGroups -> (Format.kasprintf Uri.of_string) "/"
@@ -214,7 +249,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | RemoveManagedScalingPolicy -> (Format.kasprintf Uri.of_string) "/"
       | RemoveTags -> (Format.kasprintf Uri.of_string) "/"
       | RunJobFlow -> (Format.kasprintf Uri.of_string) "/"
+      | SetKeepJobFlowAliveWhenNoSteps ->
+          (Format.kasprintf Uri.of_string) "/"
       | SetTerminationProtection -> (Format.kasprintf Uri.of_string) "/"
+      | SetUnhealthyNodeReplacement -> (Format.kasprintf Uri.of_string) "/"
       | SetVisibleToAllUsers -> (Format.kasprintf Uri.of_string) "/"
       | StartNotebookExecution -> (Format.kasprintf Uri.of_string) "/"
       | StopNotebookExecution -> (Format.kasprintf Uri.of_string) "/"
@@ -263,6 +301,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "ElasticMapReduce.CancelSteps")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreatePersistentAppUI ->
+      let json = CreatePersistentAppUIInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "ElasticMapReduce.CreatePersistentAppUI")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateSecurityConfiguration ->
       let json = CreateSecurityConfigurationInput.to_json req in
@@ -336,6 +382,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "ElasticMapReduce.DescribeNotebookExecution")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribePersistentAppUI ->
+      let json = DescribePersistentAppUIInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "ElasticMapReduce.DescribePersistentAppUI")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeReleaseLabel ->
       let json = DescribeReleaseLabelInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -385,6 +439,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "ElasticMapReduce.GetBlockPublicAccessConfiguration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetClusterSessionCredentials ->
+      let json = GetClusterSessionCredentialsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "ElasticMapReduce.GetClusterSessionCredentials")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetManagedScalingPolicy ->
       let json = GetManagedScalingPolicyInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -392,6 +454,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "ElasticMapReduce.GetManagedScalingPolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetOnClusterAppUIPresignedURL ->
+      let json = GetOnClusterAppUIPresignedURLInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "ElasticMapReduce.GetOnClusterAppUIPresignedURL")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetPersistentAppUIPresignedURL ->
+      let json = GetPersistentAppUIPresignedURLInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "ElasticMapReduce.GetPersistentAppUIPresignedURL")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetStudioSessionMapping ->
       let json = GetStudioSessionMappingInput.to_json req in
@@ -488,6 +566,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "ElasticMapReduce.ListStudios")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListSupportedInstanceTypes ->
+      let json = ListSupportedInstanceTypesInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "ElasticMapReduce.ListSupportedInstanceTypes")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ModifyCluster ->
       let json = ModifyClusterInput.to_json req in
@@ -586,6 +672,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "ElasticMapReduce.RunJobFlow")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | SetKeepJobFlowAliveWhenNoSteps ->
+      let json = SetKeepJobFlowAliveWhenNoStepsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "ElasticMapReduce.SetKeepJobFlowAliveWhenNoSteps")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | SetTerminationProtection ->
       let json = SetTerminationProtectionInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -593,6 +687,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "ElasticMapReduce.SetTerminationProtection")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | SetUnhealthyNodeReplacement ->
+      let json = SetUnhealthyNodeReplacementInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "ElasticMapReduce.SetUnhealthyNodeReplacement")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | SetVisibleToAllUsers ->
       let json = SetVisibleToAllUsersInput.to_json req in
@@ -697,6 +799,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CancelStepsOutput.of_json json)
       else Error (parse_aws_error (Some CancelStepsOutput.error_of_json))
+  | CreatePersistentAppUI ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreatePersistentAppUIOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreatePersistentAppUIOutput.error_of_json))
   | CreateSecurityConfiguration ->
       if is_success
       then
@@ -749,6 +859,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeNotebookExecutionOutput.error_of_json))
+  | DescribePersistentAppUI ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribePersistentAppUIOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribePersistentAppUIOutput.error_of_json))
   | DescribeReleaseLabel ->
       if is_success
       then
@@ -793,12 +911,39 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetBlockPublicAccessConfigurationOutput.error_of_json))
+  | GetClusterSessionCredentials ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetClusterSessionCredentialsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetClusterSessionCredentialsOutput.error_of_json))
   | GetManagedScalingPolicy ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetManagedScalingPolicyOutput.of_json json)
       else Error (parse_aws_error None)
+  | GetOnClusterAppUIPresignedURL ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetOnClusterAppUIPresignedURLOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetOnClusterAppUIPresignedURLOutput.error_of_json))
+  | GetPersistentAppUIPresignedURL ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetPersistentAppUIPresignedURLOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetPersistentAppUIPresignedURLOutput.error_of_json))
   | GetStudioSessionMapping ->
       if is_success
       then
@@ -886,6 +1031,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListStudiosOutput.of_json json)
       else Error (parse_aws_error (Some ListStudiosOutput.error_of_json))
+  | ListSupportedInstanceTypes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListSupportedInstanceTypesOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListSupportedInstanceTypesOutput.error_of_json))
   | ModifyCluster ->
       if is_success
       then
@@ -953,7 +1107,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (RunJobFlowOutput.of_json json)
       else Error (parse_aws_error (Some RunJobFlowOutput.error_of_json))
+  | SetKeepJobFlowAliveWhenNoSteps ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | SetTerminationProtection ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | SetUnhealthyNodeReplacement ->
       if is_success then Ok () else Error (parse_aws_error None)
   | SetVisibleToAllUsers ->
       if is_success then Ok () else Error (parse_aws_error None)

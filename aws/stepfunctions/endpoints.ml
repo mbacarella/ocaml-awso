@@ -6,16 +6,28 @@ type ('i, 'o, 'e) t =
   CreateActivityOutput.error) t 
   | CreateStateMachine: (CreateStateMachineInput.t,
   CreateStateMachineOutput.t, CreateStateMachineOutput.error) t 
+  | CreateStateMachineAlias: (CreateStateMachineAliasInput.t,
+  CreateStateMachineAliasOutput.t, CreateStateMachineAliasOutput.error) t 
   | DeleteActivity: (DeleteActivityInput.t, DeleteActivityOutput.t,
   DeleteActivityOutput.error) t 
   | DeleteStateMachine: (DeleteStateMachineInput.t,
   DeleteStateMachineOutput.t, DeleteStateMachineOutput.error) t 
+  | DeleteStateMachineAlias: (DeleteStateMachineAliasInput.t,
+  DeleteStateMachineAliasOutput.t, DeleteStateMachineAliasOutput.error) t 
+  | DeleteStateMachineVersion: (DeleteStateMachineVersionInput.t,
+  DeleteStateMachineVersionOutput.t, DeleteStateMachineVersionOutput.error) t
+  
   | DescribeActivity: (DescribeActivityInput.t, DescribeActivityOutput.t,
   DescribeActivityOutput.error) t 
   | DescribeExecution: (DescribeExecutionInput.t, DescribeExecutionOutput.t,
   DescribeExecutionOutput.error) t 
+  | DescribeMapRun: (DescribeMapRunInput.t, DescribeMapRunOutput.t,
+  DescribeMapRunOutput.error) t 
   | DescribeStateMachine: (DescribeStateMachineInput.t,
   DescribeStateMachineOutput.t, DescribeStateMachineOutput.error) t 
+  | DescribeStateMachineAlias: (DescribeStateMachineAliasInput.t,
+  DescribeStateMachineAliasOutput.t, DescribeStateMachineAliasOutput.error) t
+  
   | DescribeStateMachineForExecution:
   (DescribeStateMachineForExecutionInput.t,
   DescribeStateMachineForExecutionOutput.t,
@@ -28,10 +40,21 @@ type ('i, 'o, 'e) t =
   ListActivitiesOutput.error) t 
   | ListExecutions: (ListExecutionsInput.t, ListExecutionsOutput.t,
   ListExecutionsOutput.error) t 
+  | ListMapRuns: (ListMapRunsInput.t, ListMapRunsOutput.t,
+  ListMapRunsOutput.error) t 
+  | ListStateMachineAliases: (ListStateMachineAliasesInput.t,
+  ListStateMachineAliasesOutput.t, ListStateMachineAliasesOutput.error) t 
+  | ListStateMachineVersions: (ListStateMachineVersionsInput.t,
+  ListStateMachineVersionsOutput.t, ListStateMachineVersionsOutput.error) t 
   | ListStateMachines: (ListStateMachinesInput.t, ListStateMachinesOutput.t,
   ListStateMachinesOutput.error) t 
   | ListTagsForResource: (ListTagsForResourceInput.t,
   ListTagsForResourceOutput.t, ListTagsForResourceOutput.error) t 
+  | PublishStateMachineVersion: (PublishStateMachineVersionInput.t,
+  PublishStateMachineVersionOutput.t, PublishStateMachineVersionOutput.error)
+  t 
+  | RedriveExecution: (RedriveExecutionInput.t, RedriveExecutionOutput.t,
+  RedriveExecutionOutput.error) t 
   | SendTaskFailure: (SendTaskFailureInput.t, SendTaskFailureOutput.t,
   SendTaskFailureOutput.error) t 
   | SendTaskHeartbeat: (SendTaskHeartbeatInput.t, SendTaskHeartbeatOutput.t,
@@ -46,26 +69,45 @@ type ('i, 'o, 'e) t =
   StopExecutionOutput.error) t 
   | TagResource: (TagResourceInput.t, TagResourceOutput.t,
   TagResourceOutput.error) t 
+  | TestState: (TestStateInput.t, TestStateOutput.t, TestStateOutput.error) t
+  
   | UntagResource: (UntagResourceInput.t, UntagResourceOutput.t,
   UntagResourceOutput.error) t 
+  | UpdateMapRun: (UpdateMapRunInput.t, UpdateMapRunOutput.t,
+  UpdateMapRunOutput.error) t 
   | UpdateStateMachine: (UpdateStateMachineInput.t,
   UpdateStateMachineOutput.t, UpdateStateMachineOutput.error) t 
+  | UpdateStateMachineAlias: (UpdateStateMachineAliasInput.t,
+  UpdateStateMachineAliasOutput.t, UpdateStateMachineAliasOutput.error) t 
+  | ValidateStateMachineDefinition: (ValidateStateMachineDefinitionInput.t,
+  ValidateStateMachineDefinitionOutput.t,
+  ValidateStateMachineDefinitionOutput.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateActivity -> `POST
   | CreateStateMachine -> `POST
+  | CreateStateMachineAlias -> `POST
   | DeleteActivity -> `POST
   | DeleteStateMachine -> `POST
+  | DeleteStateMachineAlias -> `POST
+  | DeleteStateMachineVersion -> `POST
   | DescribeActivity -> `POST
   | DescribeExecution -> `POST
+  | DescribeMapRun -> `POST
   | DescribeStateMachine -> `POST
+  | DescribeStateMachineAlias -> `POST
   | DescribeStateMachineForExecution -> `POST
   | GetActivityTask -> `POST
   | GetExecutionHistory -> `POST
   | ListActivities -> `POST
   | ListExecutions -> `POST
+  | ListMapRuns -> `POST
+  | ListStateMachineAliases -> `POST
+  | ListStateMachineVersions -> `POST
   | ListStateMachines -> `POST
   | ListTagsForResource -> `POST
+  | PublishStateMachineVersion -> `POST
+  | RedriveExecution -> `POST
   | SendTaskFailure -> `POST
   | SendTaskHeartbeat -> `POST
   | SendTaskSuccess -> `POST
@@ -73,26 +115,40 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | StartSyncExecution -> `POST
   | StopExecution -> `POST
   | TagResource -> `POST
+  | TestState -> `POST
   | UntagResource -> `POST
+  | UpdateMapRun -> `POST
   | UpdateStateMachine -> `POST
+  | UpdateStateMachineAlias -> `POST
+  | ValidateStateMachineDefinition -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | CreateActivity -> (Format.kasprintf Uri.of_string) "/"
       | CreateStateMachine -> (Format.kasprintf Uri.of_string) "/"
+      | CreateStateMachineAlias -> (Format.kasprintf Uri.of_string) "/"
       | DeleteActivity -> (Format.kasprintf Uri.of_string) "/"
       | DeleteStateMachine -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteStateMachineAlias -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteStateMachineVersion -> (Format.kasprintf Uri.of_string) "/"
       | DescribeActivity -> (Format.kasprintf Uri.of_string) "/"
       | DescribeExecution -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeMapRun -> (Format.kasprintf Uri.of_string) "/"
       | DescribeStateMachine -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeStateMachineAlias -> (Format.kasprintf Uri.of_string) "/"
       | DescribeStateMachineForExecution ->
           (Format.kasprintf Uri.of_string) "/"
       | GetActivityTask -> (Format.kasprintf Uri.of_string) "/"
       | GetExecutionHistory -> (Format.kasprintf Uri.of_string) "/"
       | ListActivities -> (Format.kasprintf Uri.of_string) "/"
       | ListExecutions -> (Format.kasprintf Uri.of_string) "/"
+      | ListMapRuns -> (Format.kasprintf Uri.of_string) "/"
+      | ListStateMachineAliases -> (Format.kasprintf Uri.of_string) "/"
+      | ListStateMachineVersions -> (Format.kasprintf Uri.of_string) "/"
       | ListStateMachines -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | PublishStateMachineVersion -> (Format.kasprintf Uri.of_string) "/"
+      | RedriveExecution -> (Format.kasprintf Uri.of_string) "/"
       | SendTaskFailure -> (Format.kasprintf Uri.of_string) "/"
       | SendTaskHeartbeat -> (Format.kasprintf Uri.of_string) "/"
       | SendTaskSuccess -> (Format.kasprintf Uri.of_string) "/"
@@ -100,8 +156,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | StartSyncExecution -> (Format.kasprintf Uri.of_string) "/"
       | StopExecution -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
+      | TestState -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
-      | UpdateStateMachine -> (Format.kasprintf Uri.of_string) "/")
+      | UpdateMapRun -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateStateMachine -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateStateMachineAlias -> (Format.kasprintf Uri.of_string) "/"
+      | ValidateStateMachineDefinition ->
+          (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -121,6 +182,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AWSStepFunctions.CreateStateMachine")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateStateMachineAlias ->
+      let json = CreateStateMachineAliasInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AWSStepFunctions.CreateStateMachineAlias")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteActivity ->
       let json = DeleteActivityInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -136,6 +205,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AWSStepFunctions.DeleteStateMachine")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteStateMachineAlias ->
+      let json = DeleteStateMachineAliasInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AWSStepFunctions.DeleteStateMachineAlias")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteStateMachineVersion ->
+      let json = DeleteStateMachineVersionInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AWSStepFunctions.DeleteStateMachineVersion")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeActivity ->
       let json = DescribeActivityInput.to_json req in
@@ -153,6 +238,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AWSStepFunctions.DescribeExecution")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeMapRun ->
+      let json = DescribeMapRunInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AWSStepFunctions.DescribeMapRun")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeStateMachine ->
       let json = DescribeStateMachineInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -160,6 +253,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AWSStepFunctions.DescribeStateMachine")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeStateMachineAlias ->
+      let json = DescribeStateMachineAliasInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AWSStepFunctions.DescribeStateMachineAlias")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeStateMachineForExecution ->
       let json = DescribeStateMachineForExecutionInput.to_json req in
@@ -202,6 +303,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AWSStepFunctions.ListExecutions")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListMapRuns ->
+      let json = ListMapRunsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AWSStepFunctions.ListMapRuns")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListStateMachineAliases ->
+      let json = ListStateMachineAliasesInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AWSStepFunctions.ListStateMachineAliases")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListStateMachineVersions ->
+      let json = ListStateMachineVersionsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AWSStepFunctions.ListStateMachineVersions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListStateMachines ->
       let json = ListStateMachinesInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -217,6 +342,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AWSStepFunctions.ListTagsForResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PublishStateMachineVersion ->
+      let json = PublishStateMachineVersionInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AWSStepFunctions.PublishStateMachineVersion")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | RedriveExecution ->
+      let json = RedriveExecutionInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AWSStepFunctions.RedriveExecution")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | SendTaskFailure ->
       let json = SendTaskFailureInput.to_json req in
@@ -274,6 +415,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AWSStepFunctions.TagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TestState ->
+      let json = TestStateInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AWSStepFunctions.TestState")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UntagResource ->
       let json = UntagResourceInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -282,6 +431,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AWSStepFunctions.UntagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateMapRun ->
+      let json = UpdateMapRunInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AWSStepFunctions.UpdateMapRun")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateStateMachine ->
       let json = UpdateStateMachineInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -289,6 +446,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AWSStepFunctions.UpdateStateMachine")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateStateMachineAlias ->
+      let json = UpdateStateMachineAliasInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AWSStepFunctions.UpdateStateMachineAlias")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ValidateStateMachineDefinition ->
+      let json = ValidateStateMachineDefinitionInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AWSStepFunctions.ValidateStateMachineDefinition")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -326,6 +499,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateStateMachineOutput.of_json json)
       else
         Error (parse_aws_error (Some CreateStateMachineOutput.error_of_json))
+  | CreateStateMachineAlias ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateStateMachineAliasOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateStateMachineAliasOutput.error_of_json))
   | DeleteActivity ->
       if is_success
       then
@@ -339,6 +520,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeleteStateMachineOutput.of_json json)
       else
         Error (parse_aws_error (Some DeleteStateMachineOutput.error_of_json))
+  | DeleteStateMachineAlias ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteStateMachineAliasOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteStateMachineAliasOutput.error_of_json))
+  | DeleteStateMachineVersion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteStateMachineVersionOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteStateMachineVersionOutput.error_of_json))
   | DescribeActivity ->
       if is_success
       then
@@ -353,6 +551,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DescribeExecutionOutput.of_json json)
       else
         Error (parse_aws_error (Some DescribeExecutionOutput.error_of_json))
+  | DescribeMapRun ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeMapRunOutput.of_json json)
+      else Error (parse_aws_error (Some DescribeMapRunOutput.error_of_json))
   | DescribeStateMachine ->
       if is_success
       then
@@ -361,6 +565,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeStateMachineOutput.error_of_json))
+  | DescribeStateMachineAlias ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeStateMachineAliasOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeStateMachineAliasOutput.error_of_json))
   | DescribeStateMachineForExecution ->
       if is_success
       then
@@ -396,6 +609,29 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListExecutionsOutput.of_json json)
       else Error (parse_aws_error (Some ListExecutionsOutput.error_of_json))
+  | ListMapRuns ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMapRunsOutput.of_json json)
+      else Error (parse_aws_error (Some ListMapRunsOutput.error_of_json))
+  | ListStateMachineAliases ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListStateMachineAliasesOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListStateMachineAliasesOutput.error_of_json))
+  | ListStateMachineVersions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListStateMachineVersionsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListStateMachineVersionsOutput.error_of_json))
   | ListStateMachines ->
       if is_success
       then
@@ -411,6 +647,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceOutput.error_of_json))
+  | PublishStateMachineVersion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PublishStateMachineVersionOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PublishStateMachineVersionOutput.error_of_json))
+  | RedriveExecution ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RedriveExecutionOutput.of_json json)
+      else
+        Error (parse_aws_error (Some RedriveExecutionOutput.error_of_json))
   | SendTaskFailure ->
       if is_success
       then
@@ -455,12 +707,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (TagResourceOutput.of_json json)
       else Error (parse_aws_error (Some TagResourceOutput.error_of_json))
+  | TestState ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TestStateOutput.of_json json)
+      else Error (parse_aws_error (Some TestStateOutput.error_of_json))
   | UntagResource ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UntagResourceOutput.of_json json)
       else Error (parse_aws_error (Some UntagResourceOutput.error_of_json))
+  | UpdateMapRun ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateMapRunOutput.of_json json)
+      else Error (parse_aws_error (Some UpdateMapRunOutput.error_of_json))
   | UpdateStateMachine ->
       if is_success
       then
@@ -468,3 +732,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (UpdateStateMachineOutput.of_json json)
       else
         Error (parse_aws_error (Some UpdateStateMachineOutput.error_of_json))
+  | UpdateStateMachineAlias ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateStateMachineAliasOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateStateMachineAliasOutput.error_of_json))
+  | ValidateStateMachineDefinition ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ValidateStateMachineDefinitionOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ValidateStateMachineDefinitionOutput.error_of_json))

@@ -41,28 +41,26 @@ module ValidationExceptionField =
   struct
     type nonrec t =
       {
-      name: String_.t
+      name: String_.t option
         [@ocaml.doc "The field that had the validation exception."];
-      message: String_.t
+      message: String_.t option
         [@ocaml.doc "Information about the validation exception."]}
-    let context_ = "ValidationExceptionField"
-    let make ~name = fun ~message -> fun () -> { name; message }
+    let make ?name = fun ?message -> fun () -> { name; message }
     let to_value x =
       structure_to_value
-        [("name", (Some (String_.to_value x.name)));
-        ("message", (Some (String_.to_value x.message)))]
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~message ~name ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?message ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      let name = field_map_exn json "name" String_.of_json in
-      make ~message ~name ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?message ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "There was a validation error on the request."]
 module Arn =
@@ -125,6 +123,26 @@ module ControlPanelName =
     let of_json j = string_of_json ~kind:"ControlPanelName" j
     let to_json = simple_to_json to_value
   end
+module Owner =
+  struct
+    type nonrec t = string
+    let context_ = "Owner"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"^\\S+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Owner" j
+    let to_json = simple_to_json to_value
+  end
 module RoutingControlName =
   struct
     type nonrec t = string
@@ -164,6 +182,9 @@ module ValidationExceptionFieldList =
   struct
     type nonrec t = ValidationExceptionField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationExceptionField.to_value)) |>
         (fun x -> `List x)
@@ -248,11 +269,12 @@ module UpdateRoutingControlStateEntry =
           (Xml.child_exn ~context:context_ xml_arg0 "RoutingControlArn") in
       make ~routingControlState ~routingControlArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routingControlState =
-        field_map_exn json "RoutingControlState" RoutingControlState.of_json in
+        field_map_exn json__ "RoutingControlState"
+          RoutingControlState.of_json in
       let routingControlArn =
-        field_map_exn json "RoutingControlArn" Arn.of_json in
+        field_map_exn json__ "RoutingControlArn" Arn.of_json in
       make ~routingControlState ~routingControlArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A routing control state entry."]
@@ -265,27 +287,32 @@ module RoutingControl =
           "The Amazon Resource Name (ARN) of the control panel where the routing control is located."];
       controlPanelName: ControlPanelName.t option
         [@ocaml.doc
-          "The name of the control panel where the routing control is located."];
+          "The name of the control panel where the routing control is located. Only ASCII characters are supported for control panel names."];
       routingControlArn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the routing control."];
       routingControlName: RoutingControlName.t option
         [@ocaml.doc "The name of the routing control."];
       routingControlState: RoutingControlState.t option
         [@ocaml.doc
-          "The current state of the routing control. When a routing control state is On, traffic flows to a cell. When the state is Off, traffic does not flow."]}
+          "The current state of the routing control. When a routing control state is set to ON, traffic flows to a cell. When the state is set to OFF, traffic does not flow."];
+      owner: Owner.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the routing control owner."]}
     let make ?controlPanelArn =
       fun ?controlPanelName ->
         fun ?routingControlArn ->
           fun ?routingControlName ->
             fun ?routingControlState ->
-              fun () ->
-                {
-                  controlPanelArn;
-                  controlPanelName;
-                  routingControlArn;
-                  routingControlName;
-                  routingControlState
-                }
+              fun ?owner ->
+                fun () ->
+                  {
+                    controlPanelArn;
+                    controlPanelName;
+                    routingControlArn;
+                    routingControlName;
+                    routingControlState;
+                    owner
+                  }
     let to_value x =
       structure_to_value
         [("ControlPanelArn", (Option.map x.controlPanelArn ~f:Arn.to_value));
@@ -296,9 +323,11 @@ module RoutingControl =
         ("RoutingControlName",
           (Option.map x.routingControlName ~f:RoutingControlName.to_value));
         ("RoutingControlState",
-          (Option.map x.routingControlState ~f:RoutingControlState.to_value))]
+          (Option.map x.routingControlState ~f:RoutingControlState.to_value));
+        ("Owner", (Option.map x.owner ~f:Owner.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let owner = (Option.map ~f:Owner.of_xml) (Xml.child xml_arg0 "Owner") in
       let routingControlState =
         (Option.map ~f:RoutingControlState.of_xml)
           (Xml.child xml_arg0 "RoutingControlState") in
@@ -312,40 +341,42 @@ module RoutingControl =
           (Xml.child xml_arg0 "ControlPanelName") in
       let controlPanelArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ControlPanelArn") in
-      make ?routingControlState ?routingControlName ?routingControlArn
+      make ?owner ?routingControlState ?routingControlName ?routingControlArn
         ?controlPanelName ?controlPanelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let owner = field_map json__ "Owner" Owner.of_json in
       let routingControlState =
-        field_map json "RoutingControlState" RoutingControlState.of_json in
+        field_map json__ "RoutingControlState" RoutingControlState.of_json in
       let routingControlName =
-        field_map json "RoutingControlName" RoutingControlName.of_json in
-      let routingControlArn = field_map json "RoutingControlArn" Arn.of_json in
+        field_map json__ "RoutingControlName" RoutingControlName.of_json in
+      let routingControlArn =
+        field_map json__ "RoutingControlArn" Arn.of_json in
       let controlPanelName =
-        field_map json "ControlPanelName" ControlPanelName.of_json in
-      let controlPanelArn = field_map json "ControlPanelArn" Arn.of_json in
-      make ?routingControlState ?routingControlName ?routingControlArn
+        field_map json__ "ControlPanelName" ControlPanelName.of_json in
+      let controlPanelArn = field_map json__ "ControlPanelArn" Arn.of_json in
+      make ?owner ?routingControlState ?routingControlName ?routingControlArn
         ?controlPanelName ?controlPanelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A routing control, which is a simple on/off switch that you can use to route traffic to cells. When a routing control state is On, traffic flows to a cell. When the state is Off, traffic does not flow."]
+       "A routing control, which is a simple on/off switch that you can use to route traffic to cells. When a routing control state is set to ON, traffic flows to a cell. When the state is set to OFF, traffic does not flow."]
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You don't have sufficient permissions to perform this action."]
@@ -353,55 +384,54 @@ module ConflictException =
   struct
     type nonrec t =
       {
-      message: String_.t
+      message: String_.t option
         [@ocaml.doc "Description of the ConflictException error"];
-      resourceId: String_.t [@ocaml.doc "Identifier of the resource in use"];
-      resourceType: String_.t [@ocaml.doc "Type of the resource in use"]}
-    let context_ = "ConflictException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+      resourceId: String_.t option
+        [@ocaml.doc "Identifier of the resource in use"];
+      resourceType: String_.t option
+        [@ocaml.doc "Type of the resource in use"]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("resourceId", (Some (String_.to_value x.resourceId)));
-        ("resourceType", (Some (String_.to_value x.resourceType)))]
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
       let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~resourceType ~resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "resourceType" String_.of_json in
-      let resourceId = field_map_exn json "resourceId" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~resourceType ~resourceId ~message ()
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "There was a conflict with this request. Try again."]
 module EndpointTemporarilyUnavailableException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "EndpointTemporarilyUnavailableException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The cluster endpoint isn't available. Try another cluster endpoint."]
@@ -409,14 +439,13 @@ module InternalServerException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       retryAfterSeconds: RetryAfterSeconds.t option }
-    let context_ = "InternalServerException"
-    let make ?retryAfterSeconds =
-      fun ~message -> fun () -> { retryAfterSeconds; message }
+    let make ?message =
+      fun ?retryAfterSeconds -> fun () -> { message; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
         ("retryAfterSeconds",
           (Option.map x.retryAfterSeconds ~f:RetryAfterSeconds.to_value))]
     let to_query v = to_query to_value v
@@ -425,14 +454,14 @@ module InternalServerException =
         (Option.map ~f:RetryAfterSeconds.of_xml)
           (Xml.child xml_arg0 "retryAfterSeconds") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?retryAfterSeconds ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?retryAfterSeconds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "retryAfterSeconds" RetryAfterSeconds.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?retryAfterSeconds ~message ()
+        field_map json__ "retryAfterSeconds" RetryAfterSeconds.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?retryAfterSeconds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "There was an unexpected error during processing of the request."]
@@ -440,37 +469,34 @@ module ResourceNotFoundException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
-      resourceId: String_.t
+      message: String_.t option ;
+      resourceId: String_.t option
         [@ocaml.doc "Hypothetical resource identifier that was not found"];
-      resourceType: String_.t
+      resourceType: String_.t option
         [@ocaml.doc "Hypothetical resource type that was not found"]}
-    let context_ = "ResourceNotFoundException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("resourceId", (Some (String_.to_value x.resourceId)));
-        ("resourceType", (Some (String_.to_value x.resourceType)))]
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
       let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~resourceType ~resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "resourceType" String_.of_json in
-      let resourceId = field_map_exn json "resourceId" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~resourceType ~resourceId ~message ()
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request references a routing control or control panel that was not found."]
@@ -478,53 +504,51 @@ module ServiceLimitExceededException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       resourceId: String_.t option
         [@ocaml.doc
           "The resource identifier of the limit that was exceeded."];
       resourceType: String_.t option
         [@ocaml.doc "The resource type of the limit that was exceeded."];
-      limitCode: String_.t
+      limitCode: String_.t option
         [@ocaml.doc "The code of the limit that was exceeded."];
-      serviceCode: String_.t
+      serviceCode: String_.t option
         [@ocaml.doc "The service code of the limit that was exceeded."]}
-    let context_ = "ServiceLimitExceededException"
-    let make ?resourceId =
-      fun ?resourceType ->
-        fun ~message ->
-          fun ~limitCode ->
-            fun ~serviceCode ->
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType ->
+          fun ?limitCode ->
+            fun ?serviceCode ->
               fun () ->
-                { resourceId; resourceType; message; limitCode; serviceCode }
+                { message; resourceId; resourceType; limitCode; serviceCode }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
         ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
         ("resourceType", (Option.map x.resourceType ~f:String_.to_value));
-        ("limitCode", (Some (String_.to_value x.limitCode)));
-        ("serviceCode", (Some (String_.to_value x.serviceCode)))]
+        ("limitCode", (Option.map x.limitCode ~f:String_.to_value));
+        ("serviceCode", (Option.map x.serviceCode ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceCode =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "serviceCode") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceCode") in
       let limitCode =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "limitCode") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "limitCode") in
       let resourceType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
       let resourceId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~serviceCode ~limitCode ?resourceType ?resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?serviceCode ?limitCode ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceCode = field_map_exn json "serviceCode" String_.of_json in
-      let limitCode = field_map_exn json "limitCode" String_.of_json in
-      let resourceType = field_map json "resourceType" String_.of_json in
-      let resourceId = field_map json "resourceId" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~serviceCode ~limitCode ?resourceType ?resourceId ~message ()
+    let of_json json__ =
+      let serviceCode = field_map json__ "serviceCode" String_.of_json in
+      let limitCode = field_map json__ "limitCode" String_.of_json in
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?serviceCode ?limitCode ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request can't update that many routing control states at the same time. Try again with fewer routing control states."]
@@ -532,14 +556,13 @@ module ThrottlingException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       retryAfterSeconds: RetryAfterSeconds.t option }
-    let context_ = "ThrottlingException"
-    let make ?retryAfterSeconds =
-      fun ~message -> fun () -> { retryAfterSeconds; message }
+    let make ?message =
+      fun ?retryAfterSeconds -> fun () -> { message; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
         ("retryAfterSeconds",
           (Option.map x.retryAfterSeconds ~f:RetryAfterSeconds.to_value))]
     let to_query v = to_query to_value v
@@ -548,29 +571,28 @@ module ThrottlingException =
         (Option.map ~f:RetryAfterSeconds.of_xml)
           (Xml.child xml_arg0 "retryAfterSeconds") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?retryAfterSeconds ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?retryAfterSeconds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "retryAfterSeconds" RetryAfterSeconds.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?retryAfterSeconds ~message ()
+        field_map json__ "retryAfterSeconds" RetryAfterSeconds.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?retryAfterSeconds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied because of request throttling."]
 module ValidationException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       reason: ValidationExceptionReason.t option ;
       fields: ValidationExceptionFieldList.t option }
-    let context_ = "ValidationException"
-    let make ?reason =
-      fun ?fields -> fun ~message -> fun () -> { reason; fields; message }
+    let make ?message =
+      fun ?reason -> fun ?fields -> fun () -> { message; reason; fields }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
         ("reason",
           (Option.map x.reason ~f:ValidationExceptionReason.to_value));
         ("fields",
@@ -584,21 +606,25 @@ module ValidationException =
         (Option.map ~f:ValidationExceptionReason.of_xml)
           (Xml.child xml_arg0 "reason") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?fields ?reason ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?fields ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fields =
-        field_map json "fields" ValidationExceptionFieldList.of_json in
-      let reason = field_map json "reason" ValidationExceptionReason.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?fields ?reason ~message ()
+        field_map json__ "fields" ValidationExceptionFieldList.of_json in
+      let reason =
+        field_map json__ "reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?fields ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "There was a validation error on the request."]
 module Arns =
   struct
     type nonrec t = Arn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -622,6 +648,9 @@ module UpdateRoutingControlStateEntries =
   struct
     type nonrec t = UpdateRoutingControlStateEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UpdateRoutingControlStateEntry.to_value)) |>
         (fun x -> `List x)
@@ -668,6 +697,9 @@ module RoutingControls =
   struct
     type nonrec t = RoutingControl.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RoutingControl.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -810,7 +842,7 @@ module UpdateRoutingControlStatesResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Set multiple routing control states. You can set the value for each state to be On or Off. When the state is On, traffic flows to a cell. When it's Off, traffic does not flow. With Route 53 ARC, you can add safety rules for routing controls, which are safeguards for routing control state updates that help prevent unexpected outcomes, like fail open traffic routing. However, there are scenarios when you might want to bypass the routing control safeguards that are enforced with safety rules that you've configured. For example, you might want to fail over quickly for disaster recovery, and one or more safety rules might be unexpectedly preventing you from updating a routing control state to reroute traffic. In a \"break glass\" scenario like this, you can override one or more safety rules to change a routing control state and fail over your application. The SafetyRulesToOverride property enables you override one or more safety rules and update routing control states. For more information, see Override safety rules to reroute traffic in the Amazon Route 53 Application Recovery Controller Developer Guide. You must specify Regional endpoints when you work with API cluster operations to get or update routing control states in Route 53 ARC. To see a code example for getting a routing control state, including accessing Regional cluster endpoints in sequence, see API examples in the Amazon Route 53 Application Recovery Controller Developer Guide. Viewing and updating routing control states Working with routing controls overall"]
+       "Set multiple routing control states. You can set the value for each state to be ON or OFF. When the state is ON, traffic flows to a cell. When it's OFF, traffic does not flow. With Route 53 ARC, you can add safety rules for routing controls, which are safeguards for routing control state updates that help prevent unexpected outcomes, like fail open traffic routing. However, there are scenarios when you might want to bypass the routing control safeguards that are enforced with safety rules that you've configured. For example, you might want to fail over quickly for disaster recovery, and one or more safety rules might be unexpectedly preventing you from updating a routing control state to reroute traffic. In a \"break glass\" scenario like this, you can override one or more safety rules to change a routing control state and fail over your application. The SafetyRulesToOverride property enables you override one or more safety rules and update routing control states. For more information, see Override safety rules to reroute traffic in the Amazon Route 53 Application Recovery Controller Developer Guide. You must specify Regional endpoints when you work with API cluster operations to get or update routing control states in Route 53 ARC. To see a code example for getting a routing control state, including accessing Regional cluster endpoints in sequence, see API examples in the Amazon Route 53 Application Recovery Controller Developer Guide. Viewing and updating routing control states Working with routing controls overall"]
 module UpdateRoutingControlStatesRequest =
   struct
     type nonrec t =
@@ -844,16 +876,16 @@ module UpdateRoutingControlStatesRequest =
              "UpdateRoutingControlStateEntries") in
       make ?safetyRulesToOverride ~updateRoutingControlStateEntries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let safetyRulesToOverride =
-        field_map json "SafetyRulesToOverride" Arns.of_json in
+        field_map json__ "SafetyRulesToOverride" Arns.of_json in
       let updateRoutingControlStateEntries =
-        field_map_exn json "UpdateRoutingControlStateEntries"
+        field_map_exn json__ "UpdateRoutingControlStateEntries"
           UpdateRoutingControlStateEntries.of_json in
       make ?safetyRulesToOverride ~updateRoutingControlStateEntries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Set multiple routing control states. You can set the value for each state to be On or Off. When the state is On, traffic flows to a cell. When it's Off, traffic does not flow. With Route 53 ARC, you can add safety rules for routing controls, which are safeguards for routing control state updates that help prevent unexpected outcomes, like fail open traffic routing. However, there are scenarios when you might want to bypass the routing control safeguards that are enforced with safety rules that you've configured. For example, you might want to fail over quickly for disaster recovery, and one or more safety rules might be unexpectedly preventing you from updating a routing control state to reroute traffic. In a \"break glass\" scenario like this, you can override one or more safety rules to change a routing control state and fail over your application. The SafetyRulesToOverride property enables you override one or more safety rules and update routing control states. For more information, see Override safety rules to reroute traffic in the Amazon Route 53 Application Recovery Controller Developer Guide. You must specify Regional endpoints when you work with API cluster operations to get or update routing control states in Route 53 ARC. To see a code example for getting a routing control state, including accessing Regional cluster endpoints in sequence, see API examples in the Amazon Route 53 Application Recovery Controller Developer Guide. Viewing and updating routing control states Working with routing controls overall"]
+       "Set multiple routing control states. You can set the value for each state to be ON or OFF. When the state is ON, traffic flows to a cell. When it's OFF, traffic does not flow. With Route 53 ARC, you can add safety rules for routing controls, which are safeguards for routing control state updates that help prevent unexpected outcomes, like fail open traffic routing. However, there are scenarios when you might want to bypass the routing control safeguards that are enforced with safety rules that you've configured. For example, you might want to fail over quickly for disaster recovery, and one or more safety rules might be unexpectedly preventing you from updating a routing control state to reroute traffic. In a \"break glass\" scenario like this, you can override one or more safety rules to change a routing control state and fail over your application. The SafetyRulesToOverride property enables you override one or more safety rules and update routing control states. For more information, see Override safety rules to reroute traffic in the Amazon Route 53 Application Recovery Controller Developer Guide. You must specify Regional endpoints when you work with API cluster operations to get or update routing control states in Route 53 ARC. To see a code example for getting a routing control state, including accessing Regional cluster endpoints in sequence, see API examples in the Amazon Route 53 Application Recovery Controller Developer Guide. Viewing and updating routing control states Working with routing controls overall"]
 module UpdateRoutingControlStateResponse =
   struct
     type nonrec t = unit
@@ -950,7 +982,7 @@ module UpdateRoutingControlStateResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Set the state of the routing control to reroute traffic. You can set the value to be On or Off. When the state is On, traffic flows to a cell. When the state is Off, traffic does not flow. With Route 53 ARC, you can add safety rules for routing controls, which are safeguards for routing control state updates that help prevent unexpected outcomes, like fail open traffic routing. However, there are scenarios when you might want to bypass the routing control safeguards that are enforced with safety rules that you've configured. For example, you might want to fail over quickly for disaster recovery, and one or more safety rules might be unexpectedly preventing you from updating a routing control state to reroute traffic. In a \"break glass\" scenario like this, you can override one or more safety rules to change a routing control state and fail over your application. The SafetyRulesToOverride property enables you override one or more safety rules and update routing control states. For more information, see Override safety rules to reroute traffic in the Amazon Route 53 Application Recovery Controller Developer Guide. You must specify Regional endpoints when you work with API cluster operations to get or update routing control states in Route 53 ARC. To see a code example for getting a routing control state, including accessing Regional cluster endpoints in sequence, see API examples in the Amazon Route 53 Application Recovery Controller Developer Guide. Viewing and updating routing control states Working with routing controls overall"]
+       "Set the state of the routing control to reroute traffic. You can set the value to ON or OFF. When the state is ON, traffic flows to a cell. When the state is OFF, traffic does not flow. With Route 53 ARC, you can add safety rules for routing controls, which are safeguards for routing control state updates that help prevent unexpected outcomes, like fail open traffic routing. However, there are scenarios when you might want to bypass the routing control safeguards that are enforced with safety rules that you've configured. For example, you might want to fail over quickly for disaster recovery, and one or more safety rules might be unexpectedly preventing you from updating a routing control state to reroute traffic. In a \"break glass\" scenario like this, you can override one or more safety rules to change a routing control state and fail over your application. The SafetyRulesToOverride property enables you override one or more safety rules and update routing control states. For more information, see Override safety rules to reroute traffic in the Amazon Route 53 Application Recovery Controller Developer Guide. You must specify Regional endpoints when you work with API cluster operations to get or update routing control states in Route 53 ARC. To see a code example for getting a routing control state, including accessing Regional cluster endpoints in sequence, see API examples in the Amazon Route 53 Application Recovery Controller Developer Guide. Viewing and updating routing control states Working with routing controls overall"]
 module UpdateRoutingControlStateRequest =
   struct
     type nonrec t =
@@ -960,7 +992,7 @@ module UpdateRoutingControlStateRequest =
           "The Amazon Resource Name (ARN) for the routing control that you want to update the state for."];
       routingControlState: RoutingControlState.t
         [@ocaml.doc
-          "The state of the routing control. You can set the value to be On or Off."];
+          "The state of the routing control. You can set the value to ON or OFF."];
       safetyRulesToOverride: Arns.t option
         [@ocaml.doc
           "The Amazon Resource Names (ARNs) for the safety rules that you want to override when you're updating the state of a routing control. You can override one safety rule or multiple safety rules by including one or more ARNs, separated by commas. For more information, see Override safety rules to reroute traffic in the Amazon Route 53 Application Recovery Controller Developer Guide."]}
@@ -990,22 +1022,23 @@ module UpdateRoutingControlStateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoutingControlArn") in
       make ?safetyRulesToOverride ~routingControlState ~routingControlArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let safetyRulesToOverride =
-        field_map json "SafetyRulesToOverride" Arns.of_json in
+        field_map json__ "SafetyRulesToOverride" Arns.of_json in
       let routingControlState =
-        field_map_exn json "RoutingControlState" RoutingControlState.of_json in
+        field_map_exn json__ "RoutingControlState"
+          RoutingControlState.of_json in
       let routingControlArn =
-        field_map_exn json "RoutingControlArn" Arn.of_json in
+        field_map_exn json__ "RoutingControlArn" Arn.of_json in
       make ?safetyRulesToOverride ~routingControlState ~routingControlArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Set the state of the routing control to reroute traffic. You can set the value to be On or Off. When the state is On, traffic flows to a cell. When the state is Off, traffic does not flow. With Route 53 ARC, you can add safety rules for routing controls, which are safeguards for routing control state updates that help prevent unexpected outcomes, like fail open traffic routing. However, there are scenarios when you might want to bypass the routing control safeguards that are enforced with safety rules that you've configured. For example, you might want to fail over quickly for disaster recovery, and one or more safety rules might be unexpectedly preventing you from updating a routing control state to reroute traffic. In a \"break glass\" scenario like this, you can override one or more safety rules to change a routing control state and fail over your application. The SafetyRulesToOverride property enables you override one or more safety rules and update routing control states. For more information, see Override safety rules to reroute traffic in the Amazon Route 53 Application Recovery Controller Developer Guide. You must specify Regional endpoints when you work with API cluster operations to get or update routing control states in Route 53 ARC. To see a code example for getting a routing control state, including accessing Regional cluster endpoints in sequence, see API examples in the Amazon Route 53 Application Recovery Controller Developer Guide. Viewing and updating routing control states Working with routing controls overall"]
+       "Set the state of the routing control to reroute traffic. You can set the value to ON or OFF. When the state is ON, traffic flows to a cell. When the state is OFF, traffic does not flow. With Route 53 ARC, you can add safety rules for routing controls, which are safeguards for routing control state updates that help prevent unexpected outcomes, like fail open traffic routing. However, there are scenarios when you might want to bypass the routing control safeguards that are enforced with safety rules that you've configured. For example, you might want to fail over quickly for disaster recovery, and one or more safety rules might be unexpectedly preventing you from updating a routing control state to reroute traffic. In a \"break glass\" scenario like this, you can override one or more safety rules to change a routing control state and fail over your application. The SafetyRulesToOverride property enables you override one or more safety rules and update routing control states. For more information, see Override safety rules to reroute traffic in the Amazon Route 53 Application Recovery Controller Developer Guide. You must specify Regional endpoints when you work with API cluster operations to get or update routing control states in Route 53 ARC. To see a code example for getting a routing control state, including accessing Regional cluster endpoints in sequence, see API examples in the Amazon Route 53 Application Recovery Controller Developer Guide. Viewing and updating routing control states Working with routing controls overall"]
 module ListRoutingControlsResponse =
   struct
     type nonrec t =
       {
-      routingControls: RoutingControls.t
+      routingControls: RoutingControls.t option
         [@ocaml.doc "The list of routing controls."];
       nextToken: PageToken.t option
         [@ocaml.doc
@@ -1019,9 +1052,8 @@ module ListRoutingControlsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListRoutingControlsResponse"
-    let make ?nextToken =
-      fun ~routingControls -> fun () -> { nextToken; routingControls }
+    let make ?routingControls =
+      fun ?nextToken -> fun () -> { routingControls; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -1091,25 +1123,25 @@ module ListRoutingControlsResponse =
     let to_value x =
       structure_to_value
         [("RoutingControls",
-           (Some (RoutingControls.to_value x.routingControls)));
+           (Option.map x.routingControls ~f:RoutingControls.to_value));
         ("NextToken", (Option.map x.nextToken ~f:PageToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let routingControls =
-        RoutingControls.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RoutingControls") in
-      make ?nextToken ~routingControls ()
+        (Option.map ~f:RoutingControls.of_xml)
+          (Xml.child xml_arg0 "RoutingControls") in
+      make ?nextToken ?routingControls ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PageToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PageToken.of_json in
       let routingControls =
-        field_map_exn json "RoutingControls" RoutingControls.of_json in
-      make ?nextToken ~routingControls ()
+        field_map json__ "RoutingControls" RoutingControls.of_json in
+      make ?nextToken ?routingControls ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List routing control names and Amazon Resource Names (ARNs), as well as the routing control state for each routing control, along with the control panel name and control panel ARN for the routing controls. If you specify a control panel ARN, this call lists the routing controls in the control panel. Otherwise, it lists all the routing controls in the cluster. A routing control is a simple on/off switch in Route 53 ARC that you can use to route traffic to cells. When a routing control state is On, traffic flows to a cell. When the state is Off, traffic does not flow. Before you can create a routing control, you must first create a cluster, and then host the control in a control panel on the cluster. For more information, see Create routing control structures in the Amazon Route 53 Application Recovery Controller Developer Guide. You access one of the endpoints for the cluster to get or update the routing control state to redirect traffic for your application. You must specify Regional endpoints when you work with API cluster operations to use this API operation to list routing controls in Route 53 ARC. Learn more about working with routing controls in the following topics in the Amazon Route 53 Application Recovery Controller Developer Guide: Viewing and updating routing control states Working with routing controls in Route 53 ARC"]
+       "List routing control names and Amazon Resource Names (ARNs), as well as the routing control state for each routing control, along with the control panel name and control panel ARN for the routing controls. If you specify a control panel ARN, this call lists the routing controls in the control panel. Otherwise, it lists all the routing controls in the cluster. A routing control is a simple on/off switch in Route 53 ARC that you can use to route traffic to cells. When a routing control state is set to ON, traffic flows to a cell. When the state is set to OFF, traffic does not flow. Before you can create a routing control, you must first create a cluster, and then host the control in a control panel on the cluster. For more information, see Create routing control structures in the Amazon Route 53 Application Recovery Controller Developer Guide. You access one of the endpoints for the cluster to get or update the routing control state to redirect traffic for your application. You must specify Regional endpoints when you work with API cluster operations to use this API operation to list routing controls in Route 53 ARC. Learn more about working with routing controls in the following topics in the Amazon Route 53 Application Recovery Controller Developer Guide: Viewing and updating routing control states Working with routing controls in Route 53 ARC"]
 module ListRoutingControlsRequest =
   struct
     type nonrec t =
@@ -1142,21 +1174,21 @@ module ListRoutingControlsRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ControlPanelArn") in
       make ?maxResults ?nextToken ?controlPanelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" PageToken.of_json in
-      let controlPanelArn = field_map json "ControlPanelArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PageToken.of_json in
+      let controlPanelArn = field_map json__ "ControlPanelArn" Arn.of_json in
       make ?maxResults ?nextToken ?controlPanelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List routing control names and Amazon Resource Names (ARNs), as well as the routing control state for each routing control, along with the control panel name and control panel ARN for the routing controls. If you specify a control panel ARN, this call lists the routing controls in the control panel. Otherwise, it lists all the routing controls in the cluster. A routing control is a simple on/off switch in Route 53 ARC that you can use to route traffic to cells. When a routing control state is On, traffic flows to a cell. When the state is Off, traffic does not flow. Before you can create a routing control, you must first create a cluster, and then host the control in a control panel on the cluster. For more information, see Create routing control structures in the Amazon Route 53 Application Recovery Controller Developer Guide. You access one of the endpoints for the cluster to get or update the routing control state to redirect traffic for your application. You must specify Regional endpoints when you work with API cluster operations to use this API operation to list routing controls in Route 53 ARC. Learn more about working with routing controls in the following topics in the Amazon Route 53 Application Recovery Controller Developer Guide: Viewing and updating routing control states Working with routing controls in Route 53 ARC"]
+       "List routing control names and Amazon Resource Names (ARNs), as well as the routing control state for each routing control, along with the control panel name and control panel ARN for the routing controls. If you specify a control panel ARN, this call lists the routing controls in the control panel. Otherwise, it lists all the routing controls in the cluster. A routing control is a simple on/off switch in Route 53 ARC that you can use to route traffic to cells. When a routing control state is set to ON, traffic flows to a cell. When the state is set to OFF, traffic does not flow. Before you can create a routing control, you must first create a cluster, and then host the control in a control panel on the cluster. For more information, see Create routing control structures in the Amazon Route 53 Application Recovery Controller Developer Guide. You access one of the endpoints for the cluster to get or update the routing control state to redirect traffic for your application. You must specify Regional endpoints when you work with API cluster operations to use this API operation to list routing controls in Route 53 ARC. Learn more about working with routing controls in the following topics in the Amazon Route 53 Application Recovery Controller Developer Guide: Viewing and updating routing control states Working with routing controls in Route 53 ARC"]
 module GetRoutingControlStateResponse =
   struct
     type nonrec t =
       {
-      routingControlArn: Arn.t
+      routingControlArn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the response."];
-      routingControlState: RoutingControlState.t
+      routingControlState: RoutingControlState.t option
         [@ocaml.doc "The state of the routing control."];
       routingControlName: RoutingControlName.t option
         [@ocaml.doc "The routing control name."]}
@@ -1169,12 +1201,11 @@ module GetRoutingControlStateResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetRoutingControlStateResponse"
-    let make ?routingControlName =
-      fun ~routingControlArn ->
-        fun ~routingControlState ->
+    let make ?routingControlArn =
+      fun ?routingControlState ->
+        fun ?routingControlName ->
           fun () ->
-            { routingControlName; routingControlArn; routingControlState }
+            { routingControlArn; routingControlState; routingControlName }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -1243,9 +1274,10 @@ module GetRoutingControlStateResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("RoutingControlArn", (Some (Arn.to_value x.routingControlArn)));
+        [("RoutingControlArn",
+           (Option.map x.routingControlArn ~f:Arn.to_value));
         ("RoutingControlState",
-          (Some (RoutingControlState.to_value x.routingControlState)));
+          (Option.map x.routingControlState ~f:RoutingControlState.to_value));
         ("RoutingControlName",
           (Option.map x.routingControlName ~f:RoutingControlName.to_value))]
     let to_query v = to_query to_value v
@@ -1254,24 +1286,23 @@ module GetRoutingControlStateResponse =
         (Option.map ~f:RoutingControlName.of_xml)
           (Xml.child xml_arg0 "RoutingControlName") in
       let routingControlState =
-        RoutingControlState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RoutingControlState") in
+        (Option.map ~f:RoutingControlState.of_xml)
+          (Xml.child xml_arg0 "RoutingControlState") in
       let routingControlArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RoutingControlArn") in
-      make ?routingControlName ~routingControlState ~routingControlArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "RoutingControlArn") in
+      make ?routingControlName ?routingControlState ?routingControlArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routingControlName =
-        field_map json "RoutingControlName" RoutingControlName.of_json in
+        field_map json__ "RoutingControlName" RoutingControlName.of_json in
       let routingControlState =
-        field_map_exn json "RoutingControlState" RoutingControlState.of_json in
+        field_map json__ "RoutingControlState" RoutingControlState.of_json in
       let routingControlArn =
-        field_map_exn json "RoutingControlArn" Arn.of_json in
-      make ?routingControlName ~routingControlState ~routingControlArn ()
+        field_map json__ "RoutingControlArn" Arn.of_json in
+      make ?routingControlName ?routingControlState ?routingControlArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Get the state for a routing control. A routing control is a simple on/off switch that you can use to route traffic to cells. When a routing control state is On, traffic flows to a cell. When the state is Off, traffic does not flow. Before you can create a routing control, you must first create a cluster, and then host the control in a control panel on the cluster. For more information, see Create routing control structures in the Amazon Route 53 Application Recovery Controller Developer Guide. You access one of the endpoints for the cluster to get or update the routing control state to redirect traffic for your application. You must specify Regional endpoints when you work with API cluster operations to get or update routing control states in Route 53 ARC. To see a code example for getting a routing control state, including accessing Regional cluster endpoints in sequence, see API examples in the Amazon Route 53 Application Recovery Controller Developer Guide. Learn more about working with routing controls in the following topics in the Amazon Route 53 Application Recovery Controller Developer Guide: Viewing and updating routing control states Working with routing controls in Route 53 ARC"]
+       "Get the state for a routing control. A routing control is a simple on/off switch that you can use to route traffic to cells. When a routing control state is set to ON, traffic flows to a cell. When the state is set to OFF, traffic does not flow. Before you can create a routing control, you must first create a cluster, and then host the control in a control panel on the cluster. For more information, see Create routing control structures in the Amazon Route 53 Application Recovery Controller Developer Guide. You access one of the endpoints for the cluster to get or update the routing control state to redirect traffic for your application. You must specify Regional endpoints when you work with API cluster operations to get or update routing control states in Route 53 ARC. To see a code example for getting a routing control state, including accessing Regional cluster endpoints in sequence, see API examples in the Amazon Route 53 Application Recovery Controller Developer Guide. Learn more about working with routing controls in the following topics in the Amazon Route 53 Application Recovery Controller Developer Guide: Viewing and updating routing control states Working with routing controls in Route 53 ARC"]
 module GetRoutingControlStateRequest =
   struct
     type nonrec t =
@@ -1291,10 +1322,10 @@ module GetRoutingControlStateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoutingControlArn") in
       make ~routingControlArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routingControlArn =
-        field_map_exn json "RoutingControlArn" Arn.of_json in
+        field_map_exn json__ "RoutingControlArn" Arn.of_json in
       make ~routingControlArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Get the state for a routing control. A routing control is a simple on/off switch that you can use to route traffic to cells. When a routing control state is On, traffic flows to a cell. When the state is Off, traffic does not flow. Before you can create a routing control, you must first create a cluster, and then host the control in a control panel on the cluster. For more information, see Create routing control structures in the Amazon Route 53 Application Recovery Controller Developer Guide. You access one of the endpoints for the cluster to get or update the routing control state to redirect traffic for your application. You must specify Regional endpoints when you work with API cluster operations to get or update routing control states in Route 53 ARC. To see a code example for getting a routing control state, including accessing Regional cluster endpoints in sequence, see API examples in the Amazon Route 53 Application Recovery Controller Developer Guide. Learn more about working with routing controls in the following topics in the Amazon Route 53 Application Recovery Controller Developer Guide: Viewing and updating routing control states Working with routing controls in Route 53 ARC"]
+       "Get the state for a routing control. A routing control is a simple on/off switch that you can use to route traffic to cells. When a routing control state is set to ON, traffic flows to a cell. When the state is set to OFF, traffic does not flow. Before you can create a routing control, you must first create a cluster, and then host the control in a control panel on the cluster. For more information, see Create routing control structures in the Amazon Route 53 Application Recovery Controller Developer Guide. You access one of the endpoints for the cluster to get or update the routing control state to redirect traffic for your application. You must specify Regional endpoints when you work with API cluster operations to get or update routing control states in Route 53 ARC. To see a code example for getting a routing control state, including accessing Regional cluster endpoints in sequence, see API examples in the Amazon Route 53 Application Recovery Controller Developer Guide. Learn more about working with routing controls in the following topics in the Amazon Route 53 Application Recovery Controller Developer Guide: Viewing and updating routing control states Working with routing controls in Route 53 ARC"]

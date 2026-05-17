@@ -11,9 +11,33 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let accept_primary_email_update ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AcceptPrimaryEmailUpdate input
 let delete_alternate_contact ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAlternateContact input
+let disable_region ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisableRegion input
+let enable_region ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.EnableRegion input
+let get_account_information ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAccountInformation input
 let get_alternate_contact ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAlternateContact input
+let get_contact_information ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetContactInformation input
+let get_gov_cloud_account_information ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetGovCloudAccountInformation input
+let get_primary_email ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetPrimaryEmail input
+let get_region_opt_status ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRegionOptStatus input
+let list_regions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRegions input
+let put_account_name ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutAccountName input
 let put_alternate_contact ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutAlternateContact input
+let put_contact_information ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutContactInformation input
+let start_primary_email_update ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartPrimaryEmailUpdate input

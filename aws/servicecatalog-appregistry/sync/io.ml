@@ -33,6 +33,8 @@ let get_associated_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAssociatedResource input
 let get_attribute_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAttributeGroup input
+let get_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetConfiguration input
 let list_applications ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListApplications input
 let list_associated_attribute_groups ?endpoint_url ?cfg input =
@@ -41,8 +43,12 @@ let list_associated_resources ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAssociatedResources input
 let list_attribute_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAttributeGroups input
+let list_attribute_groups_for_application ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAttributeGroupsForApplication input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let put_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutConfiguration input
 let sync_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SyncResource input
 let tag_resource ?endpoint_url ?cfg input =

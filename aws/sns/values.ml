@@ -82,10 +82,10 @@ module MessageAttributeValue =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DataType") in
       make ?binaryValue ?stringValue ~dataType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let binaryValue = field_map json "BinaryValue" Binary.of_json in
-      let stringValue = field_map json "StringValue" String_.of_json in
-      let dataType = field_map_exn json "DataType" String_.of_json in
+    let of_json json__ =
+      let binaryValue = field_map json__ "BinaryValue" Binary.of_json in
+      let stringValue = field_map json__ "StringValue" String_.of_json in
+      let dataType = field_map_exn json__ "DataType" String_.of_json in
       make ?binaryValue ?stringValue ~dataType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -205,6 +205,8 @@ module MessageAttributeMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -386,6 +388,8 @@ module MapStringToString =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -417,6 +421,9 @@ module NumberCapabilityList =
   struct
     type nonrec t = NumberCapability.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NumberCapability.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -437,6 +444,19 @@ module NumberCapabilityList =
       list_of_json ~kind:"NumberCapabilityList"
         ~of_json:NumberCapability.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module PhoneNumber =
+  struct
+    type nonrec t = string
+    let context_ = "PhoneNumber"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PhoneNumber" j
+    let to_json = simple_to_json to_value
   end
 module RouteType =
   struct
@@ -511,9 +531,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The list of tags to be added to the specified topic."]
@@ -547,45 +567,43 @@ module BatchResultErrorEntry =
   struct
     type nonrec t =
       {
-      id: String_.t [@ocaml.doc "The Id of an entry in a batch request"];
-      code: String_.t
+      id: String_.t option
+        [@ocaml.doc "The Id of an entry in a batch request"];
+      code: String_.t option
         [@ocaml.doc
           "An error code representing why the action failed on this entry."];
       message: String_.t option
         [@ocaml.doc
           "A message explaining why the action failed on this entry."];
-      senderFault: Boolean.t
+      senderFault: Boolean.t option
         [@ocaml.doc
           "Specifies whether the error happened due to the caller of the batch API action."]}
-    let context_ = "BatchResultErrorEntry"
-    let make ?message =
-      fun ~id ->
-        fun ~code ->
-          fun ~senderFault -> fun () -> { message; id; code; senderFault }
+    let make ?id =
+      fun ?code ->
+        fun ?message ->
+          fun ?senderFault -> fun () -> { id; code; message; senderFault }
     let to_value x =
       structure_to_value
-        [("Id", (Some (String_.to_value x.id)));
-        ("Code", (Some (String_.to_value x.code)));
+        [("Id", (Option.map x.id ~f:String_.to_value));
+        ("Code", (Option.map x.code ~f:String_.to_value));
         ("Message", (Option.map x.message ~f:String_.to_value));
-        ("SenderFault", (Some (Boolean.to_value x.senderFault)))]
+        ("SenderFault", (Option.map x.senderFault ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let senderFault =
-        Boolean.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SenderFault") in
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "SenderFault") in
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
-      let code =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Code") in
-      let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ~senderFault ?message ~code ~id ()
+      let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?senderFault ?message ?code ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let senderFault = field_map_exn json "SenderFault" Boolean.of_json in
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map_exn json "Code" String_.of_json in
-      let id = field_map_exn json "Id" String_.of_json in
-      make ~senderFault ?message ~code ~id ()
+    let of_json json__ =
+      let senderFault = field_map json__ "SenderFault" Boolean.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
+      let id = field_map json__ "Id" String_.of_json in
+      make ?senderFault ?message ?code ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gives a detailed description of failed messages in the batch."]
@@ -617,10 +635,10 @@ module PublishBatchResultEntry =
       let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Id") in
       make ?sequenceNumber ?messageId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sequenceNumber = field_map json "SequenceNumber" String_.of_json in
-      let messageId = field_map json "MessageId" MessageId.of_json in
-      let id = field_map json "Id" String_.of_json in
+    let of_json json__ =
+      let sequenceNumber = field_map json__ "SequenceNumber" String_.of_json in
+      let messageId = field_map json__ "MessageId" MessageId.of_json in
+      let id = field_map json__ "Id" String_.of_json in
       make ?sequenceNumber ?messageId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -637,16 +655,16 @@ module PublishBatchRequestEntry =
         [@ocaml.doc "The subject of the batch message."];
       messageStructure: MessageStructure.t option
         [@ocaml.doc
-          "Set MessageStructure to json if you want to send a different message for each protocol. For example, using one publish action, you can send a short message to your SMS subscribers and a longer message to your email subscribers. If you set MessageStructure to json, the value of the Message parameter must: be a syntactically valid JSON object; and contain at least a top-level JSON key of \"default\" with a value that is a string. You can define other top-level keys that define the message you want to send to a specific transport protocol (e.g. http)."];
+          "Set MessageStructure to json if you want to send a different message for each protocol. For example, using one publish action, you can send a short message to your SMS subscribers and a longer message to your email subscribers. If you set MessageStructure to json, the value of the Message parameter must: be a syntactically valid JSON object; and contain at least a top-level JSON key of \"default\" with a value that is a string. You can define other top-level keys that define the message you want to send to a specific transport protocol (for example, http)."];
       messageAttributes: MessageAttributeMap.t option
         [@ocaml.doc
           "Each message attribute consists of a Name, Type, and Value. For more information, see Amazon SNS message attributes in the Amazon SNS Developer Guide."];
       messageDeduplicationId: String_.t option
         [@ocaml.doc
-          "This parameter applies only to FIFO (first-in-first-out) topics. The token used for deduplication of messages within a 5-minute minimum deduplication interval. If a message with a particular MessageDeduplicationId is sent successfully, subsequent messages with the same MessageDeduplicationId are accepted successfully but aren't delivered. Every message must have a unique MessageDeduplicationId. You may provide a MessageDeduplicationId explicitly. If you aren't able to provide a MessageDeduplicationId and you enable ContentBasedDeduplication for your topic, Amazon SNS uses a SHA-256 hash to generate the MessageDeduplicationId using the body of the message (but not the attributes of the message). If you don't provide a MessageDeduplicationId and the topic doesn't have ContentBasedDeduplication set, the action fails with an error. If the topic has a ContentBasedDeduplication set, your MessageDeduplicationId overrides the generated one. When ContentBasedDeduplication is in effect, messages with identical content sent within the deduplication interval are treated as duplicates and only one copy of the message is delivered. If you send one message with ContentBasedDeduplication enabled, and then another message with a MessageDeduplicationId that is the same as the one generated for the first MessageDeduplicationId, the two messages are treated as duplicates and only one copy of the message is delivered. The MessageDeduplicationId is available to the consumer of the message (this can be useful for troubleshooting delivery issues). If a message is sent successfully but the acknowledgement is lost and the message is resent with the same MessageDeduplicationId after the deduplication interval, Amazon SNS can't detect duplicate messages. Amazon SNS continues to keep track of the message deduplication ID even after the message is received and deleted. The length of MessageDeduplicationId is 128 characters. MessageDeduplicationId can contain alphanumeric characters (a-z, A-Z, 0-9) and punctuation (!\"#$%&'()*+,-./:;<=>?\\@\\[\\\\]^_`\\{|\\}~)."];
+          "This parameter applies only to FIFO (first-in-first-out) topics. This parameter applies only to FIFO (first-in-first-out) topics. The MessageDeduplicationId can contain up to 128 alphanumeric characters (a-z, A-Z, 0-9) and punctuation (!\"#$%&'()*+,-./:;<=>?\\@\\[\\\\]^_`\\{|\\}~). Every message must have a unique MessageDeduplicationId, which is a token used for deduplication of sent messages within the 5 minute minimum deduplication interval. The scope of deduplication depends on the FifoThroughputScope attribute, when set to Topic the message deduplication scope is across the entire topic, when set to MessageGroup the message deduplication scope is within each individual message group. If a message with a particular MessageDeduplicationId is sent successfully, subsequent messages within the deduplication scope and interval, with the same MessageDeduplicationId, are accepted successfully but aren't delivered. Every message must have a unique MessageDeduplicationId. You may provide a MessageDeduplicationId explicitly. If you aren't able to provide a MessageDeduplicationId and you enable ContentBasedDeduplication for your topic, Amazon SNS uses a SHA-256 hash to generate the MessageDeduplicationId using the body of the message (but not the attributes of the message). If you don't provide a MessageDeduplicationId and the topic doesn't have ContentBasedDeduplication set, the action fails with an error. If the topic has a ContentBasedDeduplication set, your MessageDeduplicationId overrides the generated one. When ContentBasedDeduplication is in effect, messages with identical content sent within the deduplication scope and interval are treated as duplicates and only one copy of the message is delivered. If you send one message with ContentBasedDeduplication enabled, and then another message with a MessageDeduplicationId that is the same as the one generated for the first MessageDeduplicationId, the two messages are treated as duplicates, within the deduplication scope and interval, and only one copy of the message is delivered. The MessageDeduplicationId is available to the consumer of the message (this can be useful for troubleshooting delivery issues). If a message is sent successfully but the acknowledgement is lost and the message is resent with the same MessageDeduplicationId after the deduplication interval, Amazon SNS can't detect duplicate messages. Amazon SNS continues to keep track of the message deduplication ID even after the message is received and deleted."];
       messageGroupId: String_.t option
         [@ocaml.doc
-          "This parameter applies only to FIFO (first-in-first-out) topics. The tag that specifies that a message belongs to a specific message group. Messages that belong to the same message group are processed in a FIFO manner (however, messages in different message groups might be processed out of order). To interleave multiple ordered streams within a single topic, use MessageGroupId values (for example, session data for multiple users). In this scenario, multiple consumers can process the topic, but the session data of each user is processed in a FIFO fashion. You must associate a non-empty MessageGroupId with a message. If you don't provide a MessageGroupId, the action fails. The length of MessageGroupId is 128 characters. MessageGroupId can contain alphanumeric characters (a-z, A-Z, 0-9) and punctuation (!\"#$%&'()*+,-./:;<=>?\\@\\[\\\\]^_`\\{|\\}~). MessageGroupId is required for FIFO topics. You can't use it for standard topics."]}
+          "FIFO topics: The tag that specifies that a message belongs to a specific message group. Messages that belong to the same message group are processed in a FIFO manner (however, messages in different message groups might be processed out of order). To interleave multiple ordered streams within a single topic, use MessageGroupId values (for example, session data for multiple users). In this scenario, multiple consumers can process the topic, but the session data of each user is processed in a FIFO fashion. You must associate a non-empty MessageGroupId with a message. If you do not provide a MessageGroupId, the action fails. Standard topics: The MessageGroupId is optional and is forwarded only to Amazon SQS standard subscriptions to activate fair queues. The MessageGroupId is not used for, or sent to, any other endpoint types. The length of MessageGroupId is 128 characters. MessageGroupId can contain alphanumeric characters (a-z, A-Z, 0-9) and punctuation (!\"#$%&'()*+,-./:;<=>?\\@\\[\\\\]^_`\\{|\\}~)."]}
     let context_ = "PublishBatchRequestEntry"
     let make ?subject =
       fun ?messageStructure ->
@@ -698,17 +716,17 @@ module PublishBatchRequestEntry =
       make ?messageGroupId ?messageDeduplicationId ?messageAttributes
         ?messageStructure ?subject ~message ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messageGroupId = field_map json "MessageGroupId" String_.of_json in
+    let of_json json__ =
+      let messageGroupId = field_map json__ "MessageGroupId" String_.of_json in
       let messageDeduplicationId =
-        field_map json "MessageDeduplicationId" String_.of_json in
+        field_map json__ "MessageDeduplicationId" String_.of_json in
       let messageAttributes =
-        field_map json "MessageAttributes" MessageAttributeMap.of_json in
+        field_map json__ "MessageAttributes" MessageAttributeMap.of_json in
       let messageStructure =
-        field_map json "MessageStructure" MessageStructure.of_json in
-      let subject = field_map json "Subject" Subject.of_json in
-      let message = field_map_exn json "Message" Message.of_json in
-      let id = field_map_exn json "Id" String_.of_json in
+        field_map json__ "MessageStructure" MessageStructure.of_json in
+      let subject = field_map json__ "Subject" Subject.of_json in
+      let message = field_map_exn json__ "Message" Message.of_json in
+      let id = field_map_exn json__ "Id" String_.of_json in
       make ?messageGroupId ?messageDeduplicationId ?messageAttributes
         ?messageStructure ?subject ~message ~id ()
     let to_json v = composed_to_json to_value v
@@ -729,8 +747,8 @@ module Topic =
         (Option.map ~f:TopicARN.of_xml) (Xml.child xml_arg0 "TopicArn") in
       make ?topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicArn = field_map json "TopicArn" TopicARN.of_json in
+    let of_json json__ =
+      let topicArn = field_map json__ "TopicArn" TopicARN.of_json in
       make ?topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -777,13 +795,13 @@ module Subscription =
           (Xml.child xml_arg0 "SubscriptionArn") in
       make ?topicArn ?endpoint ?protocol ?owner ?subscriptionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicArn = field_map json "TopicArn" TopicARN.of_json in
-      let endpoint = field_map json "Endpoint" Endpoint__lc1.of_json in
-      let protocol = field_map json "Protocol" Protocol.of_json in
-      let owner = field_map json "Owner" Account.of_json in
+    let of_json json__ =
+      let topicArn = field_map json__ "TopicArn" TopicARN.of_json in
+      let endpoint = field_map json__ "Endpoint" Endpoint__lc1.of_json in
+      let protocol = field_map json__ "Protocol" Protocol.of_json in
+      let owner = field_map json__ "Owner" Account.of_json in
       let subscriptionArn =
-        field_map json "SubscriptionArn" SubscriptionARN.of_json in
+        field_map json__ "SubscriptionArn" SubscriptionARN.of_json in
       make ?topicArn ?endpoint ?protocol ?owner ?subscriptionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -814,12 +832,12 @@ module SMSSandboxPhoneNumber =
           (Xml.child xml_arg0 "PhoneNumber") in
       make ?status ?phoneNumber ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map json "Status"
+        field_map json__ "Status"
           SMSSandboxPhoneNumberVerificationStatus.of_json in
       let phoneNumber =
-        field_map json "PhoneNumber" PhoneNumberString.of_json in
+        field_map json__ "PhoneNumber" PhoneNumberString.of_json in
       make ?status ?phoneNumber ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -851,33 +869,21 @@ module PlatformApplication =
           (Xml.child xml_arg0 "PlatformApplicationArn") in
       make ?attributes ?platformApplicationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "Attributes" MapStringToString.of_json in
+    let of_json json__ =
+      let attributes =
+        field_map json__ "Attributes" MapStringToString.of_json in
       let platformApplicationArn =
-        field_map json "PlatformApplicationArn" String_.of_json in
+        field_map json__ "PlatformApplicationArn" String_.of_json in
       make ?attributes ?platformApplicationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Platform application object."]
-module PhoneNumber =
-  struct
-    type nonrec t = string
-    let context_ = "PhoneNumber"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"PhoneNumber" j
-    let to_json = simple_to_json to_value
-  end
 module PhoneNumberInformation =
   struct
     type nonrec t =
       {
       createdAt: Timestamp.t option
         [@ocaml.doc "The date and time when the phone number was created."];
-      phoneNumber: String_.t option [@ocaml.doc "The phone number."];
+      phoneNumber: PhoneNumber.t option [@ocaml.doc "The phone number."];
       status: String_.t option [@ocaml.doc "The status of the phone number."];
       iso2CountryCode: Iso2CountryCode.t option
         [@ocaml.doc
@@ -904,7 +910,7 @@ module PhoneNumberInformation =
     let to_value x =
       structure_to_value
         [("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
-        ("PhoneNumber", (Option.map x.phoneNumber ~f:String_.to_value));
+        ("PhoneNumber", (Option.map x.phoneNumber ~f:PhoneNumber.to_value));
         ("Status", (Option.map x.status ~f:String_.to_value));
         ("Iso2CountryCode",
           (Option.map x.iso2CountryCode ~f:Iso2CountryCode.to_value));
@@ -924,21 +930,21 @@ module PhoneNumberInformation =
       let status =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
       let phoneNumber =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PhoneNumber") in
+        (Option.map ~f:PhoneNumber.of_xml) (Xml.child xml_arg0 "PhoneNumber") in
       let createdAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
       make ?numberCapabilities ?routeType ?iso2CountryCode ?status
         ?phoneNumber ?createdAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let numberCapabilities =
-        field_map json "NumberCapabilities" NumberCapabilityList.of_json in
-      let routeType = field_map json "RouteType" RouteType.of_json in
+        field_map json__ "NumberCapabilities" NumberCapabilityList.of_json in
+      let routeType = field_map json__ "RouteType" RouteType.of_json in
       let iso2CountryCode =
-        field_map json "Iso2CountryCode" Iso2CountryCode.of_json in
-      let status = field_map json "Status" String_.of_json in
-      let phoneNumber = field_map json "PhoneNumber" String_.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
+        field_map json__ "Iso2CountryCode" Iso2CountryCode.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let phoneNumber = field_map json__ "PhoneNumber" PhoneNumber.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
       make ?numberCapabilities ?routeType ?iso2CountryCode ?status
         ?phoneNumber ?createdAt ()
     let to_json v = composed_to_json to_value v
@@ -967,9 +973,10 @@ module Endpoint =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EndpointArn") in
       make ?attributes ?endpointArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "Attributes" MapStringToString.of_json in
-      let endpointArn = field_map json "EndpointArn" String_.of_json in
+    let of_json json__ =
+      let attributes =
+        field_map json__ "Attributes" MapStringToString.of_json in
+      let endpointArn = field_map json__ "EndpointArn" String_.of_json in
       make ?attributes ?endpointArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The endpoint for mobile app and device."]
@@ -1013,8 +1020,8 @@ module AuthorizationErrorException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1033,8 +1040,8 @@ module InternalErrorException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Indicates an internal service error."]
@@ -1052,8 +1059,8 @@ module InvalidParameterException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1072,8 +1079,8 @@ module ResourceNotFoundException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1093,8 +1100,8 @@ module ThrottledException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1103,29 +1110,26 @@ module VerificationException =
   struct
     type nonrec t =
       {
-      message: String__lc1.t ;
-      status: String__lc1.t
+      message: String__lc1.t option ;
+      status: String__lc1.t option
         [@ocaml.doc "The status of the verification error."]}
-    let context_ = "VerificationException"
-    let make ~message = fun ~status -> fun () -> { message; status }
+    let make ?message = fun ?status -> fun () -> { message; status }
     let to_value x =
       structure_to_value
-        [("Message", (Some (String__lc1.to_value x.message)));
-        ("Status", (Some (String__lc1.to_value x.status)))]
+        [("Message", (Option.map x.message ~f:String__lc1.to_value));
+        ("Status", (Option.map x.status ~f:String__lc1.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        String__lc1.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Status") in
       let message =
-        String__lc1.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~status ~message ()
+        (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?status ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" String__lc1.of_json in
-      let message = field_map_exn json "Message" String__lc1.of_json in
-      make ~status ~message ()
+    let of_json json__ =
+      let status = field_map json__ "Status" String__lc1.of_json in
+      let message = field_map json__ "Message" String__lc1.of_json in
+      make ?status ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Indicates that the one-time password (OTP) used for verification is invalid."]
@@ -1165,8 +1169,8 @@ module ConcurrentAccessException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1185,8 +1189,8 @@ module StaleTagException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1205,8 +1209,8 @@ module TagLimitExceededException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Can't add more than 50 tags to a topic."]
@@ -1224,8 +1228,8 @@ module TagPolicyException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1252,6 +1256,9 @@ module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1275,6 +1282,9 @@ module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1308,12 +1318,12 @@ module FilterPolicyLimitExceededException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Indicates that the number of filter polices in your Amazon Web Services account exceeds the limit. To add more filter polices, submit an Amazon SNS Limit Increase case in the Amazon Web Services Support Center."]
+       "Indicates that the number of filter polices in your Amazon Web Services account exceeds the limit. To add more filter polices, submit an Amazon SNS Limit Increase case in the Amazon Web ServicesSupport Center."]
 module InvalidSecurityException =
   struct
     type nonrec t = {
@@ -1328,8 +1338,8 @@ module InvalidSecurityException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1348,11 +1358,31 @@ module NotFoundException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Indicates that the requested resource does not exist."]
+module ReplayLimitExceededException =
+  struct
+    type nonrec t = {
+      message: String__lc1.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String__lc1.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates that the request parameter has exceeded the maximum number of concurrent message replays."]
 module SubscriptionLimitExceededException =
   struct
     type nonrec t = {
@@ -1367,8 +1397,8 @@ module SubscriptionLimitExceededException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1395,6 +1425,8 @@ module SubscriptionAttributesMap =
                        (AttributeValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1431,8 +1463,8 @@ module EndpointDisabledException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Exception error indicating endpoint disabled."]
@@ -1453,8 +1485,8 @@ module InvalidParameterValueException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1473,8 +1505,8 @@ module KMSAccessDeniedException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1493,12 +1525,12 @@ module KMSDisabledException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The request was rejected because the specified customer master key (CMK) isn't enabled."]
+       "The request was rejected because the specified Amazon Web Services KMS key isn't enabled."]
 module KMSInvalidStateException =
   struct
     type nonrec t = {
@@ -1513,12 +1545,12 @@ module KMSInvalidStateException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The request was rejected because the state of the specified resource isn't valid for this request. For more information, see How Key State Affects Use of a Customer Master Key in the Key Management Service Developer Guide."]
+       "The request was rejected because the state of the specified resource isn't valid for this request. For more information, see Key states of Amazon Web Services KMS keys in the Key Management Service Developer Guide."]
 module KMSNotFoundException =
   struct
     type nonrec t = {
@@ -1533,8 +1565,8 @@ module KMSNotFoundException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1553,8 +1585,8 @@ module KMSOptInRequired =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1573,8 +1605,8 @@ module KMSThrottlingException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1595,12 +1627,31 @@ module PlatformApplicationDisabledException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Exception error indicating platform application disabled."]
+module ValidationException =
+  struct
+    type nonrec t = {
+      message: String__lc1.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String__lc1.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String__lc1.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Indicates that a parameter in the request is invalid."]
 module BatchEntryIdsNotDistinctException =
   struct
     type nonrec t = {
@@ -1615,8 +1666,8 @@ module BatchEntryIdsNotDistinctException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1635,8 +1686,8 @@ module BatchRequestTooLongException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1645,6 +1696,9 @@ module BatchResultErrorEntryList =
   struct
     type nonrec t = BatchResultErrorEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchResultErrorEntry.to_value)) |>
         (fun x -> `List x)
@@ -1681,8 +1735,8 @@ module EmptyBatchRequestException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The batch request doesn't contain any entries."]
@@ -1700,8 +1754,8 @@ module InvalidBatchEntryIdException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1710,6 +1764,9 @@ module PublishBatchResultEntryList =
   struct
     type nonrec t = PublishBatchResultEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PublishBatchResultEntry.to_value)) |>
         (fun x -> `List x)
@@ -1746,16 +1803,19 @@ module TooManyEntriesInBatchRequestException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The batch request contains more entries than permissible."]
+       "The batch request contains more entries than permissible (more than 10)."]
 module PublishBatchRequestEntryList =
   struct
     type nonrec t = PublishBatchRequestEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PublishBatchRequestEntry.to_value)) |>
         (fun x -> `List x)
@@ -1782,6 +1842,9 @@ module TopicsList =
   struct
     type nonrec t = Topic.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Topic.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1818,6 +1881,9 @@ module SubscriptionsList =
   struct
     type nonrec t = Subscription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Subscription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1842,6 +1908,9 @@ module SMSSandboxPhoneNumberList =
   struct
     type nonrec t = SMSSandboxPhoneNumber.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SMSSandboxPhoneNumber.to_value)) |>
         (fun x -> `List x)
@@ -1885,6 +1954,9 @@ module ListOfPlatformApplications =
   struct
     type nonrec t = PlatformApplication.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PlatformApplication.to_value)) |>
         (fun x -> `List x)
@@ -1911,6 +1983,9 @@ module PhoneNumberList =
   struct
     type nonrec t = PhoneNumber.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PhoneNumber.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1935,6 +2010,9 @@ module PhoneNumberInformationList =
   struct
     type nonrec t = PhoneNumberInformation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PhoneNumberInformation.to_value)) |>
         (fun x -> `List x)
@@ -1957,27 +2035,6 @@ module PhoneNumberInformationList =
         ~of_json:PhoneNumberInformation.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ValidationException =
-  struct
-    type nonrec t = {
-      message: String__lc1.t }
-    let context_ = "ValidationException"
-    let make ~message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Some (String__lc1.to_value x.message)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        String__lc1.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" String__lc1.of_json in
-      make ~message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Indicates that a parameter in the request is invalid."]
 module MaxItemsListOriginationNumbers =
   struct
     type nonrec t = int
@@ -2001,6 +2058,9 @@ module ListOfEndpoints =
   struct
     type nonrec t = Endpoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Endpoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2043,6 +2103,8 @@ module TopicAttributesMap =
                        (AttributeValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2054,6 +2116,9 @@ module ListString =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2088,8 +2153,8 @@ module UserErrorException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2108,8 +2173,8 @@ module TopicLimitExceededException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2141,8 +2206,8 @@ module OptedOutException =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2236,6 +2301,9 @@ module ActionsList =
   struct
     type nonrec t = Action.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Action.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2260,6 +2328,9 @@ module DelegatesList =
   struct
     type nonrec t = Delegate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Delegate.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2398,11 +2469,11 @@ module VerifySMSSandboxPhoneNumberInput =
           (Xml.child_exn ~context:context_ xml_arg0 "PhoneNumber") in
       make ~oneTimePassword ~phoneNumber ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let oneTimePassword =
-        field_map_exn json "OneTimePassword" OTPCode.of_json in
+        field_map_exn json__ "OneTimePassword" OTPCode.of_json in
       let phoneNumber =
-        field_map_exn json "PhoneNumber" PhoneNumberString.of_json in
+        field_map_exn json__ "PhoneNumber" PhoneNumberString.of_json in
       make ~oneTimePassword ~phoneNumber ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2534,10 +2605,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2561,9 +2632,9 @@ module UnsubscribeInput =
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionArn") in
       make ~subscriptionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionArn =
-        field_map_exn json "SubscriptionArn" SubscriptionARN.of_json in
+        field_map_exn json__ "SubscriptionArn" SubscriptionARN.of_json in
       make ~subscriptionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for Unsubscribe action."]
@@ -2692,10 +2763,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2720,6 +2791,7 @@ module SubscribeResponse =
       | `InvalidParameterException of InvalidParameterException.t 
       | `InvalidSecurityException of InvalidSecurityException.t 
       | `NotFoundException of NotFoundException.t 
+      | `ReplayLimitExceededException of ReplayLimitExceededException.t 
       | `SubscriptionLimitExceededException of
           SubscriptionLimitExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -2743,6 +2815,9 @@ module SubscribeResponse =
           `InvalidSecurityException (InvalidSecurityException.of_json json)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_json json)
+      | "ReplayLimitExceededException" ->
+          `ReplayLimitExceededException
+            (ReplayLimitExceededException.of_json json)
       | "SubscriptionLimitExceededException" ->
           `SubscriptionLimitExceededException
             (SubscriptionLimitExceededException.of_json json)
@@ -2765,6 +2840,9 @@ module SubscribeResponse =
           `InvalidSecurityException (InvalidSecurityException.of_xml xml)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_xml xml)
+      | "ReplayLimitExceededException" ->
+          `ReplayLimitExceededException
+            (ReplayLimitExceededException.of_xml xml)
       | "SubscriptionLimitExceededException" ->
           `SubscriptionLimitExceededException
             (SubscriptionLimitExceededException.of_xml xml)
@@ -2796,6 +2874,10 @@ module SubscribeResponse =
           `Assoc
             [("error", (`String "NotFoundException"));
             ("details", (NotFoundException.to_json e))]
+      | `ReplayLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ReplayLimitExceededException"));
+            ("details", (ReplayLimitExceededException.to_json e))]
       | `SubscriptionLimitExceededException e ->
           `Assoc
             [("error", (`String "SubscriptionLimitExceededException"));
@@ -2819,9 +2901,9 @@ module SubscribeResponse =
           (Xml.child xml_arg0 "SubscriptionArn") in
       make ?subscriptionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionArn =
-        field_map json "SubscriptionArn" SubscriptionARN.of_json in
+        field_map json__ "SubscriptionArn" SubscriptionARN.of_json in
       make ?subscriptionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response for Subscribe action."]
@@ -2833,13 +2915,13 @@ module SubscribeInput =
         [@ocaml.doc "The ARN of the topic you want to subscribe to."];
       protocol: Protocol.t
         [@ocaml.doc
-          "The protocol that you want to use. Supported protocols include: http \226\128\147 delivery of JSON-encoded message via HTTP POST https \226\128\147 delivery of JSON-encoded message via HTTPS POST email \226\128\147 delivery of message via SMTP email-json \226\128\147 delivery of JSON-encoded message via SMTP sms \226\128\147 delivery of message via SMS sqs \226\128\147 delivery of JSON-encoded message to an Amazon SQS queue application \226\128\147 delivery of JSON-encoded message to an EndpointArn for a mobile app and device lambda \226\128\147 delivery of JSON-encoded message to an Lambda function firehose \226\128\147 delivery of JSON-encoded message to an Amazon Kinesis Data Firehose delivery stream."];
+          "The protocol that you want to use. Supported protocols include: http \226\128\147 delivery of JSON-encoded message via HTTP POST https \226\128\147 delivery of JSON-encoded message via HTTPS POST email \226\128\147 delivery of message via SMTP email-json \226\128\147 delivery of JSON-encoded message via SMTP sms \226\128\147 delivery of message via SMS sqs \226\128\147 delivery of JSON-encoded message to an Amazon SQS queue application \226\128\147 delivery of JSON-encoded message to an EndpointArn for a mobile app and device lambda \226\128\147 delivery of JSON-encoded message to an Lambda function firehose \226\128\147 delivery of JSON-encoded message to an Amazon Data Firehose delivery stream."];
       endpoint: Endpoint__lc1.t option
         [@ocaml.doc
-          "The endpoint that you want to receive notifications. Endpoints vary by protocol: For the http protocol, the (public) endpoint is a URL beginning with http://. For the https protocol, the (public) endpoint is a URL beginning with https://. For the email protocol, the endpoint is an email address. For the email-json protocol, the endpoint is an email address. For the sms protocol, the endpoint is a phone number of an SMS-enabled device. For the sqs protocol, the endpoint is the ARN of an Amazon SQS queue. For the application protocol, the endpoint is the EndpointArn of a mobile app and device. For the lambda protocol, the endpoint is the ARN of an Lambda function. For the firehose protocol, the endpoint is the ARN of an Amazon Kinesis Data Firehose delivery stream."];
+          "The endpoint that you want to receive notifications. Endpoints vary by protocol: For the http protocol, the (public) endpoint is a URL beginning with http://. For the https protocol, the (public) endpoint is a URL beginning with https://. For the email protocol, the endpoint is an email address. For the email-json protocol, the endpoint is an email address. For the sms protocol, the endpoint is a phone number of an SMS-enabled device. For the sqs protocol, the endpoint is the ARN of an Amazon SQS queue. For the application protocol, the endpoint is the EndpointArn of a mobile app and device. For the lambda protocol, the endpoint is the ARN of an Lambda function. For the firehose protocol, the endpoint is the ARN of an Amazon Data Firehose delivery stream."];
       attributes: SubscriptionAttributesMap.t option
         [@ocaml.doc
-          "A map of attributes with their corresponding values. The following lists the names, descriptions, and values of the special request parameters that the Subscribe action uses: DeliveryPolicy \226\128\147 The policy that defines how Amazon SNS retries failed deliveries to HTTP/S endpoints. FilterPolicy \226\128\147 The simple JSON object that lets your subscriber receive only a subset of messages, rather than receiving every message published to the topic. RawMessageDelivery \226\128\147 When set to true, enables raw message delivery to Amazon SQS or HTTP/S endpoints. This eliminates the need for the endpoints to process JSON formatting, which is otherwise created for Amazon SNS metadata. RedrivePolicy \226\128\147 When specified, sends undeliverable messages to the specified Amazon SQS dead-letter queue. Messages that can't be delivered due to client errors (for example, when the subscribed endpoint is unreachable) or server errors (for example, when the service that powers the subscribed endpoint becomes unavailable) are held in the dead-letter queue for further analysis or reprocessing. The following attribute applies only to Amazon Kinesis Data Firehose delivery stream subscriptions: SubscriptionRoleArn \226\128\147 The ARN of the IAM role that has the following: Permission to write to the Kinesis Data Firehose delivery stream Amazon SNS listed as a trusted entity Specifying a valid ARN for this attribute is required for Kinesis Data Firehose delivery stream subscriptions. For more information, see Fanout to Kinesis Data Firehose delivery streams in the Amazon SNS Developer Guide."];
+          "A map of attributes with their corresponding values. The following lists the names, descriptions, and values of the special request parameters that the Subscribe action uses: DeliveryPolicy \226\128\147 The policy that defines how Amazon SNS retries failed deliveries to HTTP/S endpoints. FilterPolicy \226\128\147 The simple JSON object that lets your subscriber receive only a subset of messages, rather than receiving every message published to the topic. FilterPolicyScope \226\128\147 This attribute lets you choose the filtering scope by using one of the following string value types: MessageAttributes (default) \226\128\147 The filter is applied on the message attributes. MessageBody \226\128\147 The filter is applied on the message body. RawMessageDelivery \226\128\147 When set to true, enables raw message delivery to Amazon SQS or HTTP/S endpoints. This eliminates the need for the endpoints to process JSON formatting, which is otherwise created for Amazon SNS metadata. RedrivePolicy \226\128\147 When specified, sends undeliverable messages to the specified Amazon SQS dead-letter queue. Messages that can't be delivered due to client errors (for example, when the subscribed endpoint is unreachable) or server errors (for example, when the service that powers the subscribed endpoint becomes unavailable) are held in the dead-letter queue for further analysis or reprocessing. The following attribute applies only to Amazon Data Firehose delivery stream subscriptions: SubscriptionRoleArn \226\128\147 The ARN of the IAM role that has the following: Permission to write to the Firehose delivery stream Amazon SNS listed as a trusted entity Specifying a valid ARN for this attribute is required for Firehose delivery stream subscriptions. For more information, see Fanout to Firehose delivery streams in the Amazon SNS Developer Guide. The following attributes apply only to FIFO topics: ReplayPolicy \226\128\147 Adds or updates an inline policy document for a subscription to replay messages stored in the specified Amazon SNS topic. ReplayStatus \226\128\147 Retrieves the status of the subscription message replay, which can be one of the following: Completed \226\128\147 The replay has successfully redelivered all messages, and is now delivering newly published messages. If an ending point was specified in the ReplayPolicy then the subscription will no longer receive newly published messages. In progress \226\128\147 The replay is currently replaying the selected messages. Failed \226\128\147 The replay was unable to complete. Pending \226\128\147 The default state while the replay initiates."];
       returnSubscriptionArn: Boolean.t option
         [@ocaml.doc
           "Sets whether the response from the Subscribe request includes the subscription ARN, even if the subscription is not yet confirmed. If you set this parameter to true, the response includes the ARN in all cases, even if the subscription is not yet confirmed. In addition to the ARN for confirmed subscriptions, the response also includes the pending subscription ARN value for subscriptions that aren't yet confirmed. A subscription becomes confirmed when the subscriber calls the ConfirmSubscription action with a confirmation token. The default value is false."]}
@@ -2883,14 +2965,14 @@ module SubscribeInput =
       make ?returnSubscriptionArn ?attributes ?endpoint ~protocol ~topicArn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let returnSubscriptionArn =
-        field_map json "ReturnSubscriptionArn" Boolean.of_json in
+        field_map json__ "ReturnSubscriptionArn" Boolean.of_json in
       let attributes =
-        field_map json "Attributes" SubscriptionAttributesMap.of_json in
-      let endpoint = field_map json "Endpoint" Endpoint__lc1.of_json in
-      let protocol = field_map_exn json "Protocol" Protocol.of_json in
-      let topicArn = field_map_exn json "TopicArn" TopicARN.of_json in
+        field_map json__ "Attributes" SubscriptionAttributesMap.of_json in
+      let endpoint = field_map json__ "Endpoint" Endpoint__lc1.of_json in
+      let protocol = field_map_exn json__ "Protocol" Protocol.of_json in
+      let topicArn = field_map_exn json__ "TopicArn" TopicARN.of_json in
       make ?returnSubscriptionArn ?attributes ?endpoint ~protocol ~topicArn
         ()
     let to_json v = composed_to_json to_value v
@@ -2902,7 +2984,7 @@ module SetTopicAttributesInput =
       topicArn: TopicARN.t [@ocaml.doc "The ARN of the topic to modify."];
       attributeName: AttributeName.t
         [@ocaml.doc
-          "A map of attributes with their corresponding values. The following lists the names, descriptions, and values of the special request parameters that the SetTopicAttributes action uses: DeliveryPolicy \226\128\147 The policy that defines how Amazon SNS retries failed deliveries to HTTP/S endpoints. DisplayName \226\128\147 The display name to use for a topic with SMS subscriptions. Policy \226\128\147 The policy that defines who can access your topic. By default, only the topic owner can publish or subscribe to the topic. The following attribute applies only to server-side-encryption: KmsMasterKeyId \226\128\147 The ID of an Amazon Web Services managed customer master key (CMK) for Amazon SNS or a custom CMK. For more information, see Key Terms. For more examples, see KeyId in the Key Management Service API Reference. The following attribute applies only to FIFO topics: ContentBasedDeduplication \226\128\147 Enables content-based deduplication for FIFO topics. By default, ContentBasedDeduplication is set to false. If you create a FIFO topic and this attribute is false, you must specify a value for the MessageDeduplicationId parameter for the Publish action. When you set ContentBasedDeduplication to true, Amazon SNS uses a SHA-256 hash to generate the MessageDeduplicationId using the body of the message (but not the attributes of the message). (Optional) To override the generated value, you can specify a value for the MessageDeduplicationId parameter for the Publish action."];
+          "A map of attributes with their corresponding values. The following lists the names, descriptions, and values of the special request parameters that the SetTopicAttributes action uses: DeliveryPolicy \226\128\147 The policy that defines how Amazon SNS retries failed deliveries to HTTP/S endpoints. DisplayName \226\128\147 The display name to use for a topic with SMS subscriptions. Policy \226\128\147 The policy that defines who can access your topic. By default, only the topic owner can publish or subscribe to the topic. TracingConfig \226\128\147 Tracing mode of an Amazon SNS topic. By default TracingConfig is set to PassThrough, and the topic passes through the tracing header it receives from an Amazon SNS publisher to its subscriptions. If set to Active, Amazon SNS will vend X-Ray segment data to topic owner account if the sampled flag in the tracing header is true. This is only supported on standard topics. HTTP HTTPSuccessFeedbackRoleArn \226\128\147 Indicates successful message delivery status for an Amazon SNS topic that is subscribed to an HTTP endpoint. HTTPSuccessFeedbackSampleRate \226\128\147 Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an HTTP endpoint. HTTPFailureFeedbackRoleArn \226\128\147 Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an HTTP endpoint. Amazon Data Firehose FirehoseSuccessFeedbackRoleArn \226\128\147 Indicates successful message delivery status for an Amazon SNS topic that is subscribed to an Amazon Data Firehose endpoint. FirehoseSuccessFeedbackSampleRate \226\128\147 Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an Amazon Data Firehose endpoint. FirehoseFailureFeedbackRoleArn \226\128\147 Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an Amazon Data Firehose endpoint. Lambda LambdaSuccessFeedbackRoleArn \226\128\147 Indicates successful message delivery status for an Amazon SNS topic that is subscribed to an Lambda endpoint. LambdaSuccessFeedbackSampleRate \226\128\147 Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an Lambda endpoint. LambdaFailureFeedbackRoleArn \226\128\147 Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an Lambda endpoint. Platform application endpoint ApplicationSuccessFeedbackRoleArn \226\128\147 Indicates successful message delivery status for an Amazon SNS topic that is subscribed to an platform application endpoint. ApplicationSuccessFeedbackSampleRate \226\128\147 Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an platform application endpoint. ApplicationFailureFeedbackRoleArn \226\128\147 Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an platform application endpoint. In addition to being able to configure topic attributes for message delivery status of notification messages sent to Amazon SNS application endpoints, you can also configure application attributes for the delivery status of push notification messages sent to push notification services. For example, For more information, see Using Amazon SNS Application Attributes for Message Delivery Status. Amazon SQS SQSSuccessFeedbackRoleArn \226\128\147 Indicates successful message delivery status for an Amazon SNS topic that is subscribed to an Amazon SQS endpoint. SQSSuccessFeedbackSampleRate \226\128\147 Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an Amazon SQS endpoint. SQSFailureFeedbackRoleArn \226\128\147 Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an Amazon SQS endpoint. The <ENDPOINT>SuccessFeedbackRoleArn and <ENDPOINT>FailureFeedbackRoleArn attributes are used to give Amazon SNS write access to use CloudWatch Logs on your behalf. The <ENDPOINT>SuccessFeedbackSampleRate attribute is for specifying the sample rate percentage (0-100) of successfully delivered messages. After you configure the <ENDPOINT>FailureFeedbackRoleArn attribute, then all failed message deliveries generate CloudWatch Logs. The following attribute applies only to server-side-encryption: KmsMasterKeyId \226\128\147 The ID of an Amazon Web Services managed customer master key (CMK) for Amazon SNS or a custom CMK. For more information, see Key Terms. For more examples, see KeyId in the Key Management Service API Reference. SignatureVersion \226\128\147 The signature version corresponds to the hashing algorithm used while creating the signature of the notifications, subscription confirmations, or unsubscribe confirmation messages sent by Amazon SNS. By default, SignatureVersion is set to 1. The following attribute applies only to FIFO topics: ArchivePolicy \226\128\147 The policy that sets the retention period for messages stored in the message archive of an Amazon SNS FIFO topic. ContentBasedDeduplication \226\128\147 Enables content-based deduplication for FIFO topics. By default, ContentBasedDeduplication is set to false. If you create a FIFO topic and this attribute is false, you must specify a value for the MessageDeduplicationId parameter for the Publish action. When you set ContentBasedDeduplication to true, Amazon SNS uses a SHA-256 hash to generate the MessageDeduplicationId using the body of the message (but not the attributes of the message). (Optional) To override the generated value, you can specify a value for the MessageDeduplicationId parameter for the Publish action. FifoThroughputScope \226\128\147 Enables higher throughput for your FIFO topic by adjusting the scope of deduplication. This attribute has two possible values: Topic \226\128\147 The scope of message deduplication is across the entire topic. This is the default value and maintains existing behavior, with a maximum throughput of 3000 messages per second or 20MB per second, whichever comes first. MessageGroup \226\128\147 The scope of deduplication is within each individual message group, which enables higher throughput per topic subject to regional quotas. For more information on quotas or to request an increase, see Amazon SNS service quotas in the Amazon Web Services General Reference."];
       attributeValue: AttributeValue.t option
         [@ocaml.doc "The new value for the attribute."]}
     let context_ = "SetTopicAttributesInput"
@@ -2928,12 +3010,12 @@ module SetTopicAttributesInput =
         TopicARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TopicArn") in
       make ?attributeValue ~attributeName ~topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeValue =
-        field_map json "AttributeValue" AttributeValue.of_json in
+        field_map json__ "AttributeValue" AttributeValue.of_json in
       let attributeName =
-        field_map_exn json "AttributeName" AttributeName.of_json in
-      let topicArn = field_map_exn json "TopicArn" TopicARN.of_json in
+        field_map_exn json__ "AttributeName" AttributeName.of_json in
+      let topicArn = field_map_exn json__ "TopicArn" TopicARN.of_json in
       make ?attributeValue ~attributeName ~topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for SetTopicAttributes action."]
@@ -2945,7 +3027,7 @@ module SetSubscriptionAttributesInput =
         [@ocaml.doc "The ARN of the subscription to modify."];
       attributeName: AttributeName.t
         [@ocaml.doc
-          "A map of attributes with their corresponding values. The following lists the names, descriptions, and values of the special request parameters that this action uses: DeliveryPolicy \226\128\147 The policy that defines how Amazon SNS retries failed deliveries to HTTP/S endpoints. FilterPolicy \226\128\147 The simple JSON object that lets your subscriber receive only a subset of messages, rather than receiving every message published to the topic. RawMessageDelivery \226\128\147 When set to true, enables raw message delivery to Amazon SQS or HTTP/S endpoints. This eliminates the need for the endpoints to process JSON formatting, which is otherwise created for Amazon SNS metadata. RedrivePolicy \226\128\147 When specified, sends undeliverable messages to the specified Amazon SQS dead-letter queue. Messages that can't be delivered due to client errors (for example, when the subscribed endpoint is unreachable) or server errors (for example, when the service that powers the subscribed endpoint becomes unavailable) are held in the dead-letter queue for further analysis or reprocessing. The following attribute applies only to Amazon Kinesis Data Firehose delivery stream subscriptions: SubscriptionRoleArn \226\128\147 The ARN of the IAM role that has the following: Permission to write to the Kinesis Data Firehose delivery stream Amazon SNS listed as a trusted entity Specifying a valid ARN for this attribute is required for Kinesis Data Firehose delivery stream subscriptions. For more information, see Fanout to Kinesis Data Firehose delivery streams in the Amazon SNS Developer Guide."];
+          "A map of attributes with their corresponding values. The following lists the names, descriptions, and values of the special request parameters that this action uses: DeliveryPolicy \226\128\147 The policy that defines how Amazon SNS retries failed deliveries to HTTP/S endpoints. FilterPolicy \226\128\147 The simple JSON object that lets your subscriber receive only a subset of messages, rather than receiving every message published to the topic. FilterPolicyScope \226\128\147 This attribute lets you choose the filtering scope by using one of the following string value types: MessageAttributes (default) \226\128\147 The filter is applied on the message attributes. MessageBody \226\128\147 The filter is applied on the message body. RawMessageDelivery \226\128\147 When set to true, enables raw message delivery to Amazon SQS or HTTP/S endpoints. This eliminates the need for the endpoints to process JSON formatting, which is otherwise created for Amazon SNS metadata. RedrivePolicy \226\128\147 When specified, sends undeliverable messages to the specified Amazon SQS dead-letter queue. Messages that can't be delivered due to client errors (for example, when the subscribed endpoint is unreachable) or server errors (for example, when the service that powers the subscribed endpoint becomes unavailable) are held in the dead-letter queue for further analysis or reprocessing. The following attribute applies only to Amazon Data Firehose delivery stream subscriptions: SubscriptionRoleArn \226\128\147 The ARN of the IAM role that has the following: Permission to write to the Firehose delivery stream Amazon SNS listed as a trusted entity Specifying a valid ARN for this attribute is required for Firehose delivery stream subscriptions. For more information, see Fanout to Firehose delivery streams in the Amazon SNS Developer Guide."];
       attributeValue: AttributeValue.t option
         [@ocaml.doc "The new value for the attribute in JSON format."]}
     let context_ = "SetSubscriptionAttributesInput"
@@ -2973,13 +3055,13 @@ module SetSubscriptionAttributesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionArn") in
       make ?attributeValue ~attributeName ~subscriptionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeValue =
-        field_map json "AttributeValue" AttributeValue.of_json in
+        field_map json__ "AttributeValue" AttributeValue.of_json in
       let attributeName =
-        field_map_exn json "AttributeName" AttributeName.of_json in
+        field_map_exn json__ "AttributeName" AttributeName.of_json in
       let subscriptionArn =
-        field_map_exn json "SubscriptionArn" SubscriptionARN.of_json in
+        field_map_exn json__ "SubscriptionArn" SubscriptionARN.of_json in
       make ?attributeValue ~attributeName ~subscriptionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for SetSubscriptionAttributes action."]
@@ -3075,9 +3157,9 @@ module SetSMSAttributesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Attributes") in
       make ~attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map_exn json "attributes" MapStringToString.of_json in
+        field_map_exn json__ "attributes" MapStringToString.of_json in
       make ~attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the SetSMSAttributes action."]
@@ -3090,7 +3172,7 @@ module SetPlatformApplicationAttributesInput =
           "PlatformApplicationArn for SetPlatformApplicationAttributes action."];
       attributes: MapStringToString.t
         [@ocaml.doc
-          "A map of the platform application attributes. Attributes in this map include the following: PlatformCredential \226\128\147 The credential received from the notification service. For ADM, PlatformCredentialis client secret. For Apple Services using certificate credentials, PlatformCredential is private key. For Apple Services using token credentials, PlatformCredential is signing key. For GCM (Firebase Cloud Messaging), PlatformCredential is API key. PlatformPrincipal \226\128\147 The principal received from the notification service. For ADM, PlatformPrincipalis client id. For Apple Services using certificate credentials, PlatformPrincipal is SSL certificate. For Apple Services using token credentials, PlatformPrincipal is signing key ID. For GCM (Firebase Cloud Messaging), there is no PlatformPrincipal. EventEndpointCreated \226\128\147 Topic ARN to which EndpointCreated event notifications are sent. EventEndpointDeleted \226\128\147 Topic ARN to which EndpointDeleted event notifications are sent. EventEndpointUpdated \226\128\147 Topic ARN to which EndpointUpdate event notifications are sent. EventDeliveryFailure \226\128\147 Topic ARN to which DeliveryFailure event notifications are sent upon Direct Publish delivery failure (permanent) to one of the application's endpoints. SuccessFeedbackRoleArn \226\128\147 IAM role ARN used to give Amazon SNS write access to use CloudWatch Logs on your behalf. FailureFeedbackRoleArn \226\128\147 IAM role ARN used to give Amazon SNS write access to use CloudWatch Logs on your behalf. SuccessFeedbackSampleRate \226\128\147 Sample rate percentage (0-100) of successfully delivered messages. The following attributes only apply to APNs token-based authentication: ApplePlatformTeamID \226\128\147 The identifier that's assigned to your Apple developer account team. ApplePlatformBundleID \226\128\147 The bundle identifier that's assigned to your iOS app."]}
+          "A map of the platform application attributes. Attributes in this map include the following: PlatformCredential \226\128\147 The credential received from the notification service. For ADM, PlatformCredentialis client secret. For Apple Services using certificate credentials, PlatformCredential is private key. For Apple Services using token credentials, PlatformCredential is signing key. For GCM (Firebase Cloud Messaging) using key credentials, there is no PlatformPrincipal. The PlatformCredential is API key. For GCM (Firebase Cloud Messaging) using token credentials, there is no PlatformPrincipal. The PlatformCredential is a JSON formatted private key file. When using the Amazon Web Services CLI, the file must be in string format and special characters must be ignored. To format the file correctly, Amazon SNS recommends using the following command: SERVICE_JSON=`jq \\@json <<< cat service.json`. PlatformPrincipal \226\128\147 The principal received from the notification service. For ADM, PlatformPrincipalis client id. For Apple Services using certificate credentials, PlatformPrincipal is SSL certificate. For Apple Services using token credentials, PlatformPrincipal is signing key ID. For GCM (Firebase Cloud Messaging), there is no PlatformPrincipal. EventEndpointCreated \226\128\147 Topic ARN to which EndpointCreated event notifications are sent. EventEndpointDeleted \226\128\147 Topic ARN to which EndpointDeleted event notifications are sent. EventEndpointUpdated \226\128\147 Topic ARN to which EndpointUpdate event notifications are sent. EventDeliveryFailure \226\128\147 Topic ARN to which DeliveryFailure event notifications are sent upon Direct Publish delivery failure (permanent) to one of the application's endpoints. SuccessFeedbackRoleArn \226\128\147 IAM role ARN used to give Amazon SNS write access to use CloudWatch Logs on your behalf. FailureFeedbackRoleArn \226\128\147 IAM role ARN used to give Amazon SNS write access to use CloudWatch Logs on your behalf. SuccessFeedbackSampleRate \226\128\147 Sample rate percentage (0-100) of successfully delivered messages. The following attributes only apply to APNs token-based authentication: ApplePlatformTeamID \226\128\147 The identifier that's assigned to your Apple developer account team. ApplePlatformBundleID \226\128\147 The bundle identifier that's assigned to your iOS app."]}
     let context_ = "SetPlatformApplicationAttributesInput"
     let make ~platformApplicationArn =
       fun ~attributes -> fun () -> { platformApplicationArn; attributes }
@@ -3109,11 +3191,11 @@ module SetPlatformApplicationAttributesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "PlatformApplicationArn") in
       make ~attributes ~platformApplicationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map_exn json "Attributes" MapStringToString.of_json in
+        field_map_exn json__ "Attributes" MapStringToString.of_json in
       let platformApplicationArn =
-        field_map_exn json "PlatformApplicationArn" String_.of_json in
+        field_map_exn json__ "PlatformApplicationArn" String_.of_json in
       make ~attributes ~platformApplicationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for SetPlatformApplicationAttributes action."]
@@ -3143,10 +3225,10 @@ module SetEndpointAttributesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointArn") in
       make ~attributes ~endpointArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map_exn json "Attributes" MapStringToString.of_json in
-      let endpointArn = field_map_exn json "EndpointArn" String_.of_json in
+        field_map_exn json__ "Attributes" MapStringToString.of_json in
+      let endpointArn = field_map_exn json__ "EndpointArn" String_.of_json in
       make ~attributes ~endpointArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for SetEndpointAttributes action."]
@@ -3173,12 +3255,49 @@ module RemovePermissionInput =
         TopicARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TopicArn") in
       make ~label ~topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let label = field_map_exn json "Label" Label.of_json in
-      let topicArn = field_map_exn json "TopicArn" TopicARN.of_json in
+    let of_json json__ =
+      let label = field_map_exn json__ "Label" Label.of_json in
+      let topicArn = field_map_exn json__ "TopicArn" TopicARN.of_json in
       make ~label ~topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for RemovePermission action."]
+module PutDataProtectionPolicyInput =
+  struct
+    type nonrec t =
+      {
+      resourceArn: TopicARN.t
+        [@ocaml.doc
+          "The ARN of the topic whose DataProtectionPolicy you want to add or update. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."];
+      dataProtectionPolicy: AttributeValue.t
+        [@ocaml.doc
+          "The JSON serialization of the topic's DataProtectionPolicy. The DataProtectionPolicy must be in JSON string format. Length Constraints: Maximum length of 30,720."]}
+    let context_ = "PutDataProtectionPolicyInput"
+    let make ~resourceArn =
+      fun ~dataProtectionPolicy ->
+        fun () -> { resourceArn; dataProtectionPolicy }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (TopicARN.to_value x.resourceArn)));
+        ("DataProtectionPolicy",
+          (Some (AttributeValue.to_value x.dataProtectionPolicy)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataProtectionPolicy =
+        AttributeValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DataProtectionPolicy") in
+      let resourceArn =
+        TopicARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~dataProtectionPolicy ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataProtectionPolicy =
+        field_map_exn json__ "DataProtectionPolicy" AttributeValue.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" TopicARN.of_json in
+      make ~dataProtectionPolicy ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds or updates an inline policy document that is stored in the specified Amazon SNS topic."]
 module PublishResponse =
   struct
     type publishResult =
@@ -3210,6 +3329,7 @@ module PublishResponse =
       | `NotFoundException of NotFoundException.t 
       | `PlatformApplicationDisabledException of
           PlatformApplicationDisabledException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "PublishResponse"
     let make ?messageId =
@@ -3252,6 +3372,8 @@ module PublishResponse =
       | "PlatformApplicationDisabledException" ->
           `PlatformApplicationDisabledException
             (PlatformApplicationDisabledException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3287,6 +3409,8 @@ module PublishResponse =
       | "PlatformApplicationDisabledException" ->
           `PlatformApplicationDisabledException
             (PlatformApplicationDisabledException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3347,6 +3471,10 @@ module PublishResponse =
           `Assoc
             [("error", (`String "PlatformApplicationDisabledException"));
             ("details", (PlatformApplicationDisabledException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3367,9 +3495,9 @@ module PublishResponse =
         (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "MessageId") in
       make ?sequenceNumber ?messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sequenceNumber = field_map json "SequenceNumber" String_.of_json in
-      let messageId = field_map json "MessageId" MessageId.of_json in
+    let of_json json__ =
+      let sequenceNumber = field_map json__ "SequenceNumber" String_.of_json in
+      let messageId = field_map json__ "MessageId" MessageId.of_json in
       make ?sequenceNumber ?messageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response for Publish action."]
@@ -3383,7 +3511,7 @@ module PublishInput =
       targetArn: String_.t option
         [@ocaml.doc
           "If you don't specify a value for the TargetArn parameter, you must specify a value for the PhoneNumber or TopicArn parameters."];
-      phoneNumber: String_.t option
+      phoneNumber: PhoneNumber.t option
         [@ocaml.doc
           "The phone number to which you want to deliver an SMS message. Use E.164 format. If you don't specify a value for the PhoneNumber parameter, you must specify a value for the TargetArn or TopicArn parameters."];
       message: Message.t
@@ -3391,7 +3519,7 @@ module PublishInput =
           "The message you want to send. If you are publishing to a topic and you want to send the same message to all transport protocols, include the text of the message as a String value. If you want to send different messages for each transport protocol, set the value of the MessageStructure parameter to json and use a JSON object for the Message parameter. Constraints: With the exception of SMS, messages must be UTF-8 encoded strings and at most 256 KB in size (262,144 bytes, not 262,144 characters). For SMS, each message can contain up to 140 characters. This character limit depends on the encoding schema. For example, an SMS message can contain 160 GSM characters, 140 ASCII characters, or 70 UCS-2 characters. If you publish a message that exceeds this size limit, Amazon SNS sends the message as multiple messages, each fitting within the size limit. Messages aren't truncated mid-word but are cut off at whole-word boundaries. The total size limit for a single SMS Publish action is 1,600 characters. JSON-specific constraints: Keys in the JSON object that correspond to supported transport protocols must have simple JSON string values. The values will be parsed (unescaped) before they are used in outgoing messages. Outbound notifications are JSON encoded (meaning that the characters will be reescaped for sending). Values have a minimum length of 0 (the empty string, \"\", is allowed). Values have a maximum length bounded by the overall message size (so, including multiple protocols may limit message sizes). Non-string values will cause the key to be ignored. Keys that do not correspond to supported transport protocols are ignored. Duplicate keys are not allowed. Failure to parse or validate any key or value in the message will cause the Publish call to return an error (no partial delivery)."];
       subject: Subject.t option
         [@ocaml.doc
-          "Optional parameter to be used as the \"Subject\" line when the message is delivered to email endpoints. This field will also be included, if present, in the standard JSON messages delivered to other endpoints. Constraints: Subjects must be ASCII text that begins with a letter, number, or punctuation mark; must not include line breaks or control characters; and must be less than 100 characters long."];
+          "Optional parameter to be used as the \"Subject\" line when the message is delivered to email endpoints. This field will also be included, if present, in the standard JSON messages delivered to other endpoints. Constraints: Subjects must be UTF-8 text with no line breaks or control characters, and less than 100 characters long."];
       messageStructure: MessageStructure.t option
         [@ocaml.doc
           "Set MessageStructure to json if you want to send a different message for each protocol. For example, using one publish action, you can send a short message to your SMS subscribers and a longer message to your email subscribers. If you set MessageStructure to json, the value of the Message parameter must: be a syntactically valid JSON object; and contain at least a top-level JSON key of \"default\" with a value that is a string. You can define other top-level keys that define the message you want to send to a specific transport protocol (e.g., \"http\"). Valid value: json"];
@@ -3399,10 +3527,10 @@ module PublishInput =
         [@ocaml.doc "Message attributes for Publish action."];
       messageDeduplicationId: String_.t option
         [@ocaml.doc
-          "This parameter applies only to FIFO (first-in-first-out) topics. The MessageDeduplicationId can contain up to 128 alphanumeric characters (a-z, A-Z, 0-9) and punctuation (!\"#$%&'()*+,-./:;<=>?\\@\\[\\\\]^_`\\{|\\}~). Every message must have a unique MessageDeduplicationId, which is a token used for deduplication of sent messages. If a message with a particular MessageDeduplicationId is sent successfully, any message sent with the same MessageDeduplicationId during the 5-minute deduplication interval is treated as a duplicate. If the topic has ContentBasedDeduplication set, the system generates a MessageDeduplicationId based on the contents of the message. Your MessageDeduplicationId overrides the generated one."];
+          "This parameter applies only to FIFO (first-in-first-out) topics. The MessageDeduplicationId can contain up to 128 alphanumeric characters (a-z, A-Z, 0-9) and punctuation (!\"#$%&'()*+,-./:;<=>?\\@\\[\\\\]^_`\\{|\\}~). Every message must have a unique MessageDeduplicationId, which is a token used for deduplication of sent messages within the 5 minute minimum deduplication interval. The scope of deduplication depends on the FifoThroughputScope attribute, when set to Topic the message deduplication scope is across the entire topic, when set to MessageGroup the message deduplication scope is within each individual message group. If a message with a particular MessageDeduplicationId is sent successfully, subsequent messages within the deduplication scope and interval, with the same MessageDeduplicationId, are accepted successfully but aren't delivered. Every message must have a unique MessageDeduplicationId: You may provide a MessageDeduplicationId explicitly. If you aren't able to provide a MessageDeduplicationId and you enable ContentBasedDeduplication for your topic, Amazon SNS uses a SHA-256 hash to generate the MessageDeduplicationId using the body of the message (but not the attributes of the message). If you don't provide a MessageDeduplicationId and the topic doesn't have ContentBasedDeduplication set, the action fails with an error. If the topic has a ContentBasedDeduplication set, your MessageDeduplicationId overrides the generated one. When ContentBasedDeduplication is in effect, messages with identical content sent within the deduplication scope and interval are treated as duplicates and only one copy of the message is delivered. If you send one message with ContentBasedDeduplication enabled, and then another message with a MessageDeduplicationId that is the same as the one generated for the first MessageDeduplicationId, the two messages are treated as duplicates, within the deduplication scope and interval, and only one copy of the message is delivered."];
       messageGroupId: String_.t option
         [@ocaml.doc
-          "This parameter applies only to FIFO (first-in-first-out) topics. The MessageGroupId can contain up to 128 alphanumeric characters (a-z, A-Z, 0-9) and punctuation (!\"#$%&'()*+,-./:;<=>?\\@\\[\\\\]^_`\\{|\\}~). The MessageGroupId is a tag that specifies that a message belongs to a specific message group. Messages that belong to the same message group are processed in a FIFO manner (however, messages in different message groups might be processed out of order). Every message must include a MessageGroupId."]}
+          "The MessageGroupId can contain up to 128 alphanumeric characters (a-z, A-Z, 0-9) and punctuation (!\"#$%&'()*+,-./:;<=>?\\@\\[\\\\]^_`\\{|\\}~). For FIFO topics: The MessageGroupId is a tag that specifies that a message belongs to a specific message group. Messages that belong to the same message group are processed in a FIFO manner (however, messages in different message groups might be processed out of order). Every message must include a MessageGroupId. For standard topics: The MessageGroupId is optional and is forwarded only to Amazon SQS standard subscriptions to activate fair queues. The MessageGroupId is not used for, or sent to, any other endpoint types. When provided, the same validation rules apply as for FIFO topics."]}
     let context_ = "PublishInput"
     let make ?topicArn =
       fun ?targetArn ->
@@ -3429,7 +3557,7 @@ module PublishInput =
       structure_to_value
         [("TopicArn", (Option.map x.topicArn ~f:TopicARN.to_value));
         ("TargetArn", (Option.map x.targetArn ~f:String_.to_value));
-        ("PhoneNumber", (Option.map x.phoneNumber ~f:String_.to_value));
+        ("PhoneNumber", (Option.map x.phoneNumber ~f:PhoneNumber.to_value));
         ("Message", (Some (Message.to_value x.message)));
         ("Subject", (Option.map x.subject ~f:Subject.to_value));
         ("MessageStructure",
@@ -3457,7 +3585,7 @@ module PublishInput =
       let message =
         Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
       let phoneNumber =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PhoneNumber") in
+        (Option.map ~f:PhoneNumber.of_xml) (Xml.child xml_arg0 "PhoneNumber") in
       let targetArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TargetArn") in
       let topicArn =
@@ -3466,19 +3594,19 @@ module PublishInput =
         ?messageStructure ?subject ~message ?phoneNumber ?targetArn ?topicArn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messageGroupId = field_map json "MessageGroupId" String_.of_json in
+    let of_json json__ =
+      let messageGroupId = field_map json__ "MessageGroupId" String_.of_json in
       let messageDeduplicationId =
-        field_map json "MessageDeduplicationId" String_.of_json in
+        field_map json__ "MessageDeduplicationId" String_.of_json in
       let messageAttributes =
-        field_map json "MessageAttributes" MessageAttributeMap.of_json in
+        field_map json__ "MessageAttributes" MessageAttributeMap.of_json in
       let messageStructure =
-        field_map json "MessageStructure" MessageStructure.of_json in
-      let subject = field_map json "Subject" Subject.of_json in
-      let message = field_map_exn json "Message" Message.of_json in
-      let phoneNumber = field_map json "PhoneNumber" String_.of_json in
-      let targetArn = field_map json "TargetArn" String_.of_json in
-      let topicArn = field_map json "TopicArn" TopicARN.of_json in
+        field_map json__ "MessageStructure" MessageStructure.of_json in
+      let subject = field_map json__ "Subject" Subject.of_json in
+      let message = field_map_exn json__ "Message" Message.of_json in
+      let phoneNumber = field_map json__ "PhoneNumber" PhoneNumber.of_json in
+      let targetArn = field_map json__ "TargetArn" String_.of_json in
+      let topicArn = field_map json__ "TopicArn" TopicARN.of_json in
       make ?messageGroupId ?messageDeduplicationId ?messageAttributes
         ?messageStructure ?subject ~message ?phoneNumber ?targetArn ?topicArn
         ()
@@ -3520,6 +3648,7 @@ module PublishBatchResponse =
           PlatformApplicationDisabledException.t 
       | `TooManyEntriesInBatchRequestException of
           TooManyEntriesInBatchRequestException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "PublishBatchResponse"
     let make ?successful =
@@ -3577,6 +3706,8 @@ module PublishBatchResponse =
       | "TooManyEntriesInBatchRequestException" ->
           `TooManyEntriesInBatchRequestException
             (TooManyEntriesInBatchRequestException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3626,6 +3757,8 @@ module PublishBatchResponse =
       | "TooManyEntriesInBatchRequestException" ->
           `TooManyEntriesInBatchRequestException
             (TooManyEntriesInBatchRequestException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3706,6 +3839,10 @@ module PublishBatchResponse =
           `Assoc
             [("error", (`String "TooManyEntriesInBatchRequestException"));
             ("details", (TooManyEntriesInBatchRequestException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3730,14 +3867,15 @@ module PublishBatchResponse =
           (Xml.child xml_arg0 "Successful") in
       make ?failed ?successful ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failed = field_map json "Failed" BatchResultErrorEntryList.of_json in
+    let of_json json__ =
+      let failed =
+        field_map json__ "Failed" BatchResultErrorEntryList.of_json in
       let successful =
-        field_map json "Successful" PublishBatchResultEntryList.of_json in
+        field_map json__ "Successful" PublishBatchResultEntryList.of_json in
       make ?failed ?successful ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Publishes up to ten messages to the specified topic. This is a batch version of Publish. For FIFO topics, multiple messages within a single batch are published in the order they are sent, and messages are deduplicated within the batch and across batches for 5 minutes. The result of publishing each message is reported individually in the response. Because the batch request can result in a combination of successful and unsuccessful actions, you should check for batch errors even when the call returns an HTTP status code of 200. The maximum allowed individual message size and the maximum total payload size (the sum of the individual lengths of all of the batched messages) are both 256 KB (262,144 bytes). Some actions take lists of parameters. These lists are specified using the param.n notation. Values of n are integers starting from 1. For example, a parameter list with two elements looks like this: &AttributeName.1=first &AttributeName.2=second If you send a batch message to a topic, Amazon SNS publishes the batch message to each endpoint that is subscribed to the topic. The format of the batch message depends on the notification protocol for each subscribed endpoint. When a messageId is returned, the batch message is saved and Amazon SNS immediately delivers the message to subscribers."]
+       "Publishes up to 10 messages to the specified topic in a single batch. This is a batch version of the Publish API. If you try to send more than 10 messages in a single batch request, you will receive a TooManyEntriesInBatchRequest exception. For FIFO topics, multiple messages within a single batch are published in the order they are sent, and messages are deduplicated within the batch and across batches for five minutes. The result of publishing each message is reported individually in the response. Because the batch request can result in a combination of successful and unsuccessful actions, you should check for batch errors even when the call returns an HTTP status code of 200. The maximum allowed individual message size and the maximum total payload size (the sum of the individual lengths of all of the batched messages) are both 256 KB (262,144 bytes). The PublishBatch API can send up to 10 messages at a time. If you attempt to send more than 10 messages in one request, you will encounter a TooManyEntriesInBatchRequest exception. In such cases, split your messages into multiple requests, each containing no more than 10 messages. Some actions take lists of parameters. These lists are specified using the param.n notation. Values of n are integers starting from 1. For example, a parameter list with two elements looks like this: &AttributeName.1=first &AttributeName.2=second If you send a batch message to a topic, Amazon SNS publishes the batch message to each endpoint that is subscribed to the topic. The format of the batch message depends on the notification protocol for each subscribed endpoint. When a messageId is returned, the batch message is saved, and Amazon SNS immediately delivers the message to subscribers."]
 module PublishBatchInput =
   struct
     type nonrec t =
@@ -3769,15 +3907,15 @@ module PublishBatchInput =
         TopicARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TopicArn") in
       make ~publishBatchRequestEntries ~topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let publishBatchRequestEntries =
-        field_map_exn json "PublishBatchRequestEntries"
+        field_map_exn json__ "PublishBatchRequestEntries"
           PublishBatchRequestEntryList.of_json in
-      let topicArn = field_map_exn json "TopicArn" TopicARN.of_json in
+      let topicArn = field_map_exn json__ "TopicArn" TopicARN.of_json in
       make ~publishBatchRequestEntries ~topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Publishes up to ten messages to the specified topic. This is a batch version of Publish. For FIFO topics, multiple messages within a single batch are published in the order they are sent, and messages are deduplicated within the batch and across batches for 5 minutes. The result of publishing each message is reported individually in the response. Because the batch request can result in a combination of successful and unsuccessful actions, you should check for batch errors even when the call returns an HTTP status code of 200. The maximum allowed individual message size and the maximum total payload size (the sum of the individual lengths of all of the batched messages) are both 256 KB (262,144 bytes). Some actions take lists of parameters. These lists are specified using the param.n notation. Values of n are integers starting from 1. For example, a parameter list with two elements looks like this: &AttributeName.1=first &AttributeName.2=second If you send a batch message to a topic, Amazon SNS publishes the batch message to each endpoint that is subscribed to the topic. The format of the batch message depends on the notification protocol for each subscribed endpoint. When a messageId is returned, the batch message is saved and Amazon SNS immediately delivers the message to subscribers."]
+       "Publishes up to 10 messages to the specified topic in a single batch. This is a batch version of the Publish API. If you try to send more than 10 messages in a single batch request, you will receive a TooManyEntriesInBatchRequest exception. For FIFO topics, multiple messages within a single batch are published in the order they are sent, and messages are deduplicated within the batch and across batches for five minutes. The result of publishing each message is reported individually in the response. Because the batch request can result in a combination of successful and unsuccessful actions, you should check for batch errors even when the call returns an HTTP status code of 200. The maximum allowed individual message size and the maximum total payload size (the sum of the individual lengths of all of the batched messages) are both 256 KB (262,144 bytes). The PublishBatch API can send up to 10 messages at a time. If you attempt to send more than 10 messages in one request, you will encounter a TooManyEntriesInBatchRequest exception. In such cases, split your messages into multiple requests, each containing no more than 10 messages. Some actions take lists of parameters. These lists are specified using the param.n notation. Values of n are integers starting from 1. For example, a parameter list with two elements looks like this: &AttributeName.1=first &AttributeName.2=second If you send a batch message to a topic, Amazon SNS publishes the batch message to each endpoint that is subscribed to the topic. The format of the batch message depends on the notification protocol for each subscribed endpoint. When a messageId is returned, the batch message is saved, and Amazon SNS immediately delivers the message to subscribers."]
 module OptInPhoneNumberResponse =
   struct
     type optInPhoneNumberResult = unit
@@ -3869,8 +4007,9 @@ module OptInPhoneNumberInput =
           (Xml.child_exn ~context:context_ xml_arg0 "PhoneNumber") in
       make ~phoneNumber ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let phoneNumber = field_map_exn json "phoneNumber" PhoneNumber.of_json in
+    let of_json json__ =
+      let phoneNumber =
+        field_map_exn json__ "phoneNumber" PhoneNumber.of_json in
       make ~phoneNumber ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for the OptInPhoneNumber action."]
@@ -3954,9 +4093,9 @@ module ListTopicsResponse =
         (Option.map ~f:TopicsList.of_xml) (Xml.child xml_arg0 "Topics") in
       make ?nextToken ?topics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let topics = field_map json "Topics" TopicsList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let topics = field_map json__ "Topics" TopicsList.of_json in
       make ?nextToken ?topics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response for ListTopics action."]
@@ -3976,8 +4115,8 @@ module ListTopicsInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4074,8 +4213,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "List all tags added to the specified Amazon SNS topic. For an overview, see Amazon SNS Tags in the Amazon Simple Notification Service Developer Guide."]
@@ -4097,9 +4236,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4191,10 +4330,10 @@ module ListSubscriptionsResponse =
           (Xml.child xml_arg0 "Subscriptions") in
       make ?nextToken ?subscriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let subscriptions =
-        field_map json "Subscriptions" SubscriptionsList.of_json in
+        field_map json__ "Subscriptions" SubscriptionsList.of_json in
       make ?nextToken ?subscriptions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response for ListSubscriptions action"]
@@ -4215,8 +4354,8 @@ module ListSubscriptionsInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for ListSubscriptions action."]
@@ -4317,10 +4456,10 @@ module ListSubscriptionsByTopicResponse =
           (Xml.child xml_arg0 "Subscriptions") in
       make ?nextToken ?subscriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let subscriptions =
-        field_map json "Subscriptions" SubscriptionsList.of_json in
+        field_map json__ "Subscriptions" SubscriptionsList.of_json in
       make ?nextToken ?subscriptions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response for ListSubscriptionsByTopic action."]
@@ -4348,9 +4487,9 @@ module ListSubscriptionsByTopicInput =
         TopicARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TopicArn") in
       make ?nextToken ~topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let topicArn = field_map_exn json "TopicArn" TopicARN.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let topicArn = field_map_exn json__ "TopicArn" TopicARN.of_json in
       make ?nextToken ~topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for ListSubscriptionsByTopic action."]
@@ -4358,7 +4497,7 @@ module ListSMSSandboxPhoneNumbersResult =
   struct
     type listSMSSandboxPhoneNumbersResult =
       {
-      phoneNumbers: SMSSandboxPhoneNumberList.t
+      phoneNumbers: SMSSandboxPhoneNumberList.t option
         [@ocaml.doc
           "A list of the calling account's pending and verified phone numbers."];
       nextToken: String__lc1.t option
@@ -4377,11 +4516,11 @@ module ListSMSSandboxPhoneNumbersResult =
       | `ThrottledException of ThrottledException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ListSMSSandboxPhoneNumbersResult"
-    let make ?nextToken =
-      fun ~phoneNumbers ->
+    let make ?phoneNumbers =
+      fun ?nextToken ->
         fun () ->
           {
-            listSMSSandboxPhoneNumbersResult = { nextToken; phoneNumbers };
+            listSMSSandboxPhoneNumbersResult = { phoneNumbers; nextToken };
             responseMetaData = ()
           }
     let error_of_json name json =
@@ -4446,7 +4585,7 @@ module ListSMSSandboxPhoneNumbersResult =
       let x = t.listSMSSandboxPhoneNumbersResult in
       structure_to_wrapped_value
         [("PhoneNumbers",
-           (Some (SMSSandboxPhoneNumberList.to_value x.phoneNumbers)));
+           (Option.map x.phoneNumbers ~f:SMSSandboxPhoneNumberList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:String__lc1.to_value))]
         ~wrapper:"ListSMSSandboxPhoneNumbersResult"
         ~response:"ResponseMetaData"
@@ -4457,15 +4596,15 @@ module ListSMSSandboxPhoneNumbersResult =
       let nextToken =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "NextToken") in
       let phoneNumbers =
-        SMSSandboxPhoneNumberList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PhoneNumbers") in
-      make ?nextToken ~phoneNumbers ()
+        (Option.map ~f:SMSSandboxPhoneNumberList.of_xml)
+          (Xml.child xml_arg0 "PhoneNumbers") in
+      make ?nextToken ?phoneNumbers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String__lc1.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String__lc1.of_json in
       let phoneNumbers =
-        field_map_exn json "PhoneNumbers" SMSSandboxPhoneNumberList.of_json in
-      make ?nextToken ~phoneNumbers ()
+        field_map json__ "PhoneNumbers" SMSSandboxPhoneNumberList.of_json in
+      make ?nextToken ?phoneNumbers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the calling Amazon Web Services account's current verified and pending destination phone numbers in the SMS sandbox. When you start using Amazon SNS to send SMS messages, your Amazon Web Services account is in the SMS sandbox. The SMS sandbox provides a safe environment for you to try Amazon SNS features without risking your reputation as an SMS sender. While your Amazon Web Services account is in the SMS sandbox, you can use all of the features of Amazon SNS. However, you can send SMS messages only to verified destination phone numbers. For more information, including how to move out of the sandbox to send messages without restrictions, see SMS sandbox in the Amazon SNS Developer Guide."]
@@ -4492,9 +4631,9 @@ module ListSMSSandboxPhoneNumbersInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4590,10 +4729,10 @@ module ListPlatformApplicationsResponse =
           (Xml.child xml_arg0 "PlatformApplications") in
       make ?nextToken ?platformApplications ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let platformApplications =
-        field_map json "PlatformApplications"
+        field_map json__ "PlatformApplications"
           ListOfPlatformApplications.of_json in
       make ?nextToken ?platformApplications ()
     let to_json v = composed_to_json to_value v
@@ -4615,8 +4754,8 @@ module ListPlatformApplicationsInput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for ListPlatformApplications action."]
@@ -4718,10 +4857,10 @@ module ListPhoneNumbersOptedOutResponse =
           (Xml.child xml_arg0 "PhoneNumbers") in
       make ?nextToken ?phoneNumbers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String__lc1.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String__lc1.of_json in
       let phoneNumbers =
-        field_map json "phoneNumbers" PhoneNumberList.of_json in
+        field_map json__ "phoneNumbers" PhoneNumberList.of_json in
       make ?nextToken ?phoneNumbers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response from the ListPhoneNumbersOptedOut action."]
@@ -4742,8 +4881,8 @@ module ListPhoneNumbersOptedOutInput =
         (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String__lc1.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String__lc1.of_json in
       make ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the ListPhoneNumbersOptedOut action."]
@@ -4853,10 +4992,10 @@ module ListOriginationNumbersResult =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?phoneNumbers ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let phoneNumbers =
-        field_map json "PhoneNumbers" PhoneNumberInformationList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "PhoneNumbers" PhoneNumberInformationList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?phoneNumbers ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4886,10 +5025,10 @@ module ListOriginationNumbersRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" MaxItemsListOriginationNumbers.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "MaxResults" MaxItemsListOriginationNumbers.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4994,9 +5133,9 @@ module ListEndpointsByPlatformApplicationResponse =
           (Xml.child xml_arg0 "Endpoints") in
       make ?nextToken ?endpoints ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let endpoints = field_map json "Endpoints" ListOfEndpoints.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let endpoints = field_map json__ "Endpoints" ListOfEndpoints.of_json in
       make ?nextToken ?endpoints ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response for ListEndpointsByPlatformApplication action."]
@@ -5028,20 +5167,40 @@ module ListEndpointsByPlatformApplicationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "PlatformApplicationArn") in
       make ?nextToken ~platformApplicationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let platformApplicationArn =
-        field_map_exn json "PlatformApplicationArn" String_.of_json in
+        field_map_exn json__ "PlatformApplicationArn" String_.of_json in
       make ?nextToken ~platformApplicationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for ListEndpointsByPlatformApplication action."]
+module InvalidStateException =
+  struct
+    type nonrec t = {
+      message: String__lc1.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String__lc1.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String__lc1.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates that the specified state is not a valid state for an event source."]
 module GetTopicAttributesResponse =
   struct
     type getTopicAttributesResult =
       {
       attributes: TopicAttributesMap.t option
         [@ocaml.doc
-          "A map of the topic's attributes. Attributes in this map include the following: DeliveryPolicy \226\128\147 The JSON serialization of the topic's delivery policy. DisplayName \226\128\147 The human-readable name used in the From field for notifications to email and email-json endpoints. Owner \226\128\147 The Amazon Web Services account ID of the topic's owner. Policy \226\128\147 The JSON serialization of the topic's access control policy. SubscriptionsConfirmed \226\128\147 The number of confirmed subscriptions for the topic. SubscriptionsDeleted \226\128\147 The number of deleted subscriptions for the topic. SubscriptionsPending \226\128\147 The number of subscriptions pending confirmation for the topic. TopicArn \226\128\147 The topic's ARN. EffectiveDeliveryPolicy \226\128\147 The JSON serialization of the effective delivery policy, taking system defaults into account. The following attribute applies only to server-side-encryption: KmsMasterKeyId - The ID of an Amazon Web Services managed customer master key (CMK) for Amazon SNS or a custom CMK. For more information, see Key Terms. For more examples, see KeyId in the Key Management Service API Reference. The following attributes apply only to FIFO topics: FifoTopic \226\128\147 When this is set to true, a FIFO topic is created. ContentBasedDeduplication \226\128\147 Enables content-based deduplication for FIFO topics. By default, ContentBasedDeduplication is set to false. If you create a FIFO topic and this attribute is false, you must specify a value for the MessageDeduplicationId parameter for the Publish action. When you set ContentBasedDeduplication to true, Amazon SNS uses a SHA-256 hash to generate the MessageDeduplicationId using the body of the message (but not the attributes of the message). (Optional) To override the generated value, you can specify a value for the MessageDeduplicationId parameter for the Publish action."]}
+          "A map of the topic's attributes. Attributes in this map include the following: DeliveryPolicy \226\128\147 The JSON serialization of the topic's delivery policy. DisplayName \226\128\147 The human-readable name used in the From field for notifications to email and email-json endpoints. EffectiveDeliveryPolicy \226\128\147 The JSON serialization of the effective delivery policy, taking system defaults into account. Owner \226\128\147 The Amazon Web Services account ID of the topic's owner. Policy \226\128\147 The JSON serialization of the topic's access control policy. SignatureVersion \226\128\147 The signature version corresponds to the hashing algorithm used while creating the signature of the notifications, subscription confirmations, or unsubscribe confirmation messages sent by Amazon SNS. By default, SignatureVersion is set to 1. The signature is a Base64-encoded SHA1withRSA signature. When you set SignatureVersion to 2. Amazon SNS uses a Base64-encoded SHA256withRSA signature. If the API response does not include the SignatureVersion attribute, it means that the SignatureVersion for the topic has value 1. SubscriptionsConfirmed \226\128\147 The number of confirmed subscriptions for the topic. SubscriptionsDeleted \226\128\147 The number of deleted subscriptions for the topic. SubscriptionsPending \226\128\147 The number of subscriptions pending confirmation for the topic. TopicArn \226\128\147 The topic's ARN. TracingConfig \226\128\147 Tracing mode of an Amazon SNS topic. By default TracingConfig is set to PassThrough, and the topic passes through the tracing header it receives from an Amazon SNS publisher to its subscriptions. If set to Active, Amazon SNS will vend X-Ray segment data to topic owner account if the sampled flag in the tracing header is true. This is only supported on standard topics. The following attribute applies only to server-side-encryption: KmsMasterKeyId - The ID of an Amazon Web Services managed customer master key (CMK) for Amazon SNS or a custom CMK. For more information, see Key Terms. For more examples, see KeyId in the Key Management Service API Reference. The following attributes apply only to FIFO topics: ArchivePolicy \226\128\147 The policy that sets the retention period for messages stored in the message archive of an Amazon SNS FIFO topic. BeginningArchiveTime \226\128\147 The earliest starting point at which a message in the topic\226\128\153s archive can be replayed from. This point in time is based on the configured message retention period set by the topic\226\128\153s message archiving policy. ContentBasedDeduplication \226\128\147 Enables content-based deduplication for FIFO topics. By default, ContentBasedDeduplication is set to false. If you create a FIFO topic and this attribute is false, you must specify a value for the MessageDeduplicationId parameter for the Publish action. When you set ContentBasedDeduplication to true, Amazon SNS uses a SHA-256 hash to generate the MessageDeduplicationId using the body of the message (but not the attributes of the message). (Optional) To override the generated value, you can specify a value for the MessageDeduplicationId parameter for the Publish action. FifoTopic \226\128\147 When this is set to true, a FIFO topic is created."]}
     and responseMetaData = unit
     and t =
       {
@@ -5131,8 +5290,9 @@ module GetTopicAttributesResponse =
           (Xml.child xml_arg0 "Attributes") in
       make ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "Attributes" TopicAttributesMap.of_json in
+    let of_json json__ =
+      let attributes =
+        field_map json__ "Attributes" TopicAttributesMap.of_json in
       make ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response for GetTopicAttributes action."]
@@ -5153,8 +5313,8 @@ module GetTopicAttributesInput =
         TopicARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TopicArn") in
       make ~topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicArn = field_map_exn json "TopicArn" TopicARN.of_json in
+    let of_json json__ =
+      let topicArn = field_map_exn json__ "TopicArn" TopicARN.of_json in
       make ~topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for GetTopicAttributes action."]
@@ -5164,7 +5324,7 @@ module GetSubscriptionAttributesResponse =
       {
       attributes: SubscriptionAttributesMap.t option
         [@ocaml.doc
-          "A map of the subscription's attributes. Attributes in this map include the following: ConfirmationWasAuthenticated \226\128\147 true if the subscription confirmation request was authenticated. DeliveryPolicy \226\128\147 The JSON serialization of the subscription's delivery policy. EffectiveDeliveryPolicy \226\128\147 The JSON serialization of the effective delivery policy that takes into account the topic delivery policy and account system defaults. FilterPolicy \226\128\147 The filter policy JSON that is assigned to the subscription. For more information, see Amazon SNS Message Filtering in the Amazon SNS Developer Guide. Owner \226\128\147 The Amazon Web Services account ID of the subscription's owner. PendingConfirmation \226\128\147 true if the subscription hasn't been confirmed. To confirm a pending subscription, call the ConfirmSubscription action with a confirmation token. RawMessageDelivery \226\128\147 true if raw message delivery is enabled for the subscription. Raw messages are free of JSON formatting and can be sent to HTTP/S and Amazon SQS endpoints. RedrivePolicy \226\128\147 When specified, sends undeliverable messages to the specified Amazon SQS dead-letter queue. Messages that can't be delivered due to client errors (for example, when the subscribed endpoint is unreachable) or server errors (for example, when the service that powers the subscribed endpoint becomes unavailable) are held in the dead-letter queue for further analysis or reprocessing. SubscriptionArn \226\128\147 The subscription's ARN. TopicArn \226\128\147 The topic ARN that the subscription is associated with. The following attribute applies only to Amazon Kinesis Data Firehose delivery stream subscriptions: SubscriptionRoleArn \226\128\147 The ARN of the IAM role that has the following: Permission to write to the Kinesis Data Firehose delivery stream Amazon SNS listed as a trusted entity Specifying a valid ARN for this attribute is required for Kinesis Data Firehose delivery stream subscriptions. For more information, see Fanout to Kinesis Data Firehose delivery streams in the Amazon SNS Developer Guide."]}
+          "A map of the subscription's attributes. Attributes in this map include the following: ConfirmationWasAuthenticated \226\128\147 true if the subscription confirmation request was authenticated. DeliveryPolicy \226\128\147 The JSON serialization of the subscription's delivery policy. EffectiveDeliveryPolicy \226\128\147 The JSON serialization of the effective delivery policy that takes into account the topic delivery policy and account system defaults. FilterPolicy \226\128\147 The filter policy JSON that is assigned to the subscription. For more information, see Amazon SNS Message Filtering in the Amazon SNS Developer Guide. FilterPolicyScope \226\128\147 This attribute lets you choose the filtering scope by using one of the following string value types: MessageAttributes (default) \226\128\147 The filter is applied on the message attributes. MessageBody \226\128\147 The filter is applied on the message body. Owner \226\128\147 The Amazon Web Services account ID of the subscription's owner. PendingConfirmation \226\128\147 true if the subscription hasn't been confirmed. To confirm a pending subscription, call the ConfirmSubscription action with a confirmation token. RawMessageDelivery \226\128\147 true if raw message delivery is enabled for the subscription. Raw messages are free of JSON formatting and can be sent to HTTP/S and Amazon SQS endpoints. RedrivePolicy \226\128\147 When specified, sends undeliverable messages to the specified Amazon SQS dead-letter queue. Messages that can't be delivered due to client errors (for example, when the subscribed endpoint is unreachable) or server errors (for example, when the service that powers the subscribed endpoint becomes unavailable) are held in the dead-letter queue for further analysis or reprocessing. SubscriptionArn \226\128\147 The subscription's ARN. TopicArn \226\128\147 The topic ARN that the subscription is associated with. The following attribute applies only to Amazon Data Firehose delivery stream subscriptions: SubscriptionRoleArn \226\128\147 The ARN of the IAM role that has the following: Permission to write to the Firehose delivery stream Amazon SNS listed as a trusted entity Specifying a valid ARN for this attribute is required for Firehose delivery stream subscriptions. For more information, see Fanout to Firehose delivery streams in the Amazon SNS Developer Guide."]}
     and responseMetaData = unit
     and t =
       {
@@ -5249,9 +5409,9 @@ module GetSubscriptionAttributesResponse =
           (Xml.child xml_arg0 "Attributes") in
       make ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map json "Attributes" SubscriptionAttributesMap.of_json in
+        field_map json__ "Attributes" SubscriptionAttributesMap.of_json in
       make ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response for GetSubscriptionAttributes action."]
@@ -5275,9 +5435,9 @@ module GetSubscriptionAttributesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionArn") in
       make ~subscriptionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionArn =
-        field_map_exn json "SubscriptionArn" SubscriptionARN.of_json in
+        field_map_exn json__ "SubscriptionArn" SubscriptionARN.of_json in
       make ~subscriptionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for GetSubscriptionAttributes."]
@@ -5285,7 +5445,7 @@ module GetSMSSandboxAccountStatusResult =
   struct
     type getSMSSandboxAccountStatusResult =
       {
-      isInSandbox: Boolean.t
+      isInSandbox: Boolean.t option
         [@ocaml.doc
           "Indicates whether the calling Amazon Web Services account is in the SMS sandbox."]}
     and responseMetaData = unit
@@ -5299,7 +5459,7 @@ module GetSMSSandboxAccountStatusResult =
       | `ThrottledException of ThrottledException.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "GetSMSSandboxAccountStatusResult"
-    let make ~isInSandbox =
+    let make ?isInSandbox =
       fun () ->
         {
           getSMSSandboxAccountStatusResult = { isInSandbox };
@@ -5350,7 +5510,7 @@ module GetSMSSandboxAccountStatusResult =
     let to_value t =
       let x = t.getSMSSandboxAccountStatusResult in
       structure_to_wrapped_value
-        [("IsInSandbox", (Some (Boolean.to_value x.isInSandbox)))]
+        [("IsInSandbox", (Option.map x.isInSandbox ~f:Boolean.to_value))]
         ~wrapper:"GetSMSSandboxAccountStatusResult"
         ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
@@ -5358,13 +5518,12 @@ module GetSMSSandboxAccountStatusResult =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "GetSMSSandboxAccountStatusResult" in
       let isInSandbox =
-        Boolean.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IsInSandbox") in
-      make ~isInSandbox ()
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "IsInSandbox") in
+      make ?isInSandbox ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isInSandbox = field_map_exn json "IsInSandbox" Boolean.of_json in
-      make ~isInSandbox ()
+    let of_json json__ =
+      let isInSandbox = field_map json__ "IsInSandbox" Boolean.of_json in
+      make ?isInSandbox ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the SMS sandbox status for the calling Amazon Web Services account in the target Amazon Web Services Region. When you start using Amazon SNS to send SMS messages, your Amazon Web Services account is in the SMS sandbox. The SMS sandbox provides a safe environment for you to try Amazon SNS features without risking your reputation as an SMS sender. While your Amazon Web Services account is in the SMS sandbox, you can use all of the features of Amazon SNS. However, you can send SMS messages only to verified destination phone numbers. For more information, including how to move out of the sandbox to send messages without restrictions, see SMS sandbox in the Amazon SNS Developer Guide."]
@@ -5467,8 +5626,9 @@ module GetSMSAttributesResponse =
           (Xml.child xml_arg0 "Attributes") in
       make ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "attributes" MapStringToString.of_json in
+    let of_json json__ =
+      let attributes =
+        field_map json__ "attributes" MapStringToString.of_json in
       make ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response from the GetSMSAttributes request."]
@@ -5489,8 +5649,8 @@ module GetSMSAttributesInput =
         (Option.map ~f:ListString.of_xml) (Xml.child xml_arg0 "Attributes") in
       make ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "attributes" ListString.of_json in
+    let of_json json__ =
+      let attributes = field_map json__ "attributes" ListString.of_json in
       make ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the GetSMSAttributes request."]
@@ -5500,7 +5660,7 @@ module GetPlatformApplicationAttributesResponse =
       {
       attributes: MapStringToString.t option
         [@ocaml.doc
-          "Attributes include the following: AppleCertificateExpiryDate \226\128\147 The expiry date of the SSL certificate used to configure certificate-based authentication. ApplePlatformTeamID \226\128\147 The Apple developer account ID used to configure token-based authentication. ApplePlatformBundleID \226\128\147 The app identifier used to configure token-based authentication. EventEndpointCreated \226\128\147 Topic ARN to which EndpointCreated event notifications should be sent. EventEndpointDeleted \226\128\147 Topic ARN to which EndpointDeleted event notifications should be sent. EventEndpointUpdated \226\128\147 Topic ARN to which EndpointUpdate event notifications should be sent. EventDeliveryFailure \226\128\147 Topic ARN to which DeliveryFailure event notifications should be sent upon Direct Publish delivery failure (permanent) to one of the application's endpoints."]}
+          "Attributes include the following: AppleCertificateExpiryDate \226\128\147 The expiry date of the SSL certificate used to configure certificate-based authentication. ApplePlatformTeamID \226\128\147 The Apple developer account ID used to configure token-based authentication. ApplePlatformBundleID \226\128\147 The app identifier used to configure token-based authentication. AuthenticationMethod \226\128\147 Returns the credential type used when sending push notifications from application to APNS/APNS_Sandbox, or application to GCM. APNS \226\128\147 Returns the token or certificate. GCM \226\128\147 Returns the token or key. EventEndpointCreated \226\128\147 Topic ARN to which EndpointCreated event notifications should be sent. EventEndpointDeleted \226\128\147 Topic ARN to which EndpointDeleted event notifications should be sent. EventEndpointUpdated \226\128\147 Topic ARN to which EndpointUpdate event notifications should be sent. EventDeliveryFailure \226\128\147 Topic ARN to which DeliveryFailure event notifications should be sent upon Direct Publish delivery failure (permanent) to one of the application's endpoints."]}
     and responseMetaData = unit
     and t =
       {
@@ -5587,8 +5747,9 @@ module GetPlatformApplicationAttributesResponse =
           (Xml.child xml_arg0 "Attributes") in
       make ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "Attributes" MapStringToString.of_json in
+    let of_json json__ =
+      let attributes =
+        field_map json__ "Attributes" MapStringToString.of_json in
       make ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response for GetPlatformApplicationAttributes action."]
@@ -5612,9 +5773,9 @@ module GetPlatformApplicationAttributesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "PlatformApplicationArn") in
       make ~platformApplicationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let platformApplicationArn =
-        field_map_exn json "PlatformApplicationArn" String_.of_json in
+        field_map_exn json__ "PlatformApplicationArn" String_.of_json in
       make ~platformApplicationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for GetPlatformApplicationAttributes action."]
@@ -5706,8 +5867,9 @@ module GetEndpointAttributesResponse =
           (Xml.child xml_arg0 "Attributes") in
       make ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "Attributes" MapStringToString.of_json in
+    let of_json json__ =
+      let attributes =
+        field_map json__ "Attributes" MapStringToString.of_json in
       make ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response from GetEndpointAttributes of the EndpointArn."]
@@ -5729,11 +5891,142 @@ module GetEndpointAttributesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointArn") in
       make ~endpointArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpointArn = field_map_exn json "EndpointArn" String_.of_json in
+    let of_json json__ =
+      let endpointArn = field_map_exn json__ "EndpointArn" String_.of_json in
       make ~endpointArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for GetEndpointAttributes action."]
+module GetDataProtectionPolicyResponse =
+  struct
+    type getDataProtectionPolicyResult =
+      {
+      dataProtectionPolicy: AttributeValue.t option
+        [@ocaml.doc
+          "Retrieves the DataProtectionPolicy in JSON string format."]}
+    and responseMetaData = unit
+    and t =
+      {
+      getDataProtectionPolicyResult: getDataProtectionPolicyResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `AuthorizationErrorException of AuthorizationErrorException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidSecurityException of InvalidSecurityException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "GetDataProtectionPolicyResponse"
+    let make ?dataProtectionPolicy =
+      fun () ->
+        {
+          getDataProtectionPolicyResult = { dataProtectionPolicy };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "AuthorizationErrorException" ->
+          `AuthorizationErrorException
+            (AuthorizationErrorException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidSecurityException" ->
+          `InvalidSecurityException (InvalidSecurityException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AuthorizationErrorException" ->
+          `AuthorizationErrorException
+            (AuthorizationErrorException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidSecurityException" ->
+          `InvalidSecurityException (InvalidSecurityException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AuthorizationErrorException e ->
+          `Assoc
+            [("error", (`String "AuthorizationErrorException"));
+            ("details", (AuthorizationErrorException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidSecurityException e ->
+          `Assoc
+            [("error", (`String "InvalidSecurityException"));
+            ("details", (InvalidSecurityException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.getDataProtectionPolicyResult in
+      structure_to_wrapped_value
+        [("DataProtectionPolicy",
+           (Option.map x.dataProtectionPolicy ~f:AttributeValue.to_value))]
+        ~wrapper:"GetDataProtectionPolicyResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "GetDataProtectionPolicyResult" in
+      let dataProtectionPolicy =
+        (Option.map ~f:AttributeValue.of_xml)
+          (Xml.child xml_arg0 "DataProtectionPolicy") in
+      make ?dataProtectionPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataProtectionPolicy =
+        field_map json__ "DataProtectionPolicy" AttributeValue.of_json in
+      make ?dataProtectionPolicy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the specified inline DataProtectionPolicy document that is stored in the specified Amazon SNS topic."]
+module GetDataProtectionPolicyInput =
+  struct
+    type nonrec t =
+      {
+      resourceArn: TopicARN.t
+        [@ocaml.doc
+          "The ARN of the topic whose DataProtectionPolicy you want to get. For more information about ARNs, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."]}
+    let context_ = "GetDataProtectionPolicyInput"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (TopicARN.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        TopicARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" TopicARN.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the specified inline DataProtectionPolicy document that is stored in the specified Amazon SNS topic."]
 module DeleteTopicInput =
   struct
     type nonrec t =
@@ -5751,8 +6044,8 @@ module DeleteTopicInput =
         TopicARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TopicArn") in
       make ~topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicArn = field_map_exn json "TopicArn" TopicARN.of_json in
+    let of_json json__ =
+      let topicArn = field_map_exn json__ "TopicArn" TopicARN.of_json in
       make ~topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5868,9 +6161,9 @@ module DeleteSMSSandboxPhoneNumberInput =
           (Xml.child_exn ~context:context_ xml_arg0 "PhoneNumber") in
       make ~phoneNumber ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let phoneNumber =
-        field_map_exn json "PhoneNumber" PhoneNumberString.of_json in
+        field_map_exn json__ "PhoneNumber" PhoneNumberString.of_json in
       make ~phoneNumber ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5895,9 +6188,9 @@ module DeletePlatformApplicationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "PlatformApplicationArn") in
       make ~platformApplicationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let platformApplicationArn =
-        field_map_exn json "PlatformApplicationArn" String_.of_json in
+        field_map_exn json__ "PlatformApplicationArn" String_.of_json in
       make ~platformApplicationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for DeletePlatformApplication action."]
@@ -5919,8 +6212,8 @@ module DeleteEndpointInput =
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointArn") in
       make ~endpointArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpointArn = field_map_exn json "EndpointArn" String_.of_json in
+    let of_json json__ =
+      let endpointArn = field_map_exn json__ "EndpointArn" String_.of_json in
       make ~endpointArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for DeleteEndpoint action."]
@@ -6054,8 +6347,8 @@ module CreateTopicResponse =
         (Option.map ~f:TopicARN.of_xml) (Xml.child xml_arg0 "TopicArn") in
       make ?topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicArn = field_map json "TopicArn" TopicARN.of_json in
+    let of_json json__ =
+      let topicArn = field_map json__ "TopicArn" TopicARN.of_json in
       make ?topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response from CreateTopic action."]
@@ -6068,34 +6361,48 @@ module CreateTopicInput =
           "The name of the topic you want to create. Constraints: Topic names must be made up of only uppercase and lowercase ASCII letters, numbers, underscores, and hyphens, and must be between 1 and 256 characters long. For a FIFO (first-in-first-out) topic, the name must end with the .fifo suffix."];
       attributes: TopicAttributesMap.t option
         [@ocaml.doc
-          "A map of attributes with their corresponding values. The following lists the names, descriptions, and values of the special request parameters that the CreateTopic action uses: DeliveryPolicy \226\128\147 The policy that defines how Amazon SNS retries failed deliveries to HTTP/S endpoints. DisplayName \226\128\147 The display name to use for a topic with SMS subscriptions. FifoTopic \226\128\147 Set to true to create a FIFO topic. Policy \226\128\147 The policy that defines who can access your topic. By default, only the topic owner can publish or subscribe to the topic. The following attribute applies only to server-side encryption: KmsMasterKeyId \226\128\147 The ID of an Amazon Web Services managed customer master key (CMK) for Amazon SNS or a custom CMK. For more information, see Key Terms. For more examples, see KeyId in the Key Management Service API Reference. The following attributes apply only to FIFO topics: FifoTopic \226\128\147 When this is set to true, a FIFO topic is created. ContentBasedDeduplication \226\128\147 Enables content-based deduplication for FIFO topics. By default, ContentBasedDeduplication is set to false. If you create a FIFO topic and this attribute is false, you must specify a value for the MessageDeduplicationId parameter for the Publish action. When you set ContentBasedDeduplication to true, Amazon SNS uses a SHA-256 hash to generate the MessageDeduplicationId using the body of the message (but not the attributes of the message). (Optional) To override the generated value, you can specify a value for the MessageDeduplicationId parameter for the Publish action."];
+          "A map of attributes with their corresponding values. The following lists names, descriptions, and values of the special request parameters that the CreateTopic action uses: DeliveryPolicy \226\128\147 The policy that defines how Amazon SNS retries failed deliveries to HTTP/S endpoints. DisplayName \226\128\147 The display name to use for a topic with SMS subscriptions. Policy \226\128\147 The policy that defines who can access your topic. By default, only the topic owner can publish or subscribe to the topic. TracingConfig \226\128\147 Tracing mode of an Amazon SNS topic. By default TracingConfig is set to PassThrough, and the topic passes through the tracing header it receives from an Amazon SNS publisher to its subscriptions. If set to Active, Amazon SNS will vend X-Ray segment data to topic owner account if the sampled flag in the tracing header is true. This is only supported on standard topics. HTTP HTTPSuccessFeedbackRoleArn \226\128\147 Indicates successful message delivery status for an Amazon SNS topic that is subscribed to an HTTP endpoint. HTTPSuccessFeedbackSampleRate \226\128\147 Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an HTTP endpoint. HTTPFailureFeedbackRoleArn \226\128\147 Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an HTTP endpoint. Amazon Data Firehose FirehoseSuccessFeedbackRoleArn \226\128\147 Indicates successful message delivery status for an Amazon SNS topic that is subscribed to an Amazon Data Firehose endpoint. FirehoseSuccessFeedbackSampleRate \226\128\147 Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an Amazon Data Firehose endpoint. FirehoseFailureFeedbackRoleArn \226\128\147 Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an Amazon Data Firehose endpoint. Lambda LambdaSuccessFeedbackRoleArn \226\128\147 Indicates successful message delivery status for an Amazon SNS topic that is subscribed to an Lambda endpoint. LambdaSuccessFeedbackSampleRate \226\128\147 Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an Lambda endpoint. LambdaFailureFeedbackRoleArn \226\128\147 Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an Lambda endpoint. Platform application endpoint ApplicationSuccessFeedbackRoleArn \226\128\147 Indicates successful message delivery status for an Amazon SNS topic that is subscribed to a platform application endpoint. ApplicationSuccessFeedbackSampleRate \226\128\147 Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an platform application endpoint. ApplicationFailureFeedbackRoleArn \226\128\147 Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an platform application endpoint. In addition to being able to configure topic attributes for message delivery status of notification messages sent to Amazon SNS application endpoints, you can also configure application attributes for the delivery status of push notification messages sent to push notification services. For example, For more information, see Using Amazon SNS Application Attributes for Message Delivery Status. Amazon SQS SQSSuccessFeedbackRoleArn \226\128\147 Indicates successful message delivery status for an Amazon SNS topic that is subscribed to an Amazon SQS endpoint. SQSSuccessFeedbackSampleRate \226\128\147 Indicates percentage of successful messages to sample for an Amazon SNS topic that is subscribed to an Amazon SQS endpoint. SQSFailureFeedbackRoleArn \226\128\147 Indicates failed message delivery status for an Amazon SNS topic that is subscribed to an Amazon SQS endpoint. The <ENDPOINT>SuccessFeedbackRoleArn and <ENDPOINT>FailureFeedbackRoleArn attributes are used to give Amazon SNS write access to use CloudWatch Logs on your behalf. The <ENDPOINT>SuccessFeedbackSampleRate attribute is for specifying the sample rate percentage (0-100) of successfully delivered messages. After you configure the <ENDPOINT>FailureFeedbackRoleArn attribute, then all failed message deliveries generate CloudWatch Logs. The following attribute applies only to server-side encryption: KmsMasterKeyId \226\128\147 The ID of an Amazon Web Services managed customer master key (CMK) for Amazon SNS or a custom CMK. For more information, see Key Terms. For more examples, see KeyId in the Key Management Service API Reference. The following attributes apply only to FIFO topics: ArchivePolicy \226\128\147 The policy that sets the retention period for messages stored in the message archive of an Amazon SNS FIFO topic. ContentBasedDeduplication \226\128\147 Enables content-based deduplication for FIFO topics. By default, ContentBasedDeduplication is set to false. If you create a FIFO topic and this attribute is false, you must specify a value for the MessageDeduplicationId parameter for the Publish action. When you set ContentBasedDeduplication to true, Amazon SNS uses a SHA-256 hash to generate the MessageDeduplicationId using the body of the message (but not the attributes of the message). (Optional) To override the generated value, you can specify a value for the MessageDeduplicationId parameter for the Publish action. FifoThroughputScope \226\128\147 Enables higher throughput for your FIFO topic by adjusting the scope of deduplication. This attribute has two possible values: Topic \226\128\147 The scope of message deduplication is across the entire topic. This is the default value and maintains existing behavior, with a maximum throughput of 3000 messages per second or 20MB per second, whichever comes first. MessageGroup \226\128\147 The scope of deduplication is within each individual message group, which enables higher throughput per topic subject to regional quotas. For more information on quotas or to request an increase, see Amazon SNS service quotas in the Amazon Web Services General Reference."];
       tags: TagList.t option
         [@ocaml.doc
-          "The list of tags to add to a new topic. To be able to tag a topic on creation, you must have the sns:CreateTopic and sns:TagResource permissions."]}
+          "The list of tags to add to a new topic. To be able to tag a topic on creation, you must have the sns:CreateTopic and sns:TagResource permissions."];
+      dataProtectionPolicy: AttributeValue.t option
+        [@ocaml.doc
+          "The body of the policy document you want to use for this topic. You can only add one policy per topic. The policy must be in JSON string format. Length Constraints: Maximum length of 30,720."]}
     let context_ = "CreateTopicInput"
     let make ?attributes =
-      fun ?tags -> fun ~name -> fun () -> { attributes; tags; name }
+      fun ?tags ->
+        fun ?dataProtectionPolicy ->
+          fun ~name ->
+            fun () -> { attributes; tags; dataProtectionPolicy; name }
     let to_value x =
       structure_to_value
         [("Name", (Some (TopicName.to_value x.name)));
         ("Attributes",
           (Option.map x.attributes ~f:TopicAttributesMap.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("DataProtectionPolicy",
+          (Option.map x.dataProtectionPolicy ~f:AttributeValue.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dataProtectionPolicy =
+        (Option.map ~f:AttributeValue.of_xml)
+          (Xml.child xml_arg0 "DataProtectionPolicy") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let attributes =
         (Option.map ~f:TopicAttributesMap.of_xml)
           (Xml.child xml_arg0 "Attributes") in
       let name =
         TopicName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?tags ?attributes ~name ()
+      make ?dataProtectionPolicy ?tags ?attributes ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let attributes = field_map json "Attributes" TopicAttributesMap.of_json in
-      let name = field_map_exn json "Name" TopicName.of_json in
-      make ?tags ?attributes ~name ()
+    let of_json json__ =
+      let dataProtectionPolicy =
+        field_map json__ "DataProtectionPolicy" AttributeValue.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let attributes =
+        field_map json__ "Attributes" TopicAttributesMap.of_json in
+      let name = field_map_exn json__ "Name" TopicName.of_json in
+      make ?dataProtectionPolicy ?tags ?attributes ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for CreateTopic action."]
 module CreateSMSSandboxPhoneNumberResult =
@@ -6219,11 +6526,11 @@ module CreateSMSSandboxPhoneNumberInput =
           (Xml.child_exn ~context:context_ xml_arg0 "PhoneNumber") in
       make ?languageCode ~phoneNumber ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languageCode =
-        field_map json "LanguageCode" LanguageCodeString.of_json in
+        field_map json__ "LanguageCode" LanguageCodeString.of_json in
       let phoneNumber =
-        field_map_exn json "PhoneNumber" PhoneNumberString.of_json in
+        field_map_exn json__ "PhoneNumber" PhoneNumberString.of_json in
       make ?languageCode ~phoneNumber ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6242,7 +6549,7 @@ module CreatePlatformEndpointInput =
         [@ocaml.doc
           "Arbitrary user data to associate with the endpoint. Amazon SNS does not use this data. The data must be in UTF-8 format and less than 2KB."];
       attributes: MapStringToString.t option
-        [@ocaml.doc "For a list of attributes, see SetEndpointAttributes."]}
+        [@ocaml.doc "For a list of attributes, see SetEndpointAttributes ."]}
     let context_ = "CreatePlatformEndpointInput"
     let make ?customUserData =
       fun ?attributes ->
@@ -6272,12 +6579,13 @@ module CreatePlatformEndpointInput =
           (Xml.child_exn ~context:context_ xml_arg0 "PlatformApplicationArn") in
       make ?attributes ?customUserData ~token ~platformApplicationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "Attributes" MapStringToString.of_json in
-      let customUserData = field_map json "CustomUserData" String_.of_json in
-      let token = field_map_exn json "Token" String_.of_json in
+    let of_json json__ =
+      let attributes =
+        field_map json__ "Attributes" MapStringToString.of_json in
+      let customUserData = field_map json__ "CustomUserData" String_.of_json in
+      let token = field_map_exn json__ "Token" String_.of_json in
       let platformApplicationArn =
-        field_map_exn json "PlatformApplicationArn" String_.of_json in
+        field_map_exn json__ "PlatformApplicationArn" String_.of_json in
       make ?attributes ?customUserData ~token ~platformApplicationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for CreatePlatformEndpoint action."]
@@ -6362,9 +6670,9 @@ module CreatePlatformApplicationResponse =
           (Xml.child xml_arg0 "PlatformApplicationArn") in
       make ?platformApplicationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let platformApplicationArn =
-        field_map json "PlatformApplicationArn" String_.of_json in
+        field_map json__ "PlatformApplicationArn" String_.of_json in
       make ?platformApplicationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response from CreatePlatformApplication action."]
@@ -6380,7 +6688,7 @@ module CreatePlatformApplicationInput =
           "The following platforms are supported: ADM (Amazon Device Messaging), APNS (Apple Push Notification Service), APNS_SANDBOX, and GCM (Firebase Cloud Messaging)."];
       attributes: MapStringToString.t
         [@ocaml.doc
-          "For a list of attributes, see SetPlatformApplicationAttributes."]}
+          "For a list of attributes, see SetPlatformApplicationAttributes ."]}
     let context_ = "CreatePlatformApplicationInput"
     let make ~name =
       fun ~platform ->
@@ -6401,11 +6709,11 @@ module CreatePlatformApplicationInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~attributes ~platform ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map_exn json "Attributes" MapStringToString.of_json in
-      let platform = field_map_exn json "Platform" String_.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
+        field_map_exn json__ "Attributes" MapStringToString.of_json in
+      let platform = field_map_exn json__ "Platform" String_.of_json in
+      let name = field_map_exn json__ "Name" String_.of_json in
       make ~attributes ~platform ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for CreatePlatformApplication action."]
@@ -6496,8 +6804,8 @@ module CreateEndpointResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EndpointArn") in
       make ?endpointArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpointArn = field_map json "EndpointArn" String_.of_json in
+    let of_json json__ =
+      let endpointArn = field_map json__ "EndpointArn" String_.of_json in
       make ?endpointArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response from CreateEndpoint action."]
@@ -6519,6 +6827,7 @@ module ConfirmSubscriptionResponse =
       | `InternalErrorException of InternalErrorException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `NotFoundException of NotFoundException.t 
+      | `ReplayLimitExceededException of ReplayLimitExceededException.t 
       | `SubscriptionLimitExceededException of
           SubscriptionLimitExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -6543,6 +6852,9 @@ module ConfirmSubscriptionResponse =
           `InvalidParameterException (InvalidParameterException.of_json json)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_json json)
+      | "ReplayLimitExceededException" ->
+          `ReplayLimitExceededException
+            (ReplayLimitExceededException.of_json json)
       | "SubscriptionLimitExceededException" ->
           `SubscriptionLimitExceededException
             (SubscriptionLimitExceededException.of_json json)
@@ -6563,6 +6875,9 @@ module ConfirmSubscriptionResponse =
           `InvalidParameterException (InvalidParameterException.of_xml xml)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_xml xml)
+      | "ReplayLimitExceededException" ->
+          `ReplayLimitExceededException
+            (ReplayLimitExceededException.of_xml xml)
       | "SubscriptionLimitExceededException" ->
           `SubscriptionLimitExceededException
             (SubscriptionLimitExceededException.of_xml xml)
@@ -6590,6 +6905,10 @@ module ConfirmSubscriptionResponse =
           `Assoc
             [("error", (`String "NotFoundException"));
             ("details", (NotFoundException.to_json e))]
+      | `ReplayLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ReplayLimitExceededException"));
+            ("details", (ReplayLimitExceededException.to_json e))]
       | `SubscriptionLimitExceededException e ->
           `Assoc
             [("error", (`String "SubscriptionLimitExceededException"));
@@ -6614,9 +6933,9 @@ module ConfirmSubscriptionResponse =
           (Xml.child xml_arg0 "SubscriptionArn") in
       make ?subscriptionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionArn =
-        field_map json "SubscriptionArn" SubscriptionARN.of_json in
+        field_map json__ "SubscriptionArn" SubscriptionARN.of_json in
       make ?subscriptionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response for ConfirmSubscriptions action."]
@@ -6656,12 +6975,12 @@ module ConfirmSubscriptionInput =
         TopicARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TopicArn") in
       make ?authenticateOnUnsubscribe ~token ~topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticateOnUnsubscribe =
-        field_map json "AuthenticateOnUnsubscribe"
+        field_map json__ "AuthenticateOnUnsubscribe"
           AuthenticateOnUnsubscribe.of_json in
-      let token = field_map_exn json "Token" Token.of_json in
-      let topicArn = field_map_exn json "TopicArn" TopicARN.of_json in
+      let token = field_map_exn json__ "Token" Token.of_json in
+      let topicArn = field_map_exn json__ "TopicArn" TopicARN.of_json in
       make ?authenticateOnUnsubscribe ~token ~topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for ConfirmSubscription action."]
@@ -6755,8 +7074,8 @@ module CheckIfPhoneNumberIsOptedOutResponse =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "IsOptedOut") in
       make ?isOptedOut ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isOptedOut = field_map json "isOptedOut" Boolean.of_json in
+    let of_json json__ =
+      let isOptedOut = field_map json__ "isOptedOut" Boolean.of_json in
       make ?isOptedOut ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6780,8 +7099,9 @@ module CheckIfPhoneNumberIsOptedOutInput =
           (Xml.child_exn ~context:context_ xml_arg0 "PhoneNumber") in
       make ~phoneNumber ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let phoneNumber = field_map_exn json "phoneNumber" PhoneNumber.of_json in
+    let of_json json__ =
+      let phoneNumber =
+        field_map_exn json__ "phoneNumber" PhoneNumber.of_json in
       make ~phoneNumber ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the CheckIfPhoneNumberIsOptedOut action."]
@@ -6826,13 +7146,13 @@ module AddPermissionInput =
         TopicARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TopicArn") in
       make ~actionName ~aWSAccountId ~label ~topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let actionName = field_map_exn json "ActionName" ActionsList.of_json in
+    let of_json json__ =
+      let actionName = field_map_exn json__ "ActionName" ActionsList.of_json in
       let aWSAccountId =
-        field_map_exn json "AWSAccountId" DelegatesList.of_json in
-      let label = field_map_exn json "Label" Label.of_json in
-      let topicArn = field_map_exn json "TopicArn" TopicARN.of_json in
+        field_map_exn json__ "AWSAccountId" DelegatesList.of_json in
+      let label = field_map_exn json__ "Label" Label.of_json in
+      let topicArn = field_map_exn json__ "TopicArn" TopicARN.of_json in
       make ~actionName ~aWSAccountId ~label ~topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds a statement to a topic's access control policy, granting access for the specified Amazon Web Services accounts to the specified actions."]
+       "Adds a statement to a topic's access control policy, granting access for the specified Amazon Web Services accounts to the specified actions. To remove the ability to change topic permissions, you must deny permissions to the AddPermission, RemovePermission, and SetTopicAttributes actions in your IAM policy."]

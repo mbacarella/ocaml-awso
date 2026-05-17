@@ -85,6 +85,77 @@ let create_host =
               ~providerType:(Values.ProviderType.of_json providerType)
               ~providerEndpoint ()) (Some Values.CreateHostOutput.to_json)
            (Some Values.CreateHostOutput.error_to_json)])
+let create_repository_link =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and encryptionKeyArn =
+         flag "encryption-key-arn" (optional string) ~doc:"STRING KmsKeyArn"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and connectionArn =
+         flag "connection-arn" (required string) ~doc:"STRING ConnectionArn"
+       and ownerId = flag "owner-id" (required string) ~doc:"STRING OwnerId"
+       and repositoryName =
+         flag "repository-name" (required string)
+           ~doc:"STRING RepositoryName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_repository_link
+           (Values.CreateRepositoryLinkInput.make ?encryptionKeyArn
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~connectionArn ~ownerId ~repositoryName ())
+           (Some Values.CreateRepositoryLinkOutput.to_json)
+           (Some Values.CreateRepositoryLinkOutput.error_to_json)])
+let create_sync_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and publishDeploymentStatus =
+         flag "publish-deployment-status" (optional json_arg)
+           ~doc:"JSON PublishDeploymentStatus"
+       and triggerResourceUpdateOn =
+         flag "trigger-resource-update-on" (optional json_arg)
+           ~doc:"JSON TriggerResourceUpdateOn"
+       and branch = flag "branch" (required string) ~doc:"STRING BranchName"
+       and configFile =
+         flag "config-file" (required string)
+           ~doc:"STRING DeploymentFilePath"
+       and repositoryLinkId =
+         flag "repository-link-id" (required string)
+           ~doc:"STRING RepositoryLinkId"
+       and resourceName =
+         flag "resource-name" (required string) ~doc:"STRING ResourceName"
+       and roleArn =
+         flag "role-arn" (required string) ~doc:"STRING IamRoleArn"
+       and syncType =
+         flag "sync-type" (required json_arg)
+           ~doc:"JSON SyncConfigurationType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_sync_configuration
+           (Values.CreateSyncConfigurationInput.make
+              ?publishDeploymentStatus:(Option.map
+                                          ~f:Values.PublishDeploymentStatus.of_json
+                                          publishDeploymentStatus)
+              ?triggerResourceUpdateOn:(Option.map
+                                          ~f:Values.TriggerResourceUpdateOn.of_json
+                                          triggerResourceUpdateOn) ~branch
+              ~configFile ~repositoryLinkId ~resourceName ~roleArn
+              ~syncType:(Values.SyncConfigurationType.of_json syncType) ())
+           (Some Values.CreateSyncConfigurationOutput.to_json)
+           (Some Values.CreateSyncConfigurationOutput.error_to_json)])
 let delete_connection =
   Command.async ~summary:""
     ([%map_open.Command
@@ -119,6 +190,48 @@ let delete_host =
            Io.delete_host (Values.DeleteHostInput.make ~hostArn ())
            (Some Values.DeleteHostOutput.to_json)
            (Some Values.DeleteHostOutput.error_to_json)])
+let delete_repository_link =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and repositoryLinkId =
+         flag "repository-link-id" (required string)
+           ~doc:"STRING RepositoryLinkId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_repository_link
+           (Values.DeleteRepositoryLinkInput.make ~repositoryLinkId ())
+           (Some Values.DeleteRepositoryLinkOutput.to_json)
+           (Some Values.DeleteRepositoryLinkOutput.error_to_json)])
+let delete_sync_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and syncType =
+         flag "sync-type" (required json_arg)
+           ~doc:"JSON SyncConfigurationType"
+       and resourceName =
+         flag "resource-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_sync_configuration
+           (Values.DeleteSyncConfigurationInput.make
+              ~syncType:(Values.SyncConfigurationType.of_json syncType)
+              ~resourceName ())
+           (Some Values.DeleteSyncConfigurationOutput.to_json)
+           (Some Values.DeleteSyncConfigurationOutput.error_to_json)])
 let get_connection =
   Command.async ~summary:""
     ([%map_open.Command
@@ -153,6 +266,118 @@ let get_host =
            Io.get_host (Values.GetHostInput.make ~hostArn ())
            (Some Values.GetHostOutput.to_json)
            (Some Values.GetHostOutput.error_to_json)])
+let get_repository_link =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and repositoryLinkId =
+         flag "repository-link-id" (required string)
+           ~doc:"STRING RepositoryLinkId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_repository_link
+           (Values.GetRepositoryLinkInput.make ~repositoryLinkId ())
+           (Some Values.GetRepositoryLinkOutput.to_json)
+           (Some Values.GetRepositoryLinkOutput.error_to_json)])
+let get_repository_sync_status =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and branch = flag "branch" (required string) ~doc:"STRING BranchName"
+       and repositoryLinkId =
+         flag "repository-link-id" (required string)
+           ~doc:"STRING RepositoryLinkId"
+       and syncType =
+         flag "sync-type" (required json_arg)
+           ~doc:"JSON SyncConfigurationType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_repository_sync_status
+           (Values.GetRepositorySyncStatusInput.make ~branch
+              ~repositoryLinkId
+              ~syncType:(Values.SyncConfigurationType.of_json syncType) ())
+           (Some Values.GetRepositorySyncStatusOutput.to_json)
+           (Some Values.GetRepositorySyncStatusOutput.error_to_json)])
+let get_resource_sync_status =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceName =
+         flag "resource-name" (required string) ~doc:"STRING ResourceName"
+       and syncType =
+         flag "sync-type" (required json_arg)
+           ~doc:"JSON SyncConfigurationType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_resource_sync_status
+           (Values.GetResourceSyncStatusInput.make ~resourceName
+              ~syncType:(Values.SyncConfigurationType.of_json syncType) ())
+           (Some Values.GetResourceSyncStatusOutput.to_json)
+           (Some Values.GetResourceSyncStatusOutput.error_to_json)])
+let get_sync_blocker_summary =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and syncType =
+         flag "sync-type" (required json_arg)
+           ~doc:"JSON SyncConfigurationType"
+       and resourceName =
+         flag "resource-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_sync_blocker_summary
+           (Values.GetSyncBlockerSummaryInput.make
+              ~syncType:(Values.SyncConfigurationType.of_json syncType)
+              ~resourceName ())
+           (Some Values.GetSyncBlockerSummaryOutput.to_json)
+           (Some Values.GetSyncBlockerSummaryOutput.error_to_json)])
+let get_sync_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and syncType =
+         flag "sync-type" (required json_arg)
+           ~doc:"JSON SyncConfigurationType"
+       and resourceName =
+         flag "resource-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_sync_configuration
+           (Values.GetSyncConfigurationInput.make
+              ~syncType:(Values.SyncConfigurationType.of_json syncType)
+              ~resourceName ())
+           (Some Values.GetSyncConfigurationOutput.to_json)
+           (Some Values.GetSyncConfigurationOutput.error_to_json)])
 let list_connections =
   Command.async ~summary:""
     ([%map_open.Command
@@ -201,6 +426,77 @@ let list_hosts =
            (Values.ListHostsInput.make ?maxResults ?nextToken ())
            (Some Values.ListHostsOutput.to_json)
            (Some Values.ListHostsOutput.error_to_json)])
+let list_repository_links =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING SharpNextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_repository_links
+           (Values.ListRepositoryLinksInput.make ?maxResults ?nextToken ())
+           (Some Values.ListRepositoryLinksOutput.to_json)
+           (Some Values.ListRepositoryLinksOutput.error_to_json)])
+let list_repository_sync_definitions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and repositoryLinkId =
+         flag "repository-link-id" (required string)
+           ~doc:"STRING RepositoryLinkId"
+       and syncType =
+         flag "sync-type" (required json_arg)
+           ~doc:"JSON SyncConfigurationType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_repository_sync_definitions
+           (Values.ListRepositorySyncDefinitionsInput.make ~repositoryLinkId
+              ~syncType:(Values.SyncConfigurationType.of_json syncType) ())
+           (Some Values.ListRepositorySyncDefinitionsOutput.to_json)
+           (Some Values.ListRepositorySyncDefinitionsOutput.error_to_json)])
+let list_sync_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING SharpNextToken"
+       and repositoryLinkId =
+         flag "repository-link-id" (required string)
+           ~doc:"STRING RepositoryLinkId"
+       and syncType =
+         flag "sync-type" (required json_arg)
+           ~doc:"JSON SyncConfigurationType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_sync_configurations
+           (Values.ListSyncConfigurationsInput.make ?maxResults ?nextToken
+              ~repositoryLinkId
+              ~syncType:(Values.SyncConfigurationType.of_json syncType) ())
+           (Some Values.ListSyncConfigurationsOutput.to_json)
+           (Some Values.ListSyncConfigurationsOutput.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -288,18 +584,129 @@ let update_host =
                                    vpcConfiguration) ~hostArn ())
            (Some Values.UpdateHostOutput.to_json)
            (Some Values.UpdateHostOutput.error_to_json)])
+let update_repository_link =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and connectionArn =
+         flag "connection-arn" (optional string) ~doc:"STRING ConnectionArn"
+       and encryptionKeyArn =
+         flag "encryption-key-arn" (optional string) ~doc:"STRING KmsKeyArn"
+       and repositoryLinkId =
+         flag "repository-link-id" (required string)
+           ~doc:"STRING RepositoryLinkId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_repository_link
+           (Values.UpdateRepositoryLinkInput.make ?connectionArn
+              ?encryptionKeyArn ~repositoryLinkId ())
+           (Some Values.UpdateRepositoryLinkOutput.to_json)
+           (Some Values.UpdateRepositoryLinkOutput.error_to_json)])
+let update_sync_blocker =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING Id"
+       and syncType =
+         flag "sync-type" (required json_arg)
+           ~doc:"JSON SyncConfigurationType"
+       and resourceName =
+         flag "resource-name" (required string) ~doc:"STRING ResourceName"
+       and resolvedReason =
+         flag "resolved-reason" (required string)
+           ~doc:"STRING ResolvedReason" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_sync_blocker
+           (Values.UpdateSyncBlockerInput.make ~id
+              ~syncType:(Values.SyncConfigurationType.of_json syncType)
+              ~resourceName ~resolvedReason ())
+           (Some Values.UpdateSyncBlockerOutput.to_json)
+           (Some Values.UpdateSyncBlockerOutput.error_to_json)])
+let update_sync_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and branch = flag "branch" (optional string) ~doc:"STRING BranchName"
+       and configFile =
+         flag "config-file" (optional string)
+           ~doc:"STRING DeploymentFilePath"
+       and repositoryLinkId =
+         flag "repository-link-id" (optional string)
+           ~doc:"STRING RepositoryLinkId"
+       and roleArn =
+         flag "role-arn" (optional string) ~doc:"STRING IamRoleArn"
+       and publishDeploymentStatus =
+         flag "publish-deployment-status" (optional json_arg)
+           ~doc:"JSON PublishDeploymentStatus"
+       and triggerResourceUpdateOn =
+         flag "trigger-resource-update-on" (optional json_arg)
+           ~doc:"JSON TriggerResourceUpdateOn"
+       and resourceName =
+         flag "resource-name" (required string) ~doc:"STRING ResourceName"
+       and syncType =
+         flag "sync-type" (required json_arg)
+           ~doc:"JSON SyncConfigurationType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_sync_configuration
+           (Values.UpdateSyncConfigurationInput.make ?branch ?configFile
+              ?repositoryLinkId ?roleArn
+              ?publishDeploymentStatus:(Option.map
+                                          ~f:Values.PublishDeploymentStatus.of_json
+                                          publishDeploymentStatus)
+              ?triggerResourceUpdateOn:(Option.map
+                                          ~f:Values.TriggerResourceUpdateOn.of_json
+                                          triggerResourceUpdateOn)
+              ~resourceName
+              ~syncType:(Values.SyncConfigurationType.of_json syncType) ())
+           (Some Values.UpdateSyncConfigurationOutput.to_json)
+           (Some Values.UpdateSyncConfigurationOutput.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-connection", create_connection);
     ("create-host", create_host);
+    ("create-repository-link", create_repository_link);
+    ("create-sync-configuration", create_sync_configuration);
     ("delete-connection", delete_connection);
     ("delete-host", delete_host);
+    ("delete-repository-link", delete_repository_link);
+    ("delete-sync-configuration", delete_sync_configuration);
     ("get-connection", get_connection);
     ("get-host", get_host);
+    ("get-repository-link", get_repository_link);
+    ("get-repository-sync-status", get_repository_sync_status);
+    ("get-resource-sync-status", get_resource_sync_status);
+    ("get-sync-blocker-summary", get_sync_blocker_summary);
+    ("get-sync-configuration", get_sync_configuration);
     ("list-connections", list_connections);
     ("list-hosts", list_hosts);
+    ("list-repository-links", list_repository_links);
+    ("list-repository-sync-definitions", list_repository_sync_definitions);
+    ("list-sync-configurations", list_sync_configurations);
     ("list-tags-for-resource", list_tags_for_resource);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
-    ("update-host", update_host)]
+    ("update-host", update_host);
+    ("update-repository-link", update_repository_link);
+    ("update-sync-blocker", update_sync_blocker);
+    ("update-sync-configuration", update_sync_configuration)]

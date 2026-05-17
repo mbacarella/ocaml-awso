@@ -92,6 +92,12 @@ val list_action_types :
     ?cfg:Awso.Cfg.t ->
       ListActionTypesInput.t ->
         (ListActionTypesOutput.t, ListActionTypesOutput.error) Result.t Lwt.t
+val list_deploy_action_execution_targets :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDeployActionExecutionTargetsInput.t ->
+        (ListDeployActionExecutionTargetsOutput.t,
+          ListDeployActionExecutionTargetsOutput.error) Result.t Lwt.t
 val list_pipeline_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -103,6 +109,17 @@ val list_pipelines :
     ?cfg:Awso.Cfg.t ->
       ListPipelinesInput.t ->
         (ListPipelinesOutput.t, ListPipelinesOutput.error) Result.t Lwt.t
+val list_rule_executions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListRuleExecutionsInput.t ->
+        (ListRuleExecutionsOutput.t, ListRuleExecutionsOutput.error) Result.t
+          Lwt.t
+val list_rule_types :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListRuleTypesInput.t ->
+        (ListRuleTypesOutput.t, ListRuleTypesOutput.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -114,6 +131,10 @@ val list_webhooks :
     ?cfg:Awso.Cfg.t ->
       ListWebhooksInput.t ->
         (ListWebhooksOutput.t, ListWebhooksOutput.error) Result.t Lwt.t
+val override_stage_condition :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      OverrideStageConditionInput.t -> (unit, unit) Result.t Lwt.t
 val poll_for_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -170,6 +191,11 @@ val retry_stage_execution :
       RetryStageExecutionInput.t ->
         (RetryStageExecutionOutput.t, RetryStageExecutionOutput.error)
           Result.t Lwt.t
+val rollback_stage :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RollbackStageInput.t ->
+        (RollbackStageOutput.t, RollbackStageOutput.error) Result.t Lwt.t
 val start_pipeline_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

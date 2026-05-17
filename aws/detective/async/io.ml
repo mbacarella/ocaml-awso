@@ -13,6 +13,10 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let accept_invitation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AcceptInvitation input
+let batch_get_graph_member_datasources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetGraphMemberDatasources input
+let batch_get_membership_datasources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetMembershipDatasources input
 let create_graph ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateGraph input
 let create_members ?endpoint_url ?cfg input =
@@ -29,10 +33,18 @@ let disassociate_membership ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateMembership input
 let enable_organization_admin_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableOrganizationAdminAccount input
+let get_investigation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetInvestigation input
 let get_members ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMembers input
+let list_datasource_packages ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDatasourcePackages input
 let list_graphs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListGraphs input
+let list_indicators ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListIndicators input
+let list_investigations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListInvestigations input
 let list_invitations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListInvitations input
 let list_members ?endpoint_url ?cfg input =
@@ -43,11 +55,17 @@ let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let reject_invitation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RejectInvitation input
+let start_investigation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartInvestigation input
 let start_monitoring_member ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartMonitoringMember input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_datasource_packages ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateDatasourcePackages input
+let update_investigation_state ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateInvestigationState input
 let update_organization_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateOrganizationConfiguration input

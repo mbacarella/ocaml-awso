@@ -89,6 +89,12 @@ val create_event_subscription :
       CreateEventSubscriptionMessage.t ->
         (CreateEventSubscriptionResult.t,
           CreateEventSubscriptionResult.error) Result.t Async.Deferred.t
+val create_global_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateGlobalClusterMessage.t ->
+        (CreateGlobalClusterResult.t, CreateGlobalClusterResult.error)
+          Result.t Async.Deferred.t
 val delete_d_b_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -133,6 +139,12 @@ val delete_event_subscription :
       DeleteEventSubscriptionMessage.t ->
         (DeleteEventSubscriptionResult.t,
           DeleteEventSubscriptionResult.error) Result.t Async.Deferred.t
+val delete_global_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteGlobalClusterMessage.t ->
+        (DeleteGlobalClusterResult.t, DeleteGlobalClusterResult.error)
+          Result.t Async.Deferred.t
 val describe_d_b_cluster_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -231,6 +243,12 @@ val describe_events :
     ?cfg:Awso.Cfg.t ->
       DescribeEventsMessage.t ->
         (EventsMessage.t, EventsMessage.error) Result.t Async.Deferred.t
+val describe_global_clusters :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeGlobalClustersMessage.t ->
+        (GlobalClustersMessage.t, GlobalClustersMessage.error) Result.t
+          Async.Deferred.t
 val describe_orderable_d_b_instance_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -256,6 +274,12 @@ val failover_d_b_cluster :
       FailoverDBClusterMessage.t ->
         (FailoverDBClusterResult.t, FailoverDBClusterResult.error) Result.t
           Async.Deferred.t
+val failover_global_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      FailoverGlobalClusterMessage.t ->
+        (FailoverGlobalClusterResult.t, FailoverGlobalClusterResult.error)
+          Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -310,6 +334,12 @@ val modify_event_subscription :
       ModifyEventSubscriptionMessage.t ->
         (ModifyEventSubscriptionResult.t,
           ModifyEventSubscriptionResult.error) Result.t Async.Deferred.t
+val modify_global_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyGlobalClusterMessage.t ->
+        (ModifyGlobalClusterResult.t, ModifyGlobalClusterResult.error)
+          Result.t Async.Deferred.t
 val promote_read_replica_d_b_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -322,6 +352,12 @@ val reboot_d_b_instance :
       RebootDBInstanceMessage.t ->
         (RebootDBInstanceResult.t, RebootDBInstanceResult.error) Result.t
           Async.Deferred.t
+val remove_from_global_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RemoveFromGlobalClusterMessage.t ->
+        (RemoveFromGlobalClusterResult.t,
+          RemoveFromGlobalClusterResult.error) Result.t Async.Deferred.t
 val remove_role_from_d_b_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -376,3 +412,9 @@ val stop_d_b_cluster :
       StopDBClusterMessage.t ->
         (StopDBClusterResult.t, StopDBClusterResult.error) Result.t
           Async.Deferred.t
+val switchover_global_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SwitchoverGlobalClusterMessage.t ->
+        (SwitchoverGlobalClusterResult.t,
+          SwitchoverGlobalClusterResult.error) Result.t Async.Deferred.t

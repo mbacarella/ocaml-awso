@@ -20,12 +20,21 @@ type ('i, 'o, 'e) t =
   | CreateForecastExportJob: (CreateForecastExportJobRequest.t,
   CreateForecastExportJobResponse.t, CreateForecastExportJobResponse.error) t
   
+  | CreateMonitor: (CreateMonitorRequest.t, CreateMonitorResponse.t,
+  CreateMonitorResponse.error) t 
   | CreatePredictor: (CreatePredictorRequest.t, CreatePredictorResponse.t,
   CreatePredictorResponse.error) t 
   | CreatePredictorBacktestExportJob:
   (CreatePredictorBacktestExportJobRequest.t,
   CreatePredictorBacktestExportJobResponse.t,
   CreatePredictorBacktestExportJobResponse.error) t 
+  | CreateWhatIfAnalysis: (CreateWhatIfAnalysisRequest.t,
+  CreateWhatIfAnalysisResponse.t, CreateWhatIfAnalysisResponse.error) t 
+  | CreateWhatIfForecast: (CreateWhatIfForecastRequest.t,
+  CreateWhatIfForecastResponse.t, CreateWhatIfForecastResponse.error) t 
+  | CreateWhatIfForecastExport: (CreateWhatIfForecastExportRequest.t,
+  CreateWhatIfForecastExportResponse.t,
+  CreateWhatIfForecastExportResponse.error) t 
   | DeleteDataset: (DeleteDatasetRequest.t, unit, unit) t 
   | DeleteDatasetGroup: (DeleteDatasetGroupRequest.t, unit, unit) t 
   | DeleteDatasetImportJob: (DeleteDatasetImportJobRequest.t, unit, unit) t 
@@ -35,10 +44,15 @@ type ('i, 'o, 'e) t =
   | DeleteForecast: (DeleteForecastRequest.t, unit, unit) t 
   | DeleteForecastExportJob: (DeleteForecastExportJobRequest.t, unit, 
   unit) t 
+  | DeleteMonitor: (DeleteMonitorRequest.t, unit, unit) t 
   | DeletePredictor: (DeletePredictorRequest.t, unit, unit) t 
   | DeletePredictorBacktestExportJob:
   (DeletePredictorBacktestExportJobRequest.t, unit, unit) t 
   | DeleteResourceTree: (DeleteResourceTreeRequest.t, unit, unit) t 
+  | DeleteWhatIfAnalysis: (DeleteWhatIfAnalysisRequest.t, unit, unit) t 
+  | DeleteWhatIfForecast: (DeleteWhatIfForecastRequest.t, unit, unit) t 
+  | DeleteWhatIfForecastExport: (DeleteWhatIfForecastExportRequest.t, 
+  unit, unit) t 
   | DescribeAutoPredictor: (DescribeAutoPredictorRequest.t,
   DescribeAutoPredictorResponse.t, DescribeAutoPredictorResponse.error) t 
   | DescribeDataset: (DescribeDatasetRequest.t, DescribeDatasetResponse.t,
@@ -58,12 +72,21 @@ type ('i, 'o, 'e) t =
   | DescribeForecastExportJob: (DescribeForecastExportJobRequest.t,
   DescribeForecastExportJobResponse.t,
   DescribeForecastExportJobResponse.error) t 
+  | DescribeMonitor: (DescribeMonitorRequest.t, DescribeMonitorResponse.t,
+  DescribeMonitorResponse.error) t 
   | DescribePredictor: (DescribePredictorRequest.t,
   DescribePredictorResponse.t, DescribePredictorResponse.error) t 
   | DescribePredictorBacktestExportJob:
   (DescribePredictorBacktestExportJobRequest.t,
   DescribePredictorBacktestExportJobResponse.t,
   DescribePredictorBacktestExportJobResponse.error) t 
+  | DescribeWhatIfAnalysis: (DescribeWhatIfAnalysisRequest.t,
+  DescribeWhatIfAnalysisResponse.t, DescribeWhatIfAnalysisResponse.error) t 
+  | DescribeWhatIfForecast: (DescribeWhatIfForecastRequest.t,
+  DescribeWhatIfForecastResponse.t, DescribeWhatIfForecastResponse.error) t 
+  | DescribeWhatIfForecastExport: (DescribeWhatIfForecastExportRequest.t,
+  DescribeWhatIfForecastExportResponse.t,
+  DescribeWhatIfForecastExportResponse.error) t 
   | GetAccuracyMetrics: (GetAccuracyMetricsRequest.t,
   GetAccuracyMetricsResponse.t, GetAccuracyMetricsResponse.error) t 
   | ListDatasetGroups: (ListDatasetGroupsRequest.t,
@@ -81,6 +104,10 @@ type ('i, 'o, 'e) t =
   ListForecastExportJobsResponse.t, ListForecastExportJobsResponse.error) t 
   | ListForecasts: (ListForecastsRequest.t, ListForecastsResponse.t,
   ListForecastsResponse.error) t 
+  | ListMonitorEvaluations: (ListMonitorEvaluationsRequest.t,
+  ListMonitorEvaluationsResponse.t, ListMonitorEvaluationsResponse.error) t 
+  | ListMonitors: (ListMonitorsRequest.t, ListMonitorsResponse.t,
+  ListMonitorsResponse.error) t 
   | ListPredictorBacktestExportJobs:
   (ListPredictorBacktestExportJobsRequest.t,
   ListPredictorBacktestExportJobsResponse.t,
@@ -89,6 +116,14 @@ type ('i, 'o, 'e) t =
   ListPredictorsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListWhatIfAnalyses: (ListWhatIfAnalysesRequest.t,
+  ListWhatIfAnalysesResponse.t, ListWhatIfAnalysesResponse.error) t 
+  | ListWhatIfForecastExports: (ListWhatIfForecastExportsRequest.t,
+  ListWhatIfForecastExportsResponse.t,
+  ListWhatIfForecastExportsResponse.error) t 
+  | ListWhatIfForecasts: (ListWhatIfForecastsRequest.t,
+  ListWhatIfForecastsResponse.t, ListWhatIfForecastsResponse.error) t 
+  | ResumeResource: (ResumeResourceRequest.t, unit, unit) t 
   | StopResource: (StopResourceRequest.t, unit, unit) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
@@ -106,8 +141,12 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateExplainabilityExport -> `POST
   | CreateForecast -> `POST
   | CreateForecastExportJob -> `POST
+  | CreateMonitor -> `POST
   | CreatePredictor -> `POST
   | CreatePredictorBacktestExportJob -> `POST
+  | CreateWhatIfAnalysis -> `POST
+  | CreateWhatIfForecast -> `POST
+  | CreateWhatIfForecastExport -> `POST
   | DeleteDataset -> `POST
   | DeleteDatasetGroup -> `POST
   | DeleteDatasetImportJob -> `POST
@@ -115,9 +154,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteExplainabilityExport -> `POST
   | DeleteForecast -> `POST
   | DeleteForecastExportJob -> `POST
+  | DeleteMonitor -> `POST
   | DeletePredictor -> `POST
   | DeletePredictorBacktestExportJob -> `POST
   | DeleteResourceTree -> `POST
+  | DeleteWhatIfAnalysis -> `POST
+  | DeleteWhatIfForecast -> `POST
+  | DeleteWhatIfForecastExport -> `POST
   | DescribeAutoPredictor -> `POST
   | DescribeDataset -> `POST
   | DescribeDatasetGroup -> `POST
@@ -126,8 +169,12 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeExplainabilityExport -> `POST
   | DescribeForecast -> `POST
   | DescribeForecastExportJob -> `POST
+  | DescribeMonitor -> `POST
   | DescribePredictor -> `POST
   | DescribePredictorBacktestExportJob -> `POST
+  | DescribeWhatIfAnalysis -> `POST
+  | DescribeWhatIfForecast -> `POST
+  | DescribeWhatIfForecastExport -> `POST
   | GetAccuracyMetrics -> `POST
   | ListDatasetGroups -> `POST
   | ListDatasetImportJobs -> `POST
@@ -136,9 +183,15 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListExplainabilityExports -> `POST
   | ListForecastExportJobs -> `POST
   | ListForecasts -> `POST
+  | ListMonitorEvaluations -> `POST
+  | ListMonitors -> `POST
   | ListPredictorBacktestExportJobs -> `POST
   | ListPredictors -> `POST
   | ListTagsForResource -> `POST
+  | ListWhatIfAnalyses -> `POST
+  | ListWhatIfForecastExports -> `POST
+  | ListWhatIfForecasts -> `POST
+  | ResumeResource -> `POST
   | StopResource -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
@@ -154,9 +207,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateExplainabilityExport -> (Format.kasprintf Uri.of_string) "/"
       | CreateForecast -> (Format.kasprintf Uri.of_string) "/"
       | CreateForecastExportJob -> (Format.kasprintf Uri.of_string) "/"
+      | CreateMonitor -> (Format.kasprintf Uri.of_string) "/"
       | CreatePredictor -> (Format.kasprintf Uri.of_string) "/"
       | CreatePredictorBacktestExportJob ->
           (Format.kasprintf Uri.of_string) "/"
+      | CreateWhatIfAnalysis -> (Format.kasprintf Uri.of_string) "/"
+      | CreateWhatIfForecast -> (Format.kasprintf Uri.of_string) "/"
+      | CreateWhatIfForecastExport -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDataset -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDatasetGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDatasetImportJob -> (Format.kasprintf Uri.of_string) "/"
@@ -164,10 +221,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteExplainabilityExport -> (Format.kasprintf Uri.of_string) "/"
       | DeleteForecast -> (Format.kasprintf Uri.of_string) "/"
       | DeleteForecastExportJob -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteMonitor -> (Format.kasprintf Uri.of_string) "/"
       | DeletePredictor -> (Format.kasprintf Uri.of_string) "/"
       | DeletePredictorBacktestExportJob ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteResourceTree -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteWhatIfAnalysis -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteWhatIfForecast -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteWhatIfForecastExport -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAutoPredictor -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDataset -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDatasetGroup -> (Format.kasprintf Uri.of_string) "/"
@@ -176,9 +237,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeExplainabilityExport -> (Format.kasprintf Uri.of_string) "/"
       | DescribeForecast -> (Format.kasprintf Uri.of_string) "/"
       | DescribeForecastExportJob -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeMonitor -> (Format.kasprintf Uri.of_string) "/"
       | DescribePredictor -> (Format.kasprintf Uri.of_string) "/"
       | DescribePredictorBacktestExportJob ->
           (Format.kasprintf Uri.of_string) "/"
+      | DescribeWhatIfAnalysis -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeWhatIfForecast -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeWhatIfForecastExport -> (Format.kasprintf Uri.of_string) "/"
       | GetAccuracyMetrics -> (Format.kasprintf Uri.of_string) "/"
       | ListDatasetGroups -> (Format.kasprintf Uri.of_string) "/"
       | ListDatasetImportJobs -> (Format.kasprintf Uri.of_string) "/"
@@ -187,10 +252,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListExplainabilityExports -> (Format.kasprintf Uri.of_string) "/"
       | ListForecastExportJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListForecasts -> (Format.kasprintf Uri.of_string) "/"
+      | ListMonitorEvaluations -> (Format.kasprintf Uri.of_string) "/"
+      | ListMonitors -> (Format.kasprintf Uri.of_string) "/"
       | ListPredictorBacktestExportJobs ->
           (Format.kasprintf Uri.of_string) "/"
       | ListPredictors -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | ListWhatIfAnalyses -> (Format.kasprintf Uri.of_string) "/"
+      | ListWhatIfForecastExports -> (Format.kasprintf Uri.of_string) "/"
+      | ListWhatIfForecasts -> (Format.kasprintf Uri.of_string) "/"
+      | ResumeResource -> (Format.kasprintf Uri.of_string) "/"
       | StopResource -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
@@ -262,6 +333,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonForecast.CreateForecastExportJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateMonitor ->
+      let json = CreateMonitorRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecast.CreateMonitor")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreatePredictor ->
       let json = CreatePredictorRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -277,6 +356,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonForecast.CreatePredictorBacktestExportJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateWhatIfAnalysis ->
+      let json = CreateWhatIfAnalysisRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecast.CreateWhatIfAnalysis")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateWhatIfForecast ->
+      let json = CreateWhatIfForecastRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecast.CreateWhatIfForecast")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateWhatIfForecastExport ->
+      let json = CreateWhatIfForecastExportRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecast.CreateWhatIfForecastExport")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteDataset ->
       let json = DeleteDatasetRequest.to_json req in
@@ -334,6 +437,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonForecast.DeleteForecastExportJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteMonitor ->
+      let json = DeleteMonitorRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecast.DeleteMonitor")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeletePredictor ->
       let json = DeletePredictorRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -357,6 +468,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonForecast.DeleteResourceTree")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteWhatIfAnalysis ->
+      let json = DeleteWhatIfAnalysisRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecast.DeleteWhatIfAnalysis")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteWhatIfForecast ->
+      let json = DeleteWhatIfForecastRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecast.DeleteWhatIfForecast")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteWhatIfForecastExport ->
+      let json = DeleteWhatIfForecastExportRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecast.DeleteWhatIfForecastExport")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeAutoPredictor ->
       let json = DescribeAutoPredictorRequest.to_json req in
@@ -422,6 +557,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonForecast.DescribeForecastExportJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeMonitor ->
+      let json = DescribeMonitorRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecast.DescribeMonitor")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribePredictor ->
       let json = DescribePredictorRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -438,6 +581,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AmazonForecast.DescribePredictorBacktestExportJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeWhatIfAnalysis ->
+      let json = DescribeWhatIfAnalysisRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecast.DescribeWhatIfAnalysis")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeWhatIfForecast ->
+      let json = DescribeWhatIfForecastRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecast.DescribeWhatIfForecast")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeWhatIfForecastExport ->
+      let json = DescribeWhatIfForecastExportRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecast.DescribeWhatIfForecastExport")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetAccuracyMetrics ->
       let json = GetAccuracyMetricsRequest.to_json req in
@@ -503,6 +670,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonForecast.ListForecasts")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListMonitorEvaluations ->
+      let json = ListMonitorEvaluationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecast.ListMonitorEvaluations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListMonitors ->
+      let json = ListMonitorsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecast.ListMonitors")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListPredictorBacktestExportJobs ->
       let json = ListPredictorBacktestExportJobsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -526,6 +709,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonForecast.ListTagsForResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListWhatIfAnalyses ->
+      let json = ListWhatIfAnalysesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecast.ListWhatIfAnalyses")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListWhatIfForecastExports ->
+      let json = ListWhatIfForecastExportsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecast.ListWhatIfForecastExports")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListWhatIfForecasts ->
+      let json = ListWhatIfForecastsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecast.ListWhatIfForecasts")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ResumeResource ->
+      let json = ResumeResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonForecast.ResumeResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopResource ->
       let json = StopResourceRequest.to_json req in
@@ -646,6 +861,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateForecastExportJobResponse.error_of_json))
+  | CreateMonitor ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateMonitorResponse.of_json json)
+      else Error (parse_aws_error (Some CreateMonitorResponse.error_of_json))
   | CreatePredictor ->
       if is_success
       then
@@ -662,6 +883,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreatePredictorBacktestExportJobResponse.error_of_json))
+  | CreateWhatIfAnalysis ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateWhatIfAnalysisResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateWhatIfAnalysisResponse.error_of_json))
+  | CreateWhatIfForecast ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateWhatIfForecastResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateWhatIfForecastResponse.error_of_json))
+  | CreateWhatIfForecastExport ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateWhatIfForecastExportResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateWhatIfForecastExportResponse.error_of_json))
   | DeleteDataset ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteDatasetGroup ->
@@ -676,11 +922,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteForecastExportJob ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteMonitor ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeletePredictor ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeletePredictorBacktestExportJob ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteResourceTree ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteWhatIfAnalysis ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteWhatIfForecast ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteWhatIfForecastExport ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DescribeAutoPredictor ->
       if is_success
@@ -748,6 +1002,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeForecastExportJobResponse.error_of_json))
+  | DescribeMonitor ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeMonitorResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeMonitorResponse.error_of_json))
   | DescribePredictor ->
       if is_success
       then
@@ -765,6 +1026,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribePredictorBacktestExportJobResponse.error_of_json))
+  | DescribeWhatIfAnalysis ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeWhatIfAnalysisResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeWhatIfAnalysisResponse.error_of_json))
+  | DescribeWhatIfForecast ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeWhatIfForecastResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeWhatIfForecastResponse.error_of_json))
+  | DescribeWhatIfForecastExport ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeWhatIfForecastExportResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeWhatIfForecastExportResponse.error_of_json))
   | GetAccuracyMetrics ->
       if is_success
       then
@@ -827,6 +1115,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListForecastsResponse.of_json json)
       else Error (parse_aws_error (Some ListForecastsResponse.error_of_json))
+  | ListMonitorEvaluations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMonitorEvaluationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListMonitorEvaluationsResponse.error_of_json))
+  | ListMonitors ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMonitorsResponse.of_json json)
+      else Error (parse_aws_error (Some ListMonitorsResponse.error_of_json))
   | ListPredictorBacktestExportJobs ->
       if is_success
       then
@@ -851,6 +1154,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListWhatIfAnalyses ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListWhatIfAnalysesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListWhatIfAnalysesResponse.error_of_json))
+  | ListWhatIfForecastExports ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListWhatIfForecastExportsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListWhatIfForecastExportsResponse.error_of_json))
+  | ListWhatIfForecasts ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListWhatIfForecastsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListWhatIfForecastsResponse.error_of_json))
+  | ResumeResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | StopResource ->
       if is_success then Ok () else Error (parse_aws_error None)
   | TagResource ->

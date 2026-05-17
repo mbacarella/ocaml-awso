@@ -45,6 +45,12 @@ let create_batch_inference_job =
          flag "batch-inference-job-config" (optional json_arg)
            ~doc:"JSON BatchInferenceJobConfig"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and batchInferenceJobMode =
+         flag "batch-inference-job-mode" (optional json_arg)
+           ~doc:"JSON BatchInferenceJobMode"
+       and themeGenerationConfig =
+         flag "theme-generation-config" (optional json_arg)
+           ~doc:"JSON ThemeGenerationConfig"
        and jobName = flag "job-name" (required string) ~doc:"STRING Name"
        and solutionVersionArn =
          flag "solution-version-arn" (required string) ~doc:"STRING Arn"
@@ -62,7 +68,13 @@ let create_batch_inference_job =
               ?batchInferenceJobConfig:(Option.map
                                           ~f:Values.BatchInferenceJobConfig.of_json
                                           batchInferenceJobConfig)
-              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~jobName
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?batchInferenceJobMode:(Option.map
+                                        ~f:Values.BatchInferenceJobMode.of_json
+                                        batchInferenceJobMode)
+              ?themeGenerationConfig:(Option.map
+                                        ~f:Values.ThemeGenerationConfig.of_json
+                                        themeGenerationConfig) ~jobName
               ~solutionVersionArn
               ~jobInput:(Values.BatchInferenceJobInput.of_json jobInput)
               ~jobOutput:(Values.BatchInferenceJobOutput.of_json jobOutput)
@@ -134,6 +146,32 @@ let create_campaign =
               ~solutionVersionArn ())
            (Some Values.CreateCampaignResponse.to_json)
            (Some Values.CreateCampaignResponse.error_to_json)])
+let create_data_deletion_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and jobName = flag "job-name" (required string) ~doc:"STRING Name"
+       and datasetGroupArn =
+         flag "dataset-group-arn" (required string) ~doc:"STRING Arn"
+       and dataSource =
+         flag "data-source" (required json_arg) ~doc:"JSON DataSource"
+       and roleArn = flag "role-arn" (required string) ~doc:"STRING RoleArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_data_deletion_job
+           (Values.CreateDataDeletionJobRequest.make
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~jobName
+              ~datasetGroupArn
+              ~dataSource:(Values.DataSource.of_json dataSource) ~roleArn ())
+           (Some Values.CreateDataDeletionJobResponse.to_json)
+           (Some Values.CreateDataDeletionJobResponse.error_to_json)])
 let create_dataset =
   Command.async ~summary:""
     ([%map_open.Command
@@ -224,20 +262,26 @@ let create_dataset_import_job =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and roleArn = flag "role-arn" (optional string) ~doc:"STRING RoleArn"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and importMode =
+         flag "import-mode" (optional json_arg) ~doc:"JSON ImportMode"
+       and publishAttributionMetricsToS3 =
+         flag "publish-attribution-metrics-to-s3" (optional bool)
+           ~doc:"BOOL Boolean"
        and jobName = flag "job-name" (required string) ~doc:"STRING Name"
        and datasetArn =
          flag "dataset-arn" (required string) ~doc:"STRING Arn"
        and dataSource =
-         flag "data-source" (required json_arg) ~doc:"JSON DataSource"
-       and roleArn = flag "role-arn" (required string) ~doc:"STRING RoleArn" in
+         flag "data-source" (required json_arg) ~doc:"JSON DataSource" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_dataset_import_job
-           (Values.CreateDatasetImportJobRequest.make
-              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~jobName
-              ~datasetArn ~dataSource:(Values.DataSource.of_json dataSource)
-              ~roleArn ())
+           (Values.CreateDatasetImportJobRequest.make ?roleArn
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?importMode:(Option.map ~f:Values.ImportMode.of_json importMode)
+              ?publishAttributionMetricsToS3 ~jobName ~datasetArn
+              ~dataSource:(Values.DataSource.of_json dataSource) ())
            (Some Values.CreateDatasetImportJobResponse.to_json)
            (Some Values.CreateDatasetImportJobResponse.error_to_json)])
 let create_event_tracker =
@@ -287,6 +331,33 @@ let create_filter =
               ~datasetGroupArn ~filterExpression ())
            (Some Values.CreateFilterResponse.to_json)
            (Some Values.CreateFilterResponse.error_to_json)])
+let create_metric_attribution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (required string) ~doc:"STRING Name"
+       and datasetGroupArn =
+         flag "dataset-group-arn" (required string) ~doc:"STRING Arn"
+       and metrics =
+         flag "metrics" (required json_arg) ~doc:"JSON MetricAttributes"
+       and metricsOutputConfig =
+         flag "metrics-output-config" (required json_arg)
+           ~doc:"JSON MetricAttributionOutput" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_metric_attribution
+           (Values.CreateMetricAttributionRequest.make ~name ~datasetGroupArn
+              ~metrics:(Values.MetricAttributes.of_json metrics)
+              ~metricsOutputConfig:(Values.MetricAttributionOutput.of_json
+                                      metricsOutputConfig) ())
+           (Some Values.CreateMetricAttributionResponse.to_json)
+           (Some Values.CreateMetricAttributionResponse.error_to_json)])
 let create_recommender =
   Command.async ~summary:""
     ([%map_open.Command
@@ -350,6 +421,12 @@ let create_solution =
          flag "perform-h-p-o" (optional bool) ~doc:"BOOL Boolean"
        and performAutoML =
          flag "perform-auto-m-l" (optional bool) ~doc:"BOOL PerformAutoML"
+       and performAutoTraining =
+         flag "perform-auto-training" (optional bool)
+           ~doc:"BOOL PerformAutoTraining"
+       and performIncrementalUpdate =
+         flag "perform-incremental-update" (optional bool)
+           ~doc:"BOOL PerformIncrementalUpdate"
        and recipeArn = flag "recipe-arn" (optional string) ~doc:"STRING Arn"
        and eventType =
          flag "event-type" (optional string) ~doc:"STRING EventType"
@@ -364,7 +441,8 @@ let create_solution =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_solution
            (Values.CreateSolutionRequest.make ?performHPO ?performAutoML
-              ?recipeArn ?eventType
+              ?performAutoTraining ?performIncrementalUpdate ?recipeArn
+              ?eventType
               ?solutionConfig:(Option.map ~f:Values.SolutionConfig.of_json
                                  solutionConfig)
               ?tags:(Option.map ~f:Values.Tags.of_json tags) ~name
@@ -381,6 +459,7 @@ let create_solution_version =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and name = flag "name" (optional string) ~doc:"STRING Name"
        and trainingMode =
          flag "training-mode" (optional json_arg) ~doc:"JSON TrainingMode"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
@@ -389,7 +468,7 @@ let create_solution_version =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_solution_version
-           (Values.CreateSolutionVersionRequest.make
+           (Values.CreateSolutionVersionRequest.make ?name
               ?trainingMode:(Option.map ~f:Values.TrainingMode.of_json
                                trainingMode)
               ?tags:(Option.map ~f:Values.Tags.of_json tags) ~solutionArn ())
@@ -476,6 +555,23 @@ let delete_filter =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_filter (Values.DeleteFilterRequest.make ~filterArn ())
            None None])
+let delete_metric_attribution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and metricAttributionArn =
+         flag "metric-attribution-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_metric_attribution
+           (Values.DeleteMetricAttributionRequest.make ~metricAttributionArn
+              ()) None None])
 let delete_recommender =
   Command.async ~summary:""
     ([%map_open.Command
@@ -597,6 +693,24 @@ let describe_campaign =
            (Values.DescribeCampaignRequest.make ~campaignArn ())
            (Some Values.DescribeCampaignResponse.to_json)
            (Some Values.DescribeCampaignResponse.error_to_json)])
+let describe_data_deletion_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataDeletionJobArn =
+         flag "data-deletion-job-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_data_deletion_job
+           (Values.DescribeDataDeletionJobRequest.make ~dataDeletionJobArn ())
+           (Some Values.DescribeDataDeletionJobResponse.to_json)
+           (Some Values.DescribeDataDeletionJobResponse.error_to_json)])
 let describe_dataset =
   Command.async ~summary:""
     ([%map_open.Command
@@ -724,6 +838,25 @@ let describe_filter =
            (Values.DescribeFilterRequest.make ~filterArn ())
            (Some Values.DescribeFilterResponse.to_json)
            (Some Values.DescribeFilterResponse.error_to_json)])
+let describe_metric_attribution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and metricAttributionArn =
+         flag "metric-attribution-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_metric_attribution
+           (Values.DescribeMetricAttributionRequest.make
+              ~metricAttributionArn ())
+           (Some Values.DescribeMetricAttributionResponse.to_json)
+           (Some Values.DescribeMetricAttributionResponse.error_to_json)])
 let describe_recipe =
   Command.async ~summary:""
     ([%map_open.Command
@@ -898,6 +1031,29 @@ let list_campaigns =
            (Values.ListCampaignsRequest.make ?solutionArn ?nextToken
               ?maxResults ()) (Some Values.ListCampaignsResponse.to_json)
            (Some Values.ListCampaignsResponse.error_to_json)])
+let list_data_deletion_jobs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and datasetGroupArn =
+         flag "dataset-group-arn" (optional string) ~doc:"STRING Arn"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_data_deletion_jobs
+           (Values.ListDataDeletionJobsRequest.make ?datasetGroupArn
+              ?nextToken ?maxResults ())
+           (Some Values.ListDataDeletionJobsResponse.to_json)
+           (Some Values.ListDataDeletionJobsResponse.error_to_json)])
 let list_dataset_export_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1030,6 +1186,52 @@ let list_filters =
            (Values.ListFiltersRequest.make ?datasetGroupArn ?nextToken
               ?maxResults ()) (Some Values.ListFiltersResponse.to_json)
            (Some Values.ListFiltersResponse.error_to_json)])
+let list_metric_attribution_metrics =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and metricAttributionArn =
+         flag "metric-attribution-arn" (optional string) ~doc:"STRING Arn"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_metric_attribution_metrics
+           (Values.ListMetricAttributionMetricsRequest.make
+              ?metricAttributionArn ?nextToken ?maxResults ())
+           (Some Values.ListMetricAttributionMetricsResponse.to_json)
+           (Some Values.ListMetricAttributionMetricsResponse.error_to_json)])
+let list_metric_attributions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and datasetGroupArn =
+         flag "dataset-group-arn" (optional string) ~doc:"STRING Arn"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_metric_attributions
+           (Values.ListMetricAttributionsRequest.make ?datasetGroupArn
+              ?nextToken ?maxResults ())
+           (Some Values.ListMetricAttributionsResponse.to_json)
+           (Some Values.ListMetricAttributionsResponse.error_to_json)])
 let list_recipes =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1162,6 +1364,42 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let start_recommender =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and recommenderArn =
+         flag "recommender-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_recommender
+           (Values.StartRecommenderRequest.make ~recommenderArn ())
+           (Some Values.StartRecommenderResponse.to_json)
+           (Some Values.StartRecommenderResponse.error_to_json)])
+let stop_recommender =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and recommenderArn =
+         flag "recommender-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_recommender
+           (Values.StopRecommenderRequest.make ~recommenderArn ())
+           (Some Values.StopRecommenderResponse.to_json)
+           (Some Values.StopRecommenderResponse.error_to_json)])
 let stop_solution_version_creation =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1248,6 +1486,60 @@ let update_campaign =
                                  campaignConfig) ~campaignArn ())
            (Some Values.UpdateCampaignResponse.to_json)
            (Some Values.UpdateCampaignResponse.error_to_json)])
+let update_dataset =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and datasetArn =
+         flag "dataset-arn" (required string) ~doc:"STRING Arn"
+       and schemaArn = flag "schema-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_dataset
+           (Values.UpdateDatasetRequest.make ~datasetArn ~schemaArn ())
+           (Some Values.UpdateDatasetResponse.to_json)
+           (Some Values.UpdateDatasetResponse.error_to_json)])
+let update_metric_attribution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and addMetrics =
+         flag "add-metrics" (optional json_arg) ~doc:"JSON MetricAttributes"
+       and removeMetrics =
+         flag "remove-metrics" (optional json_arg)
+           ~doc:"JSON MetricAttributesNamesList"
+       and metricsOutputConfig =
+         flag "metrics-output-config" (optional json_arg)
+           ~doc:"JSON MetricAttributionOutput"
+       and metricAttributionArn =
+         flag "metric-attribution-arn" (optional string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_metric_attribution
+           (Values.UpdateMetricAttributionRequest.make
+              ?addMetrics:(Option.map ~f:Values.MetricAttributes.of_json
+                             addMetrics)
+              ?removeMetrics:(Option.map
+                                ~f:Values.MetricAttributesNamesList.of_json
+                                removeMetrics)
+              ?metricsOutputConfig:(Option.map
+                                      ~f:Values.MetricAttributionOutput.of_json
+                                      metricsOutputConfig)
+              ?metricAttributionArn ())
+           (Some Values.UpdateMetricAttributionResponse.to_json)
+           (Some Values.UpdateMetricAttributionResponse.error_to_json)])
 let update_recommender =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1271,18 +1563,51 @@ let update_recommender =
                                     recommenderConfig) ())
            (Some Values.UpdateRecommenderResponse.to_json)
            (Some Values.UpdateRecommenderResponse.error_to_json)])
+let update_solution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and performAutoTraining =
+         flag "perform-auto-training" (optional bool)
+           ~doc:"BOOL PerformAutoTraining"
+       and performIncrementalUpdate =
+         flag "perform-incremental-update" (optional bool)
+           ~doc:"BOOL PerformIncrementalUpdate"
+       and solutionUpdateConfig =
+         flag "solution-update-config" (optional json_arg)
+           ~doc:"JSON SolutionUpdateConfig"
+       and solutionArn =
+         flag "solution-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_solution
+           (Values.UpdateSolutionRequest.make ?performAutoTraining
+              ?performIncrementalUpdate
+              ?solutionUpdateConfig:(Option.map
+                                       ~f:Values.SolutionUpdateConfig.of_json
+                                       solutionUpdateConfig) ~solutionArn ())
+           (Some Values.UpdateSolutionResponse.to_json)
+           (Some Values.UpdateSolutionResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-batch-inference-job", create_batch_inference_job);
     ("create-batch-segment-job", create_batch_segment_job);
     ("create-campaign", create_campaign);
+    ("create-data-deletion-job", create_data_deletion_job);
     ("create-dataset", create_dataset);
     ("create-dataset-export-job", create_dataset_export_job);
     ("create-dataset-group", create_dataset_group);
     ("create-dataset-import-job", create_dataset_import_job);
     ("create-event-tracker", create_event_tracker);
     ("create-filter", create_filter);
+    ("create-metric-attribution", create_metric_attribution);
     ("create-recommender", create_recommender);
     ("create-schema", create_schema);
     ("create-solution", create_solution);
@@ -1292,6 +1617,7 @@ let main =
     ("delete-dataset-group", delete_dataset_group);
     ("delete-event-tracker", delete_event_tracker);
     ("delete-filter", delete_filter);
+    ("delete-metric-attribution", delete_metric_attribution);
     ("delete-recommender", delete_recommender);
     ("delete-schema", delete_schema);
     ("delete-solution", delete_solution);
@@ -1299,6 +1625,7 @@ let main =
     ("describe-batch-inference-job", describe_batch_inference_job);
     ("describe-batch-segment-job", describe_batch_segment_job);
     ("describe-campaign", describe_campaign);
+    ("describe-data-deletion-job", describe_data_deletion_job);
     ("describe-dataset", describe_dataset);
     ("describe-dataset-export-job", describe_dataset_export_job);
     ("describe-dataset-group", describe_dataset_group);
@@ -1306,6 +1633,7 @@ let main =
     ("describe-event-tracker", describe_event_tracker);
     ("describe-feature-transformation", describe_feature_transformation);
     ("describe-filter", describe_filter);
+    ("describe-metric-attribution", describe_metric_attribution);
     ("describe-recipe", describe_recipe);
     ("describe-recommender", describe_recommender);
     ("describe-schema", describe_schema);
@@ -1315,20 +1643,28 @@ let main =
     ("list-batch-inference-jobs", list_batch_inference_jobs);
     ("list-batch-segment-jobs", list_batch_segment_jobs);
     ("list-campaigns", list_campaigns);
+    ("list-data-deletion-jobs", list_data_deletion_jobs);
     ("list-dataset-export-jobs", list_dataset_export_jobs);
     ("list-dataset-groups", list_dataset_groups);
     ("list-dataset-import-jobs", list_dataset_import_jobs);
     ("list-datasets", list_datasets);
     ("list-event-trackers", list_event_trackers);
     ("list-filters", list_filters);
+    ("list-metric-attribution-metrics", list_metric_attribution_metrics);
+    ("list-metric-attributions", list_metric_attributions);
     ("list-recipes", list_recipes);
     ("list-recommenders", list_recommenders);
     ("list-schemas", list_schemas);
     ("list-solution-versions", list_solution_versions);
     ("list-solutions", list_solutions);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("start-recommender", start_recommender);
+    ("stop-recommender", stop_recommender);
     ("stop-solution-version-creation", stop_solution_version_creation);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-campaign", update_campaign);
-    ("update-recommender", update_recommender)]
+    ("update-dataset", update_dataset);
+    ("update-metric-attribution", update_metric_attribution);
+    ("update-recommender", update_recommender);
+    ("update-solution", update_solution)]

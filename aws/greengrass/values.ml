@@ -127,9 +127,10 @@ module FunctionRunAsConfig =
       let gid = (Option.map ~f:Zz__integer.of_xml) (Xml.child xml_arg0 "Gid") in
       make ?uid ?gid ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let uid = field_map json "Uid" Zz__integer.of_json in
-      let gid = field_map json "Gid" Zz__integer.of_json in make ?uid ?gid ()
+    let of_json json__ =
+      let uid = field_map json__ "Uid" Zz__integer.of_json in
+      let gid = field_map json__ "Gid" Zz__integer.of_json in
+      make ?uid ?gid ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the user and group whose permissions are used when running the Lambda function. You can specify one or both values to override the default values. We recommend that you avoid running as root unless absolutely necessary to minimize the risk of unintended changes or malicious attacks. To run as root, you must set ''IsolationMode'' to ''NoContainer'' and update config.json in ''greengrass-root/config'' to set ''allowFunctionsToRunAsRoot'' to ''yes''."]
@@ -159,9 +160,9 @@ module ResourceAccessPolicy =
         (Option.map ~f:Permission.of_xml) (Xml.child xml_arg0 "Permission") in
       make ~resourceId ?permission ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map_exn json "ResourceId" Zz__string.of_json in
-      let permission = field_map json "Permission" Permission.of_json in
+    let of_json json__ =
+      let resourceId = field_map_exn json__ "ResourceId" Zz__string.of_json in
+      let permission = field_map json__ "Permission" Permission.of_json in
       make ~resourceId ?permission ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A policy used by the function to access a resource."]
@@ -191,10 +192,10 @@ module GroupOwnerSetting =
           (Xml.child xml_arg0 "AutoAddGroupOwner") in
       make ?groupOwner ?autoAddGroupOwner ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupOwner = field_map json "GroupOwner" Zz__string.of_json in
+    let of_json json__ =
+      let groupOwner = field_map json__ "GroupOwner" Zz__string.of_json in
       let autoAddGroupOwner =
-        field_map json "AutoAddGroupOwner" Zz__boolean.of_json in
+        field_map json__ "AutoAddGroupOwner" Zz__boolean.of_json in
       make ?groupOwner ?autoAddGroupOwner ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Group owner related settings for local resources."]
@@ -225,10 +226,10 @@ module ResourceDownloadOwnerSetting =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupOwner") in
       make ~groupPermission ~groupOwner ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let groupPermission =
-        field_map_exn json "GroupPermission" Permission.of_json in
-      let groupOwner = field_map_exn json "GroupOwner" Zz__string.of_json in
+        field_map_exn json__ "GroupPermission" Permission.of_json in
+      let groupOwner = field_map_exn json__ "GroupOwner" Zz__string.of_json in
       make ~groupPermission ~groupOwner ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -237,6 +238,9 @@ module Zz__listOf__string =
   struct
     type nonrec t = Zz__string.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Zz__string.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -280,10 +284,10 @@ module FunctionExecutionConfig =
           (Xml.child xml_arg0 "IsolationMode") in
       make ?runAs ?isolationMode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let runAs = field_map json "RunAs" FunctionRunAsConfig.of_json in
+    let of_json json__ =
+      let runAs = field_map json__ "RunAs" FunctionRunAsConfig.of_json in
       let isolationMode =
-        field_map json "IsolationMode" FunctionIsolationMode.of_json in
+        field_map json__ "IsolationMode" FunctionIsolationMode.of_json in
       make ?runAs ?isolationMode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -292,6 +296,9 @@ module Zz__listOfResourceAccessPolicy =
   struct
     type nonrec t = ResourceAccessPolicy.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceAccessPolicy.to_value)) |>
         (fun x -> `List x)
@@ -335,6 +342,8 @@ module Zz__mapOf__string =
                     (fun x -> (Zz__string.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -367,10 +376,10 @@ module LocalDeviceResourceData =
           (Xml.child xml_arg0 "GroupOwnerSetting") in
       make ?sourcePath ?groupOwnerSetting ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourcePath = field_map json "SourcePath" Zz__string.of_json in
+    let of_json json__ =
+      let sourcePath = field_map json__ "SourcePath" Zz__string.of_json in
       let groupOwnerSetting =
-        field_map json "GroupOwnerSetting" GroupOwnerSetting.of_json in
+        field_map json__ "GroupOwnerSetting" GroupOwnerSetting.of_json in
       make ?sourcePath ?groupOwnerSetting ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Attributes that define a local device resource."]
@@ -410,12 +419,12 @@ module LocalVolumeResourceData =
           (Xml.child xml_arg0 "DestinationPath") in
       make ?sourcePath ?groupOwnerSetting ?destinationPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourcePath = field_map json "SourcePath" Zz__string.of_json in
+    let of_json json__ =
+      let sourcePath = field_map json__ "SourcePath" Zz__string.of_json in
       let groupOwnerSetting =
-        field_map json "GroupOwnerSetting" GroupOwnerSetting.of_json in
+        field_map json__ "GroupOwnerSetting" GroupOwnerSetting.of_json in
       let destinationPath =
-        field_map json "DestinationPath" Zz__string.of_json in
+        field_map json__ "DestinationPath" Zz__string.of_json in
       make ?sourcePath ?groupOwnerSetting ?destinationPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Attributes that define a local volume resource."]
@@ -452,12 +461,12 @@ module S3MachineLearningModelResourceData =
           (Xml.child xml_arg0 "DestinationPath") in
       make ?s3Uri ?ownerSetting ?destinationPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Uri = field_map json "S3Uri" Zz__string.of_json in
+    let of_json json__ =
+      let s3Uri = field_map json__ "S3Uri" Zz__string.of_json in
       let ownerSetting =
-        field_map json "OwnerSetting" ResourceDownloadOwnerSetting.of_json in
+        field_map json__ "OwnerSetting" ResourceDownloadOwnerSetting.of_json in
       let destinationPath =
-        field_map json "DestinationPath" Zz__string.of_json in
+        field_map json__ "DestinationPath" Zz__string.of_json in
       make ?s3Uri ?ownerSetting ?destinationPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -498,13 +507,13 @@ module SageMakerMachineLearningModelResourceData =
           (Xml.child xml_arg0 "DestinationPath") in
       make ?sageMakerJobArn ?ownerSetting ?destinationPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sageMakerJobArn =
-        field_map json "SageMakerJobArn" Zz__string.of_json in
+        field_map json__ "SageMakerJobArn" Zz__string.of_json in
       let ownerSetting =
-        field_map json "OwnerSetting" ResourceDownloadOwnerSetting.of_json in
+        field_map json__ "OwnerSetting" ResourceDownloadOwnerSetting.of_json in
       let destinationPath =
-        field_map json "DestinationPath" Zz__string.of_json in
+        field_map json__ "DestinationPath" Zz__string.of_json in
       make ?sageMakerJobArn ?ownerSetting ?destinationPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -536,11 +545,11 @@ module SecretsManagerSecretResourceData =
       let aRN = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?additionalStagingLabelsToDownload ?aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let additionalStagingLabelsToDownload =
-        field_map json "AdditionalStagingLabelsToDownload"
+        field_map json__ "AdditionalStagingLabelsToDownload"
           Zz__listOf__string.of_json in
-      let aRN = field_map json "ARN" Zz__string.of_json in
+      let aRN = field_map json__ "ARN" Zz__string.of_json in
       make ?additionalStagingLabelsToDownload ?aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -609,14 +618,14 @@ module FunctionConfigurationEnvironment =
         (Option.map ~f:Zz__boolean.of_xml) (Xml.child xml_arg0 "AccessSysfs") in
       make ?variables ?resourceAccessPolicies ?execution ?accessSysfs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let variables = field_map json "Variables" Zz__mapOf__string.of_json in
+    let of_json json__ =
+      let variables = field_map json__ "Variables" Zz__mapOf__string.of_json in
       let resourceAccessPolicies =
-        field_map json "ResourceAccessPolicies"
+        field_map json__ "ResourceAccessPolicies"
           Zz__listOfResourceAccessPolicy.of_json in
       let execution =
-        field_map json "Execution" FunctionExecutionConfig.of_json in
-      let accessSysfs = field_map json "AccessSysfs" Zz__boolean.of_json in
+        field_map json__ "Execution" FunctionExecutionConfig.of_json in
+      let accessSysfs = field_map json__ "AccessSysfs" Zz__boolean.of_json in
       make ?variables ?resourceAccessPolicies ?execution ?accessSysfs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The environment configuration of the function."]
@@ -647,11 +656,11 @@ module ErrorDetail =
           (Xml.child xml_arg0 "DetailedErrorCode") in
       make ?detailedErrorMessage ?detailedErrorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let detailedErrorMessage =
-        field_map json "DetailedErrorMessage" Zz__string.of_json in
+        field_map json__ "DetailedErrorMessage" Zz__string.of_json in
       let detailedErrorCode =
-        field_map json "DetailedErrorCode" Zz__string.of_json in
+        field_map json__ "DetailedErrorCode" Zz__string.of_json in
       make ?detailedErrorMessage ?detailedErrorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about the error."]
@@ -727,21 +736,21 @@ module ResourceDataContainer =
         ?s3MachineLearningModelResourceData ?localVolumeResourceData
         ?localDeviceResourceData ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let secretsManagerSecretResourceData =
-        field_map json "SecretsManagerSecretResourceData"
+        field_map json__ "SecretsManagerSecretResourceData"
           SecretsManagerSecretResourceData.of_json in
       let sageMakerMachineLearningModelResourceData =
-        field_map json "SageMakerMachineLearningModelResourceData"
+        field_map json__ "SageMakerMachineLearningModelResourceData"
           SageMakerMachineLearningModelResourceData.of_json in
       let s3MachineLearningModelResourceData =
-        field_map json "S3MachineLearningModelResourceData"
+        field_map json__ "S3MachineLearningModelResourceData"
           S3MachineLearningModelResourceData.of_json in
       let localVolumeResourceData =
-        field_map json "LocalVolumeResourceData"
+        field_map json__ "LocalVolumeResourceData"
           LocalVolumeResourceData.of_json in
       let localDeviceResourceData =
-        field_map json "LocalDeviceResourceData"
+        field_map json__ "LocalDeviceResourceData"
           LocalDeviceResourceData.of_json in
       make ?secretsManagerSecretResourceData
         ?sageMakerMachineLearningModelResourceData
@@ -854,7 +863,10 @@ module FunctionConfiguration =
           "True if the function is pinned. Pinned means the function is long-lived and starts when the core starts."];
       timeout: Zz__integer.t option
         [@ocaml.doc
-          "The allowed function execution time, after which Lambda should terminate the function. This timeout still applies to pinned Lambda functions for each request."]}
+          "The allowed function execution time, after which Lambda should terminate the function. This timeout still applies to pinned Lambda functions for each request."];
+      functionRuntimeOverride: Zz__string.t option
+        [@ocaml.doc
+          "The Lambda runtime supported by Greengrass which is to be used instead of the one specified in the Lambda function."]}
     let make ?encodingType =
       fun ?environment ->
         fun ?execArgs ->
@@ -862,16 +874,18 @@ module FunctionConfiguration =
             fun ?memorySize ->
               fun ?pinned ->
                 fun ?timeout ->
-                  fun () ->
-                    {
-                      encodingType;
-                      environment;
-                      execArgs;
-                      executable;
-                      memorySize;
-                      pinned;
-                      timeout
-                    }
+                  fun ?functionRuntimeOverride ->
+                    fun () ->
+                      {
+                        encodingType;
+                        environment;
+                        execArgs;
+                        executable;
+                        memorySize;
+                        pinned;
+                        timeout;
+                        functionRuntimeOverride
+                      }
     let to_value x =
       structure_to_value
         [("EncodingType",
@@ -883,9 +897,14 @@ module FunctionConfiguration =
         ("Executable", (Option.map x.executable ~f:Zz__string.to_value));
         ("MemorySize", (Option.map x.memorySize ~f:Zz__integer.to_value));
         ("Pinned", (Option.map x.pinned ~f:Zz__boolean.to_value));
-        ("Timeout", (Option.map x.timeout ~f:Zz__integer.to_value))]
+        ("Timeout", (Option.map x.timeout ~f:Zz__integer.to_value));
+        ("FunctionRuntimeOverride",
+          (Option.map x.functionRuntimeOverride ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let functionRuntimeOverride =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "FunctionRuntimeOverride") in
       let timeout =
         (Option.map ~f:Zz__integer.of_xml) (Xml.child xml_arg0 "Timeout") in
       let pinned =
@@ -902,20 +921,23 @@ module FunctionConfiguration =
       let encodingType =
         (Option.map ~f:EncodingType.of_xml)
           (Xml.child xml_arg0 "EncodingType") in
-      make ?timeout ?pinned ?memorySize ?executable ?execArgs ?environment
-        ?encodingType ()
+      make ?functionRuntimeOverride ?timeout ?pinned ?memorySize ?executable
+        ?execArgs ?environment ?encodingType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeout = field_map json "Timeout" Zz__integer.of_json in
-      let pinned = field_map json "Pinned" Zz__boolean.of_json in
-      let memorySize = field_map json "MemorySize" Zz__integer.of_json in
-      let executable = field_map json "Executable" Zz__string.of_json in
-      let execArgs = field_map json "ExecArgs" Zz__string.of_json in
+    let of_json json__ =
+      let functionRuntimeOverride =
+        field_map json__ "FunctionRuntimeOverride" Zz__string.of_json in
+      let timeout = field_map json__ "Timeout" Zz__integer.of_json in
+      let pinned = field_map json__ "Pinned" Zz__boolean.of_json in
+      let memorySize = field_map json__ "MemorySize" Zz__integer.of_json in
+      let executable = field_map json__ "Executable" Zz__string.of_json in
+      let execArgs = field_map json__ "ExecArgs" Zz__string.of_json in
       let environment =
-        field_map json "Environment" FunctionConfigurationEnvironment.of_json in
-      let encodingType = field_map json "EncodingType" EncodingType.of_json in
-      make ?timeout ?pinned ?memorySize ?executable ?execArgs ?environment
-        ?encodingType ()
+        field_map json__ "Environment"
+          FunctionConfigurationEnvironment.of_json in
+      let encodingType = field_map json__ "EncodingType" EncodingType.of_json in
+      make ?functionRuntimeOverride ?timeout ?pinned ?memorySize ?executable
+        ?execArgs ?environment ?encodingType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The configuration of the Lambda function."]
 module Tags =
@@ -939,6 +961,8 @@ module Tags =
                     (fun x -> (Zz__string.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -981,6 +1005,9 @@ module ErrorDetails =
   struct
     type nonrec t = ErrorDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ErrorDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1086,11 +1113,11 @@ module Subscription =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~target ~subject ~source ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let target = field_map_exn json "Target" Zz__string.of_json in
-      let subject = field_map_exn json "Subject" Zz__string.of_json in
-      let source = field_map_exn json "Source" Zz__string.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let target = field_map_exn json__ "Target" Zz__string.of_json in
+      let subject = field_map_exn json__ "Subject" Zz__string.of_json in
+      let source = field_map_exn json__ "Source" Zz__string.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
       make ~target ~subject ~source ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a subscription."]
@@ -1128,12 +1155,12 @@ module Resource =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~resourceDataContainer ~name ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceDataContainer =
-        field_map_exn json "ResourceDataContainer"
+        field_map_exn json__ "ResourceDataContainer"
           ResourceDataContainer.of_json in
-      let name = field_map_exn json "Name" Zz__string.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
+      let name = field_map_exn json__ "Name" Zz__string.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
       make ~resourceDataContainer ~name ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a resource."]
@@ -1180,12 +1207,13 @@ module Logger =
           (Xml.child_exn ~context:context_ xml_arg0 "Component") in
       make ~type_ ?space ~level ~id ~component ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" LoggerType.of_json in
-      let space = field_map json "Space" Zz__integer.of_json in
-      let level = field_map_exn json "Level" LoggerLevel.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
-      let component = field_map_exn json "Component" LoggerComponent.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" LoggerType.of_json in
+      let space = field_map json__ "Space" Zz__integer.of_json in
+      let level = field_map_exn json__ "Level" LoggerLevel.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
+      let component =
+        field_map_exn json__ "Component" LoggerComponent.of_json in
       make ~type_ ?space ~level ~id ~component ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a logger"]
@@ -1212,10 +1240,10 @@ module FunctionDefaultExecutionConfig =
           (Xml.child xml_arg0 "IsolationMode") in
       make ?runAs ?isolationMode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let runAs = field_map json "RunAs" FunctionRunAsConfig.of_json in
+    let of_json json__ =
+      let runAs = field_map json__ "RunAs" FunctionRunAsConfig.of_json in
       let isolationMode =
-        field_map json "IsolationMode" FunctionIsolationMode.of_json in
+        field_map json__ "IsolationMode" FunctionIsolationMode.of_json in
       make ?runAs ?isolationMode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1253,11 +1281,12 @@ module Function =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "FunctionArn") in
       make ~id ?functionConfiguration ?functionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
       let functionConfiguration =
-        field_map json "FunctionConfiguration" FunctionConfiguration.of_json in
-      let functionArn = field_map json "FunctionArn" Zz__string.of_json in
+        field_map json__ "FunctionConfiguration"
+          FunctionConfiguration.of_json in
+      let functionArn = field_map json__ "FunctionArn" Zz__string.of_json in
       make ~id ?functionConfiguration ?functionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a Lambda function."]
@@ -1300,12 +1329,12 @@ module Device =
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
       make ~thingArn ?syncShadow ~id ~certificateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let thingArn = field_map_exn json "ThingArn" Zz__string.of_json in
-      let syncShadow = field_map json "SyncShadow" Zz__boolean.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let thingArn = field_map_exn json__ "ThingArn" Zz__string.of_json in
+      let syncShadow = field_map json__ "SyncShadow" Zz__boolean.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
       let certificateArn =
-        field_map_exn json "CertificateArn" Zz__string.of_json in
+        field_map_exn json__ "CertificateArn" Zz__string.of_json in
       make ~thingArn ?syncShadow ~id ~certificateArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a device."]
@@ -1349,12 +1378,12 @@ module Core_ =
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
       make ~thingArn ?syncShadow ~id ~certificateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let thingArn = field_map_exn json "ThingArn" Zz__string.of_json in
-      let syncShadow = field_map json "SyncShadow" Zz__boolean.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let thingArn = field_map_exn json__ "ThingArn" Zz__string.of_json in
+      let syncShadow = field_map json__ "SyncShadow" Zz__boolean.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
       let certificateArn =
-        field_map_exn json "CertificateArn" Zz__string.of_json in
+        field_map_exn json__ "CertificateArn" Zz__string.of_json in
       make ~thingArn ?syncShadow ~id ~certificateArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a core."]
@@ -1391,10 +1420,12 @@ module Connector =
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectorArn") in
       make ?parameters ~id ~connectorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map json "Parameters" Zz__mapOf__string.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
-      let connectorArn = field_map_exn json "ConnectorArn" Zz__string.of_json in
+    let of_json json__ =
+      let parameters =
+        field_map json__ "Parameters" Zz__mapOf__string.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
+      let connectorArn =
+        field_map_exn json__ "ConnectorArn" Zz__string.of_json in
       make ?parameters ~id ~connectorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1434,11 +1465,11 @@ module ConnectivityInfo =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "HostAddress") in
       make ?portNumber ?metadata ?id ?hostAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portNumber = field_map json "PortNumber" Zz__integer.of_json in
-      let metadata = field_map json "Metadata" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let hostAddress = field_map json "HostAddress" Zz__string.of_json in
+    let of_json json__ =
+      let portNumber = field_map json__ "PortNumber" Zz__integer.of_json in
+      let metadata = field_map json__ "Metadata" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let hostAddress = field_map json__ "HostAddress" Zz__string.of_json in
       make ?portNumber ?metadata ?id ?hostAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a Greengrass core's connectivity."]
@@ -1476,12 +1507,12 @@ module VersionInformation =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?version ?id ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?version ?id ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a version."]
@@ -1560,18 +1591,18 @@ module DefinitionInformation =
       make ?tags ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp
         ?id ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let latestVersionArn =
-        field_map json "LatestVersionArn" Zz__string.of_json in
-      let latestVersion = field_map json "LatestVersion" Zz__string.of_json in
+        field_map json__ "LatestVersionArn" Zz__string.of_json in
+      let latestVersion = field_map json__ "LatestVersion" Zz__string.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "LastUpdatedTimestamp" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp
         ?id ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
@@ -1646,17 +1677,17 @@ module GroupInformation =
       make ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp ?id
         ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" Zz__string.of_json in
       let latestVersionArn =
-        field_map json "LatestVersionArn" Zz__string.of_json in
-      let latestVersion = field_map json "LatestVersion" Zz__string.of_json in
+        field_map json__ "LatestVersionArn" Zz__string.of_json in
+      let latestVersion = field_map json__ "LatestVersion" Zz__string.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "LastUpdatedTimestamp" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp ?id
         ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
@@ -1689,11 +1720,11 @@ module GroupCertificateAuthorityProperties =
           (Xml.child xml_arg0 "GroupCertificateAuthorityArn") in
       make ?groupCertificateAuthorityId ?groupCertificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let groupCertificateAuthorityId =
-        field_map json "GroupCertificateAuthorityId" Zz__string.of_json in
+        field_map json__ "GroupCertificateAuthorityId" Zz__string.of_json in
       let groupCertificateAuthorityArn =
-        field_map json "GroupCertificateAuthorityArn" Zz__string.of_json in
+        field_map json__ "GroupCertificateAuthorityArn" Zz__string.of_json in
       make ?groupCertificateAuthorityId ?groupCertificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a certificate authority for a group."]
@@ -1751,13 +1782,13 @@ module Deployment =
       make ?groupArn ?deploymentType ?deploymentId ?deploymentArn ?createdAt
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupArn = field_map json "GroupArn" Zz__string.of_json in
+    let of_json json__ =
+      let groupArn = field_map json__ "GroupArn" Zz__string.of_json in
       let deploymentType =
-        field_map json "DeploymentType" DeploymentType.of_json in
-      let deploymentId = field_map json "DeploymentId" Zz__string.of_json in
-      let deploymentArn = field_map json "DeploymentArn" Zz__string.of_json in
-      let createdAt = field_map json "CreatedAt" Zz__string.of_json in
+        field_map json__ "DeploymentType" DeploymentType.of_json in
+      let deploymentId = field_map json__ "DeploymentId" Zz__string.of_json in
+      let deploymentArn = field_map json__ "DeploymentArn" Zz__string.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
       make ?groupArn ?deploymentType ?deploymentId ?deploymentArn ?createdAt
         ()
     let to_json v = composed_to_json to_value v
@@ -1796,12 +1827,12 @@ module BulkDeployment =
           (Xml.child xml_arg0 "BulkDeploymentArn") in
       make ?createdAt ?bulkDeploymentId ?bulkDeploymentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdAt = field_map json "CreatedAt" Zz__string.of_json in
+    let of_json json__ =
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
       let bulkDeploymentId =
-        field_map json "BulkDeploymentId" Zz__string.of_json in
+        field_map json__ "BulkDeploymentId" Zz__string.of_json in
       let bulkDeploymentArn =
-        field_map json "BulkDeploymentArn" Zz__string.of_json in
+        field_map json__ "BulkDeploymentArn" Zz__string.of_json in
       make ?createdAt ?bulkDeploymentId ?bulkDeploymentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1886,17 +1917,17 @@ module BulkDeploymentResult =
       make ?groupArn ?errorMessage ?errorDetails ?deploymentType
         ?deploymentStatus ?deploymentId ?deploymentArn ?createdAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupArn = field_map json "GroupArn" Zz__string.of_json in
-      let errorMessage = field_map json "ErrorMessage" Zz__string.of_json in
-      let errorDetails = field_map json "ErrorDetails" ErrorDetails.of_json in
+    let of_json json__ =
+      let groupArn = field_map json__ "GroupArn" Zz__string.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" Zz__string.of_json in
+      let errorDetails = field_map json__ "ErrorDetails" ErrorDetails.of_json in
       let deploymentType =
-        field_map json "DeploymentType" DeploymentType.of_json in
+        field_map json__ "DeploymentType" DeploymentType.of_json in
       let deploymentStatus =
-        field_map json "DeploymentStatus" Zz__string.of_json in
-      let deploymentId = field_map json "DeploymentId" Zz__string.of_json in
-      let deploymentArn = field_map json "DeploymentArn" Zz__string.of_json in
-      let createdAt = field_map json "CreatedAt" Zz__string.of_json in
+        field_map json__ "DeploymentStatus" Zz__string.of_json in
+      let deploymentId = field_map json__ "DeploymentId" Zz__string.of_json in
+      let deploymentArn = field_map json__ "DeploymentArn" Zz__string.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
       make ?groupArn ?errorMessage ?errorDetails ?deploymentType
         ?deploymentStatus ?deploymentId ?deploymentArn ?createdAt ()
     let to_json v = composed_to_json to_value v
@@ -1909,39 +1940,40 @@ module TelemetryConfiguration =
       configurationSyncStatus: ConfigurationSyncStatus.t option
         [@ocaml.doc
           "Synchronization status of the device reported configuration with the desired configuration."];
-      telemetry: Telemetry.t
+      telemetry: Telemetry.t option
         [@ocaml.doc "Configure telemetry to be on or off."]}
-    let context_ = "TelemetryConfiguration"
     let make ?configurationSyncStatus =
-      fun ~telemetry -> fun () -> { configurationSyncStatus; telemetry }
+      fun ?telemetry -> fun () -> { configurationSyncStatus; telemetry }
     let to_value x =
       structure_to_value
         [("ConfigurationSyncStatus",
            (Option.map x.configurationSyncStatus
               ~f:ConfigurationSyncStatus.to_value));
-        ("Telemetry", (Some (Telemetry.to_value x.telemetry)))]
+        ("Telemetry", (Option.map x.telemetry ~f:Telemetry.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let telemetry =
-        Telemetry.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Telemetry") in
+        (Option.map ~f:Telemetry.of_xml) (Xml.child xml_arg0 "Telemetry") in
       let configurationSyncStatus =
         (Option.map ~f:ConfigurationSyncStatus.of_xml)
           (Xml.child xml_arg0 "ConfigurationSyncStatus") in
-      make ~telemetry ?configurationSyncStatus ()
+      make ?telemetry ?configurationSyncStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let telemetry = field_map_exn json "Telemetry" Telemetry.of_json in
+    let of_json json__ =
+      let telemetry = field_map json__ "Telemetry" Telemetry.of_json in
       let configurationSyncStatus =
-        field_map json "ConfigurationSyncStatus"
+        field_map json__ "ConfigurationSyncStatus"
           ConfigurationSyncStatus.of_json in
-      make ~telemetry ?configurationSyncStatus ()
+      make ?telemetry ?configurationSyncStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Configuration settings for running telemetry."]
 module Zz__listOfSubscription =
   struct
     type nonrec t = Subscription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Subscription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1967,6 +1999,9 @@ module Zz__listOfResource =
   struct
     type nonrec t = Resource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Resource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1991,6 +2026,9 @@ module Zz__listOfLogger =
   struct
     type nonrec t = Logger.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Logger.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2027,9 +2065,9 @@ module FunctionDefaultConfig =
           (Xml.child xml_arg0 "Execution") in
       make ?execution ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let execution =
-        field_map json "Execution" FunctionDefaultExecutionConfig.of_json in
+        field_map json__ "Execution" FunctionDefaultExecutionConfig.of_json in
       make ?execution ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2038,6 +2076,9 @@ module Zz__listOfFunction =
   struct
     type nonrec t = Function.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Function.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2062,6 +2103,9 @@ module Zz__listOfDevice =
   struct
     type nonrec t = Device.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Device.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2086,6 +2130,9 @@ module Zz__listOfCore =
   struct
     type nonrec t = Core_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Core_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2110,6 +2157,9 @@ module Zz__listOfConnector =
   struct
     type nonrec t = Connector.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Connector.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2154,9 +2204,9 @@ module BadRequestException =
           (Xml.child xml_arg0 "ErrorDetails") in
       make ?message ?errorDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
-      let errorDetails = field_map json "ErrorDetails" ErrorDetails.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let errorDetails = field_map json__ "ErrorDetails" ErrorDetails.of_json in
       make ?message ?errorDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "General error information."]
@@ -2184,9 +2234,9 @@ module InternalServerErrorException =
           (Xml.child xml_arg0 "ErrorDetails") in
       make ?message ?errorDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
-      let errorDetails = field_map json "ErrorDetails" ErrorDetails.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let errorDetails = field_map json__ "ErrorDetails" ErrorDetails.of_json in
       make ?message ?errorDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "General error information."]
@@ -2208,8 +2258,8 @@ module TelemetryConfigurationUpdate =
           (Xml.child_exn ~context:context_ xml_arg0 "Telemetry") in
       make ~telemetry ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let telemetry = field_map_exn json "Telemetry" Telemetry.of_json in
+    let of_json json__ =
+      let telemetry = field_map_exn json__ "Telemetry" Telemetry.of_json in
       make ~telemetry ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Configuration settings for running telemetry."]
@@ -2217,6 +2267,9 @@ module Zz__listOfConnectivityInfo =
   struct
     type nonrec t = ConnectivityInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectivityInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2242,6 +2295,9 @@ module Zz__listOfVersionInformation =
   struct
     type nonrec t = VersionInformation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VersionInformation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2267,6 +2323,9 @@ module Zz__listOfDefinitionInformation =
   struct
     type nonrec t = DefinitionInformation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DefinitionInformation.to_value)) |>
         (fun x -> `List x)
@@ -2293,6 +2352,9 @@ module Zz__listOfGroupInformation =
   struct
     type nonrec t = GroupInformation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GroupInformation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2318,6 +2380,9 @@ module Zz__listOfGroupCertificateAuthorityProperties =
   struct
     type nonrec t = GroupCertificateAuthorityProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GroupCertificateAuthorityProperties.to_value)) |>
         (fun x -> `List x)
@@ -2345,6 +2410,9 @@ module Deployments =
   struct
     type nonrec t = Deployment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Deployment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2369,6 +2437,9 @@ module BulkDeployments =
   struct
     type nonrec t = BulkDeployment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BulkDeployment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2393,6 +2464,9 @@ module BulkDeploymentResults =
   struct
     type nonrec t = BulkDeploymentResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BulkDeploymentResult.to_value)) |>
         (fun x -> `List x)
@@ -2434,9 +2508,9 @@ module RuntimeConfiguration =
           (Xml.child xml_arg0 "TelemetryConfiguration") in
       make ?telemetryConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let telemetryConfiguration =
-        field_map json "TelemetryConfiguration"
+        field_map json__ "TelemetryConfiguration"
           TelemetryConfiguration.of_json in
       make ?telemetryConfiguration ()
     let to_json v = composed_to_json to_value v
@@ -2459,9 +2533,9 @@ module SubscriptionDefinitionVersion =
           (Xml.child xml_arg0 "Subscriptions") in
       make ?subscriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptions =
-        field_map json "Subscriptions" Zz__listOfSubscription.of_json in
+        field_map json__ "Subscriptions" Zz__listOfSubscription.of_json in
       make ?subscriptions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a subscription definition version."]
@@ -2483,8 +2557,8 @@ module ResourceDefinitionVersion =
           (Xml.child xml_arg0 "Resources") in
       make ?resources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resources = field_map json "Resources" Zz__listOfResource.of_json in
+    let of_json json__ =
+      let resources = field_map json__ "Resources" Zz__listOfResource.of_json in
       make ?resources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a resource definition version."]
@@ -2504,8 +2578,8 @@ module LoggerDefinitionVersion =
           (Xml.child xml_arg0 "Loggers") in
       make ?loggers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let loggers = field_map json "Loggers" Zz__listOfLogger.of_json in
+    let of_json json__ =
+      let loggers = field_map json__ "Loggers" Zz__listOfLogger.of_json in
       make ?loggers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a logger definition version."]
@@ -2595,21 +2669,22 @@ module GroupVersion =
         ?deviceDefinitionVersionArn ?coreDefinitionVersionArn
         ?connectorDefinitionVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionDefinitionVersionArn =
-        field_map json "SubscriptionDefinitionVersionArn" Zz__string.of_json in
+        field_map json__ "SubscriptionDefinitionVersionArn"
+          Zz__string.of_json in
       let resourceDefinitionVersionArn =
-        field_map json "ResourceDefinitionVersionArn" Zz__string.of_json in
+        field_map json__ "ResourceDefinitionVersionArn" Zz__string.of_json in
       let loggerDefinitionVersionArn =
-        field_map json "LoggerDefinitionVersionArn" Zz__string.of_json in
+        field_map json__ "LoggerDefinitionVersionArn" Zz__string.of_json in
       let functionDefinitionVersionArn =
-        field_map json "FunctionDefinitionVersionArn" Zz__string.of_json in
+        field_map json__ "FunctionDefinitionVersionArn" Zz__string.of_json in
       let deviceDefinitionVersionArn =
-        field_map json "DeviceDefinitionVersionArn" Zz__string.of_json in
+        field_map json__ "DeviceDefinitionVersionArn" Zz__string.of_json in
       let coreDefinitionVersionArn =
-        field_map json "CoreDefinitionVersionArn" Zz__string.of_json in
+        field_map json__ "CoreDefinitionVersionArn" Zz__string.of_json in
       let connectorDefinitionVersionArn =
-        field_map json "ConnectorDefinitionVersionArn" Zz__string.of_json in
+        field_map json__ "ConnectorDefinitionVersionArn" Zz__string.of_json in
       make ?subscriptionDefinitionVersionArn ?resourceDefinitionVersionArn
         ?loggerDefinitionVersionArn ?functionDefinitionVersionArn
         ?deviceDefinitionVersionArn ?coreDefinitionVersionArn
@@ -2644,10 +2719,10 @@ module FunctionDefinitionVersion =
           (Xml.child xml_arg0 "DefaultConfig") in
       make ?functions ?defaultConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let functions = field_map json "Functions" Zz__listOfFunction.of_json in
+    let of_json json__ =
+      let functions = field_map json__ "Functions" Zz__listOfFunction.of_json in
       let defaultConfig =
-        field_map json "DefaultConfig" FunctionDefaultConfig.of_json in
+        field_map json__ "DefaultConfig" FunctionDefaultConfig.of_json in
       make ?functions ?defaultConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a function definition version."]
@@ -2668,8 +2743,8 @@ module DeviceDefinitionVersion =
           (Xml.child xml_arg0 "Devices") in
       make ?devices ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let devices = field_map json "Devices" Zz__listOfDevice.of_json in
+    let of_json json__ =
+      let devices = field_map json__ "Devices" Zz__listOfDevice.of_json in
       make ?devices ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a device definition version."]
@@ -2689,8 +2764,8 @@ module CoreDefinitionVersion =
         (Option.map ~f:Zz__listOfCore.of_xml) (Xml.child xml_arg0 "Cores") in
       make ?cores ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cores = field_map json "Cores" Zz__listOfCore.of_json in
+    let of_json json__ =
+      let cores = field_map json__ "Cores" Zz__listOfCore.of_json in
       make ?cores ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a core definition version."]
@@ -2713,9 +2788,9 @@ module ConnectorDefinitionVersion =
           (Xml.child xml_arg0 "Connectors") in
       make ?connectors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectors =
-        field_map json "Connectors" Zz__listOfConnector.of_json in
+        field_map json__ "Connectors" Zz__listOfConnector.of_json in
       make ?connectors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2758,12 +2833,13 @@ module BulkDeploymentMetrics =
           (Xml.child xml_arg0 "InvalidInputRecords") in
       make ?retryAttempts ?recordsProcessed ?invalidInputRecords ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let retryAttempts = field_map json "RetryAttempts" Zz__integer.of_json in
+    let of_json json__ =
+      let retryAttempts =
+        field_map json__ "RetryAttempts" Zz__integer.of_json in
       let recordsProcessed =
-        field_map json "RecordsProcessed" Zz__integer.of_json in
+        field_map json__ "RecordsProcessed" Zz__integer.of_json in
       let invalidInputRecords =
-        field_map json "InvalidInputRecords" Zz__integer.of_json in
+        field_map json__ "InvalidInputRecords" Zz__integer.of_json in
       make ?retryAttempts ?recordsProcessed ?invalidInputRecords ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2894,6 +2970,9 @@ module UpdateTargets =
   struct
     type nonrec t = Zz__string.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Zz__string.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3107,10 +3186,10 @@ module UpdateThingRuntimeConfigurationRequest =
           (Xml.child xml_arg0 "TelemetryConfiguration") in
       make ~thingName ?telemetryConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let thingName = field_map_exn json "ThingName" Zz__string.of_json in
+    let of_json json__ =
+      let thingName = field_map_exn json__ "ThingName" Zz__string.of_json in
       let telemetryConfiguration =
-        field_map json "TelemetryConfiguration"
+        field_map json__ "TelemetryConfiguration"
           TelemetryConfigurationUpdate.of_json in
       make ~thingName ?telemetryConfiguration ()
     let to_json v = composed_to_json to_value v
@@ -3180,10 +3259,10 @@ module UpdateSubscriptionDefinitionRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Name") in
       make ~subscriptionDefinitionId ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionDefinitionId =
-        field_map_exn json "SubscriptionDefinitionId" Zz__string.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+        field_map_exn json__ "SubscriptionDefinitionId" Zz__string.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       make ~subscriptionDefinitionId ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a subscription definition."]
@@ -3250,10 +3329,10 @@ module UpdateResourceDefinitionRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Name") in
       make ~resourceDefinitionId ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceDefinitionId =
-        field_map_exn json "ResourceDefinitionId" Zz__string.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+        field_map_exn json__ "ResourceDefinitionId" Zz__string.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       make ~resourceDefinitionId ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a resource definition."]
@@ -3320,10 +3399,10 @@ module UpdateLoggerDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LoggerDefinitionId") in
       make ?name ~loggerDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" Zz__string.of_json in
       let loggerDefinitionId =
-        field_map_exn json "LoggerDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "LoggerDefinitionId" Zz__string.of_json in
       make ?name ~loggerDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a logger definition."]
@@ -3387,9 +3466,9 @@ module UpdateGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       make ?name ~groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Zz__string.of_json in
-      let groupId = field_map_exn json "GroupId" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" Zz__string.of_json in
+      let groupId = field_map_exn json__ "GroupId" Zz__string.of_json in
       make ?name ~groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a group."]
@@ -3474,12 +3553,12 @@ module UpdateGroupCertificateConfigurationResponse =
       make ?groupId ?certificateExpiryInMilliseconds
         ?certificateAuthorityExpiryInMilliseconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map json "GroupId" Zz__string.of_json in
+    let of_json json__ =
+      let groupId = field_map json__ "GroupId" Zz__string.of_json in
       let certificateExpiryInMilliseconds =
-        field_map json "CertificateExpiryInMilliseconds" Zz__string.of_json in
+        field_map json__ "CertificateExpiryInMilliseconds" Zz__string.of_json in
       let certificateAuthorityExpiryInMilliseconds =
-        field_map json "CertificateAuthorityExpiryInMilliseconds"
+        field_map json__ "CertificateAuthorityExpiryInMilliseconds"
           Zz__string.of_json in
       make ?groupId ?certificateExpiryInMilliseconds
         ?certificateAuthorityExpiryInMilliseconds ()
@@ -3512,10 +3591,10 @@ module UpdateGroupCertificateConfigurationRequest =
           (Xml.child xml_arg0 "CertificateExpiryInMilliseconds") in
       make ~groupId ?certificateExpiryInMilliseconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map_exn json "GroupId" Zz__string.of_json in
+    let of_json json__ =
+      let groupId = field_map_exn json__ "GroupId" Zz__string.of_json in
       let certificateExpiryInMilliseconds =
-        field_map json "CertificateExpiryInMilliseconds" Zz__string.of_json in
+        field_map json__ "CertificateExpiryInMilliseconds" Zz__string.of_json in
       make ~groupId ?certificateExpiryInMilliseconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the Certificate expiry time for a group."]
@@ -3582,10 +3661,10 @@ module UpdateFunctionDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FunctionDefinitionId") in
       make ?name ~functionDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" Zz__string.of_json in
       let functionDefinitionId =
-        field_map_exn json "FunctionDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "FunctionDefinitionId" Zz__string.of_json in
       make ?name ~functionDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a Lambda function definition."]
@@ -3652,10 +3731,10 @@ module UpdateDeviceDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DeviceDefinitionId") in
       make ?name ~deviceDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" Zz__string.of_json in
       let deviceDefinitionId =
-        field_map_exn json "DeviceDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "DeviceDefinitionId" Zz__string.of_json in
       make ?name ~deviceDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a device definition."]
@@ -3722,10 +3801,10 @@ module UpdateCoreDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CoreDefinitionId") in
       make ?name ~coreDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" Zz__string.of_json in
       let coreDefinitionId =
-        field_map_exn json "CoreDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "CoreDefinitionId" Zz__string.of_json in
       make ?name ~coreDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a core definition."]
@@ -3792,10 +3871,10 @@ module UpdateConnectorDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectorDefinitionId") in
       make ?name ~connectorDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" Zz__string.of_json in
       let connectorDefinitionId =
-        field_map_exn json "ConnectorDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "ConnectorDefinitionId" Zz__string.of_json in
       make ?name ~connectorDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a connector definition."]
@@ -3858,9 +3937,9 @@ module UpdateConnectivityInfoResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?version ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Zz__string.of_json in
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Zz__string.of_json in
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?version ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3891,10 +3970,11 @@ module UpdateConnectivityInfoRequest =
           (Xml.child xml_arg0 "ConnectivityInfo") in
       make ~thingName ?connectivityInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let thingName = field_map_exn json "ThingName" Zz__string.of_json in
+    let of_json json__ =
+      let thingName = field_map_exn json__ "ThingName" Zz__string.of_json in
       let connectivityInfo =
-        field_map json "ConnectivityInfo" Zz__listOfConnectivityInfo.of_json in
+        field_map json__ "ConnectivityInfo"
+          Zz__listOfConnectivityInfo.of_json in
       make ~thingName ?connectivityInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Connectivity information."]
@@ -3923,9 +4003,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resource-arn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" Zz__listOf__string.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" Zz__listOf__string.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Remove resource tags from a Greengrass Resource."]
@@ -3950,9 +4030,9 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resource-arn") in
       make ?tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ?tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A map of the key-value pairs for the resource tag."]
@@ -4015,9 +4095,9 @@ module StopBulkDeploymentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "BulkDeploymentId") in
       make ~bulkDeploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bulkDeploymentId =
-        field_map_exn json "BulkDeploymentId" Zz__string.of_json in
+        field_map_exn json__ "BulkDeploymentId" Zz__string.of_json in
       make ~bulkDeploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4076,11 +4156,11 @@ module StartBulkDeploymentResponse =
           (Xml.child xml_arg0 "BulkDeploymentArn") in
       make ?bulkDeploymentId ?bulkDeploymentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bulkDeploymentId =
-        field_map json "BulkDeploymentId" Zz__string.of_json in
+        field_map json__ "BulkDeploymentId" Zz__string.of_json in
       let bulkDeploymentArn =
-        field_map json "BulkDeploymentArn" Zz__string.of_json in
+        field_map json__ "BulkDeploymentArn" Zz__string.of_json in
       make ?bulkDeploymentId ?bulkDeploymentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4127,13 +4207,14 @@ module StartBulkDeploymentRequest =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?tags ~inputFileUri ~executionRoleArn ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let inputFileUri = field_map_exn json "InputFileUri" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let inputFileUri =
+        field_map_exn json__ "InputFileUri" Zz__string.of_json in
       let executionRoleArn =
-        field_map_exn json "ExecutionRoleArn" Zz__string.of_json in
+        field_map_exn json__ "ExecutionRoleArn" Zz__string.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ?tags ~inputFileUri ~executionRoleArn ?amznClientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4157,9 +4238,9 @@ module RuntimeConfigurationUpdate =
           (Xml.child xml_arg0 "TelemetryConfiguration") in
       make ?telemetryConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let telemetryConfiguration =
-        field_map json "TelemetryConfiguration"
+        field_map json__ "TelemetryConfiguration"
           TelemetryConfigurationUpdate.of_json in
       make ?telemetryConfiguration ()
     let to_json v = composed_to_json to_value v
@@ -4215,9 +4296,9 @@ module ResetDeploymentsResponse =
           (Xml.child xml_arg0 "DeploymentArn") in
       make ?deploymentId ?deploymentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deploymentId = field_map json "DeploymentId" Zz__string.of_json in
-      let deploymentArn = field_map json "DeploymentArn" Zz__string.of_json in
+    let of_json json__ =
+      let deploymentId = field_map json__ "DeploymentId" Zz__string.of_json in
+      let deploymentArn = field_map json__ "DeploymentArn" Zz__string.of_json in
       make ?deploymentId ?deploymentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Resets a group's deployments."]
@@ -4253,11 +4334,11 @@ module ResetDeploymentsRequest =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ~groupId ?force ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map_exn json "GroupId" Zz__string.of_json in
-      let force = field_map json "Force" Zz__boolean.of_json in
+    let of_json json__ =
+      let groupId = field_map_exn json__ "GroupId" Zz__string.of_json in
+      let force = field_map json__ "Force" Zz__boolean.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ~groupId ?force ?amznClientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information needed to reset deployments."]
@@ -4285,10 +4366,10 @@ module ListVersionsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?versions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versions =
-        field_map json "Versions" Zz__listOfVersionInformation.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "Versions" Zz__listOfVersionInformation.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?versions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of versions."]
@@ -4331,8 +4412,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of resource tags for a resource arn."]
 module ListTagsForResourceRequest =
@@ -4353,8 +4434,8 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resource-arn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of resource tags for a resource arn."]
@@ -4402,10 +4483,11 @@ module ListSubscriptionDefinitionsResponse =
           (Xml.child xml_arg0 "Definitions") in
       make ?nextToken ?definitions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let definitions =
-        field_map json "Definitions" Zz__listOfDefinitionInformation.of_json in
+        field_map json__ "Definitions"
+          Zz__listOfDefinitionInformation.of_json in
       make ?nextToken ?definitions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of subscription definitions."]
@@ -4433,9 +4515,9 @@ module ListSubscriptionDefinitionsRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of subscription definitions."]
@@ -4490,10 +4572,10 @@ module ListSubscriptionDefinitionVersionsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?versions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versions =
-        field_map json "Versions" Zz__listOfVersionInformation.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "Versions" Zz__listOfVersionInformation.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?versions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the versions of a subscription definition."]
@@ -4532,11 +4614,11 @@ module ListSubscriptionDefinitionVersionsRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ~subscriptionDefinitionId ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionDefinitionId =
-        field_map_exn json "SubscriptionDefinitionId" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
+        field_map_exn json__ "SubscriptionDefinitionId" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
       make ~subscriptionDefinitionId ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the versions of a subscription definition."]
@@ -4584,10 +4666,11 @@ module ListResourceDefinitionsResponse =
           (Xml.child xml_arg0 "Definitions") in
       make ?nextToken ?definitions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let definitions =
-        field_map json "Definitions" Zz__listOfDefinitionInformation.of_json in
+        field_map json__ "Definitions"
+          Zz__listOfDefinitionInformation.of_json in
       make ?nextToken ?definitions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of resource definitions."]
@@ -4615,9 +4698,9 @@ module ListResourceDefinitionsRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of resource definitions."]
@@ -4672,10 +4755,10 @@ module ListResourceDefinitionVersionsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?versions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versions =
-        field_map json "Versions" Zz__listOfVersionInformation.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "Versions" Zz__listOfVersionInformation.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?versions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the versions of a resource definition."]
@@ -4713,11 +4796,11 @@ module ListResourceDefinitionVersionsRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ~resourceDefinitionId ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceDefinitionId =
-        field_map_exn json "ResourceDefinitionId" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
+        field_map_exn json__ "ResourceDefinitionId" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
       make ~resourceDefinitionId ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the versions of a resource definition."]
@@ -4765,10 +4848,11 @@ module ListLoggerDefinitionsResponse =
           (Xml.child xml_arg0 "Definitions") in
       make ?nextToken ?definitions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let definitions =
-        field_map json "Definitions" Zz__listOfDefinitionInformation.of_json in
+        field_map json__ "Definitions"
+          Zz__listOfDefinitionInformation.of_json in
       make ?nextToken ?definitions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of logger definitions."]
@@ -4796,9 +4880,9 @@ module ListLoggerDefinitionsRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of logger definitions."]
@@ -4853,10 +4937,10 @@ module ListLoggerDefinitionVersionsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?versions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versions =
-        field_map json "Versions" Zz__listOfVersionInformation.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "Versions" Zz__listOfVersionInformation.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?versions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the versions of a logger definition."]
@@ -4894,11 +4978,11 @@ module ListLoggerDefinitionVersionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LoggerDefinitionId") in
       make ?nextToken ?maxResults ~loggerDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
       let loggerDefinitionId =
-        field_map_exn json "LoggerDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "LoggerDefinitionId" Zz__string.of_json in
       make ?nextToken ?maxResults ~loggerDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the versions of a logger definition."]
@@ -4944,9 +5028,10 @@ module ListGroupsResponse =
           (Xml.child xml_arg0 "Groups") in
       make ?nextToken ?groups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let groups = field_map json "Groups" Zz__listOfGroupInformation.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let groups =
+        field_map json__ "Groups" Zz__listOfGroupInformation.of_json in
       make ?nextToken ?groups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of groups."]
@@ -4974,9 +5059,9 @@ module ListGroupsRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of groups."]
@@ -5031,10 +5116,10 @@ module ListGroupVersionsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?versions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versions =
-        field_map json "Versions" Zz__listOfVersionInformation.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "Versions" Zz__listOfVersionInformation.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?versions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the versions of a group."]
@@ -5069,10 +5154,10 @@ module ListGroupVersionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       make ?nextToken ?maxResults ~groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
-      let groupId = field_map_exn json "GroupId" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
+      let groupId = field_map_exn json__ "GroupId" Zz__string.of_json in
       make ?nextToken ?maxResults ~groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the versions of a group."]
@@ -5136,9 +5221,9 @@ module ListGroupCertificateAuthoritiesResponse =
           (Xml.child xml_arg0 "GroupCertificateAuthorities") in
       make ?groupCertificateAuthorities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let groupCertificateAuthorities =
-        field_map json "GroupCertificateAuthorities"
+        field_map json__ "GroupCertificateAuthorities"
           Zz__listOfGroupCertificateAuthorityProperties.of_json in
       make ?groupCertificateAuthorities ()
     let to_json v = composed_to_json to_value v
@@ -5160,8 +5245,8 @@ module ListGroupCertificateAuthoritiesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       make ~groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map_exn json "GroupId" Zz__string.of_json in
+    let of_json json__ =
+      let groupId = field_map_exn json__ "GroupId" Zz__string.of_json in
       make ~groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the current CAs for a group."]
@@ -5209,10 +5294,11 @@ module ListFunctionDefinitionsResponse =
           (Xml.child xml_arg0 "Definitions") in
       make ?nextToken ?definitions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let definitions =
-        field_map json "Definitions" Zz__listOfDefinitionInformation.of_json in
+        field_map json__ "Definitions"
+          Zz__listOfDefinitionInformation.of_json in
       make ?nextToken ?definitions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of Lambda function definitions."]
@@ -5240,9 +5326,9 @@ module ListFunctionDefinitionsRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of Lambda function definitions."]
@@ -5297,10 +5383,10 @@ module ListFunctionDefinitionVersionsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?versions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versions =
-        field_map json "Versions" Zz__listOfVersionInformation.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "Versions" Zz__listOfVersionInformation.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?versions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the versions of a Lambda function definition."]
@@ -5338,11 +5424,11 @@ module ListFunctionDefinitionVersionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FunctionDefinitionId") in
       make ?nextToken ?maxResults ~functionDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
       let functionDefinitionId =
-        field_map_exn json "FunctionDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "FunctionDefinitionId" Zz__string.of_json in
       make ?nextToken ?maxResults ~functionDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the versions of a Lambda function definition."]
@@ -5390,10 +5476,11 @@ module ListDeviceDefinitionsResponse =
           (Xml.child xml_arg0 "Definitions") in
       make ?nextToken ?definitions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let definitions =
-        field_map json "Definitions" Zz__listOfDefinitionInformation.of_json in
+        field_map json__ "Definitions"
+          Zz__listOfDefinitionInformation.of_json in
       make ?nextToken ?definitions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of device definitions."]
@@ -5421,9 +5508,9 @@ module ListDeviceDefinitionsRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of device definitions."]
@@ -5478,10 +5565,10 @@ module ListDeviceDefinitionVersionsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?versions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versions =
-        field_map json "Versions" Zz__listOfVersionInformation.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "Versions" Zz__listOfVersionInformation.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?versions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the versions of a device definition."]
@@ -5519,11 +5606,11 @@ module ListDeviceDefinitionVersionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DeviceDefinitionId") in
       make ?nextToken ?maxResults ~deviceDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
       let deviceDefinitionId =
-        field_map_exn json "DeviceDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "DeviceDefinitionId" Zz__string.of_json in
       make ?nextToken ?maxResults ~deviceDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the versions of a device definition."]
@@ -5577,9 +5664,9 @@ module ListDeploymentsResponse =
         (Option.map ~f:Deployments.of_xml) (Xml.child xml_arg0 "Deployments") in
       make ?nextToken ?deployments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let deployments = field_map json "Deployments" Deployments.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let deployments = field_map json__ "Deployments" Deployments.of_json in
       make ?nextToken ?deployments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a history of deployments for the group."]
@@ -5614,10 +5701,10 @@ module ListDeploymentsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       make ?nextToken ?maxResults ~groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
-      let groupId = field_map_exn json "GroupId" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
+      let groupId = field_map_exn json__ "GroupId" Zz__string.of_json in
       make ?nextToken ?maxResults ~groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a history of deployments for the group."]
@@ -5647,10 +5734,11 @@ module ListDefinitionsResponse =
           (Xml.child xml_arg0 "Definitions") in
       make ?nextToken ?definitions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let definitions =
-        field_map json "Definitions" Zz__listOfDefinitionInformation.of_json in
+        field_map json__ "Definitions"
+          Zz__listOfDefinitionInformation.of_json in
       make ?nextToken ?definitions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of definitions."]
@@ -5698,10 +5786,11 @@ module ListCoreDefinitionsResponse =
           (Xml.child xml_arg0 "Definitions") in
       make ?nextToken ?definitions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let definitions =
-        field_map json "Definitions" Zz__listOfDefinitionInformation.of_json in
+        field_map json__ "Definitions"
+          Zz__listOfDefinitionInformation.of_json in
       make ?nextToken ?definitions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of core definitions."]
@@ -5729,9 +5818,9 @@ module ListCoreDefinitionsRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of core definitions."]
@@ -5786,10 +5875,10 @@ module ListCoreDefinitionVersionsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?versions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versions =
-        field_map json "Versions" Zz__listOfVersionInformation.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "Versions" Zz__listOfVersionInformation.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?versions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the versions of a core definition."]
@@ -5827,11 +5916,11 @@ module ListCoreDefinitionVersionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CoreDefinitionId") in
       make ?nextToken ?maxResults ~coreDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
       let coreDefinitionId =
-        field_map_exn json "CoreDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "CoreDefinitionId" Zz__string.of_json in
       make ?nextToken ?maxResults ~coreDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the versions of a core definition."]
@@ -5879,10 +5968,11 @@ module ListConnectorDefinitionsResponse =
           (Xml.child xml_arg0 "Definitions") in
       make ?nextToken ?definitions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let definitions =
-        field_map json "Definitions" Zz__listOfDefinitionInformation.of_json in
+        field_map json__ "Definitions"
+          Zz__listOfDefinitionInformation.of_json in
       make ?nextToken ?definitions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of connector definitions."]
@@ -5910,9 +6000,9 @@ module ListConnectorDefinitionsRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of connector definitions."]
@@ -5967,10 +6057,10 @@ module ListConnectorDefinitionVersionsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?versions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versions =
-        field_map json "Versions" Zz__listOfVersionInformation.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "Versions" Zz__listOfVersionInformation.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?versions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6009,11 +6099,11 @@ module ListConnectorDefinitionVersionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectorDefinitionId") in
       make ?nextToken ?maxResults ~connectorDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
       let connectorDefinitionId =
-        field_map_exn json "ConnectorDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "ConnectorDefinitionId" Zz__string.of_json in
       make ?nextToken ?maxResults ~connectorDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6070,10 +6160,10 @@ module ListBulkDeploymentsResponse =
           (Xml.child xml_arg0 "BulkDeployments") in
       make ?nextToken ?bulkDeployments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let bulkDeployments =
-        field_map json "BulkDeployments" BulkDeployments.of_json in
+        field_map json__ "BulkDeployments" BulkDeployments.of_json in
       make ?nextToken ?bulkDeployments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of bulk deployments."]
@@ -6101,9 +6191,9 @@ module ListBulkDeploymentsRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of bulk deployments."]
@@ -6160,10 +6250,10 @@ module ListBulkDeploymentDetailedReportsResponse =
           (Xml.child xml_arg0 "Deployments") in
       make ?nextToken ?deployments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let deployments =
-        field_map json "Deployments" BulkDeploymentResults.of_json in
+        field_map json__ "Deployments" BulkDeploymentResults.of_json in
       make ?nextToken ?deployments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6202,11 +6292,11 @@ module ListBulkDeploymentDetailedReportsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "BulkDeploymentId") in
       make ?nextToken ?maxResults ~bulkDeploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" Zz__string.of_json in
       let bulkDeploymentId =
-        field_map_exn json "BulkDeploymentId" Zz__string.of_json in
+        field_map_exn json__ "BulkDeploymentId" Zz__string.of_json in
       make ?nextToken ?maxResults ~bulkDeploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6254,12 +6344,12 @@ module GroupCertificateConfiguration =
       make ?groupId ?certificateExpiryInMilliseconds
         ?certificateAuthorityExpiryInMilliseconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map json "GroupId" Zz__string.of_json in
+    let of_json json__ =
+      let groupId = field_map json__ "GroupId" Zz__string.of_json in
       let certificateExpiryInMilliseconds =
-        field_map json "CertificateExpiryInMilliseconds" Zz__string.of_json in
+        field_map json__ "CertificateExpiryInMilliseconds" Zz__string.of_json in
       let certificateAuthorityExpiryInMilliseconds =
-        field_map json "CertificateAuthorityExpiryInMilliseconds"
+        field_map json__ "CertificateAuthorityExpiryInMilliseconds"
           Zz__string.of_json in
       make ?groupId ?certificateExpiryInMilliseconds
         ?certificateAuthorityExpiryInMilliseconds ()
@@ -6322,9 +6412,9 @@ module GetThingRuntimeConfigurationResponse =
           (Xml.child xml_arg0 "RuntimeConfiguration") in
       make ?runtimeConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let runtimeConfiguration =
-        field_map json "RuntimeConfiguration" RuntimeConfiguration.of_json in
+        field_map json__ "RuntimeConfiguration" RuntimeConfiguration.of_json in
       make ?runtimeConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Get the runtime configuration of a thing."]
@@ -6344,8 +6434,8 @@ module GetThingRuntimeConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ThingName") in
       make ~thingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let thingName = field_map_exn json "ThingName" Zz__string.of_json in
+    let of_json json__ =
+      let thingName = field_map_exn json__ "ThingName" Zz__string.of_json in
       make ~thingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Get the runtime configuration of a thing."]
@@ -6435,15 +6525,15 @@ module GetSubscriptionDefinitionVersionResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?version ?nextToken ?id ?definition ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let definition =
-        field_map json "Definition" SubscriptionDefinitionVersion.of_json in
+        field_map json__ "Definition" SubscriptionDefinitionVersion.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?version ?nextToken ?id ?definition ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6492,13 +6582,13 @@ module GetSubscriptionDefinitionVersionRequest =
       make ~subscriptionDefinitionVersionId ~subscriptionDefinitionId
         ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionDefinitionVersionId =
-        field_map_exn json "SubscriptionDefinitionVersionId"
+        field_map_exn json__ "SubscriptionDefinitionVersionId"
           Zz__string.of_json in
       let subscriptionDefinitionId =
-        field_map_exn json "SubscriptionDefinitionId" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map_exn json__ "SubscriptionDefinitionId" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ~subscriptionDefinitionVersionId ~subscriptionDefinitionId
         ?nextToken ()
     let to_json v = composed_to_json to_value v
@@ -6606,18 +6696,18 @@ module GetSubscriptionDefinitionResponse =
       make ?tags ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp
         ?id ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let latestVersionArn =
-        field_map json "LatestVersionArn" Zz__string.of_json in
-      let latestVersion = field_map json "LatestVersion" Zz__string.of_json in
+        field_map json__ "LatestVersionArn" Zz__string.of_json in
+      let latestVersion = field_map json__ "LatestVersion" Zz__string.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "LastUpdatedTimestamp" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp
         ?id ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
@@ -6643,9 +6733,9 @@ module GetSubscriptionDefinitionRequest =
              "SubscriptionDefinitionId") in
       make ~subscriptionDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionDefinitionId =
-        field_map_exn json "SubscriptionDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "SubscriptionDefinitionId" Zz__string.of_json in
       make ~subscriptionDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about a subscription definition."]
@@ -6702,9 +6792,9 @@ module GetServiceRoleForAccountResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "AssociatedAt") in
       make ?roleArn ?associatedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "RoleArn" Zz__string.of_json in
-      let associatedAt = field_map json "AssociatedAt" Zz__string.of_json in
+    let of_json json__ =
+      let roleArn = field_map json__ "RoleArn" Zz__string.of_json in
+      let associatedAt = field_map json__ "AssociatedAt" Zz__string.of_json in
       make ?roleArn ?associatedAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6793,14 +6883,14 @@ module GetResourceDefinitionVersionResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?version ?id ?definition ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let definition =
-        field_map json "Definition" ResourceDefinitionVersion.of_json in
+        field_map json__ "Definition" ResourceDefinitionVersion.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?version ?id ?definition ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6835,11 +6925,11 @@ module GetResourceDefinitionVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceDefinitionId") in
       make ~resourceDefinitionVersionId ~resourceDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceDefinitionVersionId =
-        field_map_exn json "ResourceDefinitionVersionId" Zz__string.of_json in
+        field_map_exn json__ "ResourceDefinitionVersionId" Zz__string.of_json in
       let resourceDefinitionId =
-        field_map_exn json "ResourceDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "ResourceDefinitionId" Zz__string.of_json in
       make ~resourceDefinitionVersionId ~resourceDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6946,18 +7036,18 @@ module GetResourceDefinitionResponse =
       make ?tags ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp
         ?id ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let latestVersionArn =
-        field_map json "LatestVersionArn" Zz__string.of_json in
-      let latestVersion = field_map json "LatestVersion" Zz__string.of_json in
+        field_map json__ "LatestVersionArn" Zz__string.of_json in
+      let latestVersion = field_map json__ "LatestVersion" Zz__string.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "LastUpdatedTimestamp" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp
         ?id ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
@@ -6982,9 +7072,9 @@ module GetResourceDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceDefinitionId") in
       make ~resourceDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceDefinitionId =
-        field_map_exn json "ResourceDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "ResourceDefinitionId" Zz__string.of_json in
       make ~resourceDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7060,14 +7150,14 @@ module GetLoggerDefinitionVersionResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?version ?id ?definition ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let definition =
-        field_map json "Definition" LoggerDefinitionVersion.of_json in
+        field_map json__ "Definition" LoggerDefinitionVersion.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?version ?id ?definition ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about a logger definition version."]
@@ -7109,12 +7199,12 @@ module GetLoggerDefinitionVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LoggerDefinitionId") in
       make ?nextToken ~loggerDefinitionVersionId ~loggerDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let loggerDefinitionVersionId =
-        field_map_exn json "LoggerDefinitionVersionId" Zz__string.of_json in
+        field_map_exn json__ "LoggerDefinitionVersionId" Zz__string.of_json in
       let loggerDefinitionId =
-        field_map_exn json "LoggerDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "LoggerDefinitionId" Zz__string.of_json in
       make ?nextToken ~loggerDefinitionVersionId ~loggerDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about a logger definition version."]
@@ -7220,18 +7310,18 @@ module GetLoggerDefinitionResponse =
       make ?tags ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp
         ?id ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let latestVersionArn =
-        field_map json "LatestVersionArn" Zz__string.of_json in
-      let latestVersion = field_map json "LatestVersion" Zz__string.of_json in
+        field_map json__ "LatestVersionArn" Zz__string.of_json in
+      let latestVersion = field_map json__ "LatestVersion" Zz__string.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "LastUpdatedTimestamp" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp
         ?id ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
@@ -7255,9 +7345,9 @@ module GetLoggerDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LoggerDefinitionId") in
       make ~loggerDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loggerDefinitionId =
-        field_map_exn json "LoggerDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "LoggerDefinitionId" Zz__string.of_json in
       make ~loggerDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about a logger definition."]
@@ -7330,13 +7420,13 @@ module GetGroupVersionResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?version ?id ?definition ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let definition = field_map json "Definition" GroupVersion.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let definition = field_map json__ "Definition" GroupVersion.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?version ?id ?definition ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about a group version."]
@@ -7365,10 +7455,10 @@ module GetGroupVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       make ~groupVersionId ~groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let groupVersionId =
-        field_map_exn json "GroupVersionId" Zz__string.of_json in
-      let groupId = field_map_exn json "GroupId" Zz__string.of_json in
+        field_map_exn json__ "GroupVersionId" Zz__string.of_json in
+      let groupId = field_map_exn json__ "GroupId" Zz__string.of_json in
       make ~groupVersionId ~groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about a group version."]
@@ -7474,18 +7564,18 @@ module GetGroupResponse =
       make ?tags ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp
         ?id ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let latestVersionArn =
-        field_map json "LatestVersionArn" Zz__string.of_json in
-      let latestVersion = field_map json "LatestVersion" Zz__string.of_json in
+        field_map json__ "LatestVersionArn" Zz__string.of_json in
+      let latestVersion = field_map json__ "LatestVersion" Zz__string.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "LastUpdatedTimestamp" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp
         ?id ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
@@ -7507,8 +7597,8 @@ module GetGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       make ~groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map_exn json "GroupId" Zz__string.of_json in
+    let of_json json__ =
+      let groupId = field_map_exn json__ "GroupId" Zz__string.of_json in
       make ~groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about a group."]
@@ -7593,12 +7683,12 @@ module GetGroupCertificateConfigurationResponse =
       make ?groupId ?certificateExpiryInMilliseconds
         ?certificateAuthorityExpiryInMilliseconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map json "GroupId" Zz__string.of_json in
+    let of_json json__ =
+      let groupId = field_map json__ "GroupId" Zz__string.of_json in
       let certificateExpiryInMilliseconds =
-        field_map json "CertificateExpiryInMilliseconds" Zz__string.of_json in
+        field_map json__ "CertificateExpiryInMilliseconds" Zz__string.of_json in
       let certificateAuthorityExpiryInMilliseconds =
-        field_map json "CertificateAuthorityExpiryInMilliseconds"
+        field_map json__ "CertificateAuthorityExpiryInMilliseconds"
           Zz__string.of_json in
       make ?groupId ?certificateExpiryInMilliseconds
         ?certificateAuthorityExpiryInMilliseconds ()
@@ -7622,8 +7712,8 @@ module GetGroupCertificateConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       make ~groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map_exn json "GroupId" Zz__string.of_json in
+    let of_json json__ =
+      let groupId = field_map_exn json__ "GroupId" Zz__string.of_json in
       make ~groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7707,13 +7797,13 @@ module GetGroupCertificateAuthorityResponse =
       make ?pemEncodedCertificate ?groupCertificateAuthorityId
         ?groupCertificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pemEncodedCertificate =
-        field_map json "PemEncodedCertificate" Zz__string.of_json in
+        field_map json__ "PemEncodedCertificate" Zz__string.of_json in
       let groupCertificateAuthorityId =
-        field_map json "GroupCertificateAuthorityId" Zz__string.of_json in
+        field_map json__ "GroupCertificateAuthorityId" Zz__string.of_json in
       let groupCertificateAuthorityArn =
-        field_map json "GroupCertificateAuthorityArn" Zz__string.of_json in
+        field_map json__ "GroupCertificateAuthorityArn" Zz__string.of_json in
       make ?pemEncodedCertificate ?groupCertificateAuthorityId
         ?groupCertificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
@@ -7744,10 +7834,10 @@ module GetGroupCertificateAuthorityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateAuthorityId") in
       make ~groupId ~certificateAuthorityId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map_exn json "GroupId" Zz__string.of_json in
+    let of_json json__ =
+      let groupId = field_map_exn json__ "GroupId" Zz__string.of_json in
       let certificateAuthorityId =
-        field_map_exn json "CertificateAuthorityId" Zz__string.of_json in
+        field_map_exn json__ "CertificateAuthorityId" Zz__string.of_json in
       make ~groupId ~certificateAuthorityId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7838,15 +7928,15 @@ module GetFunctionDefinitionVersionResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?version ?nextToken ?id ?definition ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let definition =
-        field_map json "Definition" FunctionDefinitionVersion.of_json in
+        field_map json__ "Definition" FunctionDefinitionVersion.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?version ?nextToken ?id ?definition ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7889,12 +7979,12 @@ module GetFunctionDefinitionVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FunctionDefinitionId") in
       make ?nextToken ~functionDefinitionVersionId ~functionDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let functionDefinitionVersionId =
-        field_map_exn json "FunctionDefinitionVersionId" Zz__string.of_json in
+        field_map_exn json__ "FunctionDefinitionVersionId" Zz__string.of_json in
       let functionDefinitionId =
-        field_map_exn json "FunctionDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "FunctionDefinitionId" Zz__string.of_json in
       make ?nextToken ~functionDefinitionVersionId ~functionDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8001,18 +8091,18 @@ module GetFunctionDefinitionResponse =
       make ?tags ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp
         ?id ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let latestVersionArn =
-        field_map json "LatestVersionArn" Zz__string.of_json in
-      let latestVersion = field_map json "LatestVersion" Zz__string.of_json in
+        field_map json__ "LatestVersionArn" Zz__string.of_json in
+      let latestVersion = field_map json__ "LatestVersion" Zz__string.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "LastUpdatedTimestamp" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp
         ?id ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
@@ -8037,9 +8127,9 @@ module GetFunctionDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FunctionDefinitionId") in
       make ~functionDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let functionDefinitionId =
-        field_map_exn json "FunctionDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "FunctionDefinitionId" Zz__string.of_json in
       make ~functionDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8130,15 +8220,15 @@ module GetDeviceDefinitionVersionResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?version ?nextToken ?id ?definition ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let definition =
-        field_map json "Definition" DeviceDefinitionVersion.of_json in
+        field_map json__ "Definition" DeviceDefinitionVersion.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?version ?nextToken ?id ?definition ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about a device definition version."]
@@ -8180,12 +8270,12 @@ module GetDeviceDefinitionVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DeviceDefinitionId") in
       make ?nextToken ~deviceDefinitionVersionId ~deviceDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let deviceDefinitionVersionId =
-        field_map_exn json "DeviceDefinitionVersionId" Zz__string.of_json in
+        field_map_exn json__ "DeviceDefinitionVersionId" Zz__string.of_json in
       let deviceDefinitionId =
-        field_map_exn json "DeviceDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "DeviceDefinitionId" Zz__string.of_json in
       make ?nextToken ~deviceDefinitionVersionId ~deviceDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about a device definition version."]
@@ -8291,18 +8381,18 @@ module GetDeviceDefinitionResponse =
       make ?tags ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp
         ?id ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let latestVersionArn =
-        field_map json "LatestVersionArn" Zz__string.of_json in
-      let latestVersion = field_map json "LatestVersion" Zz__string.of_json in
+        field_map json__ "LatestVersionArn" Zz__string.of_json in
+      let latestVersion = field_map json__ "LatestVersion" Zz__string.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "LastUpdatedTimestamp" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp
         ?id ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
@@ -8326,9 +8416,9 @@ module GetDeviceDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DeviceDefinitionId") in
       make ~deviceDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deviceDefinitionId =
-        field_map_exn json "DeviceDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "DeviceDefinitionId" Zz__string.of_json in
       make ~deviceDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about a device definition."]
@@ -8414,14 +8504,14 @@ module GetDeploymentStatusResponse =
       make ?updatedAt ?errorMessage ?errorDetails ?deploymentType
         ?deploymentStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "UpdatedAt" Zz__string.of_json in
-      let errorMessage = field_map json "ErrorMessage" Zz__string.of_json in
-      let errorDetails = field_map json "ErrorDetails" ErrorDetails.of_json in
+    let of_json json__ =
+      let updatedAt = field_map json__ "UpdatedAt" Zz__string.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" Zz__string.of_json in
+      let errorDetails = field_map json__ "ErrorDetails" ErrorDetails.of_json in
       let deploymentType =
-        field_map json "DeploymentType" DeploymentType.of_json in
+        field_map json__ "DeploymentType" DeploymentType.of_json in
       let deploymentStatus =
-        field_map json "DeploymentStatus" Zz__string.of_json in
+        field_map json__ "DeploymentStatus" Zz__string.of_json in
       make ?updatedAt ?errorMessage ?errorDetails ?deploymentType
         ?deploymentStatus ()
     let to_json v = composed_to_json to_value v
@@ -8449,9 +8539,10 @@ module GetDeploymentStatusRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DeploymentId") in
       make ~groupId ~deploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map_exn json "GroupId" Zz__string.of_json in
-      let deploymentId = field_map_exn json "DeploymentId" Zz__string.of_json in
+    let of_json json__ =
+      let groupId = field_map_exn json__ "GroupId" Zz__string.of_json in
+      let deploymentId =
+        field_map_exn json__ "DeploymentId" Zz__string.of_json in
       make ~groupId ~deploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the status of a deployment."]
@@ -8541,15 +8632,15 @@ module GetCoreDefinitionVersionResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?version ?nextToken ?id ?definition ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let definition =
-        field_map json "Definition" CoreDefinitionVersion.of_json in
+        field_map json__ "Definition" CoreDefinitionVersion.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?version ?nextToken ?id ?definition ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about a core definition version."]
@@ -8582,11 +8673,11 @@ module GetCoreDefinitionVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CoreDefinitionId") in
       make ~coreDefinitionVersionId ~coreDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let coreDefinitionVersionId =
-        field_map_exn json "CoreDefinitionVersionId" Zz__string.of_json in
+        field_map_exn json__ "CoreDefinitionVersionId" Zz__string.of_json in
       let coreDefinitionId =
-        field_map_exn json "CoreDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "CoreDefinitionId" Zz__string.of_json in
       make ~coreDefinitionVersionId ~coreDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about a core definition version."]
@@ -8692,18 +8783,18 @@ module GetCoreDefinitionResponse =
       make ?tags ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp
         ?id ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let latestVersionArn =
-        field_map json "LatestVersionArn" Zz__string.of_json in
-      let latestVersion = field_map json "LatestVersion" Zz__string.of_json in
+        field_map json__ "LatestVersionArn" Zz__string.of_json in
+      let latestVersion = field_map json__ "LatestVersion" Zz__string.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "LastUpdatedTimestamp" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp
         ?id ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
@@ -8727,9 +8818,9 @@ module GetCoreDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CoreDefinitionId") in
       make ~coreDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let coreDefinitionId =
-        field_map_exn json "CoreDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "CoreDefinitionId" Zz__string.of_json in
       make ~coreDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about a core definition version."]
@@ -8819,15 +8910,15 @@ module GetConnectorDefinitionVersionResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?version ?nextToken ?id ?definition ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let definition =
-        field_map json "Definition" ConnectorDefinitionVersion.of_json in
+        field_map json__ "Definition" ConnectorDefinitionVersion.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?version ?nextToken ?id ?definition ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8871,12 +8962,13 @@ module GetConnectorDefinitionVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectorDefinitionId") in
       make ?nextToken ~connectorDefinitionVersionId ~connectorDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let connectorDefinitionVersionId =
-        field_map_exn json "ConnectorDefinitionVersionId" Zz__string.of_json in
+        field_map_exn json__ "ConnectorDefinitionVersionId"
+          Zz__string.of_json in
       let connectorDefinitionId =
-        field_map_exn json "ConnectorDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "ConnectorDefinitionId" Zz__string.of_json in
       make ?nextToken ~connectorDefinitionVersionId ~connectorDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8983,18 +9075,18 @@ module GetConnectorDefinitionResponse =
       make ?tags ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp
         ?id ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let latestVersionArn =
-        field_map json "LatestVersionArn" Zz__string.of_json in
-      let latestVersion = field_map json "LatestVersion" Zz__string.of_json in
+        field_map json__ "LatestVersionArn" Zz__string.of_json in
+      let latestVersion = field_map json__ "LatestVersion" Zz__string.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "LastUpdatedTimestamp" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp
         ?id ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
@@ -9018,9 +9110,9 @@ module GetConnectorDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectorDefinitionId") in
       make ~connectorDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectorDefinitionId =
-        field_map_exn json "ConnectorDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "ConnectorDefinitionId" Zz__string.of_json in
       make ~connectorDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about a connector definition."]
@@ -9087,10 +9179,11 @@ module GetConnectivityInfoResponse =
           (Xml.child xml_arg0 "ConnectivityInfo") in
       make ?message ?connectivityInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       let connectivityInfo =
-        field_map json "ConnectivityInfo" Zz__listOfConnectivityInfo.of_json in
+        field_map json__ "ConnectivityInfo"
+          Zz__listOfConnectivityInfo.of_json in
       make ?message ?connectivityInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the connectivity information for a core."]
@@ -9110,8 +9203,8 @@ module GetConnectivityInfoRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ThingName") in
       make ~thingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let thingName = field_map_exn json "ThingName" Zz__string.of_json in
+    let of_json json__ =
+      let thingName = field_map_exn json__ "ThingName" Zz__string.of_json in
       make ~thingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the connectivity information for a core."]
@@ -9203,15 +9296,16 @@ module GetBulkDeploymentStatusResponse =
       make ?tags ?errorMessage ?errorDetails ?createdAt ?bulkDeploymentStatus
         ?bulkDeploymentMetrics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let errorMessage = field_map json "ErrorMessage" Zz__string.of_json in
-      let errorDetails = field_map json "ErrorDetails" ErrorDetails.of_json in
-      let createdAt = field_map json "CreatedAt" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" Zz__string.of_json in
+      let errorDetails = field_map json__ "ErrorDetails" ErrorDetails.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
       let bulkDeploymentStatus =
-        field_map json "BulkDeploymentStatus" BulkDeploymentStatus.of_json in
+        field_map json__ "BulkDeploymentStatus" BulkDeploymentStatus.of_json in
       let bulkDeploymentMetrics =
-        field_map json "BulkDeploymentMetrics" BulkDeploymentMetrics.of_json in
+        field_map json__ "BulkDeploymentMetrics"
+          BulkDeploymentMetrics.of_json in
       make ?tags ?errorMessage ?errorDetails ?createdAt ?bulkDeploymentStatus
         ?bulkDeploymentMetrics ()
     let to_json v = composed_to_json to_value v
@@ -9235,9 +9329,9 @@ module GetBulkDeploymentStatusRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "BulkDeploymentId") in
       make ~bulkDeploymentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bulkDeploymentId =
-        field_map_exn json "BulkDeploymentId" Zz__string.of_json in
+        field_map_exn json__ "BulkDeploymentId" Zz__string.of_json in
       make ~bulkDeploymentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the status of a bulk deployment."]
@@ -9301,9 +9395,9 @@ module GetAssociatedRoleResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "AssociatedAt") in
       make ?roleArn ?associatedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "RoleArn" Zz__string.of_json in
-      let associatedAt = field_map json "AssociatedAt" Zz__string.of_json in
+    let of_json json__ =
+      let roleArn = field_map json__ "RoleArn" Zz__string.of_json in
+      let associatedAt = field_map json__ "AssociatedAt" Zz__string.of_json in
       make ?roleArn ?associatedAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the role associated with a particular group."]
@@ -9324,8 +9418,8 @@ module GetAssociatedRoleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       make ~groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map_exn json "GroupId" Zz__string.of_json in
+    let of_json json__ =
+      let groupId = field_map_exn json__ "GroupId" Zz__string.of_json in
       make ~groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the role associated with a particular group."]
@@ -9353,9 +9447,9 @@ module GeneralError =
           (Xml.child xml_arg0 "ErrorDetails") in
       make ?message ?errorDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
-      let errorDetails = field_map json "ErrorDetails" ErrorDetails.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let errorDetails = field_map json__ "ErrorDetails" ErrorDetails.of_json in
       make ?message ?errorDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "General error information."]
@@ -9419,9 +9513,9 @@ module DisassociateServiceRoleFromAccountResponse =
           (Xml.child xml_arg0 "DisassociatedAt") in
       make ?disassociatedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let disassociatedAt =
-        field_map json "DisassociatedAt" Zz__string.of_json in
+        field_map json__ "DisassociatedAt" Zz__string.of_json in
       make ?disassociatedAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9496,9 +9590,9 @@ module DisassociateRoleFromGroupResponse =
           (Xml.child xml_arg0 "DisassociatedAt") in
       make ?disassociatedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let disassociatedAt =
-        field_map json "DisassociatedAt" Zz__string.of_json in
+        field_map json__ "DisassociatedAt" Zz__string.of_json in
       make ?disassociatedAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates the role from a group."]
@@ -9519,8 +9613,8 @@ module DisassociateRoleFromGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       make ~groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map_exn json "GroupId" Zz__string.of_json in
+    let of_json json__ =
+      let groupId = field_map_exn json__ "GroupId" Zz__string.of_json in
       make ~groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates the role from a group."]
@@ -9584,9 +9678,9 @@ module DeleteSubscriptionDefinitionRequest =
              "SubscriptionDefinitionId") in
       make ~subscriptionDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionDefinitionId =
-        field_map_exn json "SubscriptionDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "SubscriptionDefinitionId" Zz__string.of_json in
       make ~subscriptionDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a subscription definition."]
@@ -9648,9 +9742,9 @@ module DeleteResourceDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceDefinitionId") in
       make ~resourceDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceDefinitionId =
-        field_map_exn json "ResourceDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "ResourceDefinitionId" Zz__string.of_json in
       make ~resourceDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a resource definition."]
@@ -9712,9 +9806,9 @@ module DeleteLoggerDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LoggerDefinitionId") in
       make ~loggerDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loggerDefinitionId =
-        field_map_exn json "LoggerDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "LoggerDefinitionId" Zz__string.of_json in
       make ~loggerDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a logger definition."]
@@ -9774,8 +9868,8 @@ module DeleteGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       make ~groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map_exn json "GroupId" Zz__string.of_json in
+    let of_json json__ =
+      let groupId = field_map_exn json__ "GroupId" Zz__string.of_json in
       make ~groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a group."]
@@ -9837,9 +9931,9 @@ module DeleteFunctionDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FunctionDefinitionId") in
       make ~functionDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let functionDefinitionId =
-        field_map_exn json "FunctionDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "FunctionDefinitionId" Zz__string.of_json in
       make ~functionDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a Lambda function definition."]
@@ -9901,9 +9995,9 @@ module DeleteDeviceDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DeviceDefinitionId") in
       make ~deviceDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deviceDefinitionId =
-        field_map_exn json "DeviceDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "DeviceDefinitionId" Zz__string.of_json in
       make ~deviceDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a device definition."]
@@ -9965,9 +10059,9 @@ module DeleteCoreDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CoreDefinitionId") in
       make ~coreDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let coreDefinitionId =
-        field_map_exn json "CoreDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "CoreDefinitionId" Zz__string.of_json in
       make ~coreDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a core definition."]
@@ -10029,9 +10123,9 @@ module DeleteConnectorDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectorDefinitionId") in
       make ~connectorDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectorDefinitionId =
-        field_map_exn json "ConnectorDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "ConnectorDefinitionId" Zz__string.of_json in
       make ~connectorDefinitionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a connector definition."]
@@ -10096,12 +10190,12 @@ module CreateSubscriptionDefinitionVersionResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?version ?id ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?version ?id ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10145,13 +10239,13 @@ module CreateSubscriptionDefinitionVersionRequest =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?subscriptions ~subscriptionDefinitionId ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptions =
-        field_map json "Subscriptions" Zz__listOfSubscription.of_json in
+        field_map json__ "Subscriptions" Zz__listOfSubscription.of_json in
       let subscriptionDefinitionId =
-        field_map_exn json "SubscriptionDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "SubscriptionDefinitionId" Zz__string.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ?subscriptions ~subscriptionDefinitionId ?amznClientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10253,17 +10347,17 @@ module CreateSubscriptionDefinitionResponse =
       make ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp ?id
         ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" Zz__string.of_json in
       let latestVersionArn =
-        field_map json "LatestVersionArn" Zz__string.of_json in
-      let latestVersion = field_map json "LatestVersion" Zz__string.of_json in
+        field_map json__ "LatestVersionArn" Zz__string.of_json in
+      let latestVersion = field_map json__ "LatestVersion" Zz__string.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "LastUpdatedTimestamp" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp ?id
         ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
@@ -10309,13 +10403,14 @@ module CreateSubscriptionDefinitionRequest =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?tags ?name ?initialVersion ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let initialVersion =
-        field_map json "InitialVersion" SubscriptionDefinitionVersion.of_json in
+        field_map json__ "InitialVersion"
+          SubscriptionDefinitionVersion.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ?tags ?name ?initialVersion ?amznClientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10390,11 +10485,11 @@ module CreateSoftwareUpdateJobResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "IotJobArn") in
       make ?platformSoftwareVersion ?iotJobId ?iotJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let platformSoftwareVersion =
-        field_map json "PlatformSoftwareVersion" Zz__string.of_json in
-      let iotJobId = field_map json "IotJobId" Zz__string.of_json in
-      let iotJobArn = field_map json "IotJobArn" Zz__string.of_json in
+        field_map json__ "PlatformSoftwareVersion" Zz__string.of_json in
+      let iotJobId = field_map json__ "IotJobId" Zz__string.of_json in
+      let iotJobArn = field_map json__ "IotJobArn" Zz__string.of_json in
       make ?platformSoftwareVersion ?iotJobId ?iotJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10477,23 +10572,23 @@ module CreateSoftwareUpdateJobRequest =
         ~updateTargets ?updateAgentLogLevel ~softwareToUpdate
         ~s3UrlSignerRole ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let updateTargetsOperatingSystem =
-        field_map_exn json "UpdateTargetsOperatingSystem"
+        field_map_exn json__ "UpdateTargetsOperatingSystem"
           UpdateTargetsOperatingSystem.of_json in
       let updateTargetsArchitecture =
-        field_map_exn json "UpdateTargetsArchitecture"
+        field_map_exn json__ "UpdateTargetsArchitecture"
           UpdateTargetsArchitecture.of_json in
       let updateTargets =
-        field_map_exn json "UpdateTargets" UpdateTargets.of_json in
+        field_map_exn json__ "UpdateTargets" UpdateTargets.of_json in
       let updateAgentLogLevel =
-        field_map json "UpdateAgentLogLevel" UpdateAgentLogLevel.of_json in
+        field_map json__ "UpdateAgentLogLevel" UpdateAgentLogLevel.of_json in
       let softwareToUpdate =
-        field_map_exn json "SoftwareToUpdate" SoftwareToUpdate.of_json in
+        field_map_exn json__ "SoftwareToUpdate" SoftwareToUpdate.of_json in
       let s3UrlSignerRole =
-        field_map_exn json "S3UrlSignerRole" S3UrlSignerRole.of_json in
+        field_map_exn json__ "S3UrlSignerRole" S3UrlSignerRole.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ~updateTargetsOperatingSystem ~updateTargetsArchitecture
         ~updateTargets ?updateAgentLogLevel ~softwareToUpdate
         ~s3UrlSignerRole ?amznClientToken ()
@@ -10561,12 +10656,12 @@ module CreateResourceDefinitionVersionResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?version ?id ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?version ?id ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10608,12 +10703,12 @@ module CreateResourceDefinitionVersionRequest =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?resources ~resourceDefinitionId ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resources = field_map json "Resources" Zz__listOfResource.of_json in
+    let of_json json__ =
+      let resources = field_map json__ "Resources" Zz__listOfResource.of_json in
       let resourceDefinitionId =
-        field_map_exn json "ResourceDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "ResourceDefinitionId" Zz__string.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ?resources ~resourceDefinitionId ?amznClientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10715,17 +10810,17 @@ module CreateResourceDefinitionResponse =
       make ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp ?id
         ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" Zz__string.of_json in
       let latestVersionArn =
-        field_map json "LatestVersionArn" Zz__string.of_json in
-      let latestVersion = field_map json "LatestVersion" Zz__string.of_json in
+        field_map json__ "LatestVersionArn" Zz__string.of_json in
+      let latestVersion = field_map json__ "LatestVersion" Zz__string.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "LastUpdatedTimestamp" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp ?id
         ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
@@ -10770,13 +10865,13 @@ module CreateResourceDefinitionRequest =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?tags ?name ?initialVersion ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let initialVersion =
-        field_map json "InitialVersion" ResourceDefinitionVersion.of_json in
+        field_map json__ "InitialVersion" ResourceDefinitionVersion.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ?tags ?name ?initialVersion ?amznClientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10842,12 +10937,12 @@ module CreateLoggerDefinitionVersionResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?version ?id ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?version ?id ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10887,12 +10982,12 @@ module CreateLoggerDefinitionVersionRequest =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?loggers ~loggerDefinitionId ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let loggers = field_map json "Loggers" Zz__listOfLogger.of_json in
+    let of_json json__ =
+      let loggers = field_map json__ "Loggers" Zz__listOfLogger.of_json in
       let loggerDefinitionId =
-        field_map_exn json "LoggerDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "LoggerDefinitionId" Zz__string.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ?loggers ~loggerDefinitionId ?amznClientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10994,17 +11089,17 @@ module CreateLoggerDefinitionResponse =
       make ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp ?id
         ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" Zz__string.of_json in
       let latestVersionArn =
-        field_map json "LatestVersionArn" Zz__string.of_json in
-      let latestVersion = field_map json "LatestVersion" Zz__string.of_json in
+        field_map json__ "LatestVersionArn" Zz__string.of_json in
+      let latestVersion = field_map json__ "LatestVersion" Zz__string.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "LastUpdatedTimestamp" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp ?id
         ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
@@ -11049,13 +11144,13 @@ module CreateLoggerDefinitionRequest =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?tags ?name ?initialVersion ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let initialVersion =
-        field_map json "InitialVersion" LoggerDefinitionVersion.of_json in
+        field_map json__ "InitialVersion" LoggerDefinitionVersion.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ?tags ?name ?initialVersion ?amznClientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11121,12 +11216,12 @@ module CreateGroupVersionResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?version ?id ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?version ?id ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11235,24 +11330,25 @@ module CreateGroupVersionRequest =
         ?deviceDefinitionVersionArn ?coreDefinitionVersionArn
         ?connectorDefinitionVersionArn ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionDefinitionVersionArn =
-        field_map json "SubscriptionDefinitionVersionArn" Zz__string.of_json in
+        field_map json__ "SubscriptionDefinitionVersionArn"
+          Zz__string.of_json in
       let resourceDefinitionVersionArn =
-        field_map json "ResourceDefinitionVersionArn" Zz__string.of_json in
+        field_map json__ "ResourceDefinitionVersionArn" Zz__string.of_json in
       let loggerDefinitionVersionArn =
-        field_map json "LoggerDefinitionVersionArn" Zz__string.of_json in
-      let groupId = field_map_exn json "GroupId" Zz__string.of_json in
+        field_map json__ "LoggerDefinitionVersionArn" Zz__string.of_json in
+      let groupId = field_map_exn json__ "GroupId" Zz__string.of_json in
       let functionDefinitionVersionArn =
-        field_map json "FunctionDefinitionVersionArn" Zz__string.of_json in
+        field_map json__ "FunctionDefinitionVersionArn" Zz__string.of_json in
       let deviceDefinitionVersionArn =
-        field_map json "DeviceDefinitionVersionArn" Zz__string.of_json in
+        field_map json__ "DeviceDefinitionVersionArn" Zz__string.of_json in
       let coreDefinitionVersionArn =
-        field_map json "CoreDefinitionVersionArn" Zz__string.of_json in
+        field_map json__ "CoreDefinitionVersionArn" Zz__string.of_json in
       let connectorDefinitionVersionArn =
-        field_map json "ConnectorDefinitionVersionArn" Zz__string.of_json in
+        field_map json__ "ConnectorDefinitionVersionArn" Zz__string.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ?subscriptionDefinitionVersionArn ?resourceDefinitionVersionArn
         ?loggerDefinitionVersionArn ~groupId ?functionDefinitionVersionArn
         ?deviceDefinitionVersionArn ?coreDefinitionVersionArn
@@ -11357,17 +11453,17 @@ module CreateGroupResponse =
       make ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp ?id
         ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" Zz__string.of_json in
       let latestVersionArn =
-        field_map json "LatestVersionArn" Zz__string.of_json in
-      let latestVersion = field_map json "LatestVersion" Zz__string.of_json in
+        field_map json__ "LatestVersionArn" Zz__string.of_json in
+      let latestVersion = field_map json__ "LatestVersion" Zz__string.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "LastUpdatedTimestamp" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp ?id
         ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
@@ -11411,13 +11507,13 @@ module CreateGroupRequest =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?tags ~name ?initialVersion ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map_exn json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map_exn json__ "Name" Zz__string.of_json in
       let initialVersion =
-        field_map json "InitialVersion" GroupVersion.of_json in
+        field_map json__ "InitialVersion" GroupVersion.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ?tags ~name ?initialVersion ?amznClientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11479,9 +11575,9 @@ module CreateGroupCertificateAuthorityResponse =
           (Xml.child xml_arg0 "GroupCertificateAuthorityArn") in
       make ?groupCertificateAuthorityArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let groupCertificateAuthorityArn =
-        field_map json "GroupCertificateAuthorityArn" Zz__string.of_json in
+        field_map json__ "GroupCertificateAuthorityArn" Zz__string.of_json in
       make ?groupCertificateAuthorityArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11512,10 +11608,10 @@ module CreateGroupCertificateAuthorityRequest =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ~groupId ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map_exn json "GroupId" Zz__string.of_json in
+    let of_json json__ =
+      let groupId = field_map_exn json__ "GroupId" Zz__string.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ~groupId ?amznClientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11581,12 +11677,12 @@ module CreateFunctionDefinitionVersionResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?version ?id ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?version ?id ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11645,14 +11741,14 @@ module CreateFunctionDefinitionVersionRequest =
       make ?functions ~functionDefinitionId ?defaultConfig ?amznClientToken
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let functions = field_map json "Functions" Zz__listOfFunction.of_json in
+    let of_json json__ =
+      let functions = field_map json__ "Functions" Zz__listOfFunction.of_json in
       let functionDefinitionId =
-        field_map_exn json "FunctionDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "FunctionDefinitionId" Zz__string.of_json in
       let defaultConfig =
-        field_map json "DefaultConfig" FunctionDefaultConfig.of_json in
+        field_map json__ "DefaultConfig" FunctionDefaultConfig.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ?functions ~functionDefinitionId ?defaultConfig ?amznClientToken
         ()
     let to_json v = composed_to_json to_value v
@@ -11755,17 +11851,17 @@ module CreateFunctionDefinitionResponse =
       make ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp ?id
         ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" Zz__string.of_json in
       let latestVersionArn =
-        field_map json "LatestVersionArn" Zz__string.of_json in
-      let latestVersion = field_map json "LatestVersion" Zz__string.of_json in
+        field_map json__ "LatestVersionArn" Zz__string.of_json in
+      let latestVersion = field_map json__ "LatestVersion" Zz__string.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "LastUpdatedTimestamp" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp ?id
         ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
@@ -11810,13 +11906,13 @@ module CreateFunctionDefinitionRequest =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?tags ?name ?initialVersion ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let initialVersion =
-        field_map json "InitialVersion" FunctionDefinitionVersion.of_json in
+        field_map json__ "InitialVersion" FunctionDefinitionVersion.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ?tags ?name ?initialVersion ?amznClientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11882,12 +11978,12 @@ module CreateDeviceDefinitionVersionResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?version ?id ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?version ?id ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11928,12 +12024,12 @@ module CreateDeviceDefinitionVersionRequest =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?devices ~deviceDefinitionId ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let devices = field_map json "Devices" Zz__listOfDevice.of_json in
+    let of_json json__ =
+      let devices = field_map json__ "Devices" Zz__listOfDevice.of_json in
       let deviceDefinitionId =
-        field_map_exn json "DeviceDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "DeviceDefinitionId" Zz__string.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ?devices ~deviceDefinitionId ?amznClientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12035,17 +12131,17 @@ module CreateDeviceDefinitionResponse =
       make ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp ?id
         ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" Zz__string.of_json in
       let latestVersionArn =
-        field_map json "LatestVersionArn" Zz__string.of_json in
-      let latestVersion = field_map json "LatestVersion" Zz__string.of_json in
+        field_map json__ "LatestVersionArn" Zz__string.of_json in
+      let latestVersion = field_map json__ "LatestVersion" Zz__string.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "LastUpdatedTimestamp" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp ?id
         ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
@@ -12090,13 +12186,13 @@ module CreateDeviceDefinitionRequest =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?tags ?name ?initialVersion ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let initialVersion =
-        field_map json "InitialVersion" DeviceDefinitionVersion.of_json in
+        field_map json__ "InitialVersion" DeviceDefinitionVersion.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ?tags ?name ?initialVersion ?amznClientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12152,9 +12248,9 @@ module CreateDeploymentResponse =
           (Xml.child xml_arg0 "DeploymentArn") in
       make ?deploymentId ?deploymentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deploymentId = field_map json "DeploymentId" Zz__string.of_json in
-      let deploymentArn = field_map json "DeploymentArn" Zz__string.of_json in
+    let of_json json__ =
+      let deploymentId = field_map json__ "DeploymentId" Zz__string.of_json in
+      let deploymentArn = field_map json__ "DeploymentArn" Zz__string.of_json in
       make ?deploymentId ?deploymentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12217,14 +12313,15 @@ module CreateDeploymentRequest =
       make ?groupVersionId ~groupId ~deploymentType ?deploymentId
         ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupVersionId = field_map json "GroupVersionId" Zz__string.of_json in
-      let groupId = field_map_exn json "GroupId" Zz__string.of_json in
+    let of_json json__ =
+      let groupVersionId =
+        field_map json__ "GroupVersionId" Zz__string.of_json in
+      let groupId = field_map_exn json__ "GroupId" Zz__string.of_json in
       let deploymentType =
-        field_map_exn json "DeploymentType" DeploymentType.of_json in
-      let deploymentId = field_map json "DeploymentId" Zz__string.of_json in
+        field_map_exn json__ "DeploymentType" DeploymentType.of_json in
+      let deploymentId = field_map json__ "DeploymentId" Zz__string.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ?groupVersionId ~groupId ~deploymentType ?deploymentId
         ?amznClientToken ()
     let to_json v = composed_to_json to_value v
@@ -12291,12 +12388,12 @@ module CreateCoreDefinitionVersionResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?version ?id ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?version ?id ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12335,12 +12432,12 @@ module CreateCoreDefinitionVersionRequest =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?cores ~coreDefinitionId ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cores = field_map json "Cores" Zz__listOfCore.of_json in
+    let of_json json__ =
+      let cores = field_map json__ "Cores" Zz__listOfCore.of_json in
       let coreDefinitionId =
-        field_map_exn json "CoreDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "CoreDefinitionId" Zz__string.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ?cores ~coreDefinitionId ?amznClientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12442,17 +12539,17 @@ module CreateCoreDefinitionResponse =
       make ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp ?id
         ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" Zz__string.of_json in
       let latestVersionArn =
-        field_map json "LatestVersionArn" Zz__string.of_json in
-      let latestVersion = field_map json "LatestVersion" Zz__string.of_json in
+        field_map json__ "LatestVersionArn" Zz__string.of_json in
+      let latestVersion = field_map json__ "LatestVersion" Zz__string.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "LastUpdatedTimestamp" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp ?id
         ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
@@ -12497,13 +12594,13 @@ module CreateCoreDefinitionRequest =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?tags ?name ?initialVersion ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let initialVersion =
-        field_map json "InitialVersion" CoreDefinitionVersion.of_json in
+        field_map json__ "InitialVersion" CoreDefinitionVersion.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ?tags ?name ?initialVersion ?amznClientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information needed to create a core definition."]
@@ -12568,12 +12665,12 @@ module CreateConnectorDefinitionVersionResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?version ?id ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?version ?id ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12616,13 +12713,13 @@ module CreateConnectorDefinitionVersionRequest =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?connectors ~connectorDefinitionId ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectors =
-        field_map json "Connectors" Zz__listOfConnector.of_json in
+        field_map json__ "Connectors" Zz__listOfConnector.of_json in
       let connectorDefinitionId =
-        field_map_exn json "ConnectorDefinitionId" Zz__string.of_json in
+        field_map_exn json__ "ConnectorDefinitionId" Zz__string.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ?connectors ~connectorDefinitionId ?amznClientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12724,17 +12821,17 @@ module CreateConnectorDefinitionResponse =
       make ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp ?id
         ?creationTimestamp ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" Zz__string.of_json in
       let latestVersionArn =
-        field_map json "LatestVersionArn" Zz__string.of_json in
-      let latestVersion = field_map json "LatestVersion" Zz__string.of_json in
+        field_map json__ "LatestVersionArn" Zz__string.of_json in
+      let latestVersion = field_map json__ "LatestVersion" Zz__string.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+        field_map json__ "LastUpdatedTimestamp" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       let creationTimestamp =
-        field_map json "CreationTimestamp" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTimestamp" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?name ?latestVersionArn ?latestVersion ?lastUpdatedTimestamp ?id
         ?creationTimestamp ?arn ()
     let to_json v = composed_to_json to_value v
@@ -12779,13 +12876,13 @@ module CreateConnectorDefinitionRequest =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?tags ?name ?initialVersion ?amznClientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let initialVersion =
-        field_map json "InitialVersion" ConnectorDefinitionVersion.of_json in
+        field_map json__ "InitialVersion" ConnectorDefinitionVersion.of_json in
       let amznClientToken =
-        field_map json "AmznClientToken" Zz__string.of_json in
+        field_map json__ "AmznClientToken" Zz__string.of_json in
       make ?tags ?name ?initialVersion ?amznClientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12845,8 +12942,8 @@ module AssociateServiceRoleToAccountResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "AssociatedAt") in
       make ?associatedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let associatedAt = field_map json "AssociatedAt" Zz__string.of_json in
+    let of_json json__ =
+      let associatedAt = field_map json__ "AssociatedAt" Zz__string.of_json in
       make ?associatedAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12870,8 +12967,8 @@ module AssociateServiceRoleToAccountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
       make ~roleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map_exn json "RoleArn" Zz__string.of_json in
+    let of_json json__ =
+      let roleArn = field_map_exn json__ "RoleArn" Zz__string.of_json in
       make ~roleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12931,8 +13028,8 @@ module AssociateRoleToGroupResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "AssociatedAt") in
       make ?associatedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let associatedAt = field_map json "AssociatedAt" Zz__string.of_json in
+    let of_json json__ =
+      let associatedAt = field_map json__ "AssociatedAt" Zz__string.of_json in
       make ?associatedAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12961,9 +13058,9 @@ module AssociateRoleToGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       make ~roleArn ~groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map_exn json "RoleArn" Zz__string.of_json in
-      let groupId = field_map_exn json "GroupId" Zz__string.of_json in
+    let of_json json__ =
+      let roleArn = field_map_exn json__ "RoleArn" Zz__string.of_json in
+      let groupId = field_map_exn json__ "GroupId" Zz__string.of_json in
       make ~roleArn ~groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

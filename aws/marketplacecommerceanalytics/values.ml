@@ -103,8 +103,8 @@ module MarketplaceCommerceAnalyticsException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -134,6 +134,8 @@ module CustomerDefinedValues =
                     (fun x -> (OptionalValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -146,7 +148,11 @@ module DestinationS3BucketName =
     type nonrec t = string
     let context_ = "DestinationS3BucketName"
     let make i =
-      let open Result in ok_or_failwith (check_string_min i ~min:1); i
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:63) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -185,7 +191,11 @@ module RoleNameArn =
     type nonrec t = string
     let context_ = "RoleNameArn"
     let make i =
-      let open Result in ok_or_failwith (check_string_min i ~min:1); i
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -199,7 +209,11 @@ module SnsTopicArn =
     type nonrec t = string
     let context_ = "SnsTopicArn"
     let make i =
-      let open Result in ok_or_failwith (check_string_min i ~min:1); i
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -384,7 +398,7 @@ module StartSupportDataExportResult =
       {
       dataSetRequestId: DataSetRequestId.t option
         [@ocaml.doc
-          "A unique identifier representing a specific request to the StartSupportDataExport operation. This identifier can be used to correlate a request with notifications from the SNS topic."]}
+          "This target has been deprecated. A unique identifier representing a specific request to the StartSupportDataExport operation. This identifier can be used to correlate a request with notifications from the SNS topic."]}
     type nonrec error =
       [
         `MarketplaceCommerceAnalyticsException of
@@ -428,38 +442,38 @@ module StartSupportDataExportResult =
           (Xml.child xml_arg0 "dataSetRequestId") in
       make ?dataSetRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataSetRequestId =
-        field_map json "dataSetRequestId" DataSetRequestId.of_json in
+        field_map json__ "dataSetRequestId" DataSetRequestId.of_json in
       make ?dataSetRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Container for the result of the StartSupportDataExport operation."]
+       "This target has been deprecated. Container for the result of the StartSupportDataExport operation."]
 module StartSupportDataExportRequest =
   struct
     type nonrec t =
       {
       dataSetType: SupportDataSetType.t
         [@ocaml.doc
-          "Specifies the data set type to be written to the output csv file. The data set types customer_support_contacts_data and test_customer_support_contacts_data both result in a csv file containing the following fields: Product Id, Product Code, Customer Guid, Subscription Guid, Subscription Start Date, Organization, AWS Account Id, Given Name, Surname, Telephone Number, Email, Title, Country Code, ZIP Code, Operation Type, and Operation Time. customer_support_contacts_data Customer support contact data. The data set will contain all changes (Creates, Updates, and Deletes) to customer support contact data from the date specified in the from_date parameter. test_customer_support_contacts_data An example data set containing static test data in the same format as customer_support_contacts_data"];
+          "This target has been deprecated. Specifies the data set type to be written to the output csv file. The data set types customer_support_contacts_data and test_customer_support_contacts_data both result in a csv file containing the following fields: Product Id, Product Code, Customer Guid, Subscription Guid, Subscription Start Date, Organization, AWS Account Id, Given Name, Surname, Telephone Number, Email, Title, Country Code, ZIP Code, Operation Type, and Operation Time. customer_support_contacts_data Customer support contact data. The data set will contain all changes (Creates, Updates, and Deletes) to customer support contact data from the date specified in the from_date parameter. test_customer_support_contacts_data An example data set containing static test data in the same format as customer_support_contacts_data"];
       fromDate: FromDate.t
         [@ocaml.doc
-          "The start date from which to retrieve the data set in UTC. This parameter only affects the customer_support_contacts_data data set type."];
+          "This target has been deprecated. The start date from which to retrieve the data set in UTC. This parameter only affects the customer_support_contacts_data data set type."];
       roleNameArn: RoleNameArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Role with an attached permissions policy to interact with the provided AWS services."];
+          "This target has been deprecated. The Amazon Resource Name (ARN) of the Role with an attached permissions policy to interact with the provided AWS services."];
       destinationS3BucketName: DestinationS3BucketName.t
         [@ocaml.doc
-          "The name (friendly name, not ARN) of the destination S3 bucket."];
+          "This target has been deprecated. The name (friendly name, not ARN) of the destination S3 bucket."];
       destinationS3Prefix: DestinationS3Prefix.t option
         [@ocaml.doc
-          "(Optional) The desired S3 prefix for the published data set, similar to a directory path in standard file systems. For example, if given the bucket name \"mybucket\" and the prefix \"myprefix/mydatasets\", the output file \"outputfile\" would be published to \"s3://mybucket/myprefix/mydatasets/outputfile\". If the prefix directory structure does not exist, it will be created. If no prefix is provided, the data set will be published to the S3 bucket root."];
+          "This target has been deprecated. (Optional) The desired S3 prefix for the published data set, similar to a directory path in standard file systems. For example, if given the bucket name \"mybucket\" and the prefix \"myprefix/mydatasets\", the output file \"outputfile\" would be published to \"s3://mybucket/myprefix/mydatasets/outputfile\". If the prefix directory structure does not exist, it will be created. If no prefix is provided, the data set will be published to the S3 bucket root."];
       snsTopicArn: SnsTopicArn.t
         [@ocaml.doc
-          "Amazon Resource Name (ARN) for the SNS Topic that will be notified when the data set has been published or if an error has occurred."];
+          "This target has been deprecated. Amazon Resource Name (ARN) for the SNS Topic that will be notified when the data set has been published or if an error has occurred."];
       customerDefinedValues: CustomerDefinedValues.t option
         [@ocaml.doc
-          "(Optional) Key-value pairs which will be returned, unmodified, in the Amazon SNS notification message and the data set metadata file."]}
+          "This target has been deprecated. (Optional) Key-value pairs which will be returned, unmodified, in the Amazon SNS notification message and the data set metadata file."]}
     let context_ = "StartSupportDataExportRequest"
     let make ?destinationS3Prefix =
       fun ?customerDefinedValues ->
@@ -516,24 +530,27 @@ module StartSupportDataExportRequest =
       make ?customerDefinedValues ~snsTopicArn ?destinationS3Prefix
         ~destinationS3BucketName ~roleNameArn ~fromDate ~dataSetType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customerDefinedValues =
-        field_map json "customerDefinedValues" CustomerDefinedValues.of_json in
-      let snsTopicArn = field_map_exn json "snsTopicArn" SnsTopicArn.of_json in
+        field_map json__ "customerDefinedValues"
+          CustomerDefinedValues.of_json in
+      let snsTopicArn =
+        field_map_exn json__ "snsTopicArn" SnsTopicArn.of_json in
       let destinationS3Prefix =
-        field_map json "destinationS3Prefix" DestinationS3Prefix.of_json in
+        field_map json__ "destinationS3Prefix" DestinationS3Prefix.of_json in
       let destinationS3BucketName =
-        field_map_exn json "destinationS3BucketName"
+        field_map_exn json__ "destinationS3BucketName"
           DestinationS3BucketName.of_json in
-      let roleNameArn = field_map_exn json "roleNameArn" RoleNameArn.of_json in
-      let fromDate = field_map_exn json "fromDate" FromDate.of_json in
+      let roleNameArn =
+        field_map_exn json__ "roleNameArn" RoleNameArn.of_json in
+      let fromDate = field_map_exn json__ "fromDate" FromDate.of_json in
       let dataSetType =
-        field_map_exn json "dataSetType" SupportDataSetType.of_json in
+        field_map_exn json__ "dataSetType" SupportDataSetType.of_json in
       make ?customerDefinedValues ~snsTopicArn ?destinationS3Prefix
         ~destinationS3BucketName ~roleNameArn ~fromDate ~dataSetType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Container for the parameters to the StartSupportDataExport operation."]
+       "This target has been deprecated. Container for the parameters to the StartSupportDataExport operation."]
 module GenerateDataSetResult =
   struct
     type nonrec t =
@@ -584,9 +601,9 @@ module GenerateDataSetResult =
           (Xml.child xml_arg0 "dataSetRequestId") in
       make ?dataSetRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataSetRequestId =
-        field_map json "dataSetRequestId" DataSetRequestId.of_json in
+        field_map json__ "dataSetRequestId" DataSetRequestId.of_json in
       make ?dataSetRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -675,20 +692,24 @@ module GenerateDataSetRequest =
         ~destinationS3BucketName ~roleNameArn ~dataSetPublicationDate
         ~dataSetType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customerDefinedValues =
-        field_map json "customerDefinedValues" CustomerDefinedValues.of_json in
-      let snsTopicArn = field_map_exn json "snsTopicArn" SnsTopicArn.of_json in
+        field_map json__ "customerDefinedValues"
+          CustomerDefinedValues.of_json in
+      let snsTopicArn =
+        field_map_exn json__ "snsTopicArn" SnsTopicArn.of_json in
       let destinationS3Prefix =
-        field_map json "destinationS3Prefix" DestinationS3Prefix.of_json in
+        field_map json__ "destinationS3Prefix" DestinationS3Prefix.of_json in
       let destinationS3BucketName =
-        field_map_exn json "destinationS3BucketName"
+        field_map_exn json__ "destinationS3BucketName"
           DestinationS3BucketName.of_json in
-      let roleNameArn = field_map_exn json "roleNameArn" RoleNameArn.of_json in
+      let roleNameArn =
+        field_map_exn json__ "roleNameArn" RoleNameArn.of_json in
       let dataSetPublicationDate =
-        field_map_exn json "dataSetPublicationDate"
+        field_map_exn json__ "dataSetPublicationDate"
           DataSetPublicationDate.of_json in
-      let dataSetType = field_map_exn json "dataSetType" DataSetType.of_json in
+      let dataSetType =
+        field_map_exn json__ "dataSetType" DataSetType.of_json in
       make ?customerDefinedValues ~snsTopicArn ?destinationS3Prefix
         ~destinationS3BucketName ~roleNameArn ~dataSetPublicationDate
         ~dataSetType ()

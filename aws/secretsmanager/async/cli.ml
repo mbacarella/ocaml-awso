@@ -28,6 +28,35 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let batch_get_secret_value =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and secretIdList =
+         flag "secret-id-list" (optional json_arg)
+           ~doc:"JSON SecretIdListType"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FiltersListType"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsBatchType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextTokenType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_secret_value
+           (Values.BatchGetSecretValueRequest.make
+              ?secretIdList:(Option.map ~f:Values.SecretIdListType.of_json
+                               secretIdList)
+              ?filters:(Option.map ~f:Values.FiltersListType.of_json filters)
+              ?maxResults ?nextToken ())
+           (Some Values.BatchGetSecretValueResponse.to_json)
+           (Some Values.BatchGetSecretValueResponse.error_to_json)])
 let cancel_rotate_secret =
   Command.async ~summary:""
     ([%map_open.Command
@@ -76,6 +105,7 @@ let create_secret =
        and forceOverwriteReplicaSecret =
          flag "force-overwrite-replica-secret" (optional bool)
            ~doc:"BOOL BooleanType"
+       and type_ = flag "type-" (optional string) ~doc:"STRING MedeaTypeType"
        and name = flag "name" (required string) ~doc:"STRING NameType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -88,7 +118,7 @@ let create_secret =
               ?addReplicaRegions:(Option.map
                                     ~f:Values.AddReplicaRegionListType.of_json
                                     addReplicaRegions)
-              ?forceOverwriteReplicaSecret ~name ())
+              ?forceOverwriteReplicaSecret ?type_ ~name ())
            (Some Values.CreateSecretResponse.to_json)
            (Some Values.CreateSecretResponse.error_to_json)])
 let delete_resource_policy =
@@ -276,6 +306,9 @@ let list_secrets =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and includePlannedDeletion =
+         flag "include-planned-deletion" (optional bool)
+           ~doc:"BOOL BooleanType"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResultsType"
        and nextToken =
@@ -283,14 +316,17 @@ let list_secrets =
        and filters =
          flag "filters" (optional json_arg) ~doc:"JSON FiltersListType"
        and sortOrder =
-         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrderType" in
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrderType"
+       and sortBy = flag "sort-by" (optional json_arg) ~doc:"JSON SortByType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_secrets
-           (Values.ListSecretsRequest.make ?maxResults ?nextToken
+           (Values.ListSecretsRequest.make ?includePlannedDeletion
+              ?maxResults ?nextToken
               ?filters:(Option.map ~f:Values.FiltersListType.of_json filters)
               ?sortOrder:(Option.map ~f:Values.SortOrderType.of_json
-                            sortOrder) ())
+                            sortOrder)
+              ?sortBy:(Option.map ~f:Values.SortByType.of_json sortBy) ())
            (Some Values.ListSecretsResponse.to_json)
            (Some Values.ListSecretsResponse.error_to_json)])
 let put_resource_policy =
@@ -339,6 +375,9 @@ let put_secret_value =
        and versionStages =
          flag "version-stages" (optional json_arg)
            ~doc:"JSON SecretVersionStagesType"
+       and rotationToken =
+         flag "rotation-token" (optional string)
+           ~doc:"STRING RotationTokenType"
        and secretId =
          flag "secret-id" (required string) ~doc:"STRING SecretIdType" in
        fun () ->
@@ -349,7 +388,7 @@ let put_secret_value =
                                secretBinary) ?secretString
               ?versionStages:(Option.map
                                 ~f:Values.SecretVersionStagesType.of_json
-                                versionStages) ~secretId ())
+                                versionStages) ?rotationToken ~secretId ())
            (Some Values.PutSecretValueResponse.to_json)
            (Some Values.PutSecretValueResponse.error_to_json)])
 let remove_regions_from_replication =
@@ -438,6 +477,12 @@ let rotate_secret =
        and rotationRules =
          flag "rotation-rules" (optional json_arg)
            ~doc:"JSON RotationRulesType"
+       and externalSecretRotationMetadata =
+         flag "external-secret-rotation-metadata" (optional json_arg)
+           ~doc:"JSON ExternalSecretRotationMetadataType"
+       and externalSecretRotationRoleArn =
+         flag "external-secret-rotation-role-arn" (optional string)
+           ~doc:"STRING RoleARNType"
        and rotateImmediately =
          flag "rotate-immediately" (optional bool) ~doc:"BOOL BooleanType"
        and secretId =
@@ -448,8 +493,12 @@ let rotate_secret =
            (Values.RotateSecretRequest.make ?clientRequestToken
               ?rotationLambdaARN
               ?rotationRules:(Option.map ~f:Values.RotationRulesType.of_json
-                                rotationRules) ?rotateImmediately ~secretId
-              ()) (Some Values.RotateSecretResponse.to_json)
+                                rotationRules)
+              ?externalSecretRotationMetadata:(Option.map
+                                                 ~f:Values.ExternalSecretRotationMetadataType.of_json
+                                                 externalSecretRotationMetadata)
+              ?externalSecretRotationRoleArn ?rotateImmediately ~secretId ())
+           (Some Values.RotateSecretResponse.to_json)
            (Some Values.RotateSecretResponse.error_to_json)])
 let stop_replication_to_replica =
   Command.async ~summary:""
@@ -529,6 +578,7 @@ let update_secret =
        and secretString =
          flag "secret-string" (optional string)
            ~doc:"STRING SecretStringType"
+       and type_ = flag "type-" (optional string) ~doc:"STRING MedeaTypeType"
        and secretId =
          flag "secret-id" (required string) ~doc:"STRING SecretIdType" in
        fun () ->
@@ -537,8 +587,8 @@ let update_secret =
            (Values.UpdateSecretRequest.make ?clientRequestToken ?description
               ?kmsKeyId
               ?secretBinary:(Option.map ~f:Values.SecretBinaryType.of_json
-                               secretBinary) ?secretString ~secretId ())
-           (Some Values.UpdateSecretResponse.to_json)
+                               secretBinary) ?secretString ?type_ ~secretId
+              ()) (Some Values.UpdateSecretResponse.to_json)
            (Some Values.UpdateSecretResponse.error_to_json)])
 let update_secret_version_stage =
   Command.async ~summary:""
@@ -593,7 +643,8 @@ let validate_resource_policy =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("cancel-rotate-secret", cancel_rotate_secret);
+    [("batch-get-secret-value", batch_get_secret_value);
+    ("cancel-rotate-secret", cancel_rotate_secret);
     ("create-secret", create_secret);
     ("delete-resource-policy", delete_resource_policy);
     ("delete-secret", delete_secret);

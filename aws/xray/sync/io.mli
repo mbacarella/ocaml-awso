@@ -5,6 +5,12 @@ val batch_get_traces :
     ?cfg:Awso.Cfg.t ->
       BatchGetTracesRequest.t ->
         (BatchGetTracesResult.t, BatchGetTracesResult.error) Result.t
+val cancel_trace_retrieval :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CancelTraceRetrievalRequest.t ->
+        (CancelTraceRetrievalResult.t, CancelTraceRetrievalResult.error)
+          Result.t
 val create_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -20,6 +26,12 @@ val delete_group :
     ?cfg:Awso.Cfg.t ->
       DeleteGroupRequest.t ->
         (DeleteGroupResult.t, DeleteGroupResult.error) Result.t
+val delete_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteResourcePolicyRequest.t ->
+        (DeleteResourcePolicyResult.t, DeleteResourcePolicyResult.error)
+          Result.t
 val delete_sampling_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -40,6 +52,11 @@ val get_groups :
     ?cfg:Awso.Cfg.t ->
       GetGroupsRequest.t ->
         (GetGroupsResult.t, GetGroupsResult.error) Result.t
+val get_indexing_rules :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetIndexingRulesRequest.t ->
+        (GetIndexingRulesResult.t, GetIndexingRulesResult.error) Result.t
 val get_insight :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -62,6 +79,12 @@ val get_insight_summaries :
       GetInsightSummariesRequest.t ->
         (GetInsightSummariesResult.t, GetInsightSummariesResult.error)
           Result.t
+val get_retrieved_traces_graph :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetRetrievedTracesGraphRequest.t ->
+        (GetRetrievedTracesGraphResult.t,
+          GetRetrievedTracesGraphResult.error) Result.t
 val get_sampling_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -94,11 +117,29 @@ val get_trace_graph :
     ?cfg:Awso.Cfg.t ->
       GetTraceGraphRequest.t ->
         (GetTraceGraphResult.t, GetTraceGraphResult.error) Result.t
+val get_trace_segment_destination :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetTraceSegmentDestinationRequest.t ->
+        (GetTraceSegmentDestinationResult.t,
+          GetTraceSegmentDestinationResult.error) Result.t
 val get_trace_summaries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetTraceSummariesRequest.t ->
         (GetTraceSummariesResult.t, GetTraceSummariesResult.error) Result.t
+val list_resource_policies :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListResourcePoliciesRequest.t ->
+        (ListResourcePoliciesResult.t, ListResourcePoliciesResult.error)
+          Result.t
+val list_retrieved_traces :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListRetrievedTracesRequest.t ->
+        (ListRetrievedTracesResult.t, ListRetrievedTracesResult.error)
+          Result.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -111,6 +152,11 @@ val put_encryption_config :
       PutEncryptionConfigRequest.t ->
         (PutEncryptionConfigResult.t, PutEncryptionConfigResult.error)
           Result.t
+val put_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutResourcePolicyRequest.t ->
+        (PutResourcePolicyResult.t, PutResourcePolicyResult.error) Result.t
 val put_telemetry_records :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -122,6 +168,12 @@ val put_trace_segments :
     ?cfg:Awso.Cfg.t ->
       PutTraceSegmentsRequest.t ->
         (PutTraceSegmentsResult.t, PutTraceSegmentsResult.error) Result.t
+val start_trace_retrieval :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartTraceRetrievalRequest.t ->
+        (StartTraceRetrievalResult.t, StartTraceRetrievalResult.error)
+          Result.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -137,8 +189,19 @@ val update_group :
     ?cfg:Awso.Cfg.t ->
       UpdateGroupRequest.t ->
         (UpdateGroupResult.t, UpdateGroupResult.error) Result.t
+val update_indexing_rule :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateIndexingRuleRequest.t ->
+        (UpdateIndexingRuleResult.t, UpdateIndexingRuleResult.error) Result.t
 val update_sampling_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSamplingRuleRequest.t ->
         (UpdateSamplingRuleResult.t, UpdateSamplingRuleResult.error) Result.t
+val update_trace_segment_destination :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateTraceSegmentDestinationRequest.t ->
+        (UpdateTraceSegmentDestinationResult.t,
+          UpdateTraceSegmentDestinationResult.error) Result.t

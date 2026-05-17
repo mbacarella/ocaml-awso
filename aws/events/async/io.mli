@@ -320,3 +320,9 @@ val update_endpoint :
       UpdateEndpointRequest.t ->
         (UpdateEndpointResponse.t, UpdateEndpointResponse.error) Result.t
           Async.Deferred.t
+val update_event_bus :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateEventBusRequest.t ->
+        (UpdateEventBusResponse.t, UpdateEventBusResponse.error) Result.t
+          Async.Deferred.t

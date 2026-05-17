@@ -38,16 +38,57 @@ let associate_browser_settings =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and portalArn = flag "portal-arn" (required string) ~doc:"STRING ARN"
        and browserSettingsArn =
-         flag "browser-settings-arn" (required string) ~doc:"STRING ARN"
-       and portalArn = flag "portal-arn" (required string) ~doc:"STRING ARN" in
+         flag "browser-settings-arn" (required string) ~doc:"STRING ARN" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.associate_browser_settings
-           (Values.AssociateBrowserSettingsRequest.make ~browserSettingsArn
-              ~portalArn ())
+           (Values.AssociateBrowserSettingsRequest.make ~portalArn
+              ~browserSettingsArn ())
            (Some Values.AssociateBrowserSettingsResponse.to_json)
            (Some Values.AssociateBrowserSettingsResponse.error_to_json)])
+let associate_data_protection_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and portalArn = flag "portal-arn" (required string) ~doc:"STRING ARN"
+       and dataProtectionSettingsArn =
+         flag "data-protection-settings-arn" (required string)
+           ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_data_protection_settings
+           (Values.AssociateDataProtectionSettingsRequest.make ~portalArn
+              ~dataProtectionSettingsArn ())
+           (Some Values.AssociateDataProtectionSettingsResponse.to_json)
+           (Some Values.AssociateDataProtectionSettingsResponse.error_to_json)])
+let associate_ip_access_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and portalArn = flag "portal-arn" (required string) ~doc:"STRING ARN"
+       and ipAccessSettingsArn =
+         flag "ip-access-settings-arn" (required string) ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_ip_access_settings
+           (Values.AssociateIpAccessSettingsRequest.make ~portalArn
+              ~ipAccessSettingsArn ())
+           (Some Values.AssociateIpAccessSettingsResponse.to_json)
+           (Some Values.AssociateIpAccessSettingsResponse.error_to_json)])
 let associate_network_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -58,16 +99,36 @@ let associate_network_settings =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and portalArn = flag "portal-arn" (required string) ~doc:"STRING ARN"
        and networkSettingsArn =
-         flag "network-settings-arn" (required string) ~doc:"STRING ARN"
-       and portalArn = flag "portal-arn" (required string) ~doc:"STRING ARN" in
+         flag "network-settings-arn" (required string) ~doc:"STRING ARN" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.associate_network_settings
-           (Values.AssociateNetworkSettingsRequest.make ~networkSettingsArn
-              ~portalArn ())
+           (Values.AssociateNetworkSettingsRequest.make ~portalArn
+              ~networkSettingsArn ())
            (Some Values.AssociateNetworkSettingsResponse.to_json)
            (Some Values.AssociateNetworkSettingsResponse.error_to_json)])
+let associate_session_logger =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and portalArn = flag "portal-arn" (required string) ~doc:"STRING ARN"
+       and sessionLoggerArn =
+         flag "session-logger-arn" (required string) ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_session_logger
+           (Values.AssociateSessionLoggerRequest.make ~portalArn
+              ~sessionLoggerArn ())
+           (Some Values.AssociateSessionLoggerResponse.to_json)
+           (Some Values.AssociateSessionLoggerResponse.error_to_json)])
 let associate_trust_store =
   Command.async ~summary:""
     ([%map_open.Command
@@ -87,6 +148,28 @@ let associate_trust_store =
            (Values.AssociateTrustStoreRequest.make ~portalArn ~trustStoreArn
               ()) (Some Values.AssociateTrustStoreResponse.to_json)
            (Some Values.AssociateTrustStoreResponse.error_to_json)])
+let associate_user_access_logging_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and portalArn = flag "portal-arn" (required string) ~doc:"STRING ARN"
+       and userAccessLoggingSettingsArn =
+         flag "user-access-logging-settings-arn" (required string)
+           ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_user_access_logging_settings
+           (Values.AssociateUserAccessLoggingSettingsRequest.make ~portalArn
+              ~userAccessLoggingSettingsArn ())
+           (Some Values.AssociateUserAccessLoggingSettingsResponse.to_json)
+           (Some
+              Values.AssociateUserAccessLoggingSettingsResponse.error_to_json)])
 let associate_user_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -117,28 +200,74 @@ let create_browser_settings =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and customerManagedKey =
+         flag "customer-managed-key" (optional string) ~doc:"STRING keyArn"
        and additionalEncryptionContext =
          flag "additional-encryption-context" (optional json_arg)
            ~doc:"JSON EncryptionContextMap"
+       and browserPolicy =
+         flag "browser-policy" (optional string) ~doc:"STRING BrowserPolicy"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
-       and customerManagedKey =
-         flag "customer-managed-key" (optional string) ~doc:"STRING keyArn"
-       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
-       and browserPolicy =
-         flag "browser-policy" (required string) ~doc:"STRING BrowserPolicy" in
+       and webContentFilteringPolicy =
+         flag "web-content-filtering-policy" (optional json_arg)
+           ~doc:"JSON WebContentFilteringPolicy" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_browser_settings
            (Values.CreateBrowserSettingsRequest.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?customerManagedKey
               ?additionalEncryptionContext:(Option.map
                                               ~f:Values.EncryptionContextMap.of_json
                                               additionalEncryptionContext)
-              ?clientToken ?customerManagedKey
-              ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ~browserPolicy ())
+              ?browserPolicy ?clientToken
+              ?webContentFilteringPolicy:(Option.map
+                                            ~f:Values.WebContentFilteringPolicy.of_json
+                                            webContentFilteringPolicy) ())
            (Some Values.CreateBrowserSettingsResponse.to_json)
            (Some Values.CreateBrowserSettingsResponse.error_to_json)])
+let create_data_protection_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and displayName =
+         flag "display-name" (optional string) ~doc:"STRING DisplayNameSafe"
+       and description =
+         flag "description" (optional string) ~doc:"STRING DescriptionSafe"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and customerManagedKey =
+         flag "customer-managed-key" (optional string) ~doc:"STRING keyArn"
+       and additionalEncryptionContext =
+         flag "additional-encryption-context" (optional json_arg)
+           ~doc:"JSON EncryptionContextMap"
+       and inlineRedactionConfiguration =
+         flag "inline-redaction-configuration" (optional json_arg)
+           ~doc:"JSON InlineRedactionConfiguration"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_data_protection_settings
+           (Values.CreateDataProtectionSettingsRequest.make ?displayName
+              ?description ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?customerManagedKey
+              ?additionalEncryptionContext:(Option.map
+                                              ~f:Values.EncryptionContextMap.of_json
+                                              additionalEncryptionContext)
+              ?inlineRedactionConfiguration:(Option.map
+                                               ~f:Values.InlineRedactionConfiguration.of_json
+                                               inlineRedactionConfiguration)
+              ?clientToken ())
+           (Some Values.CreateDataProtectionSettingsResponse.to_json)
+           (Some Values.CreateDataProtectionSettingsResponse.error_to_json)])
 let create_identity_provider =
   Command.async ~summary:""
     ([%map_open.Command
@@ -151,27 +280,65 @@ let create_identity_provider =
            ~doc:"URL override endpoint url"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
-       and identityProviderDetails =
-         flag "identity-provider-details" (required json_arg)
-           ~doc:"JSON IdentityProviderDetails"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and portalArn = flag "portal-arn" (required string) ~doc:"STRING ARN"
        and identityProviderName =
          flag "identity-provider-name" (required string)
            ~doc:"STRING IdentityProviderName"
        and identityProviderType =
          flag "identity-provider-type" (required json_arg)
            ~doc:"JSON IdentityProviderType"
-       and portalArn = flag "portal-arn" (required string) ~doc:"STRING ARN" in
+       and identityProviderDetails =
+         flag "identity-provider-details" (required json_arg)
+           ~doc:"JSON IdentityProviderDetails" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_identity_provider
            (Values.CreateIdentityProviderRequest.make ?clientToken
-              ~identityProviderDetails:(Values.IdentityProviderDetails.of_json
-                                          identityProviderDetails)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~portalArn
               ~identityProviderName
               ~identityProviderType:(Values.IdentityProviderType.of_json
-                                       identityProviderType) ~portalArn ())
+                                       identityProviderType)
+              ~identityProviderDetails:(Values.IdentityProviderDetails.of_json
+                                          identityProviderDetails) ())
            (Some Values.CreateIdentityProviderResponse.to_json)
            (Some Values.CreateIdentityProviderResponse.error_to_json)])
+let create_ip_access_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and displayName =
+         flag "display-name" (optional string) ~doc:"STRING DisplayName"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and customerManagedKey =
+         flag "customer-managed-key" (optional string) ~doc:"STRING keyArn"
+       and additionalEncryptionContext =
+         flag "additional-encryption-context" (optional json_arg)
+           ~doc:"JSON EncryptionContextMap"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and ipRules =
+         flag "ip-rules" (required json_arg) ~doc:"JSON IpRuleList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_ip_access_settings
+           (Values.CreateIpAccessSettingsRequest.make ?displayName
+              ?description ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?customerManagedKey
+              ?additionalEncryptionContext:(Option.map
+                                              ~f:Values.EncryptionContextMap.of_json
+                                              additionalEncryptionContext)
+              ?clientToken ~ipRules:(Values.IpRuleList.of_json ipRules) ())
+           (Some Values.CreateIpAccessSettingsResponse.to_json)
+           (Some Values.CreateIpAccessSettingsResponse.error_to_json)])
 let create_network_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -182,23 +349,23 @@ let create_network_settings =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
-       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
-       and securityGroupIds =
-         flag "security-group-ids" (required json_arg)
-           ~doc:"JSON SecurityGroupIdList"
+       and vpcId = flag "vpc-id" (required string) ~doc:"STRING VpcId"
        and subnetIds =
          flag "subnet-ids" (required json_arg) ~doc:"JSON SubnetIdList"
-       and vpcId = flag "vpc-id" (required string) ~doc:"STRING VpcId" in
+       and securityGroupIds =
+         flag "security-group-ids" (required json_arg)
+           ~doc:"JSON SecurityGroupIdList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_network_settings
-           (Values.CreateNetworkSettingsRequest.make ?clientToken
-              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+           (Values.CreateNetworkSettingsRequest.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ?clientToken
+              ~vpcId ~subnetIds:(Values.SubnetIdList.of_json subnetIds)
               ~securityGroupIds:(Values.SecurityGroupIdList.of_json
-                                   securityGroupIds)
-              ~subnetIds:(Values.SubnetIdList.of_json subnetIds) ~vpcId ())
+                                   securityGroupIds) ())
            (Some Values.CreateNetworkSettingsResponse.to_json)
            (Some Values.CreateNetworkSettingsResponse.error_to_json)])
 let create_portal =
@@ -211,27 +378,84 @@ let create_portal =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and displayName =
+         flag "display-name" (optional string) ~doc:"STRING DisplayName"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and customerManagedKey =
+         flag "customer-managed-key" (optional string) ~doc:"STRING keyArn"
        and additionalEncryptionContext =
          flag "additional-encryption-context" (optional json_arg)
            ~doc:"JSON EncryptionContextMap"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
-       and customerManagedKey =
-         flag "customer-managed-key" (optional string) ~doc:"STRING keyArn"
-       and displayName =
-         flag "display-name" (optional string) ~doc:"STRING DisplayName"
-       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList" in
+       and authenticationType =
+         flag "authentication-type" (optional json_arg)
+           ~doc:"JSON AuthenticationType"
+       and instanceType =
+         flag "instance-type" (optional json_arg) ~doc:"JSON InstanceType"
+       and maxConcurrentSessions =
+         flag "max-concurrent-sessions" (optional int)
+           ~doc:"INT MaxConcurrentSessions"
+       and portalCustomDomain =
+         flag "portal-custom-domain" (optional string)
+           ~doc:"STRING PortalCustomDomain" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_portal
-           (Values.CreatePortalRequest.make
+           (Values.CreatePortalRequest.make ?displayName
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?customerManagedKey
               ?additionalEncryptionContext:(Option.map
                                               ~f:Values.EncryptionContextMap.of_json
                                               additionalEncryptionContext)
-              ?clientToken ?customerManagedKey ?displayName
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ())
+              ?clientToken
+              ?authenticationType:(Option.map
+                                     ~f:Values.AuthenticationType.of_json
+                                     authenticationType)
+              ?instanceType:(Option.map ~f:Values.InstanceType.of_json
+                               instanceType) ?maxConcurrentSessions
+              ?portalCustomDomain ())
            (Some Values.CreatePortalResponse.to_json)
            (Some Values.CreatePortalResponse.error_to_json)])
+let create_session_logger =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and displayName =
+         flag "display-name" (optional string) ~doc:"STRING DisplayNameSafe"
+       and customerManagedKey =
+         flag "customer-managed-key" (optional string) ~doc:"STRING keyArn"
+       and additionalEncryptionContext =
+         flag "additional-encryption-context" (optional json_arg)
+           ~doc:"JSON EncryptionContextMap"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and eventFilter =
+         flag "event-filter" (required json_arg) ~doc:"JSON EventFilter"
+       and logConfiguration =
+         flag "log-configuration" (required json_arg)
+           ~doc:"JSON LogConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_session_logger
+           (Values.CreateSessionLoggerRequest.make ?displayName
+              ?customerManagedKey
+              ?additionalEncryptionContext:(Option.map
+                                              ~f:Values.EncryptionContextMap.of_json
+                                              additionalEncryptionContext)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ?clientToken
+              ~eventFilter:(Values.EventFilter.of_json eventFilter)
+              ~logConfiguration:(Values.LogConfiguration.of_json
+                                   logConfiguration) ())
+           (Some Values.CreateSessionLoggerResponse.to_json)
+           (Some Values.CreateSessionLoggerResponse.error_to_json)])
 let create_trust_store =
   Command.async ~summary:""
     ([%map_open.Command
@@ -242,21 +466,45 @@ let create_trust_store =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
-       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and certificateList =
          flag "certificate-list" (required json_arg)
            ~doc:"JSON CertificateList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_trust_store
-           (Values.CreateTrustStoreRequest.make ?clientToken
-              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+           (Values.CreateTrustStoreRequest.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ?clientToken
               ~certificateList:(Values.CertificateList.of_json
                                   certificateList) ())
            (Some Values.CreateTrustStoreResponse.to_json)
            (Some Values.CreateTrustStoreResponse.error_to_json)])
+let create_user_access_logging_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and kinesisStreamArn =
+         flag "kinesis-stream-arn" (required string)
+           ~doc:"STRING KinesisStreamArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_user_access_logging_settings
+           (Values.CreateUserAccessLoggingSettingsRequest.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ?clientToken
+              ~kinesisStreamArn ())
+           (Some Values.CreateUserAccessLoggingSettingsResponse.to_json)
+           (Some Values.CreateUserAccessLoggingSettingsResponse.error_to_json)])
 let create_user_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -267,29 +515,72 @@ let create_user_settings =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and disconnectTimeoutInMinutes =
+         flag "disconnect-timeout-in-minutes" (optional int)
+           ~doc:"INT DisconnectTimeoutInMinutes"
+       and idleDisconnectTimeoutInMinutes =
+         flag "idle-disconnect-timeout-in-minutes" (optional int)
+           ~doc:"INT IdleDisconnectTimeoutInMinutes"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
-       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and cookieSynchronizationConfiguration =
+         flag "cookie-synchronization-configuration" (optional json_arg)
+           ~doc:"JSON CookieSynchronizationConfiguration"
+       and customerManagedKey =
+         flag "customer-managed-key" (optional string) ~doc:"STRING keyArn"
+       and additionalEncryptionContext =
+         flag "additional-encryption-context" (optional json_arg)
+           ~doc:"JSON EncryptionContextMap"
+       and deepLinkAllowed =
+         flag "deep-link-allowed" (optional json_arg) ~doc:"JSON EnabledType"
+       and toolbarConfiguration =
+         flag "toolbar-configuration" (optional json_arg)
+           ~doc:"JSON ToolbarConfiguration"
+       and brandingConfigurationInput =
+         flag "branding-configuration-input" (optional json_arg)
+           ~doc:"JSON BrandingConfigurationCreateInput"
+       and webAuthnAllowed =
+         flag "web-authn-allowed" (optional json_arg) ~doc:"JSON EnabledType"
        and copyAllowed =
          flag "copy-allowed" (required json_arg) ~doc:"JSON EnabledType"
-       and downloadAllowed =
-         flag "download-allowed" (required json_arg) ~doc:"JSON EnabledType"
        and pasteAllowed =
          flag "paste-allowed" (required json_arg) ~doc:"JSON EnabledType"
-       and printAllowed =
-         flag "print-allowed" (required json_arg) ~doc:"JSON EnabledType"
+       and downloadAllowed =
+         flag "download-allowed" (required json_arg) ~doc:"JSON EnabledType"
        and uploadAllowed =
-         flag "upload-allowed" (required json_arg) ~doc:"JSON EnabledType" in
+         flag "upload-allowed" (required json_arg) ~doc:"JSON EnabledType"
+       and printAllowed =
+         flag "print-allowed" (required json_arg) ~doc:"JSON EnabledType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_user_settings
-           (Values.CreateUserSettingsRequest.make ?clientToken
+           (Values.CreateUserSettingsRequest.make
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?disconnectTimeoutInMinutes ?idleDisconnectTimeoutInMinutes
+              ?clientToken
+              ?cookieSynchronizationConfiguration:(Option.map
+                                                     ~f:Values.CookieSynchronizationConfiguration.of_json
+                                                     cookieSynchronizationConfiguration)
+              ?customerManagedKey
+              ?additionalEncryptionContext:(Option.map
+                                              ~f:Values.EncryptionContextMap.of_json
+                                              additionalEncryptionContext)
+              ?deepLinkAllowed:(Option.map ~f:Values.EnabledType.of_json
+                                  deepLinkAllowed)
+              ?toolbarConfiguration:(Option.map
+                                       ~f:Values.ToolbarConfiguration.of_json
+                                       toolbarConfiguration)
+              ?brandingConfigurationInput:(Option.map
+                                             ~f:Values.BrandingConfigurationCreateInput.of_json
+                                             brandingConfigurationInput)
+              ?webAuthnAllowed:(Option.map ~f:Values.EnabledType.of_json
+                                  webAuthnAllowed)
               ~copyAllowed:(Values.EnabledType.of_json copyAllowed)
-              ~downloadAllowed:(Values.EnabledType.of_json downloadAllowed)
               ~pasteAllowed:(Values.EnabledType.of_json pasteAllowed)
-              ~printAllowed:(Values.EnabledType.of_json printAllowed)
-              ~uploadAllowed:(Values.EnabledType.of_json uploadAllowed) ())
+              ~downloadAllowed:(Values.EnabledType.of_json downloadAllowed)
+              ~uploadAllowed:(Values.EnabledType.of_json uploadAllowed)
+              ~printAllowed:(Values.EnabledType.of_json printAllowed) ())
            (Some Values.CreateUserSettingsResponse.to_json)
            (Some Values.CreateUserSettingsResponse.error_to_json)])
 let delete_browser_settings =
@@ -310,6 +601,26 @@ let delete_browser_settings =
            (Values.DeleteBrowserSettingsRequest.make ~browserSettingsArn ())
            (Some Values.DeleteBrowserSettingsResponse.to_json)
            (Some Values.DeleteBrowserSettingsResponse.error_to_json)])
+let delete_data_protection_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataProtectionSettingsArn =
+         flag "data-protection-settings-arn" (required string)
+           ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_data_protection_settings
+           (Values.DeleteDataProtectionSettingsRequest.make
+              ~dataProtectionSettingsArn ())
+           (Some Values.DeleteDataProtectionSettingsResponse.to_json)
+           (Some Values.DeleteDataProtectionSettingsResponse.error_to_json)])
 let delete_identity_provider =
   Command.async ~summary:""
     ([%map_open.Command
@@ -321,13 +632,32 @@ let delete_identity_provider =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and identityProviderArn =
-         flag "identity-provider-arn" (required string) ~doc:"STRING ARN" in
+         flag "identity-provider-arn" (required string)
+           ~doc:"STRING SubresourceARN" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_identity_provider
            (Values.DeleteIdentityProviderRequest.make ~identityProviderArn ())
            (Some Values.DeleteIdentityProviderResponse.to_json)
            (Some Values.DeleteIdentityProviderResponse.error_to_json)])
+let delete_ip_access_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ipAccessSettingsArn =
+         flag "ip-access-settings-arn" (required string) ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_ip_access_settings
+           (Values.DeleteIpAccessSettingsRequest.make ~ipAccessSettingsArn ())
+           (Some Values.DeleteIpAccessSettingsResponse.to_json)
+           (Some Values.DeleteIpAccessSettingsResponse.error_to_json)])
 let delete_network_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -362,6 +692,24 @@ let delete_portal =
            Io.delete_portal (Values.DeletePortalRequest.make ~portalArn ())
            (Some Values.DeletePortalResponse.to_json)
            (Some Values.DeletePortalResponse.error_to_json)])
+let delete_session_logger =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sessionLoggerArn =
+         flag "session-logger-arn" (required string) ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_session_logger
+           (Values.DeleteSessionLoggerRequest.make ~sessionLoggerArn ())
+           (Some Values.DeleteSessionLoggerResponse.to_json)
+           (Some Values.DeleteSessionLoggerResponse.error_to_json)])
 let delete_trust_store =
   Command.async ~summary:""
     ([%map_open.Command
@@ -380,6 +728,26 @@ let delete_trust_store =
            (Values.DeleteTrustStoreRequest.make ~trustStoreArn ())
            (Some Values.DeleteTrustStoreResponse.to_json)
            (Some Values.DeleteTrustStoreResponse.error_to_json)])
+let delete_user_access_logging_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and userAccessLoggingSettingsArn =
+         flag "user-access-logging-settings-arn" (required string)
+           ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_user_access_logging_settings
+           (Values.DeleteUserAccessLoggingSettingsRequest.make
+              ~userAccessLoggingSettingsArn ())
+           (Some Values.DeleteUserAccessLoggingSettingsResponse.to_json)
+           (Some Values.DeleteUserAccessLoggingSettingsResponse.error_to_json)])
 let delete_user_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -415,6 +783,42 @@ let disassociate_browser_settings =
            (Values.DisassociateBrowserSettingsRequest.make ~portalArn ())
            (Some Values.DisassociateBrowserSettingsResponse.to_json)
            (Some Values.DisassociateBrowserSettingsResponse.error_to_json)])
+let disassociate_data_protection_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and portalArn = flag "portal-arn" (required string) ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_data_protection_settings
+           (Values.DisassociateDataProtectionSettingsRequest.make ~portalArn
+              ())
+           (Some Values.DisassociateDataProtectionSettingsResponse.to_json)
+           (Some
+              Values.DisassociateDataProtectionSettingsResponse.error_to_json)])
+let disassociate_ip_access_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and portalArn = flag "portal-arn" (required string) ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_ip_access_settings
+           (Values.DisassociateIpAccessSettingsRequest.make ~portalArn ())
+           (Some Values.DisassociateIpAccessSettingsResponse.to_json)
+           (Some Values.DisassociateIpAccessSettingsResponse.error_to_json)])
 let disassociate_network_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -432,6 +836,23 @@ let disassociate_network_settings =
            (Values.DisassociateNetworkSettingsRequest.make ~portalArn ())
            (Some Values.DisassociateNetworkSettingsResponse.to_json)
            (Some Values.DisassociateNetworkSettingsResponse.error_to_json)])
+let disassociate_session_logger =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and portalArn = flag "portal-arn" (required string) ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_session_logger
+           (Values.DisassociateSessionLoggerRequest.make ~portalArn ())
+           (Some Values.DisassociateSessionLoggerResponse.to_json)
+           (Some Values.DisassociateSessionLoggerResponse.error_to_json)])
 let disassociate_trust_store =
   Command.async ~summary:""
     ([%map_open.Command
@@ -449,6 +870,25 @@ let disassociate_trust_store =
            (Values.DisassociateTrustStoreRequest.make ~portalArn ())
            (Some Values.DisassociateTrustStoreResponse.to_json)
            (Some Values.DisassociateTrustStoreResponse.error_to_json)])
+let disassociate_user_access_logging_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and portalArn = flag "portal-arn" (required string) ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_user_access_logging_settings
+           (Values.DisassociateUserAccessLoggingSettingsRequest.make
+              ~portalArn ())
+           (Some Values.DisassociateUserAccessLoggingSettingsResponse.to_json)
+           (Some
+              Values.DisassociateUserAccessLoggingSettingsResponse.error_to_json)])
 let disassociate_user_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -466,6 +906,26 @@ let disassociate_user_settings =
            (Values.DisassociateUserSettingsRequest.make ~portalArn ())
            (Some Values.DisassociateUserSettingsResponse.to_json)
            (Some Values.DisassociateUserSettingsResponse.error_to_json)])
+let expire_session =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and portalId =
+         flag "portal-id" (required string) ~doc:"STRING PortalId"
+       and sessionId =
+         flag "session-id" (required string) ~doc:"STRING SessionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.expire_session
+           (Values.ExpireSessionRequest.make ~portalId ~sessionId ())
+           (Some Values.ExpireSessionResponse.to_json)
+           (Some Values.ExpireSessionResponse.error_to_json)])
 let get_browser_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -484,6 +944,26 @@ let get_browser_settings =
            (Values.GetBrowserSettingsRequest.make ~browserSettingsArn ())
            (Some Values.GetBrowserSettingsResponse.to_json)
            (Some Values.GetBrowserSettingsResponse.error_to_json)])
+let get_data_protection_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataProtectionSettingsArn =
+         flag "data-protection-settings-arn" (required string)
+           ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_data_protection_settings
+           (Values.GetDataProtectionSettingsRequest.make
+              ~dataProtectionSettingsArn ())
+           (Some Values.GetDataProtectionSettingsResponse.to_json)
+           (Some Values.GetDataProtectionSettingsResponse.error_to_json)])
 let get_identity_provider =
   Command.async ~summary:""
     ([%map_open.Command
@@ -495,13 +975,32 @@ let get_identity_provider =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and identityProviderArn =
-         flag "identity-provider-arn" (required string) ~doc:"STRING ARN" in
+         flag "identity-provider-arn" (required string)
+           ~doc:"STRING SubresourceARN" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_identity_provider
            (Values.GetIdentityProviderRequest.make ~identityProviderArn ())
            (Some Values.GetIdentityProviderResponse.to_json)
            (Some Values.GetIdentityProviderResponse.error_to_json)])
+let get_ip_access_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ipAccessSettingsArn =
+         flag "ip-access-settings-arn" (required string) ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_ip_access_settings
+           (Values.GetIpAccessSettingsRequest.make ~ipAccessSettingsArn ())
+           (Some Values.GetIpAccessSettingsResponse.to_json)
+           (Some Values.GetIpAccessSettingsResponse.error_to_json)])
 let get_network_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -554,6 +1053,44 @@ let get_portal_service_provider_metadata =
            (Some Values.GetPortalServiceProviderMetadataResponse.to_json)
            (Some
               Values.GetPortalServiceProviderMetadataResponse.error_to_json)])
+let get_session =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and portalId =
+         flag "portal-id" (required string) ~doc:"STRING PortalId"
+       and sessionId =
+         flag "session-id" (required string) ~doc:"STRING SessionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_session
+           (Values.GetSessionRequest.make ~portalId ~sessionId ())
+           (Some Values.GetSessionResponse.to_json)
+           (Some Values.GetSessionResponse.error_to_json)])
+let get_session_logger =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sessionLoggerArn =
+         flag "session-logger-arn" (required string) ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_session_logger
+           (Values.GetSessionLoggerRequest.make ~sessionLoggerArn ())
+           (Some Values.GetSessionLoggerResponse.to_json)
+           (Some Values.GetSessionLoggerResponse.error_to_json)])
 let get_trust_store =
   Command.async ~summary:""
     ([%map_open.Command
@@ -582,18 +1119,38 @@ let get_trust_store_certificate =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and trustStoreArn =
+         flag "trust-store-arn" (required string) ~doc:"STRING ARN"
        and thumbprint =
          flag "thumbprint" (required string)
-           ~doc:"STRING CertificateThumbprint"
-       and trustStoreArn =
-         flag "trust-store-arn" (required string) ~doc:"STRING ARN" in
+           ~doc:"STRING CertificateThumbprint" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_trust_store_certificate
-           (Values.GetTrustStoreCertificateRequest.make ~thumbprint
-              ~trustStoreArn ())
+           (Values.GetTrustStoreCertificateRequest.make ~trustStoreArn
+              ~thumbprint ())
            (Some Values.GetTrustStoreCertificateResponse.to_json)
            (Some Values.GetTrustStoreCertificateResponse.error_to_json)])
+let get_user_access_logging_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and userAccessLoggingSettingsArn =
+         flag "user-access-logging-settings-arn" (required string)
+           ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_user_access_logging_settings
+           (Values.GetUserAccessLoggingSettingsRequest.make
+              ~userAccessLoggingSettingsArn ())
+           (Some Values.GetUserAccessLoggingSettingsResponse.to_json)
+           (Some Values.GetUserAccessLoggingSettingsResponse.error_to_json)])
 let get_user_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -622,16 +1179,37 @@ let list_browser_settings =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_browser_settings
-           (Values.ListBrowserSettingsRequest.make ?maxResults ?nextToken ())
+           (Values.ListBrowserSettingsRequest.make ?nextToken ?maxResults ())
            (Some Values.ListBrowserSettingsResponse.to_json)
            (Some Values.ListBrowserSettingsResponse.error_to_json)])
+let list_data_protection_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_data_protection_settings
+           (Values.ListDataProtectionSettingsRequest.make ?nextToken
+              ?maxResults ())
+           (Some Values.ListDataProtectionSettingsResponse.to_json)
+           (Some Values.ListDataProtectionSettingsResponse.error_to_json)])
 let list_identity_providers =
   Command.async ~summary:""
     ([%map_open.Command
@@ -642,18 +1220,38 @@ let list_identity_providers =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
        and portalArn = flag "portal-arn" (required string) ~doc:"STRING ARN" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_identity_providers
-           (Values.ListIdentityProvidersRequest.make ?maxResults ?nextToken
+           (Values.ListIdentityProvidersRequest.make ?nextToken ?maxResults
               ~portalArn ())
            (Some Values.ListIdentityProvidersResponse.to_json)
            (Some Values.ListIdentityProvidersResponse.error_to_json)])
+let list_ip_access_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_ip_access_settings
+           (Values.ListIpAccessSettingsRequest.make ?nextToken ?maxResults ())
+           (Some Values.ListIpAccessSettingsResponse.to_json)
+           (Some Values.ListIpAccessSettingsResponse.error_to_json)])
 let list_network_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -664,14 +1262,14 @@ let list_network_settings =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_network_settings
-           (Values.ListNetworkSettingsRequest.make ?maxResults ?nextToken ())
+           (Values.ListNetworkSettingsRequest.make ?nextToken ?maxResults ())
            (Some Values.ListNetworkSettingsResponse.to_json)
            (Some Values.ListNetworkSettingsResponse.error_to_json)])
 let list_portals =
@@ -684,16 +1282,69 @@ let list_portals =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_portals
-           (Values.ListPortalsRequest.make ?maxResults ?nextToken ())
+           (Values.ListPortalsRequest.make ?nextToken ?maxResults ())
            (Some Values.ListPortalsResponse.to_json)
            (Some Values.ListPortalsResponse.error_to_json)])
+let list_session_loggers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_session_loggers
+           (Values.ListSessionLoggersRequest.make ?nextToken ?maxResults ())
+           (Some Values.ListSessionLoggersResponse.to_json)
+           (Some Values.ListSessionLoggersResponse.error_to_json)])
+let list_sessions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and username =
+         flag "username" (optional string) ~doc:"STRING Username"
+       and sessionId =
+         flag "session-id" (optional string) ~doc:"STRING SessionId"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON SessionSortBy"
+       and status =
+         flag "status" (optional json_arg) ~doc:"JSON SessionStatus"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and portalId =
+         flag "portal-id" (required string) ~doc:"STRING PortalId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_sessions
+           (Values.ListSessionsRequest.make ?username ?sessionId
+              ?sortBy:(Option.map ~f:Values.SessionSortBy.of_json sortBy)
+              ?status:(Option.map ~f:Values.SessionStatus.of_json status)
+              ?maxResults ?nextToken ~portalId ())
+           (Some Values.ListSessionsResponse.to_json)
+           (Some Values.ListSessionsResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -722,17 +1373,17 @@ let list_trust_store_certificates =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
        and trustStoreArn =
          flag "trust-store-arn" (required string) ~doc:"STRING ARN" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_trust_store_certificates
-           (Values.ListTrustStoreCertificatesRequest.make ?maxResults
-              ?nextToken ~trustStoreArn ())
+           (Values.ListTrustStoreCertificatesRequest.make ?nextToken
+              ?maxResults ~trustStoreArn ())
            (Some Values.ListTrustStoreCertificatesResponse.to_json)
            (Some Values.ListTrustStoreCertificatesResponse.error_to_json)])
 let list_trust_stores =
@@ -745,16 +1396,37 @@ let list_trust_stores =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_trust_stores
-           (Values.ListTrustStoresRequest.make ?maxResults ?nextToken ())
+           (Values.ListTrustStoresRequest.make ?nextToken ?maxResults ())
            (Some Values.ListTrustStoresResponse.to_json)
            (Some Values.ListTrustStoresResponse.error_to_json)])
+let list_user_access_logging_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_user_access_logging_settings
+           (Values.ListUserAccessLoggingSettingsRequest.make ?nextToken
+              ?maxResults ())
+           (Some Values.ListUserAccessLoggingSettingsResponse.to_json)
+           (Some Values.ListUserAccessLoggingSettingsResponse.error_to_json)])
 let list_user_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -765,14 +1437,14 @@ let list_user_settings =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_user_settings
-           (Values.ListUserSettingsRequest.make ?maxResults ?nextToken ())
+           (Values.ListUserSettingsRequest.make ?nextToken ?maxResults ())
            (Some Values.ListUserSettingsResponse.to_json)
            (Some Values.ListUserSettingsResponse.error_to_json)])
 let tag_resource =
@@ -832,15 +1504,55 @@ let update_browser_settings =
          flag "browser-policy" (optional string) ~doc:"STRING BrowserPolicy"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and webContentFilteringPolicy =
+         flag "web-content-filtering-policy" (optional json_arg)
+           ~doc:"JSON WebContentFilteringPolicy"
        and browserSettingsArn =
          flag "browser-settings-arn" (required string) ~doc:"STRING ARN" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_browser_settings
            (Values.UpdateBrowserSettingsRequest.make ?browserPolicy
-              ?clientToken ~browserSettingsArn ())
+              ?clientToken
+              ?webContentFilteringPolicy:(Option.map
+                                            ~f:Values.WebContentFilteringPolicy.of_json
+                                            webContentFilteringPolicy)
+              ~browserSettingsArn ())
            (Some Values.UpdateBrowserSettingsResponse.to_json)
            (Some Values.UpdateBrowserSettingsResponse.error_to_json)])
+let update_data_protection_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and inlineRedactionConfiguration =
+         flag "inline-redaction-configuration" (optional json_arg)
+           ~doc:"JSON InlineRedactionConfiguration"
+       and displayName =
+         flag "display-name" (optional string) ~doc:"STRING DisplayNameSafe"
+       and description =
+         flag "description" (optional string) ~doc:"STRING DescriptionSafe"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and dataProtectionSettingsArn =
+         flag "data-protection-settings-arn" (required string)
+           ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_data_protection_settings
+           (Values.UpdateDataProtectionSettingsRequest.make
+              ?inlineRedactionConfiguration:(Option.map
+                                               ~f:Values.InlineRedactionConfiguration.of_json
+                                               inlineRedactionConfiguration)
+              ?displayName ?description ?clientToken
+              ~dataProtectionSettingsArn ())
+           (Some Values.UpdateDataProtectionSettingsResponse.to_json)
+           (Some Values.UpdateDataProtectionSettingsResponse.error_to_json)])
 let update_identity_provider =
   Command.async ~summary:""
     ([%map_open.Command
@@ -851,33 +1563,62 @@ let update_identity_provider =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and clientToken =
-         flag "client-token" (optional string) ~doc:"STRING ClientToken"
-       and identityProviderDetails =
-         flag "identity-provider-details" (optional json_arg)
-           ~doc:"JSON IdentityProviderDetails"
        and identityProviderName =
          flag "identity-provider-name" (optional string)
            ~doc:"STRING IdentityProviderName"
        and identityProviderType =
          flag "identity-provider-type" (optional json_arg)
            ~doc:"JSON IdentityProviderType"
+       and identityProviderDetails =
+         flag "identity-provider-details" (optional json_arg)
+           ~doc:"JSON IdentityProviderDetails"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and identityProviderArn =
-         flag "identity-provider-arn" (required string) ~doc:"STRING ARN" in
+         flag "identity-provider-arn" (required string)
+           ~doc:"STRING SubresourceARN" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_identity_provider
-           (Values.UpdateIdentityProviderRequest.make ?clientToken
-              ?identityProviderDetails:(Option.map
-                                          ~f:Values.IdentityProviderDetails.of_json
-                                          identityProviderDetails)
-              ?identityProviderName
+           (Values.UpdateIdentityProviderRequest.make ?identityProviderName
               ?identityProviderType:(Option.map
                                        ~f:Values.IdentityProviderType.of_json
                                        identityProviderType)
-              ~identityProviderArn ())
+              ?identityProviderDetails:(Option.map
+                                          ~f:Values.IdentityProviderDetails.of_json
+                                          identityProviderDetails)
+              ?clientToken ~identityProviderArn ())
            (Some Values.UpdateIdentityProviderResponse.to_json)
            (Some Values.UpdateIdentityProviderResponse.error_to_json)])
+let update_ip_access_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and displayName =
+         flag "display-name" (optional string) ~doc:"STRING DisplayName"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and ipRules =
+         flag "ip-rules" (optional json_arg) ~doc:"JSON IpRuleList"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and ipAccessSettingsArn =
+         flag "ip-access-settings-arn" (required string) ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_ip_access_settings
+           (Values.UpdateIpAccessSettingsRequest.make ?displayName
+              ?description
+              ?ipRules:(Option.map ~f:Values.IpRuleList.of_json ipRules)
+              ?clientToken ~ipAccessSettingsArn ())
+           (Some Values.UpdateIpAccessSettingsResponse.to_json)
+           (Some Values.UpdateIpAccessSettingsResponse.error_to_json)])
 let update_network_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -888,25 +1629,25 @@ let update_network_settings =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and clientToken =
-         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and vpcId = flag "vpc-id" (optional string) ~doc:"STRING VpcId"
+       and subnetIds =
+         flag "subnet-ids" (optional json_arg) ~doc:"JSON SubnetIdList"
        and securityGroupIds =
          flag "security-group-ids" (optional json_arg)
            ~doc:"JSON SecurityGroupIdList"
-       and subnetIds =
-         flag "subnet-ids" (optional json_arg) ~doc:"JSON SubnetIdList"
-       and vpcId = flag "vpc-id" (optional string) ~doc:"STRING VpcId"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and networkSettingsArn =
          flag "network-settings-arn" (required string) ~doc:"STRING ARN" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_network_settings
-           (Values.UpdateNetworkSettingsRequest.make ?clientToken
+           (Values.UpdateNetworkSettingsRequest.make ?vpcId
+              ?subnetIds:(Option.map ~f:Values.SubnetIdList.of_json subnetIds)
               ?securityGroupIds:(Option.map
                                    ~f:Values.SecurityGroupIdList.of_json
-                                   securityGroupIds)
-              ?subnetIds:(Option.map ~f:Values.SubnetIdList.of_json subnetIds)
-              ?vpcId ~networkSettingsArn ())
+                                   securityGroupIds) ?clientToken
+              ~networkSettingsArn ())
            (Some Values.UpdateNetworkSettingsResponse.to_json)
            (Some Values.UpdateNetworkSettingsResponse.error_to_json)])
 let update_portal =
@@ -921,13 +1662,61 @@ let update_portal =
            ~doc:"URL override endpoint url"
        and displayName =
          flag "display-name" (optional string) ~doc:"STRING DisplayName"
+       and authenticationType =
+         flag "authentication-type" (optional json_arg)
+           ~doc:"JSON AuthenticationType"
+       and instanceType =
+         flag "instance-type" (optional json_arg) ~doc:"JSON InstanceType"
+       and maxConcurrentSessions =
+         flag "max-concurrent-sessions" (optional int)
+           ~doc:"INT MaxConcurrentSessions"
+       and portalCustomDomain =
+         flag "portal-custom-domain" (optional string)
+           ~doc:"STRING PortalCustomDomain"
        and portalArn = flag "portal-arn" (required string) ~doc:"STRING ARN" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_portal
-           (Values.UpdatePortalRequest.make ?displayName ~portalArn ())
+           (Values.UpdatePortalRequest.make ?displayName
+              ?authenticationType:(Option.map
+                                     ~f:Values.AuthenticationType.of_json
+                                     authenticationType)
+              ?instanceType:(Option.map ~f:Values.InstanceType.of_json
+                               instanceType) ?maxConcurrentSessions
+              ?portalCustomDomain ~portalArn ())
            (Some Values.UpdatePortalResponse.to_json)
            (Some Values.UpdatePortalResponse.error_to_json)])
+let update_session_logger =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and eventFilter =
+         flag "event-filter" (optional json_arg) ~doc:"JSON EventFilter"
+       and logConfiguration =
+         flag "log-configuration" (optional json_arg)
+           ~doc:"JSON LogConfiguration"
+       and displayName =
+         flag "display-name" (optional string) ~doc:"STRING DisplayNameSafe"
+       and sessionLoggerArn =
+         flag "session-logger-arn" (required string) ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_session_logger
+           (Values.UpdateSessionLoggerRequest.make
+              ?eventFilter:(Option.map ~f:Values.EventFilter.of_json
+                              eventFilter)
+              ?logConfiguration:(Option.map
+                                   ~f:Values.LogConfiguration.of_json
+                                   logConfiguration) ?displayName
+              ~sessionLoggerArn ())
+           (Some Values.UpdateSessionLoggerResponse.to_json)
+           (Some Values.UpdateSessionLoggerResponse.error_to_json)])
 let update_trust_store =
   Command.async ~summary:""
     ([%map_open.Command
@@ -961,6 +1750,31 @@ let update_trust_store =
               ~trustStoreArn ())
            (Some Values.UpdateTrustStoreResponse.to_json)
            (Some Values.UpdateTrustStoreResponse.error_to_json)])
+let update_user_access_logging_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and kinesisStreamArn =
+         flag "kinesis-stream-arn" (optional string)
+           ~doc:"STRING KinesisStreamArn"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and userAccessLoggingSettingsArn =
+         flag "user-access-logging-settings-arn" (required string)
+           ~doc:"STRING ARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_user_access_logging_settings
+           (Values.UpdateUserAccessLoggingSettingsRequest.make
+              ?kinesisStreamArn ?clientToken ~userAccessLoggingSettingsArn ())
+           (Some Values.UpdateUserAccessLoggingSettingsResponse.to_json)
+           (Some Values.UpdateUserAccessLoggingSettingsResponse.error_to_json)])
 let update_user_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -971,81 +1785,152 @@ let update_user_settings =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and clientToken =
-         flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and copyAllowed =
          flag "copy-allowed" (optional json_arg) ~doc:"JSON EnabledType"
-       and downloadAllowed =
-         flag "download-allowed" (optional json_arg) ~doc:"JSON EnabledType"
        and pasteAllowed =
          flag "paste-allowed" (optional json_arg) ~doc:"JSON EnabledType"
-       and printAllowed =
-         flag "print-allowed" (optional json_arg) ~doc:"JSON EnabledType"
+       and downloadAllowed =
+         flag "download-allowed" (optional json_arg) ~doc:"JSON EnabledType"
        and uploadAllowed =
          flag "upload-allowed" (optional json_arg) ~doc:"JSON EnabledType"
+       and printAllowed =
+         flag "print-allowed" (optional json_arg) ~doc:"JSON EnabledType"
+       and disconnectTimeoutInMinutes =
+         flag "disconnect-timeout-in-minutes" (optional int)
+           ~doc:"INT DisconnectTimeoutInMinutes"
+       and idleDisconnectTimeoutInMinutes =
+         flag "idle-disconnect-timeout-in-minutes" (optional int)
+           ~doc:"INT IdleDisconnectTimeoutInMinutes"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and cookieSynchronizationConfiguration =
+         flag "cookie-synchronization-configuration" (optional json_arg)
+           ~doc:"JSON CookieSynchronizationConfiguration"
+       and deepLinkAllowed =
+         flag "deep-link-allowed" (optional json_arg) ~doc:"JSON EnabledType"
+       and toolbarConfiguration =
+         flag "toolbar-configuration" (optional json_arg)
+           ~doc:"JSON ToolbarConfiguration"
+       and brandingConfigurationInput =
+         flag "branding-configuration-input" (optional json_arg)
+           ~doc:"JSON BrandingConfigurationUpdateInput"
+       and webAuthnAllowed =
+         flag "web-authn-allowed" (optional json_arg) ~doc:"JSON EnabledType"
        and userSettingsArn =
          flag "user-settings-arn" (required string) ~doc:"STRING ARN" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_user_settings
-           (Values.UpdateUserSettingsRequest.make ?clientToken
+           (Values.UpdateUserSettingsRequest.make
               ?copyAllowed:(Option.map ~f:Values.EnabledType.of_json
                               copyAllowed)
-              ?downloadAllowed:(Option.map ~f:Values.EnabledType.of_json
-                                  downloadAllowed)
               ?pasteAllowed:(Option.map ~f:Values.EnabledType.of_json
                                pasteAllowed)
-              ?printAllowed:(Option.map ~f:Values.EnabledType.of_json
-                               printAllowed)
+              ?downloadAllowed:(Option.map ~f:Values.EnabledType.of_json
+                                  downloadAllowed)
               ?uploadAllowed:(Option.map ~f:Values.EnabledType.of_json
-                                uploadAllowed) ~userSettingsArn ())
+                                uploadAllowed)
+              ?printAllowed:(Option.map ~f:Values.EnabledType.of_json
+                               printAllowed) ?disconnectTimeoutInMinutes
+              ?idleDisconnectTimeoutInMinutes ?clientToken
+              ?cookieSynchronizationConfiguration:(Option.map
+                                                     ~f:Values.CookieSynchronizationConfiguration.of_json
+                                                     cookieSynchronizationConfiguration)
+              ?deepLinkAllowed:(Option.map ~f:Values.EnabledType.of_json
+                                  deepLinkAllowed)
+              ?toolbarConfiguration:(Option.map
+                                       ~f:Values.ToolbarConfiguration.of_json
+                                       toolbarConfiguration)
+              ?brandingConfigurationInput:(Option.map
+                                             ~f:Values.BrandingConfigurationUpdateInput.of_json
+                                             brandingConfigurationInput)
+              ?webAuthnAllowed:(Option.map ~f:Values.EnabledType.of_json
+                                  webAuthnAllowed) ~userSettingsArn ())
            (Some Values.UpdateUserSettingsResponse.to_json)
            (Some Values.UpdateUserSettingsResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-browser-settings", associate_browser_settings);
+    ("associate-data-protection-settings",
+      associate_data_protection_settings);
+    ("associate-ip-access-settings", associate_ip_access_settings);
     ("associate-network-settings", associate_network_settings);
+    ("associate-session-logger", associate_session_logger);
     ("associate-trust-store", associate_trust_store);
+    ("associate-user-access-logging-settings",
+      associate_user_access_logging_settings);
     ("associate-user-settings", associate_user_settings);
     ("create-browser-settings", create_browser_settings);
+    ("create-data-protection-settings", create_data_protection_settings);
     ("create-identity-provider", create_identity_provider);
+    ("create-ip-access-settings", create_ip_access_settings);
     ("create-network-settings", create_network_settings);
     ("create-portal", create_portal);
+    ("create-session-logger", create_session_logger);
     ("create-trust-store", create_trust_store);
+    ("create-user-access-logging-settings",
+      create_user_access_logging_settings);
     ("create-user-settings", create_user_settings);
     ("delete-browser-settings", delete_browser_settings);
+    ("delete-data-protection-settings", delete_data_protection_settings);
     ("delete-identity-provider", delete_identity_provider);
+    ("delete-ip-access-settings", delete_ip_access_settings);
     ("delete-network-settings", delete_network_settings);
     ("delete-portal", delete_portal);
+    ("delete-session-logger", delete_session_logger);
     ("delete-trust-store", delete_trust_store);
+    ("delete-user-access-logging-settings",
+      delete_user_access_logging_settings);
     ("delete-user-settings", delete_user_settings);
     ("disassociate-browser-settings", disassociate_browser_settings);
+    ("disassociate-data-protection-settings",
+      disassociate_data_protection_settings);
+    ("disassociate-ip-access-settings", disassociate_ip_access_settings);
     ("disassociate-network-settings", disassociate_network_settings);
+    ("disassociate-session-logger", disassociate_session_logger);
     ("disassociate-trust-store", disassociate_trust_store);
+    ("disassociate-user-access-logging-settings",
+      disassociate_user_access_logging_settings);
     ("disassociate-user-settings", disassociate_user_settings);
+    ("expire-session", expire_session);
     ("get-browser-settings", get_browser_settings);
+    ("get-data-protection-settings", get_data_protection_settings);
     ("get-identity-provider", get_identity_provider);
+    ("get-ip-access-settings", get_ip_access_settings);
     ("get-network-settings", get_network_settings);
     ("get-portal", get_portal);
     ("get-portal-service-provider-metadata",
       get_portal_service_provider_metadata);
+    ("get-session", get_session);
+    ("get-session-logger", get_session_logger);
     ("get-trust-store", get_trust_store);
     ("get-trust-store-certificate", get_trust_store_certificate);
+    ("get-user-access-logging-settings", get_user_access_logging_settings);
     ("get-user-settings", get_user_settings);
     ("list-browser-settings", list_browser_settings);
+    ("list-data-protection-settings", list_data_protection_settings);
     ("list-identity-providers", list_identity_providers);
+    ("list-ip-access-settings", list_ip_access_settings);
     ("list-network-settings", list_network_settings);
     ("list-portals", list_portals);
+    ("list-session-loggers", list_session_loggers);
+    ("list-sessions", list_sessions);
     ("list-tags-for-resource", list_tags_for_resource);
     ("list-trust-store-certificates", list_trust_store_certificates);
     ("list-trust-stores", list_trust_stores);
+    ("list-user-access-logging-settings", list_user_access_logging_settings);
     ("list-user-settings", list_user_settings);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-browser-settings", update_browser_settings);
+    ("update-data-protection-settings", update_data_protection_settings);
     ("update-identity-provider", update_identity_provider);
+    ("update-ip-access-settings", update_ip_access_settings);
     ("update-network-settings", update_network_settings);
     ("update-portal", update_portal);
+    ("update-session-logger", update_session_logger);
     ("update-trust-store", update_trust_store);
+    ("update-user-access-logging-settings",
+      update_user_access_logging_settings);
     ("update-user-settings", update_user_settings)]

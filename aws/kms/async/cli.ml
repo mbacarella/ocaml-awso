@@ -93,23 +93,56 @@ let create_custom_key_store =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and customKeyStoreName =
-         flag "custom-key-store-name" (required string)
-           ~doc:"STRING CustomKeyStoreNameType"
        and cloudHsmClusterId =
-         flag "cloud-hsm-cluster-id" (required string)
+         flag "cloud-hsm-cluster-id" (optional string)
            ~doc:"STRING CloudHsmClusterIdType"
        and trustAnchorCertificate =
-         flag "trust-anchor-certificate" (required string)
+         flag "trust-anchor-certificate" (optional string)
            ~doc:"STRING TrustAnchorCertificateType"
        and keyStorePassword =
-         flag "key-store-password" (required string)
-           ~doc:"STRING KeyStorePasswordType" in
+         flag "key-store-password" (optional string)
+           ~doc:"STRING KeyStorePasswordType"
+       and customKeyStoreType =
+         flag "custom-key-store-type" (optional json_arg)
+           ~doc:"JSON CustomKeyStoreType"
+       and xksProxyUriEndpoint =
+         flag "xks-proxy-uri-endpoint" (optional string)
+           ~doc:"STRING XksProxyUriEndpointType"
+       and xksProxyUriPath =
+         flag "xks-proxy-uri-path" (optional string)
+           ~doc:"STRING XksProxyUriPathType"
+       and xksProxyVpcEndpointServiceName =
+         flag "xks-proxy-vpc-endpoint-service-name" (optional string)
+           ~doc:"STRING XksProxyVpcEndpointServiceNameType"
+       and xksProxyVpcEndpointServiceOwner =
+         flag "xks-proxy-vpc-endpoint-service-owner" (optional string)
+           ~doc:"STRING AccountIdType"
+       and xksProxyAuthenticationCredential =
+         flag "xks-proxy-authentication-credential" (optional json_arg)
+           ~doc:"JSON XksProxyAuthenticationCredentialType"
+       and xksProxyConnectivity =
+         flag "xks-proxy-connectivity" (optional json_arg)
+           ~doc:"JSON XksProxyConnectivityType"
+       and customKeyStoreName =
+         flag "custom-key-store-name" (required string)
+           ~doc:"STRING CustomKeyStoreNameType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_custom_key_store
-           (Values.CreateCustomKeyStoreRequest.make ~customKeyStoreName
-              ~cloudHsmClusterId ~trustAnchorCertificate ~keyStorePassword ())
+           (Values.CreateCustomKeyStoreRequest.make ?cloudHsmClusterId
+              ?trustAnchorCertificate ?keyStorePassword
+              ?customKeyStoreType:(Option.map
+                                     ~f:Values.CustomKeyStoreType.of_json
+                                     customKeyStoreType) ?xksProxyUriEndpoint
+              ?xksProxyUriPath ?xksProxyVpcEndpointServiceName
+              ?xksProxyVpcEndpointServiceOwner
+              ?xksProxyAuthenticationCredential:(Option.map
+                                                   ~f:Values.XksProxyAuthenticationCredentialType.of_json
+                                                   xksProxyAuthenticationCredential)
+              ?xksProxyConnectivity:(Option.map
+                                       ~f:Values.XksProxyConnectivityType.of_json
+                                       xksProxyConnectivity)
+              ~customKeyStoreName ())
            (Some Values.CreateCustomKeyStoreResponse.to_json)
            (Some Values.CreateCustomKeyStoreResponse.error_to_json)])
 let create_grant =
@@ -130,6 +163,8 @@ let create_grant =
        and grantTokens =
          flag "grant-tokens" (optional json_arg) ~doc:"JSON GrantTokenList"
        and name = flag "name" (optional string) ~doc:"STRING GrantNameType"
+       and dryRun =
+         flag "dry-run" (optional bool) ~doc:"BOOL NullableBooleanType"
        and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType"
        and granteePrincipal =
          flag "grantee-principal" (required string)
@@ -143,7 +178,8 @@ let create_grant =
               ?constraints:(Option.map ~f:Values.GrantConstraints.of_json
                               constraints)
               ?grantTokens:(Option.map ~f:Values.GrantTokenList.of_json
-                              grantTokens) ?name ~keyId ~granteePrincipal
+                              grantTokens) ?name ?dryRun ~keyId
+              ~granteePrincipal
               ~operations:(Values.GrantOperationList.of_json operations) ())
            (Some Values.CreateGrantResponse.to_json)
            (Some Values.CreateGrantResponse.error_to_json)])
@@ -175,7 +211,9 @@ let create_key =
            ~doc:"BOOL BooleanType"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and multiRegion =
-         flag "multi-region" (optional bool) ~doc:"BOOL NullableBooleanType" in
+         flag "multi-region" (optional bool) ~doc:"BOOL NullableBooleanType"
+       and xksKeyId =
+         flag "xks-key-id" (optional string) ~doc:"STRING XksKeyIdType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_key
@@ -188,7 +226,7 @@ let create_key =
               ?origin:(Option.map ~f:Values.OriginType.of_json origin)
               ?customKeyStoreId ?bypassPolicyLockoutSafetyCheck
               ?tags:(Option.map ~f:Values.TagList.of_json tags) ?multiRegion
-              ()) (Some Values.CreateKeyResponse.to_json)
+              ?xksKeyId ()) (Some Values.CreateKeyResponse.to_json)
            (Some Values.CreateKeyResponse.error_to_json)])
 let decrypt =
   Command.async ~summary:""
@@ -200,6 +238,9 @@ let decrypt =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and ciphertextBlob =
+         flag "ciphertext-blob" (optional json_arg)
+           ~doc:"JSON CiphertextType"
        and encryptionContext =
          flag "encryption-context" (optional json_arg)
            ~doc:"JSON EncryptionContextType"
@@ -209,13 +250,19 @@ let decrypt =
        and encryptionAlgorithm =
          flag "encryption-algorithm" (optional json_arg)
            ~doc:"JSON EncryptionAlgorithmSpec"
-       and ciphertextBlob =
-         flag "ciphertext-blob" (required json_arg)
-           ~doc:"JSON CiphertextType" in
+       and recipient =
+         flag "recipient" (optional json_arg) ~doc:"JSON RecipientInfo"
+       and dryRun =
+         flag "dry-run" (optional bool) ~doc:"BOOL NullableBooleanType"
+       and dryRunModifiers =
+         flag "dry-run-modifiers" (optional json_arg)
+           ~doc:"JSON DryRunModifierList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.decrypt
            (Values.DecryptRequest.make
+              ?ciphertextBlob:(Option.map ~f:Values.CiphertextType.of_json
+                                 ciphertextBlob)
               ?encryptionContext:(Option.map
                                     ~f:Values.EncryptionContextType.of_json
                                     encryptionContext)
@@ -224,8 +271,12 @@ let decrypt =
               ?encryptionAlgorithm:(Option.map
                                       ~f:Values.EncryptionAlgorithmSpec.of_json
                                       encryptionAlgorithm)
-              ~ciphertextBlob:(Values.CiphertextType.of_json ciphertextBlob)
-              ()) (Some Values.DecryptResponse.to_json)
+              ?recipient:(Option.map ~f:Values.RecipientInfo.of_json
+                            recipient) ?dryRun
+              ?dryRunModifiers:(Option.map
+                                  ~f:Values.DryRunModifierList.of_json
+                                  dryRunModifiers) ())
+           (Some Values.DecryptResponse.to_json)
            (Some Values.DecryptResponse.error_to_json)])
 let delete_alias =
   Command.async ~summary:""
@@ -272,11 +323,52 @@ let delete_imported_key_material =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and keyMaterialId =
+         flag "key-material-id" (optional string)
+           ~doc:"STRING BackingKeyIdType"
        and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_imported_key_material
-           (Values.DeleteImportedKeyMaterialRequest.make ~keyId ()) None None])
+           (Values.DeleteImportedKeyMaterialRequest.make ?keyMaterialId
+              ~keyId ())
+           (Some Values.DeleteImportedKeyMaterialResponse.to_json)
+           (Some Values.DeleteImportedKeyMaterialResponse.error_to_json)])
+let derive_shared_secret =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and grantTokens =
+         flag "grant-tokens" (optional json_arg) ~doc:"JSON GrantTokenList"
+       and dryRun =
+         flag "dry-run" (optional bool) ~doc:"BOOL NullableBooleanType"
+       and recipient =
+         flag "recipient" (optional json_arg) ~doc:"JSON RecipientInfo"
+       and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType"
+       and keyAgreementAlgorithm =
+         flag "key-agreement-algorithm" (required json_arg)
+           ~doc:"JSON KeyAgreementAlgorithmSpec"
+       and publicKey =
+         flag "public-key" (required json_arg) ~doc:"JSON PublicKeyType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.derive_shared_secret
+           (Values.DeriveSharedSecretRequest.make
+              ?grantTokens:(Option.map ~f:Values.GrantTokenList.of_json
+                              grantTokens) ?dryRun
+              ?recipient:(Option.map ~f:Values.RecipientInfo.of_json
+                            recipient) ~keyId
+              ~keyAgreementAlgorithm:(Values.KeyAgreementAlgorithmSpec.of_json
+                                        keyAgreementAlgorithm)
+              ~publicKey:(Values.PublicKeyType.of_json publicKey) ())
+           (Some Values.DeriveSharedSecretResponse.to_json)
+           (Some Values.DeriveSharedSecretResponse.error_to_json)])
 let describe_custom_key_stores =
   Command.async ~summary:""
     ([%map_open.Command
@@ -395,11 +487,15 @@ let enable_key_rotation =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and rotationPeriodInDays =
+         flag "rotation-period-in-days" (optional int)
+           ~doc:"INT RotationPeriodInDaysType"
        and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.enable_key_rotation
-           (Values.EnableKeyRotationRequest.make ~keyId ()) None None])
+           (Values.EnableKeyRotationRequest.make ?rotationPeriodInDays ~keyId
+              ()) None None])
 let encrypt =
   Command.async ~summary:""
     ([%map_open.Command
@@ -418,6 +514,8 @@ let encrypt =
        and encryptionAlgorithm =
          flag "encryption-algorithm" (optional json_arg)
            ~doc:"JSON EncryptionAlgorithmSpec"
+       and dryRun =
+         flag "dry-run" (optional bool) ~doc:"BOOL NullableBooleanType"
        and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType"
        and plaintext =
          flag "plaintext" (required json_arg) ~doc:"JSON PlaintextType" in
@@ -432,7 +530,7 @@ let encrypt =
                               grantTokens)
               ?encryptionAlgorithm:(Option.map
                                       ~f:Values.EncryptionAlgorithmSpec.of_json
-                                      encryptionAlgorithm) ~keyId
+                                      encryptionAlgorithm) ?dryRun ~keyId
               ~plaintext:(Values.PlaintextType.of_json plaintext) ())
            (Some Values.EncryptResponse.to_json)
            (Some Values.EncryptResponse.error_to_json)])
@@ -455,6 +553,10 @@ let generate_data_key =
          flag "key-spec" (optional json_arg) ~doc:"JSON DataKeySpec"
        and grantTokens =
          flag "grant-tokens" (optional json_arg) ~doc:"JSON GrantTokenList"
+       and recipient =
+         flag "recipient" (optional json_arg) ~doc:"JSON RecipientInfo"
+       and dryRun =
+         flag "dry-run" (optional bool) ~doc:"BOOL NullableBooleanType"
        and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -465,7 +567,9 @@ let generate_data_key =
                                     encryptionContext) ?numberOfBytes
               ?keySpec:(Option.map ~f:Values.DataKeySpec.of_json keySpec)
               ?grantTokens:(Option.map ~f:Values.GrantTokenList.of_json
-                              grantTokens) ~keyId ())
+                              grantTokens)
+              ?recipient:(Option.map ~f:Values.RecipientInfo.of_json
+                            recipient) ?dryRun ~keyId ())
            (Some Values.GenerateDataKeyResponse.to_json)
            (Some Values.GenerateDataKeyResponse.error_to_json)])
 let generate_data_key_pair =
@@ -483,6 +587,10 @@ let generate_data_key_pair =
            ~doc:"JSON EncryptionContextType"
        and grantTokens =
          flag "grant-tokens" (optional json_arg) ~doc:"JSON GrantTokenList"
+       and recipient =
+         flag "recipient" (optional json_arg) ~doc:"JSON RecipientInfo"
+       and dryRun =
+         flag "dry-run" (optional bool) ~doc:"BOOL NullableBooleanType"
        and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType"
        and keyPairSpec =
          flag "key-pair-spec" (required json_arg) ~doc:"JSON DataKeyPairSpec" in
@@ -494,7 +602,9 @@ let generate_data_key_pair =
                                     ~f:Values.EncryptionContextType.of_json
                                     encryptionContext)
               ?grantTokens:(Option.map ~f:Values.GrantTokenList.of_json
-                              grantTokens) ~keyId
+                              grantTokens)
+              ?recipient:(Option.map ~f:Values.RecipientInfo.of_json
+                            recipient) ?dryRun ~keyId
               ~keyPairSpec:(Values.DataKeyPairSpec.of_json keyPairSpec) ())
            (Some Values.GenerateDataKeyPairResponse.to_json)
            (Some Values.GenerateDataKeyPairResponse.error_to_json)])
@@ -513,6 +623,8 @@ let generate_data_key_pair_without_plaintext =
            ~doc:"JSON EncryptionContextType"
        and grantTokens =
          flag "grant-tokens" (optional json_arg) ~doc:"JSON GrantTokenList"
+       and dryRun =
+         flag "dry-run" (optional bool) ~doc:"BOOL NullableBooleanType"
        and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType"
        and keyPairSpec =
          flag "key-pair-spec" (required json_arg) ~doc:"JSON DataKeyPairSpec" in
@@ -524,7 +636,7 @@ let generate_data_key_pair_without_plaintext =
                                     ~f:Values.EncryptionContextType.of_json
                                     encryptionContext)
               ?grantTokens:(Option.map ~f:Values.GrantTokenList.of_json
-                              grantTokens) ~keyId
+                              grantTokens) ?dryRun ~keyId
               ~keyPairSpec:(Values.DataKeyPairSpec.of_json keyPairSpec) ())
            (Some Values.GenerateDataKeyPairWithoutPlaintextResponse.to_json)
            (Some
@@ -548,6 +660,8 @@ let generate_data_key_without_plaintext =
          flag "number-of-bytes" (optional int) ~doc:"INT NumberOfBytesType"
        and grantTokens =
          flag "grant-tokens" (optional json_arg) ~doc:"JSON GrantTokenList"
+       and dryRun =
+         flag "dry-run" (optional bool) ~doc:"BOOL NullableBooleanType"
        and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -559,9 +673,39 @@ let generate_data_key_without_plaintext =
               ?keySpec:(Option.map ~f:Values.DataKeySpec.of_json keySpec)
               ?numberOfBytes
               ?grantTokens:(Option.map ~f:Values.GrantTokenList.of_json
-                              grantTokens) ~keyId ())
+                              grantTokens) ?dryRun ~keyId ())
            (Some Values.GenerateDataKeyWithoutPlaintextResponse.to_json)
            (Some Values.GenerateDataKeyWithoutPlaintextResponse.error_to_json)])
+let generate_mac =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and grantTokens =
+         flag "grant-tokens" (optional json_arg) ~doc:"JSON GrantTokenList"
+       and dryRun =
+         flag "dry-run" (optional bool) ~doc:"BOOL NullableBooleanType"
+       and message =
+         flag "message" (required json_arg) ~doc:"JSON PlaintextType"
+       and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType"
+       and macAlgorithm =
+         flag "mac-algorithm" (required json_arg)
+           ~doc:"JSON MacAlgorithmSpec" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.generate_mac
+           (Values.GenerateMacRequest.make
+              ?grantTokens:(Option.map ~f:Values.GrantTokenList.of_json
+                              grantTokens) ?dryRun
+              ~message:(Values.PlaintextType.of_json message) ~keyId
+              ~macAlgorithm:(Values.MacAlgorithmSpec.of_json macAlgorithm) ())
+           (Some Values.GenerateMacResponse.to_json)
+           (Some Values.GenerateMacResponse.error_to_json)])
 let generate_random =
   Command.async ~summary:""
     ([%map_open.Command
@@ -576,14 +720,35 @@ let generate_random =
          flag "number-of-bytes" (optional int) ~doc:"INT NumberOfBytesType"
        and customKeyStoreId =
          flag "custom-key-store-id" (optional string)
-           ~doc:"STRING CustomKeyStoreIdType" in
+           ~doc:"STRING CustomKeyStoreIdType"
+       and recipient =
+         flag "recipient" (optional json_arg) ~doc:"JSON RecipientInfo" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.generate_random
            (Values.GenerateRandomRequest.make ?numberOfBytes
-              ?customKeyStoreId ())
+              ?customKeyStoreId
+              ?recipient:(Option.map ~f:Values.RecipientInfo.of_json
+                            recipient) ())
            (Some Values.GenerateRandomResponse.to_json)
            (Some Values.GenerateRandomResponse.error_to_json)])
+let get_key_last_usage =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_key_last_usage
+           (Values.GetKeyLastUsageRequest.make ~keyId ())
+           (Some Values.GetKeyLastUsageResponse.to_json)
+           (Some Values.GetKeyLastUsageResponse.error_to_json)])
 let get_key_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -594,13 +759,13 @@ let get_key_policy =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType"
        and policyName =
-         flag "policy-name" (required string) ~doc:"STRING PolicyNameType" in
+         flag "policy-name" (optional string) ~doc:"STRING PolicyNameType"
+       and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_key_policy
-           (Values.GetKeyPolicyRequest.make ~keyId ~policyName ())
+           (Values.GetKeyPolicyRequest.make ?policyName ~keyId ())
            (Some Values.GetKeyPolicyResponse.to_json)
            (Some Values.GetKeyPolicyResponse.error_to_json)])
 let get_key_rotation_status =
@@ -682,6 +847,14 @@ let import_key_material =
        and expirationModel =
          flag "expiration-model" (optional json_arg)
            ~doc:"JSON ExpirationModelType"
+       and importType =
+         flag "import-type" (optional json_arg) ~doc:"JSON ImportType"
+       and keyMaterialDescription =
+         flag "key-material-description" (optional string)
+           ~doc:"STRING KeyMaterialDescriptionType"
+       and keyMaterialId =
+         flag "key-material-id" (optional string)
+           ~doc:"STRING BackingKeyIdType"
        and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType"
        and importToken =
          flag "import-token" (required json_arg) ~doc:"JSON CiphertextType"
@@ -695,7 +868,9 @@ let import_key_material =
               ?validTo:(Option.map ~f:Values.DateType.of_json validTo)
               ?expirationModel:(Option.map
                                   ~f:Values.ExpirationModelType.of_json
-                                  expirationModel) ~keyId
+                                  expirationModel)
+              ?importType:(Option.map ~f:Values.ImportType.of_json importType)
+              ?keyMaterialDescription ?keyMaterialId ~keyId
               ~importToken:(Values.CiphertextType.of_json importToken)
               ~encryptedKeyMaterial:(Values.CiphertextType.of_json
                                        encryptedKeyMaterial) ())
@@ -764,6 +939,31 @@ let list_key_policies =
            (Values.ListKeyPoliciesRequest.make ?limit ?marker ~keyId ())
            (Some Values.ListKeyPoliciesResponse.to_json)
            (Some Values.ListKeyPoliciesResponse.error_to_json)])
+let list_key_rotations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and includeKeyMaterial =
+         flag "include-key-material" (optional json_arg)
+           ~doc:"JSON IncludeKeyMaterial"
+       and limit = flag "limit" (optional int) ~doc:"INT LimitType"
+       and marker = flag "marker" (optional string) ~doc:"STRING MarkerType"
+       and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_key_rotations
+           (Values.ListKeyRotationsRequest.make
+              ?includeKeyMaterial:(Option.map
+                                     ~f:Values.IncludeKeyMaterial.of_json
+                                     includeKeyMaterial) ?limit ?marker
+              ~keyId ()) (Some Values.ListKeyRotationsResponse.to_json)
+           (Some Values.ListKeyRotationsResponse.error_to_json)])
 let list_keys =
   Command.async ~summary:""
     ([%map_open.Command
@@ -831,18 +1031,18 @@ let put_key_policy =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and policyName =
+         flag "policy-name" (optional string) ~doc:"STRING PolicyNameType"
        and bypassPolicyLockoutSafetyCheck =
          flag "bypass-policy-lockout-safety-check" (optional bool)
            ~doc:"BOOL BooleanType"
        and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType"
-       and policyName =
-         flag "policy-name" (required string) ~doc:"STRING PolicyNameType"
        and policy = flag "policy" (required string) ~doc:"STRING PolicyType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_key_policy
-           (Values.PutKeyPolicyRequest.make ?bypassPolicyLockoutSafetyCheck
-              ~keyId ~policyName ~policy ()) None None])
+           (Values.PutKeyPolicyRequest.make ?policyName
+              ?bypassPolicyLockoutSafetyCheck ~keyId ~policy ()) None None])
 let re_encrypt =
   Command.async ~summary:""
     ([%map_open.Command
@@ -853,6 +1053,9 @@ let re_encrypt =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and ciphertextBlob =
+         flag "ciphertext-blob" (optional json_arg)
+           ~doc:"JSON CiphertextType"
        and sourceEncryptionContext =
          flag "source-encryption-context" (optional json_arg)
            ~doc:"JSON EncryptionContextType"
@@ -869,15 +1072,19 @@ let re_encrypt =
            ~doc:"JSON EncryptionAlgorithmSpec"
        and grantTokens =
          flag "grant-tokens" (optional json_arg) ~doc:"JSON GrantTokenList"
-       and ciphertextBlob =
-         flag "ciphertext-blob" (required json_arg)
-           ~doc:"JSON CiphertextType"
+       and dryRun =
+         flag "dry-run" (optional bool) ~doc:"BOOL NullableBooleanType"
+       and dryRunModifiers =
+         flag "dry-run-modifiers" (optional json_arg)
+           ~doc:"JSON DryRunModifierList"
        and destinationKeyId =
          flag "destination-key-id" (required string) ~doc:"STRING KeyIdType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.re_encrypt
            (Values.ReEncryptRequest.make
+              ?ciphertextBlob:(Option.map ~f:Values.CiphertextType.of_json
+                                 ciphertextBlob)
               ?sourceEncryptionContext:(Option.map
                                           ~f:Values.EncryptionContextType.of_json
                                           sourceEncryptionContext)
@@ -892,9 +1099,11 @@ let re_encrypt =
                                                  ~f:Values.EncryptionAlgorithmSpec.of_json
                                                  destinationEncryptionAlgorithm)
               ?grantTokens:(Option.map ~f:Values.GrantTokenList.of_json
-                              grantTokens)
-              ~ciphertextBlob:(Values.CiphertextType.of_json ciphertextBlob)
-              ~destinationKeyId ()) (Some Values.ReEncryptResponse.to_json)
+                              grantTokens) ?dryRun
+              ?dryRunModifiers:(Option.map
+                                  ~f:Values.DryRunModifierList.of_json
+                                  dryRunModifiers) ~destinationKeyId ())
+           (Some Values.ReEncryptResponse.to_json)
            (Some Values.ReEncryptResponse.error_to_json)])
 let replicate_key =
   Command.async ~summary:""
@@ -938,12 +1147,14 @@ let retire_grant =
          flag "grant-token" (optional string) ~doc:"STRING GrantTokenType"
        and keyId = flag "key-id" (optional string) ~doc:"STRING KeyIdType"
        and grantId =
-         flag "grant-id" (optional string) ~doc:"STRING GrantIdType" in
+         flag "grant-id" (optional string) ~doc:"STRING GrantIdType"
+       and dryRun =
+         flag "dry-run" (optional bool) ~doc:"BOOL NullableBooleanType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.retire_grant
-           (Values.RetireGrantRequest.make ?grantToken ?keyId ?grantId ())
-           None None])
+           (Values.RetireGrantRequest.make ?grantToken ?keyId ?grantId
+              ?dryRun ()) None None])
 let revoke_grant =
   Command.async ~summary:""
     ([%map_open.Command
@@ -954,13 +1165,33 @@ let revoke_grant =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and dryRun =
+         flag "dry-run" (optional bool) ~doc:"BOOL NullableBooleanType"
        and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType"
        and grantId =
          flag "grant-id" (required string) ~doc:"STRING GrantIdType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.revoke_grant
-           (Values.RevokeGrantRequest.make ~keyId ~grantId ()) None None])
+           (Values.RevokeGrantRequest.make ?dryRun ~keyId ~grantId ()) None
+           None])
+let rotate_key_on_demand =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.rotate_key_on_demand
+           (Values.RotateKeyOnDemandRequest.make ~keyId ())
+           (Some Values.RotateKeyOnDemandResponse.to_json)
+           (Some Values.RotateKeyOnDemandResponse.error_to_json)])
 let schedule_key_deletion =
   Command.async ~summary:""
     ([%map_open.Command
@@ -995,6 +1226,8 @@ let sign =
          flag "message-type" (optional json_arg) ~doc:"JSON MessageType"
        and grantTokens =
          flag "grant-tokens" (optional json_arg) ~doc:"JSON GrantTokenList"
+       and dryRun =
+         flag "dry-run" (optional bool) ~doc:"BOOL NullableBooleanType"
        and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType"
        and message =
          flag "message" (required json_arg) ~doc:"JSON PlaintextType"
@@ -1007,7 +1240,7 @@ let sign =
               ?messageType:(Option.map ~f:Values.MessageType.of_json
                               messageType)
               ?grantTokens:(Option.map ~f:Values.GrantTokenList.of_json
-                              grantTokens) ~keyId
+                              grantTokens) ?dryRun ~keyId
               ~message:(Values.PlaintextType.of_json message)
               ~signingAlgorithm:(Values.SigningAlgorithmSpec.of_json
                                    signingAlgorithm) ())
@@ -1086,6 +1319,24 @@ let update_custom_key_store =
        and cloudHsmClusterId =
          flag "cloud-hsm-cluster-id" (optional string)
            ~doc:"STRING CloudHsmClusterIdType"
+       and xksProxyUriEndpoint =
+         flag "xks-proxy-uri-endpoint" (optional string)
+           ~doc:"STRING XksProxyUriEndpointType"
+       and xksProxyUriPath =
+         flag "xks-proxy-uri-path" (optional string)
+           ~doc:"STRING XksProxyUriPathType"
+       and xksProxyVpcEndpointServiceName =
+         flag "xks-proxy-vpc-endpoint-service-name" (optional string)
+           ~doc:"STRING XksProxyVpcEndpointServiceNameType"
+       and xksProxyVpcEndpointServiceOwner =
+         flag "xks-proxy-vpc-endpoint-service-owner" (optional string)
+           ~doc:"STRING AccountIdType"
+       and xksProxyAuthenticationCredential =
+         flag "xks-proxy-authentication-credential" (optional json_arg)
+           ~doc:"JSON XksProxyAuthenticationCredentialType"
+       and xksProxyConnectivity =
+         flag "xks-proxy-connectivity" (optional json_arg)
+           ~doc:"JSON XksProxyConnectivityType"
        and customKeyStoreId =
          flag "custom-key-store-id" (required string)
            ~doc:"STRING CustomKeyStoreIdType" in
@@ -1093,7 +1344,16 @@ let update_custom_key_store =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_custom_key_store
            (Values.UpdateCustomKeyStoreRequest.make ?newCustomKeyStoreName
-              ?keyStorePassword ?cloudHsmClusterId ~customKeyStoreId ())
+              ?keyStorePassword ?cloudHsmClusterId ?xksProxyUriEndpoint
+              ?xksProxyUriPath ?xksProxyVpcEndpointServiceName
+              ?xksProxyVpcEndpointServiceOwner
+              ?xksProxyAuthenticationCredential:(Option.map
+                                                   ~f:Values.XksProxyAuthenticationCredentialType.of_json
+                                                   xksProxyAuthenticationCredential)
+              ?xksProxyConnectivity:(Option.map
+                                       ~f:Values.XksProxyConnectivityType.of_json
+                                       xksProxyConnectivity)
+              ~customKeyStoreId ())
            (Some Values.UpdateCustomKeyStoreResponse.to_json)
            (Some Values.UpdateCustomKeyStoreResponse.error_to_json)])
 let update_key_description =
@@ -1146,6 +1406,8 @@ let verify =
          flag "message-type" (optional json_arg) ~doc:"JSON MessageType"
        and grantTokens =
          flag "grant-tokens" (optional json_arg) ~doc:"JSON GrantTokenList"
+       and dryRun =
+         flag "dry-run" (optional bool) ~doc:"BOOL NullableBooleanType"
        and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType"
        and message =
          flag "message" (required json_arg) ~doc:"JSON PlaintextType"
@@ -1160,13 +1422,45 @@ let verify =
               ?messageType:(Option.map ~f:Values.MessageType.of_json
                               messageType)
               ?grantTokens:(Option.map ~f:Values.GrantTokenList.of_json
-                              grantTokens) ~keyId
+                              grantTokens) ?dryRun ~keyId
               ~message:(Values.PlaintextType.of_json message)
               ~signature:(Values.CiphertextType.of_json signature)
               ~signingAlgorithm:(Values.SigningAlgorithmSpec.of_json
                                    signingAlgorithm) ())
            (Some Values.VerifyResponse.to_json)
            (Some Values.VerifyResponse.error_to_json)])
+let verify_mac =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and grantTokens =
+         flag "grant-tokens" (optional json_arg) ~doc:"JSON GrantTokenList"
+       and dryRun =
+         flag "dry-run" (optional bool) ~doc:"BOOL NullableBooleanType"
+       and message =
+         flag "message" (required json_arg) ~doc:"JSON PlaintextType"
+       and keyId = flag "key-id" (required string) ~doc:"STRING KeyIdType"
+       and macAlgorithm =
+         flag "mac-algorithm" (required json_arg)
+           ~doc:"JSON MacAlgorithmSpec"
+       and mac = flag "mac" (required json_arg) ~doc:"JSON CiphertextType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.verify_mac
+           (Values.VerifyMacRequest.make
+              ?grantTokens:(Option.map ~f:Values.GrantTokenList.of_json
+                              grantTokens) ?dryRun
+              ~message:(Values.PlaintextType.of_json message) ~keyId
+              ~macAlgorithm:(Values.MacAlgorithmSpec.of_json macAlgorithm)
+              ~mac:(Values.CiphertextType.of_json mac) ())
+           (Some Values.VerifyMacResponse.to_json)
+           (Some Values.VerifyMacResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
@@ -1180,6 +1474,7 @@ let main =
     ("delete-alias", delete_alias);
     ("delete-custom-key-store", delete_custom_key_store);
     ("delete-imported-key-material", delete_imported_key_material);
+    ("derive-shared-secret", derive_shared_secret);
     ("describe-custom-key-stores", describe_custom_key_stores);
     ("describe-key", describe_key);
     ("disable-key", disable_key);
@@ -1194,7 +1489,9 @@ let main =
       generate_data_key_pair_without_plaintext);
     ("generate-data-key-without-plaintext",
       generate_data_key_without_plaintext);
+    ("generate-mac", generate_mac);
     ("generate-random", generate_random);
+    ("get-key-last-usage", get_key_last_usage);
     ("get-key-policy", get_key_policy);
     ("get-key-rotation-status", get_key_rotation_status);
     ("get-parameters-for-import", get_parameters_for_import);
@@ -1203,6 +1500,7 @@ let main =
     ("list-aliases", list_aliases);
     ("list-grants", list_grants);
     ("list-key-policies", list_key_policies);
+    ("list-key-rotations", list_key_rotations);
     ("list-keys", list_keys);
     ("list-resource-tags", list_resource_tags);
     ("list-retirable-grants", list_retirable_grants);
@@ -1211,6 +1509,7 @@ let main =
     ("replicate-key", replicate_key);
     ("retire-grant", retire_grant);
     ("revoke-grant", revoke_grant);
+    ("rotate-key-on-demand", rotate_key_on_demand);
     ("schedule-key-deletion", schedule_key_deletion);
     ("sign", sign);
     ("tag-resource", tag_resource);
@@ -1219,4 +1518,5 @@ let main =
     ("update-custom-key-store", update_custom_key_store);
     ("update-key-description", update_key_description);
     ("update-primary-region", update_primary_region);
-    ("verify", verify)]
+    ("verify", verify);
+    ("verify-mac", verify_mac)]

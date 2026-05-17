@@ -60,6 +60,12 @@ val delete_topic :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTopicInput.t -> (unit, unit) Result.t Async.Deferred.t
+val get_data_protection_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDataProtectionPolicyInput.t ->
+        (GetDataProtectionPolicyResponse.t,
+          GetDataProtectionPolicyResponse.error) Result.t Async.Deferred.t
 val get_endpoint_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -169,6 +175,11 @@ val publish_batch :
       PublishBatchInput.t ->
         (PublishBatchResponse.t, PublishBatchResponse.error) Result.t
           Async.Deferred.t
+val put_data_protection_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutDataProtectionPolicyInput.t ->
+        (unit, unit) Result.t Async.Deferred.t
 val remove_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

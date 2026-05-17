@@ -41,6 +41,10 @@ type ('i, 'o, 'e) t =
   CreateFuotaTaskResponse.error) t 
   | CreateMulticastGroup: (CreateMulticastGroupRequest.t,
   CreateMulticastGroupResponse.t, CreateMulticastGroupResponse.error) t 
+  | CreateNetworkAnalyzerConfiguration:
+  (CreateNetworkAnalyzerConfigurationRequest.t,
+  CreateNetworkAnalyzerConfigurationResponse.t,
+  CreateNetworkAnalyzerConfigurationResponse.error) t 
   | CreateServiceProfile: (CreateServiceProfileRequest.t,
   CreateServiceProfileResponse.t, CreateServiceProfileResponse.error) t 
   | CreateWirelessDevice: (CreateWirelessDeviceRequest.t,
@@ -62,12 +66,19 @@ type ('i, 'o, 'e) t =
   DeleteFuotaTaskResponse.error) t 
   | DeleteMulticastGroup: (DeleteMulticastGroupRequest.t,
   DeleteMulticastGroupResponse.t, DeleteMulticastGroupResponse.error) t 
+  | DeleteNetworkAnalyzerConfiguration:
+  (DeleteNetworkAnalyzerConfigurationRequest.t,
+  DeleteNetworkAnalyzerConfigurationResponse.t,
+  DeleteNetworkAnalyzerConfigurationResponse.error) t 
   | DeleteQueuedMessages: (DeleteQueuedMessagesRequest.t,
   DeleteQueuedMessagesResponse.t, DeleteQueuedMessagesResponse.error) t 
   | DeleteServiceProfile: (DeleteServiceProfileRequest.t,
   DeleteServiceProfileResponse.t, DeleteServiceProfileResponse.error) t 
   | DeleteWirelessDevice: (DeleteWirelessDeviceRequest.t,
   DeleteWirelessDeviceResponse.t, DeleteWirelessDeviceResponse.error) t 
+  | DeleteWirelessDeviceImportTask: (DeleteWirelessDeviceImportTaskRequest.t,
+  DeleteWirelessDeviceImportTaskResponse.t,
+  DeleteWirelessDeviceImportTaskResponse.error) t 
   | DeleteWirelessGateway: (DeleteWirelessGatewayRequest.t,
   DeleteWirelessGatewayResponse.t, DeleteWirelessGatewayResponse.error) t 
   | DeleteWirelessGatewayTask: (DeleteWirelessGatewayTaskRequest.t,
@@ -77,6 +88,9 @@ type ('i, 'o, 'e) t =
   (DeleteWirelessGatewayTaskDefinitionRequest.t,
   DeleteWirelessGatewayTaskDefinitionResponse.t,
   DeleteWirelessGatewayTaskDefinitionResponse.error) t 
+  | DeregisterWirelessDevice: (DeregisterWirelessDeviceRequest.t,
+  DeregisterWirelessDeviceResponse.t, DeregisterWirelessDeviceResponse.error)
+  t 
   | DisassociateAwsAccountFromPartnerAccount:
   (DisassociateAwsAccountFromPartnerAccountRequest.t,
   DisassociateAwsAccountFromPartnerAccountResponse.t,
@@ -109,11 +123,19 @@ type ('i, 'o, 'e) t =
   GetDestinationResponse.error) t 
   | GetDeviceProfile: (GetDeviceProfileRequest.t, GetDeviceProfileResponse.t,
   GetDeviceProfileResponse.error) t 
+  | GetEventConfigurationByResourceTypes:
+  (GetEventConfigurationByResourceTypesRequest.t,
+  GetEventConfigurationByResourceTypesResponse.t,
+  GetEventConfigurationByResourceTypesResponse.error) t 
   | GetFuotaTask: (GetFuotaTaskRequest.t, GetFuotaTaskResponse.t,
   GetFuotaTaskResponse.error) t 
   | GetLogLevelsByResourceTypes: (GetLogLevelsByResourceTypesRequest.t,
   GetLogLevelsByResourceTypesResponse.t,
   GetLogLevelsByResourceTypesResponse.error) t 
+  | GetMetricConfiguration: (GetMetricConfigurationRequest.t,
+  GetMetricConfigurationResponse.t, GetMetricConfigurationResponse.error) t 
+  | GetMetrics: (GetMetricsRequest.t, GetMetricsResponse.t,
+  GetMetricsResponse.error) t 
   | GetMulticastGroup: (GetMulticastGroupRequest.t,
   GetMulticastGroupResponse.t, GetMulticastGroupResponse.error) t 
   | GetMulticastGroupSession: (GetMulticastGroupSessionRequest.t,
@@ -125,17 +147,29 @@ type ('i, 'o, 'e) t =
   GetNetworkAnalyzerConfigurationResponse.error) t 
   | GetPartnerAccount: (GetPartnerAccountRequest.t,
   GetPartnerAccountResponse.t, GetPartnerAccountResponse.error) t 
+  | GetPosition: (GetPositionRequest.t, GetPositionResponse.t,
+  GetPositionResponse.error) t 
+  | GetPositionConfiguration: (GetPositionConfigurationRequest.t,
+  GetPositionConfigurationResponse.t, GetPositionConfigurationResponse.error)
+  t 
+  | GetPositionEstimate: (GetPositionEstimateRequest.t,
+  GetPositionEstimateResponse.t, GetPositionEstimateResponse.error) t 
   | GetResourceEventConfiguration: (GetResourceEventConfigurationRequest.t,
   GetResourceEventConfigurationResponse.t,
   GetResourceEventConfigurationResponse.error) t 
   | GetResourceLogLevel: (GetResourceLogLevelRequest.t,
   GetResourceLogLevelResponse.t, GetResourceLogLevelResponse.error) t 
+  | GetResourcePosition: (GetResourcePositionRequest.t,
+  GetResourcePositionResponse.t, GetResourcePositionResponse.error) t 
   | GetServiceEndpoint: (GetServiceEndpointRequest.t,
   GetServiceEndpointResponse.t, GetServiceEndpointResponse.error) t 
   | GetServiceProfile: (GetServiceProfileRequest.t,
   GetServiceProfileResponse.t, GetServiceProfileResponse.error) t 
   | GetWirelessDevice: (GetWirelessDeviceRequest.t,
   GetWirelessDeviceResponse.t, GetWirelessDeviceResponse.error) t 
+  | GetWirelessDeviceImportTask: (GetWirelessDeviceImportTaskRequest.t,
+  GetWirelessDeviceImportTaskResponse.t,
+  GetWirelessDeviceImportTaskResponse.error) t 
   | GetWirelessDeviceStatistics: (GetWirelessDeviceStatisticsRequest.t,
   GetWirelessDeviceStatisticsResponse.t,
   GetWirelessDeviceStatisticsResponse.error) t 
@@ -161,6 +195,13 @@ type ('i, 'o, 'e) t =
   ListDestinationsResponse.error) t 
   | ListDeviceProfiles: (ListDeviceProfilesRequest.t,
   ListDeviceProfilesResponse.t, ListDeviceProfilesResponse.error) t 
+  | ListDevicesForWirelessDeviceImportTask:
+  (ListDevicesForWirelessDeviceImportTaskRequest.t,
+  ListDevicesForWirelessDeviceImportTaskResponse.t,
+  ListDevicesForWirelessDeviceImportTaskResponse.error) t 
+  | ListEventConfigurations: (ListEventConfigurationsRequest.t,
+  ListEventConfigurationsResponse.t, ListEventConfigurationsResponse.error) t
+  
   | ListFuotaTasks: (ListFuotaTasksRequest.t, ListFuotaTasksResponse.t,
   ListFuotaTasksResponse.error) t 
   | ListMulticastGroups: (ListMulticastGroupsRequest.t,
@@ -168,14 +209,24 @@ type ('i, 'o, 'e) t =
   | ListMulticastGroupsByFuotaTask: (ListMulticastGroupsByFuotaTaskRequest.t,
   ListMulticastGroupsByFuotaTaskResponse.t,
   ListMulticastGroupsByFuotaTaskResponse.error) t 
+  | ListNetworkAnalyzerConfigurations:
+  (ListNetworkAnalyzerConfigurationsRequest.t,
+  ListNetworkAnalyzerConfigurationsResponse.t,
+  ListNetworkAnalyzerConfigurationsResponse.error) t 
   | ListPartnerAccounts: (ListPartnerAccountsRequest.t,
   ListPartnerAccountsResponse.t, ListPartnerAccountsResponse.error) t 
+  | ListPositionConfigurations: (ListPositionConfigurationsRequest.t,
+  ListPositionConfigurationsResponse.t,
+  ListPositionConfigurationsResponse.error) t 
   | ListQueuedMessages: (ListQueuedMessagesRequest.t,
   ListQueuedMessagesResponse.t, ListQueuedMessagesResponse.error) t 
   | ListServiceProfiles: (ListServiceProfilesRequest.t,
   ListServiceProfilesResponse.t, ListServiceProfilesResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListWirelessDeviceImportTasks: (ListWirelessDeviceImportTasksRequest.t,
+  ListWirelessDeviceImportTasksResponse.t,
+  ListWirelessDeviceImportTasksResponse.error) t 
   | ListWirelessDevices: (ListWirelessDevicesRequest.t,
   ListWirelessDevicesResponse.t, ListWirelessDevicesResponse.error) t 
   | ListWirelessGatewayTaskDefinitions:
@@ -184,6 +235,9 @@ type ('i, 'o, 'e) t =
   ListWirelessGatewayTaskDefinitionsResponse.error) t 
   | ListWirelessGateways: (ListWirelessGatewaysRequest.t,
   ListWirelessGatewaysResponse.t, ListWirelessGatewaysResponse.error) t 
+  | PutPositionConfiguration: (PutPositionConfigurationRequest.t,
+  PutPositionConfigurationResponse.t, PutPositionConfigurationResponse.error)
+  t 
   | PutResourceLogLevel: (PutResourceLogLevelRequest.t,
   PutResourceLogLevelResponse.t, PutResourceLogLevelResponse.error) t 
   | ResetAllResourceLogLevels: (ResetAllResourceLogLevelsRequest.t,
@@ -210,6 +264,13 @@ type ('i, 'o, 'e) t =
   | StartMulticastGroupSession: (StartMulticastGroupSessionRequest.t,
   StartMulticastGroupSessionResponse.t,
   StartMulticastGroupSessionResponse.error) t 
+  | StartSingleWirelessDeviceImportTask:
+  (StartSingleWirelessDeviceImportTaskRequest.t,
+  StartSingleWirelessDeviceImportTaskResponse.t,
+  StartSingleWirelessDeviceImportTaskResponse.error) t 
+  | StartWirelessDeviceImportTask: (StartWirelessDeviceImportTaskRequest.t,
+  StartWirelessDeviceImportTaskResponse.t,
+  StartWirelessDeviceImportTaskResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | TestWirelessDevice: (TestWirelessDeviceRequest.t,
@@ -218,11 +279,18 @@ type ('i, 'o, 'e) t =
   UntagResourceResponse.error) t 
   | UpdateDestination: (UpdateDestinationRequest.t,
   UpdateDestinationResponse.t, UpdateDestinationResponse.error) t 
+  | UpdateEventConfigurationByResourceTypes:
+  (UpdateEventConfigurationByResourceTypesRequest.t,
+  UpdateEventConfigurationByResourceTypesResponse.t,
+  UpdateEventConfigurationByResourceTypesResponse.error) t 
   | UpdateFuotaTask: (UpdateFuotaTaskRequest.t, UpdateFuotaTaskResponse.t,
   UpdateFuotaTaskResponse.error) t 
   | UpdateLogLevelsByResourceTypes: (UpdateLogLevelsByResourceTypesRequest.t,
   UpdateLogLevelsByResourceTypesResponse.t,
   UpdateLogLevelsByResourceTypesResponse.error) t 
+  | UpdateMetricConfiguration: (UpdateMetricConfigurationRequest.t,
+  UpdateMetricConfigurationResponse.t,
+  UpdateMetricConfigurationResponse.error) t 
   | UpdateMulticastGroup: (UpdateMulticastGroupRequest.t,
   UpdateMulticastGroupResponse.t, UpdateMulticastGroupResponse.error) t 
   | UpdateNetworkAnalyzerConfiguration:
@@ -231,12 +299,19 @@ type ('i, 'o, 'e) t =
   UpdateNetworkAnalyzerConfigurationResponse.error) t 
   | UpdatePartnerAccount: (UpdatePartnerAccountRequest.t,
   UpdatePartnerAccountResponse.t, UpdatePartnerAccountResponse.error) t 
+  | UpdatePosition: (UpdatePositionRequest.t, UpdatePositionResponse.t,
+  UpdatePositionResponse.error) t 
   | UpdateResourceEventConfiguration:
   (UpdateResourceEventConfigurationRequest.t,
   UpdateResourceEventConfigurationResponse.t,
   UpdateResourceEventConfigurationResponse.error) t 
+  | UpdateResourcePosition: (UpdateResourcePositionRequest.t,
+  UpdateResourcePositionResponse.t, UpdateResourcePositionResponse.error) t 
   | UpdateWirelessDevice: (UpdateWirelessDeviceRequest.t,
   UpdateWirelessDeviceResponse.t, UpdateWirelessDeviceResponse.error) t 
+  | UpdateWirelessDeviceImportTask: (UpdateWirelessDeviceImportTaskRequest.t,
+  UpdateWirelessDeviceImportTaskResponse.t,
+  UpdateWirelessDeviceImportTaskResponse.error) t 
   | UpdateWirelessGateway: (UpdateWirelessGatewayRequest.t,
   UpdateWirelessGatewayResponse.t, UpdateWirelessGatewayResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
@@ -253,6 +328,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateDeviceProfile -> `POST
   | CreateFuotaTask -> `POST
   | CreateMulticastGroup -> `POST
+  | CreateNetworkAnalyzerConfiguration -> `POST
   | CreateServiceProfile -> `POST
   | CreateWirelessDevice -> `POST
   | CreateWirelessGateway -> `POST
@@ -262,12 +338,15 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteDeviceProfile -> `DELETE
   | DeleteFuotaTask -> `DELETE
   | DeleteMulticastGroup -> `DELETE
+  | DeleteNetworkAnalyzerConfiguration -> `DELETE
   | DeleteQueuedMessages -> `DELETE
   | DeleteServiceProfile -> `DELETE
   | DeleteWirelessDevice -> `DELETE
+  | DeleteWirelessDeviceImportTask -> `DELETE
   | DeleteWirelessGateway -> `DELETE
   | DeleteWirelessGatewayTask -> `DELETE
   | DeleteWirelessGatewayTaskDefinition -> `DELETE
+  | DeregisterWirelessDevice -> `PATCH
   | DisassociateAwsAccountFromPartnerAccount -> `DELETE
   | DisassociateMulticastGroupFromFuotaTask -> `DELETE
   | DisassociateWirelessDeviceFromFuotaTask -> `DELETE
@@ -277,17 +356,25 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DisassociateWirelessGatewayFromThing -> `DELETE
   | GetDestination -> `GET
   | GetDeviceProfile -> `GET
+  | GetEventConfigurationByResourceTypes -> `GET
   | GetFuotaTask -> `GET
   | GetLogLevelsByResourceTypes -> `GET
+  | GetMetricConfiguration -> `GET
+  | GetMetrics -> `POST
   | GetMulticastGroup -> `GET
   | GetMulticastGroupSession -> `GET
   | GetNetworkAnalyzerConfiguration -> `GET
   | GetPartnerAccount -> `GET
+  | GetPosition -> `GET
+  | GetPositionConfiguration -> `GET
+  | GetPositionEstimate -> `POST
   | GetResourceEventConfiguration -> `GET
   | GetResourceLogLevel -> `GET
+  | GetResourcePosition -> `GET
   | GetServiceEndpoint -> `GET
   | GetServiceProfile -> `GET
   | GetWirelessDevice -> `GET
+  | GetWirelessDeviceImportTask -> `GET
   | GetWirelessDeviceStatistics -> `GET
   | GetWirelessGateway -> `GET
   | GetWirelessGatewayCertificate -> `GET
@@ -297,16 +384,22 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetWirelessGatewayTaskDefinition -> `GET
   | ListDestinations -> `GET
   | ListDeviceProfiles -> `GET
+  | ListDevicesForWirelessDeviceImportTask -> `GET
+  | ListEventConfigurations -> `GET
   | ListFuotaTasks -> `GET
   | ListMulticastGroups -> `GET
   | ListMulticastGroupsByFuotaTask -> `GET
+  | ListNetworkAnalyzerConfigurations -> `GET
   | ListPartnerAccounts -> `GET
+  | ListPositionConfigurations -> `GET
   | ListQueuedMessages -> `GET
   | ListServiceProfiles -> `GET
   | ListTagsForResource -> `GET
+  | ListWirelessDeviceImportTasks -> `GET
   | ListWirelessDevices -> `GET
   | ListWirelessGatewayTaskDefinitions -> `GET
   | ListWirelessGateways -> `GET
+  | PutPositionConfiguration -> `PUT
   | PutResourceLogLevel -> `PUT
   | ResetAllResourceLogLevels -> `DELETE
   | ResetResourceLogLevel -> `DELETE
@@ -316,17 +409,24 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | StartBulkDisassociateWirelessDeviceFromMulticastGroup -> `POST
   | StartFuotaTask -> `PUT
   | StartMulticastGroupSession -> `PUT
+  | StartSingleWirelessDeviceImportTask -> `POST
+  | StartWirelessDeviceImportTask -> `POST
   | TagResource -> `POST
   | TestWirelessDevice -> `POST
   | UntagResource -> `DELETE
   | UpdateDestination -> `PATCH
+  | UpdateEventConfigurationByResourceTypes -> `PATCH
   | UpdateFuotaTask -> `PATCH
   | UpdateLogLevelsByResourceTypes -> `POST
+  | UpdateMetricConfiguration -> `PUT
   | UpdateMulticastGroup -> `PATCH
   | UpdateNetworkAnalyzerConfiguration -> `PATCH
   | UpdatePartnerAccount -> `PATCH
+  | UpdatePosition -> `PATCH
   | UpdateResourceEventConfiguration -> `PATCH
+  | UpdateResourcePosition -> `PATCH
   | UpdateWirelessDevice -> `PATCH
+  | UpdateWirelessDeviceImportTask -> `PATCH
   | UpdateWirelessGateway -> `PATCH
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
@@ -369,6 +469,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateFuotaTask -> (Format.kasprintf Uri.of_string) "/fuota-tasks"
       | CreateMulticastGroup ->
           (Format.kasprintf Uri.of_string) "/multicast-groups"
+      | CreateNetworkAnalyzerConfiguration ->
+          (Format.kasprintf Uri.of_string) "/network-analyzer-configurations"
       | CreateServiceProfile ->
           (Format.kasprintf Uri.of_string) "/service-profiles"
       | CreateWirelessDevice ->
@@ -394,6 +496,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteMulticastGroup ->
           (Format.kasprintf Uri.of_string) "/multicast-groups/%s"
             (MulticastGroupId.to_header x.DeleteMulticastGroupRequest.id)
+      | DeleteNetworkAnalyzerConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/network-analyzer-configurations/%s"
+            (NetworkAnalyzerConfigurationName.to_header
+               x.DeleteNetworkAnalyzerConfigurationRequest.configurationName)
       | DeleteQueuedMessages ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/wireless-devices/%s/data"
@@ -411,6 +518,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteWirelessDevice ->
           (Format.kasprintf Uri.of_string) "/wireless-devices/%s"
             (WirelessDeviceId.to_header x.DeleteWirelessDeviceRequest.id)
+      | DeleteWirelessDeviceImportTask ->
+          (Format.kasprintf Uri.of_string) "/wireless_device_import_task/%s"
+            (ImportTaskId.to_header
+               x.DeleteWirelessDeviceImportTaskRequest.id)
       | DeleteWirelessGateway ->
           (Format.kasprintf Uri.of_string) "/wireless-gateways/%s"
             (WirelessGatewayId.to_header x.DeleteWirelessGatewayRequest.id)
@@ -423,6 +534,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/wireless-gateway-task-definitions/%s"
             (WirelessGatewayTaskDefinitionId.to_header
                x.DeleteWirelessGatewayTaskDefinitionRequest.id)
+      | DeregisterWirelessDevice ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/wireless-devices/%s/deregister"
+               (Identifier.to_header
+                  x.DeregisterWirelessDeviceRequest.identifier))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("WirelessDeviceType",
+                          (WirelessDeviceType.to_header v)))
+                  x.wirelessDeviceType])
       | DisassociateAwsAccountFromPartnerAccount ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/partner-accounts/%s"
@@ -470,11 +593,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetDeviceProfile ->
           (Format.kasprintf Uri.of_string) "/device-profiles/%s"
             (DeviceProfileId.to_header x.GetDeviceProfileRequest.id)
+      | GetEventConfigurationByResourceTypes ->
+          (Format.kasprintf Uri.of_string)
+            "/event-configurations-resource-types"
       | GetFuotaTask ->
           (Format.kasprintf Uri.of_string) "/fuota-tasks/%s"
             (FuotaTaskId.to_header x.GetFuotaTaskRequest.id)
       | GetLogLevelsByResourceTypes ->
           (Format.kasprintf Uri.of_string) "/log-levels"
+      | GetMetricConfiguration ->
+          (Format.kasprintf Uri.of_string) "/metric-configuration"
+      | GetMetrics -> (Format.kasprintf Uri.of_string) "/metrics"
       | GetMulticastGroup ->
           (Format.kasprintf Uri.of_string) "/multicast-groups/%s"
             (MulticastGroupId.to_header x.GetMulticastGroupRequest.id)
@@ -493,6 +622,26 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.GetPartnerAccountRequest.partnerAccountId))
             (List.filter_opt
                [Some ("partnerType", (PartnerType.to_header x.partnerType))])
+      | GetPosition ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/positions/%s"
+               (PositionResourceIdentifier.to_header
+                  x.GetPositionRequest.resourceIdentifier))
+            (List.filter_opt
+               [Some
+                  ("resourceType",
+                    (PositionResourceType.to_header x.resourceType))])
+      | GetPositionConfiguration ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/position-configurations/%s"
+               (PositionResourceIdentifier.to_header
+                  x.GetPositionConfigurationRequest.resourceIdentifier))
+            (List.filter_opt
+               [Some
+                  ("resourceType",
+                    (PositionResourceType.to_header x.resourceType))])
+      | GetPositionEstimate ->
+          (Format.kasprintf Uri.of_string) "/position-estimate"
       | GetResourceEventConfiguration ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/event-configurations/%s"
@@ -515,6 +664,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (List.filter_opt
                [Some
                   ("resourceType", (ResourceType.to_header x.resourceType))])
+      | GetResourcePosition ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/resource-positions/%s"
+               (PositionResourceIdentifier.to_header
+                  x.GetResourcePositionRequest.resourceIdentifier))
+            (List.filter_opt
+               [Some
+                  ("resourceType",
+                    (PositionResourceType.to_header x.resourceType))])
       | GetServiceEndpoint ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/service-endpoint")
@@ -535,6 +693,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Some
                   ("identifierType",
                     (WirelessDeviceIdType.to_header x.identifierType))])
+      | GetWirelessDeviceImportTask ->
+          (Format.kasprintf Uri.of_string) "/wireless_device_import_task/%s"
+            (ImportTaskId.to_header x.GetWirelessDeviceImportTaskRequest.id)
       | GetWirelessDeviceStatistics ->
           (Format.kasprintf Uri.of_string) "/wireless-devices/%s/statistics"
             (WirelessDeviceId.to_header
@@ -588,7 +749,38 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.nextToken;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
-                 x.maxResults])
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v ->
+                       ("deviceProfileType", (DeviceProfileType.to_header v)))
+                 x.deviceProfileType])
+      | ListDevicesForWirelessDeviceImportTask ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/wireless_device_import_task")
+            (List.filter_opt
+               [Some ("id", (ImportTaskId.to_header x.id));
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("status", (OnboardStatus.to_header v)))
+                 x.status])
+      | ListEventConfigurations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/event-configurations")
+            (List.filter_opt
+               [Some
+                  ("resourceType",
+                    (EventNotificationResourceType.to_header x.resourceType));
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
       | ListFuotaTasks ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/fuota-tasks")
@@ -622,6 +814,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
                  x.maxResults])
+      | ListNetworkAnalyzerConfigurations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/network-analyzer-configurations")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
       | ListPartnerAccounts ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/partner-accounts")
@@ -632,6 +835,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
                  x.maxResults])
+      | ListPositionConfigurations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/position-configurations")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("resourceType", (PositionResourceType.to_header v)))
+                  x.resourceType;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
       | ListQueuedMessages ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/wireless-devices/%s/data"
@@ -664,6 +881,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Some
                   ("resourceArn",
                     (AmazonResourceName.to_header x.resourceArn))])
+      | ListWirelessDeviceImportTasks ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/wireless_device_import_tasks")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
       | ListWirelessDevices ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/wireless-devices")
@@ -724,6 +951,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
                  x.maxResults])
+      | PutPositionConfiguration ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/position-configurations/%s"
+               (PositionResourceIdentifier.to_header
+                  x.PutPositionConfigurationRequest.resourceIdentifier))
+            (List.filter_opt
+               [Some
+                  ("resourceType",
+                    (PositionResourceType.to_header x.resourceType))])
       | PutResourceLogLevel ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/log-levels/%s"
@@ -763,6 +999,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/multicast-groups/%s/session"
             (MulticastGroupId.to_header
                x.StartMulticastGroupSessionRequest.id)
+      | StartSingleWirelessDeviceImportTask ->
+          (Format.kasprintf Uri.of_string)
+            "/wireless_single_device_import_task"
+      | StartWirelessDeviceImportTask ->
+          (Format.kasprintf Uri.of_string) "/wireless_device_import_task"
       | TagResource ->
           Uri.add_query_params' ((Format.kasprintf Uri.of_string) "/tags")
             (List.filter_opt
@@ -782,11 +1023,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateDestination ->
           (Format.kasprintf Uri.of_string) "/destinations/%s"
             (DestinationName.to_header x.UpdateDestinationRequest.name)
+      | UpdateEventConfigurationByResourceTypes ->
+          (Format.kasprintf Uri.of_string)
+            "/event-configurations-resource-types"
       | UpdateFuotaTask ->
           (Format.kasprintf Uri.of_string) "/fuota-tasks/%s"
             (FuotaTaskId.to_header x.UpdateFuotaTaskRequest.id)
       | UpdateLogLevelsByResourceTypes ->
           (Format.kasprintf Uri.of_string) "/log-levels"
+      | UpdateMetricConfiguration ->
+          (Format.kasprintf Uri.of_string) "/metric-configuration"
       | UpdateMulticastGroup ->
           (Format.kasprintf Uri.of_string) "/multicast-groups/%s"
             (MulticastGroupId.to_header x.UpdateMulticastGroupRequest.id)
@@ -802,6 +1048,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.UpdatePartnerAccountRequest.partnerAccountId))
             (List.filter_opt
                [Some ("partnerType", (PartnerType.to_header x.partnerType))])
+      | UpdatePosition ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/positions/%s"
+               (PositionResourceIdentifier.to_header
+                  x.UpdatePositionRequest.resourceIdentifier))
+            (List.filter_opt
+               [Some
+                  ("resourceType",
+                    (PositionResourceType.to_header x.resourceType))])
       | UpdateResourceEventConfiguration ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/event-configurations/%s"
@@ -816,9 +1071,22 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                        ("partnerType",
                          (EventNotificationPartnerType.to_header v)))
                  x.partnerType])
+      | UpdateResourcePosition ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/resource-positions/%s"
+               (PositionResourceIdentifier.to_header
+                  x.UpdateResourcePositionRequest.resourceIdentifier))
+            (List.filter_opt
+               [Some
+                  ("resourceType",
+                    (PositionResourceType.to_header x.resourceType))])
       | UpdateWirelessDevice ->
           (Format.kasprintf Uri.of_string) "/wireless-devices/%s"
             (WirelessDeviceId.to_header x.UpdateWirelessDeviceRequest.id)
+      | UpdateWirelessDeviceImportTask ->
+          (Format.kasprintf Uri.of_string) "/wireless_device_import_task/%s"
+            (ImportTaskId.to_header
+               x.UpdateWirelessDeviceImportTaskRequest.id)
       | UpdateWirelessGateway ->
           (Format.kasprintf Uri.of_string) "/wireless-gateways/%s"
             (WirelessGatewayId.to_header x.UpdateWirelessGatewayRequest.id))
@@ -931,7 +1199,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.CreateDeviceProfileRequest.clientRequestToken
                         ~f:(fun x ->
                               ("ClientRequestToken",
-                                (ClientRequestToken.to_value x)))])
+                                (ClientRequestToken.to_value x)));
+                      Option.map req.CreateDeviceProfileRequest.sidewalk
+                        ~f:(fun x ->
+                              ("Sidewalk",
+                                (SidewalkCreateDeviceProfile.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -970,7 +1242,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                           (FirmwareUpdateRole.to_value
                              req.CreateFuotaTaskRequest.firmwareUpdateRole));
                       Option.map req.CreateFuotaTaskRequest.tags
-                        ~f:(fun x -> ("Tags", (TagList.to_value x)))])
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
+                      Option.map req.CreateFuotaTaskRequest.redundancyPercent
+                        ~f:(fun x ->
+                              ("RedundancyPercent",
+                                (RedundancyPercent.to_value x)));
+                      Option.map req.CreateFuotaTaskRequest.fragmentSizeBytes
+                        ~f:(fun x ->
+                              ("FragmentSizeBytes",
+                                (FragmentSizeBytes.to_value x)));
+                      Option.map
+                        req.CreateFuotaTaskRequest.fragmentIntervalMS
+                        ~f:(fun x ->
+                              ("FragmentIntervalMS",
+                                (FragmentIntervalMS.to_value x)));
+                      Option.map req.CreateFuotaTaskRequest.descriptor
+                        ~f:(fun x ->
+                              ("Descriptor", (FileDescriptor.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1004,6 +1292,57 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                              req.CreateMulticastGroupRequest.loRaWAN));
                       Option.map req.CreateMulticastGroupRequest.tags
                         ~f:(fun x -> ("Tags", (TagList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateNetworkAnalyzerConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Name",
+                           (NetworkAnalyzerConfigurationName.to_value
+                              req.CreateNetworkAnalyzerConfigurationRequest.name));
+                      Option.map
+                        req.CreateNetworkAnalyzerConfigurationRequest.traceContent
+                        ~f:(fun x ->
+                              ("TraceContent", (TraceContent.to_value x)));
+                      Option.map
+                        req.CreateNetworkAnalyzerConfigurationRequest.wirelessDevices
+                        ~f:(fun x ->
+                              ("WirelessDevices",
+                                (WirelessDeviceList.to_value x)));
+                      Option.map
+                        req.CreateNetworkAnalyzerConfigurationRequest.wirelessGateways
+                        ~f:(fun x ->
+                              ("WirelessGateways",
+                                (WirelessGatewayList.to_value x)));
+                      Option.map
+                        req.CreateNetworkAnalyzerConfigurationRequest.description
+                        ~f:(fun x ->
+                              ("Description", (Description.to_value x)));
+                      Option.map
+                        req.CreateNetworkAnalyzerConfigurationRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
+                      Option.map
+                        req.CreateNetworkAnalyzerConfigurationRequest.clientRequestToken
+                        ~f:(fun x ->
+                              ("ClientRequestToken",
+                                (ClientRequestToken.to_value x)));
+                      Option.map
+                        req.CreateNetworkAnalyzerConfigurationRequest.multicastGroups
+                        ~f:(fun x ->
+                              ("MulticastGroups",
+                                (NetworkAnalyzerMulticastGroupList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1071,7 +1410,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.CreateWirelessDeviceRequest.loRaWAN
                         ~f:(fun x -> ("LoRaWAN", (LoRaWANDevice.to_value x)));
                       Option.map req.CreateWirelessDeviceRequest.tags
-                        ~f:(fun x -> ("Tags", (TagList.to_value x)))])
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
+                      Option.map req.CreateWirelessDeviceRequest.positioning
+                        ~f:(fun x ->
+                              ("Positioning",
+                                (PositioningConfigStatus.to_value x)));
+                      Option.map req.CreateWirelessDeviceRequest.sidewalk
+                        ~f:(fun x ->
+                              ("Sidewalk",
+                                (SidewalkCreateWirelessDevice.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1173,13 +1520,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteDeviceProfile -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteFuotaTask -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteMulticastGroup -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteNetworkAnalyzerConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteQueuedMessages -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteServiceProfile -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteWirelessDevice -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteWirelessDeviceImportTask ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteWirelessGateway -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteWirelessGatewayTask ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteWirelessGatewayTaskDefinition ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeregisterWirelessDevice ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DisassociateAwsAccountFromPartnerAccount ->
       Awso.Http.Request.make (method_of_endpoint endp)
@@ -1201,11 +1554,37 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetDeviceProfile ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetEventConfigurationByResourceTypes ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetFuotaTask ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetLogLevelsByResourceTypes ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetMetricConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetMetrics ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.GetMetricsRequest.summaryMetricQueries
+                         ~f:(fun x ->
+                               ("SummaryMetricQueries",
+                                 (SummaryMetricQueries.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetMulticastGroup ->
       let (headers, body) = (None, None) in
@@ -1219,10 +1598,53 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetPartnerAccount ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetPosition ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetPositionConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetPositionEstimate ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.GetPositionEstimateRequest.wiFiAccessPoints
+                         ~f:(fun x ->
+                               ("WiFiAccessPoints",
+                                 (WiFiAccessPoints.to_value x)));
+                      Option.map req.GetPositionEstimateRequest.cellTowers
+                        ~f:(fun x -> ("CellTowers", (CellTowers.to_value x)));
+                      Option.map req.GetPositionEstimateRequest.ip
+                        ~f:(fun x -> ("Ip", (Ip.to_value x)));
+                      Option.map req.GetPositionEstimateRequest.gnss
+                        ~f:(fun x -> ("Gnss", (Gnss.to_value x)));
+                      Option.map req.GetPositionEstimateRequest.timestamp
+                        ~f:(fun x -> ("Timestamp", (CreationDate.to_value x)));
+                      Option.map
+                        req.GetPositionEstimateRequest.advancedConfiguration
+                        ~f:(fun x ->
+                              ("AdvancedConfiguration",
+                                (AdvancedConfiguration.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetResourceEventConfiguration ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetResourceLogLevel ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetResourcePosition ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetServiceEndpoint ->
@@ -1232,6 +1654,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetWirelessDevice ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetWirelessDeviceImportTask ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetWirelessDeviceStatistics ->
@@ -1261,6 +1686,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListDeviceProfiles ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListDevicesForWirelessDeviceImportTask ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListEventConfigurations ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListFuotaTasks ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -1270,7 +1701,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListMulticastGroupsByFuotaTask ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListNetworkAnalyzerConfigurations ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListPartnerAccounts ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListPositionConfigurations ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListQueuedMessages ->
@@ -1282,6 +1719,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListTagsForResource ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListWirelessDeviceImportTasks ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListWirelessDevices ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -1291,6 +1731,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListWirelessGateways ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutPositionConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | PutResourceLogLevel -> Awso.Http.Request.make (method_of_endpoint endp)
   | ResetAllResourceLogLevels ->
       Awso.Http.Request.make (method_of_endpoint endp)
@@ -1376,6 +1818,83 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | StartFuotaTask -> Awso.Http.Request.make (method_of_endpoint endp)
   | StartMulticastGroupSession ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | StartSingleWirelessDeviceImportTask ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("DestinationName",
+                           (DestinationName.to_value
+                              req.StartSingleWirelessDeviceImportTaskRequest.destinationName));
+                      Option.map
+                        req.StartSingleWirelessDeviceImportTaskRequest.clientRequestToken
+                        ~f:(fun x ->
+                              ("ClientRequestToken",
+                                (ClientRequestToken.to_value x)));
+                      Option.map
+                        req.StartSingleWirelessDeviceImportTaskRequest.deviceName
+                        ~f:(fun x -> ("DeviceName", (DeviceName.to_value x)));
+                      Option.map
+                        req.StartSingleWirelessDeviceImportTaskRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
+                      Option.map
+                        req.StartSingleWirelessDeviceImportTaskRequest.positioning
+                        ~f:(fun x ->
+                              ("Positioning",
+                                (PositioningConfigStatus.to_value x)));
+                      Some
+                        ("Sidewalk",
+                          (SidewalkSingleStartImportInfo.to_value
+                             req.StartSingleWirelessDeviceImportTaskRequest.sidewalk))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartWirelessDeviceImportTask ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("DestinationName",
+                           (DestinationName.to_value
+                              req.StartWirelessDeviceImportTaskRequest.destinationName));
+                      Option.map
+                        req.StartWirelessDeviceImportTaskRequest.clientRequestToken
+                        ~f:(fun x ->
+                              ("ClientRequestToken",
+                                (ClientRequestToken.to_value x)));
+                      Option.map
+                        req.StartWirelessDeviceImportTaskRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
+                      Option.map
+                        req.StartWirelessDeviceImportTaskRequest.positioning
+                        ~f:(fun x ->
+                              ("Positioning",
+                                (PositioningConfigStatus.to_value x)));
+                      Some
+                        ("Sidewalk",
+                          (SidewalkStartImportInfo.to_value
+                             req.StartWirelessDeviceImportTaskRequest.sidewalk))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | TagResource ->
       let (headers, body) =
         let headers =
@@ -1400,6 +1919,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateDestination -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateEventConfigurationByResourceTypes ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateFuotaTask -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateLogLevelsByResourceTypes ->
       let (headers, body) =
@@ -1414,6 +1935,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          req.UpdateLogLevelsByResourceTypesRequest.defaultLogLevel
                          ~f:(fun x ->
                                ("DefaultLogLevel", (LogLevel.to_value x)));
+                      Option.map
+                        req.UpdateLogLevelsByResourceTypesRequest.fuotaTaskLogOptions
+                        ~f:(fun x ->
+                              ("FuotaTaskLogOptions",
+                                (FuotaTaskLogOptionList.to_value x)));
                       Option.map
                         req.UpdateLogLevelsByResourceTypesRequest.wirelessDeviceLogOptions
                         ~f:(fun x ->
@@ -1431,13 +1957,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateMetricConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateMulticastGroup -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateNetworkAnalyzerConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | UpdatePartnerAccount -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdatePosition -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateResourceEventConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateResourcePosition ->
+      let headers = Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+      let body = Option.map req.geoJsonPayload ~f:GeoJsonPayload.to_header in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateWirelessDevice -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateWirelessDeviceImportTask ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateWirelessGateway -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -1605,6 +2140,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateMulticastGroupResponse.error_of_json))
+  | CreateNetworkAnalyzerConfiguration ->
+      if is_success
+      then
+        Ok
+          (CreateNetworkAnalyzerConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateNetworkAnalyzerConfigurationResponse.error_of_json))
   | CreateServiceProfile ->
       if is_success
       then Ok (CreateServiceProfileResponse.of_json (response_to_json resp))
@@ -1677,6 +2222,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteMulticastGroupResponse.error_of_json))
+  | DeleteNetworkAnalyzerConfiguration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteNetworkAnalyzerConfigurationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteNetworkAnalyzerConfigurationResponse.error_of_json))
   | DeleteQueuedMessages ->
       if is_success
       then
@@ -1704,6 +2261,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteWirelessDeviceResponse.error_of_json))
+  | DeleteWirelessDeviceImportTask ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteWirelessDeviceImportTaskResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteWirelessDeviceImportTaskResponse.error_of_json))
   | DeleteWirelessGateway ->
       if is_success
       then
@@ -1736,6 +2305,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteWirelessGatewayTaskDefinitionResponse.error_of_json))
+  | DeregisterWirelessDevice ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeregisterWirelessDeviceResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeregisterWirelessDeviceResponse.error_of_json))
   | DisassociateAwsAccountFromPartnerAccount ->
       if is_success
       then
@@ -1835,6 +2415,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (GetDeviceProfileResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some GetDeviceProfileResponse.error_of_json))
+  | GetEventConfigurationByResourceTypes ->
+      if is_success
+      then
+        Ok
+          (GetEventConfigurationByResourceTypesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetEventConfigurationByResourceTypesResponse.error_of_json))
   | GetFuotaTask ->
       if is_success
       then Ok (GetFuotaTaskResponse.of_json (response_to_json resp))
@@ -1849,6 +2439,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetLogLevelsByResourceTypesResponse.error_of_json))
+  | GetMetricConfiguration ->
+      if is_success
+      then
+        Ok (GetMetricConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetMetricConfigurationResponse.error_of_json))
+  | GetMetrics ->
+      if is_success
+      then Ok (GetMetricsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetMetricsResponse.error_of_json))
   | GetMulticastGroup ->
       if is_success
       then Ok (GetMulticastGroupResponse.of_json (response_to_json resp))
@@ -1879,6 +2481,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetPartnerAccountResponse.error_of_json))
+  | GetPosition ->
+      if is_success
+      then Ok (GetPositionResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetPositionResponse.error_of_json))
+  | GetPositionConfiguration ->
+      if is_success
+      then
+        Ok (GetPositionConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetPositionConfigurationResponse.error_of_json))
+  | GetPositionEstimate ->
+      if is_success
+      then
+        let body = GeoJsonPayload.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetPositionEstimateResponse.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error (Some GetPositionEstimateResponse.error_of_json))
   | GetResourceEventConfiguration ->
       if is_success
       then
@@ -1895,6 +2519,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetResourceLogLevelResponse.error_of_json))
+  | GetResourcePosition ->
+      if is_success
+      then
+        let body = GeoJsonPayload.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetResourcePositionResponse.of_header_and_body (headers, body))
+      else
+        Error
+          (parse_aws_error (Some GetResourcePositionResponse.error_of_json))
   | GetServiceEndpoint ->
       if is_success
       then Ok (GetServiceEndpointResponse.of_json (response_to_json resp))
@@ -1913,6 +2547,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetWirelessDeviceResponse.error_of_json))
+  | GetWirelessDeviceImportTask ->
+      if is_success
+      then
+        Ok
+          (GetWirelessDeviceImportTaskResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetWirelessDeviceImportTaskResponse.error_of_json))
   | GetWirelessDeviceStatistics ->
       if is_success
       then
@@ -1989,6 +2633,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListDeviceProfilesResponse.error_of_json))
+  | ListDevicesForWirelessDeviceImportTask ->
+      if is_success
+      then
+        Ok
+          (ListDevicesForWirelessDeviceImportTaskResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListDevicesForWirelessDeviceImportTaskResponse.error_of_json))
+  | ListEventConfigurations ->
+      if is_success
+      then
+        Ok (ListEventConfigurationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListEventConfigurationsResponse.error_of_json))
   | ListFuotaTasks ->
       if is_success
       then Ok (ListFuotaTasksResponse.of_json (response_to_json resp))
@@ -2010,12 +2673,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListMulticastGroupsByFuotaTaskResponse.error_of_json))
+  | ListNetworkAnalyzerConfigurations ->
+      if is_success
+      then
+        Ok
+          (ListNetworkAnalyzerConfigurationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListNetworkAnalyzerConfigurationsResponse.error_of_json))
   | ListPartnerAccounts ->
       if is_success
       then Ok (ListPartnerAccountsResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some ListPartnerAccountsResponse.error_of_json))
+  | ListPositionConfigurations ->
+      if is_success
+      then
+        Ok
+          (ListPositionConfigurationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListPositionConfigurationsResponse.error_of_json))
   | ListQueuedMessages ->
       if is_success
       then Ok (ListQueuedMessagesResponse.of_json (response_to_json resp))
@@ -2034,6 +2716,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListWirelessDeviceImportTasks ->
+      if is_success
+      then
+        Ok
+          (ListWirelessDeviceImportTasksResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListWirelessDeviceImportTasksResponse.error_of_json))
   | ListWirelessDevices ->
       if is_success
       then Ok (ListWirelessDevicesResponse.of_json (response_to_json resp))
@@ -2056,6 +2748,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListWirelessGatewaysResponse.error_of_json))
+  | PutPositionConfiguration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (PutPositionConfigurationResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some PutPositionConfigurationResponse.error_of_json))
   | PutResourceLogLevel ->
       if is_success
       then
@@ -2147,6 +2850,26 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some StartMulticastGroupSessionResponse.error_of_json))
+  | StartSingleWirelessDeviceImportTask ->
+      if is_success
+      then
+        Ok
+          (StartSingleWirelessDeviceImportTaskResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartSingleWirelessDeviceImportTaskResponse.error_of_json))
+  | StartWirelessDeviceImportTask ->
+      if is_success
+      then
+        Ok
+          (StartWirelessDeviceImportTaskResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartWirelessDeviceImportTaskResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -2176,6 +2899,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateDestinationResponse.error_of_json))
+  | UpdateEventConfigurationByResourceTypes ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateEventConfigurationByResourceTypesResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                UpdateEventConfigurationByResourceTypesResponse.error_of_json))
   | UpdateFuotaTask ->
       if is_success
       then
@@ -2196,6 +2932,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateLogLevelsByResourceTypesResponse.error_of_json))
+  | UpdateMetricConfiguration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateMetricConfigurationResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateMetricConfigurationResponse.error_of_json))
   | UpdateMulticastGroup ->
       if is_success
       then
@@ -2226,6 +2973,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdatePartnerAccountResponse.error_of_json))
+  | UpdatePosition ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdatePositionResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some UpdatePositionResponse.error_of_json))
   | UpdateResourceEventConfiguration ->
       if is_success
       then
@@ -2238,6 +2993,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateResourceEventConfigurationResponse.error_of_json))
+  | UpdateResourcePosition ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateResourcePositionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateResourcePositionResponse.error_of_json))
   | UpdateWirelessDevice ->
       if is_success
       then
@@ -2247,6 +3012,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateWirelessDeviceResponse.error_of_json))
+  | UpdateWirelessDeviceImportTask ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateWirelessDeviceImportTaskResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateWirelessDeviceImportTaskResponse.error_of_json))
   | UpdateWirelessGateway ->
       if is_success
       then

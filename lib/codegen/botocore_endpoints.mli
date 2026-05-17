@@ -41,6 +41,7 @@ type properties =
   ; signatureVersions : [ `v2 | `v3 | `v4 | `s3 | `s3v4 ] list option
   ; variants : variant list option
   ; deprecated : bool option
+  ; dnsSuffix : string option
   }
 
 type service =
@@ -69,12 +70,12 @@ type t =
 
 val of_json : string -> t
 
-(** [make_lookup_uri e] generates a module implementation for endpoint heuristics,
+(** [make_lookup_uri e] generates structure items for endpoint heuristics,
     which are rules described in botodata to determine an endpoint (service URL, basically)
     for a service given a region and a few more properties. *)
-val make_lookup_uri : t -> structure_item
+val make_lookup_uri : t -> structure_item list
 
 (** [make_lookup_credential_scope e] is similar to the above, but determines
     the region credentials should be bound to, though most of the time it's the same as
     the region of the service. One notable exception is route53. *)
-val make_lookup_credential_scope : t -> structure_item
+val make_lookup_credential_scope : t -> structure_item list

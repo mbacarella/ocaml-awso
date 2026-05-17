@@ -199,48 +199,13 @@ module Query = struct
     | `Athena_execution_id _ -> None
     | `Athena_execution { GetQueryExecutionOutput.queryExecution = None } -> None
     | `Athena_execution
-        { GetQueryExecutionOutput.queryExecution =
-            Some
-              { queryExecutionId = _
-              ; query = _
-              ; resultConfiguration = None
-              ; queryExecutionContext = _
-              ; status = _
-              ; statistics = _
-              ; statementType = _
-              ; workGroup = _
-              ; engineVersion = _
-              }
+        { GetQueryExecutionOutput.queryExecution = Some { resultConfiguration = None; _ }
         } -> None
     | `Athena_execution
         { GetQueryExecutionOutput.queryExecution =
-            Some
-              { queryExecutionId = _
-              ; query = _
-              ; resultConfiguration =
-                  Some
-                    { outputLocation
-                    ; encryptionConfiguration = _
-                    ; expectedBucketOwner = _
-                    ; aclConfiguration = _
-                    }
-              ; queryExecutionContext = _
-              ; status = _
-              ; statistics = _
-              ; statementType = _
-              ; workGroup = _
-              ; engineVersion = _
-              }
+            Some { resultConfiguration = Some { outputLocation; _ }; _ }
         } -> outputLocation
-    | `Athena_start
-        { query_execution_output = _
-        ; result_configuration =
-            { outputLocation
-            ; encryptionConfiguration = _
-            ; expectedBucketOwner = _
-            ; aclConfiguration = _
-            }
-        } -> outputLocation
+    | `Athena_start { result_configuration = { outputLocation; _ }; _ } -> outputLocation
   ;;
 
   let ls ?max_results ?(close_on_exception = true) cfg

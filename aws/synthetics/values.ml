@@ -51,6 +51,9 @@ module BaseScreenshotIgnoreCoordinates =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BaseScreenshotConfigIgnoreCoordinate.to_value)) |>
         (fun x -> `List x)
@@ -92,6 +95,63 @@ module String_ =
     let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
   end
+module DependencyType =
+  struct
+    type nonrec t =
+      | LambdaLayer 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | LambdaLayer -> "LambdaLayer" | Non_static_id s -> s
+    let of_string =
+      function | "LambdaLayer" -> LambdaLayer | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DependencyType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DependencyType" j)
+    let to_json = simple_to_json to_value
+  end
+module BaseScreenshot =
+  struct
+    type nonrec t =
+      {
+      screenshotName: String_.t
+        [@ocaml.doc
+          "The name of the screenshot. This is generated the first time the canary is run after the UpdateCanary operation that specified for this canary to perform visual monitoring."];
+      ignoreCoordinates: BaseScreenshotIgnoreCoordinates.t option
+        [@ocaml.doc
+          "Coordinates that define the part of a screen to ignore during screenshot comparisons. To obtain the coordinates to use here, use the CloudWatch console to draw the boundaries on the screen. For more information, see Editing or deleting a canary"]}
+    let context_ = "BaseScreenshot"
+    let make ?ignoreCoordinates =
+      fun ~screenshotName -> fun () -> { ignoreCoordinates; screenshotName }
+    let to_value x =
+      structure_to_value
+        [("ScreenshotName", (Some (String_.to_value x.screenshotName)));
+        ("IgnoreCoordinates",
+          (Option.map x.ignoreCoordinates
+             ~f:BaseScreenshotIgnoreCoordinates.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ignoreCoordinates =
+        (Option.map ~f:BaseScreenshotIgnoreCoordinates.of_xml)
+          (Xml.child xml_arg0 "IgnoreCoordinates") in
+      let screenshotName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ScreenshotName") in
+      make ?ignoreCoordinates ~screenshotName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ignoreCoordinates =
+        field_map json__ "IgnoreCoordinates"
+          BaseScreenshotIgnoreCoordinates.of_json in
+      let screenshotName =
+        field_map_exn json__ "ScreenshotName" String_.of_json in
+      make ?ignoreCoordinates ~screenshotName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure representing a screenshot that is used as a baseline during visual monitoring comparisons made by the canary."]
 module EncryptionMode =
   struct
     type nonrec t =
@@ -129,7 +189,7 @@ module KmsKeyArn =
                 (check_string_max i ~max:2048) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"arn:(aws[a-zA-Z-]*)?:kms:[a-z]{2}((-gov)|(-iso(b?)))?-[a-z]+-\\d{1}:\\d{12}:key/[\\w\\-\\/]+")));
+                       ~pattern:"arn:(aws[a-zA-Z-]*)?:kms:[a-z]{2,4}(-[a-z]{2,4})?-[a-z]+-\\d{1}:\\d{12}:key/[\\w\\-\\/]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -139,45 +199,148 @@ module KmsKeyArn =
     let of_json j = string_of_json ~kind:"KmsKeyArn" j
     let to_json = simple_to_json to_value
   end
-module BaseScreenshot =
+module BrowserType =
+  struct
+    type nonrec t =
+      | CHROME 
+      | FIREFOX 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CHROME -> "CHROME"
+      | FIREFOX -> "FIREFOX"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CHROME" -> CHROME
+      | "FIREFOX" -> FIREFOX
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration BrowserType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"BrowserType" j)
+    let to_json = simple_to_json to_value
+  end
+module BlueprintType =
+  struct
+    type nonrec t = string
+    let context_ = "BlueprintType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9a-zA-Z_\\-\\.]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"BlueprintType" j
+    let to_json = simple_to_json to_value
+  end
+module Dependency =
   struct
     type nonrec t =
       {
-      screenshotName: String_.t
+      type_: DependencyType.t option
+        [@ocaml.doc "The type of dependency. Valid value is LambdaLayer."];
+      reference: String_.t
         [@ocaml.doc
-          "The name of the screenshot. This is generated the first time the canary is run after the UpdateCanary operation that specified for this canary to perform visual monitoring."];
-      ignoreCoordinates: BaseScreenshotIgnoreCoordinates.t option
-        [@ocaml.doc
-          "Coordinates that define the part of a screen to ignore during screenshot comparisons. To obtain the coordinates to use here, use the CloudWatch Logs console to draw the boundaries on the screen. For more information, see \\{LINK\\}"]}
-    let context_ = "BaseScreenshot"
-    let make ?ignoreCoordinates =
-      fun ~screenshotName -> fun () -> { ignoreCoordinates; screenshotName }
+          "The dependency reference. For Lambda layers, this is the ARN of the Lambda layer. For more information about Lambda ARN format, see Lambda."]}
+    let context_ = "Dependency"
+    let make ?type_ = fun ~reference -> fun () -> { type_; reference }
     let to_value x =
       structure_to_value
-        [("ScreenshotName", (Some (String_.to_value x.screenshotName)));
-        ("IgnoreCoordinates",
-          (Option.map x.ignoreCoordinates
-             ~f:BaseScreenshotIgnoreCoordinates.to_value))]
+        [("Type", (Option.map x.type_ ~f:DependencyType.to_value));
+        ("Reference", (Some (String_.to_value x.reference)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let ignoreCoordinates =
-        (Option.map ~f:BaseScreenshotIgnoreCoordinates.of_xml)
-          (Xml.child xml_arg0 "IgnoreCoordinates") in
-      let screenshotName =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ScreenshotName") in
-      make ?ignoreCoordinates ~screenshotName ()
+      let reference =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Reference") in
+      let type_ =
+        (Option.map ~f:DependencyType.of_xml) (Xml.child xml_arg0 "Type") in
+      make ~reference ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ignoreCoordinates =
-        field_map json "IgnoreCoordinates"
-          BaseScreenshotIgnoreCoordinates.of_json in
-      let screenshotName =
-        field_map_exn json "ScreenshotName" String_.of_json in
-      make ?ignoreCoordinates ~screenshotName ()
+    let of_json json__ =
+      let reference = field_map_exn json__ "Reference" String_.of_json in
+      let type_ = field_map json__ "Type" DependencyType.of_json in
+      make ~reference ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A structure representing a screenshot that is used as a baseline during visual monitoring comparisons made by the canary."]
+       "A structure that contains information about a dependency for a canary."]
+module MaxRetries =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:2) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxRetries" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module FunctionArn =
+  struct
+    type nonrec t = string
+    let context_ = "FunctionArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:(aws[a-zA-Z-]*)?:lambda:[a-z]{2,4}(-[a-z]{2,4})?-[a-z]+-\\d{1}:\\d{12}:function:[a-zA-Z0-9-_]+(:(\\$LATEST|[a-zA-Z0-9-_]+))?")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FunctionArn" j
+    let to_json = simple_to_json to_value
+  end
+module BaseScreenshots =
+  struct
+    type nonrec t = BaseScreenshot.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BaseScreenshot.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BaseScreenshot.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BaseScreenshots" ~of_json:BaseScreenshot.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module SecurityGroupId =
   struct
     type nonrec t = string
@@ -202,6 +365,24 @@ module SubnetId =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"SubnetId" j
+    let to_json = simple_to_json to_value
+  end
+module UUID =
+  struct
+    type nonrec t = string
+    let context_ = "UUID"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UUID" j
     let to_json = simple_to_json to_value
   end
 module CanaryRunState =
@@ -259,6 +440,35 @@ module CanaryRunStateReasonCode =
       of_string (string_of_json ~kind:"CanaryRunStateReasonCode" j)
     let to_json = simple_to_json to_value
   end
+module CanaryRunTestResult =
+  struct
+    type nonrec t =
+      | PASSED 
+      | FAILED 
+      | UNKNOWN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PASSED -> "PASSED"
+      | FAILED -> "FAILED"
+      | UNKNOWN -> "UNKNOWN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PASSED" -> PASSED
+      | "FAILED" -> FAILED
+      | "UNKNOWN" -> UNKNOWN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CanaryRunTestResult" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CanaryRunTestResult" j)
+    let to_json = simple_to_json to_value
+  end
 module Timestamp =
   struct
     type nonrec t = string
@@ -297,14 +507,118 @@ module S3EncryptionConfig =
           (Xml.child xml_arg0 "EncryptionMode") in
       make ?kmsKeyArn ?encryptionMode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyArn = field_map json "KmsKeyArn" KmsKeyArn.of_json in
+    let of_json json__ =
+      let kmsKeyArn = field_map json__ "KmsKeyArn" KmsKeyArn.of_json in
       let encryptionMode =
-        field_map json "EncryptionMode" EncryptionMode.of_json in
+        field_map json__ "EncryptionMode" EncryptionMode.of_json in
       make ?kmsKeyArn ?encryptionMode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that contains the configuration of encryption-at-rest settings for canary artifacts that the canary uploads to Amazon S3. For more information, see Encrypting canary artifacts"]
+module BrowserConfig =
+  struct
+    type nonrec t =
+      {
+      browserType: BrowserType.t option
+        [@ocaml.doc
+          "The browser type associated with this browser configuration."]}
+    let make ?browserType = fun () -> { browserType }
+    let to_value x =
+      structure_to_value
+        [("BrowserType", (Option.map x.browserType ~f:BrowserType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let browserType =
+        (Option.map ~f:BrowserType.of_xml) (Xml.child xml_arg0 "BrowserType") in
+      make ?browserType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let browserType = field_map json__ "BrowserType" BrowserType.of_json in
+      make ?browserType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that specifies the browser type to use for a canary run."]
+module BlueprintTypes =
+  struct
+    type nonrec t = BlueprintType.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BlueprintType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BlueprintType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BlueprintTypes" ~of_json:BlueprintType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Dependencies =
+  struct
+    type nonrec t = Dependency.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Dependency.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Dependency.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Dependencies" ~of_json:Dependency.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EphemeralStorageSize =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:10240) >>=
+             (fun () -> check_int_min i ~min:1024));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for EphemeralStorageSize" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module MaxFifteenMinutesInSeconds =
   struct
     type nonrec t = int
@@ -374,6 +688,29 @@ module MaxOneYearInSeconds =
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
+module RetryConfigOutput =
+  struct
+    type nonrec t =
+      {
+      maxRetries: MaxRetries.t option
+        [@ocaml.doc
+          "The maximum number of retries. The value must be less than or equal to 2."]}
+    let make ?maxRetries = fun () -> { maxRetries }
+    let to_value x =
+      structure_to_value
+        [("MaxRetries", (Option.map x.maxRetries ~f:MaxRetries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxRetries =
+        (Option.map ~f:MaxRetries.of_xml) (Xml.child xml_arg0 "MaxRetries") in
+      make ?maxRetries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxRetries = field_map json__ "MaxRetries" MaxRetries.of_json in
+      make ?maxRetries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This structure contains information about the canary's retry configuration."]
 module CanaryState =
   struct
     type nonrec t =
@@ -424,15 +761,48 @@ module CanaryStateReasonCode =
   struct
     type nonrec t =
       | INVALID_PERMISSIONS 
+      | CREATE_PENDING 
+      | CREATE_IN_PROGRESS 
+      | CREATE_FAILED 
+      | UPDATE_PENDING 
+      | UPDATE_IN_PROGRESS 
+      | UPDATE_COMPLETE 
+      | ROLLBACK_COMPLETE 
+      | ROLLBACK_FAILED 
+      | DELETE_IN_PROGRESS 
+      | DELETE_FAILED 
+      | SYNC_DELETE_IN_PROGRESS 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | INVALID_PERMISSIONS -> "INVALID_PERMISSIONS"
+      | CREATE_PENDING -> "CREATE_PENDING"
+      | CREATE_IN_PROGRESS -> "CREATE_IN_PROGRESS"
+      | CREATE_FAILED -> "CREATE_FAILED"
+      | UPDATE_PENDING -> "UPDATE_PENDING"
+      | UPDATE_IN_PROGRESS -> "UPDATE_IN_PROGRESS"
+      | UPDATE_COMPLETE -> "UPDATE_COMPLETE"
+      | ROLLBACK_COMPLETE -> "ROLLBACK_COMPLETE"
+      | ROLLBACK_FAILED -> "ROLLBACK_FAILED"
+      | DELETE_IN_PROGRESS -> "DELETE_IN_PROGRESS"
+      | DELETE_FAILED -> "DELETE_FAILED"
+      | SYNC_DELETE_IN_PROGRESS -> "SYNC_DELETE_IN_PROGRESS"
       | Non_static_id s -> s
     let of_string =
       function
       | "INVALID_PERMISSIONS" -> INVALID_PERMISSIONS
+      | "CREATE_PENDING" -> CREATE_PENDING
+      | "CREATE_IN_PROGRESS" -> CREATE_IN_PROGRESS
+      | "CREATE_FAILED" -> CREATE_FAILED
+      | "UPDATE_PENDING" -> UPDATE_PENDING
+      | "UPDATE_IN_PROGRESS" -> UPDATE_IN_PROGRESS
+      | "UPDATE_COMPLETE" -> UPDATE_COMPLETE
+      | "ROLLBACK_COMPLETE" -> ROLLBACK_COMPLETE
+      | "ROLLBACK_FAILED" -> ROLLBACK_FAILED
+      | "DELETE_IN_PROGRESS" -> DELETE_IN_PROGRESS
+      | "DELETE_FAILED" -> DELETE_FAILED
+      | "SYNC_DELETE_IN_PROGRESS" -> SYNC_DELETE_IN_PROGRESS
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -444,6 +814,37 @@ module CanaryStateReasonCode =
       of_string (string_of_json ~kind:"CanaryStateReasonCode" j)
     let to_json = simple_to_json to_value
   end
+module EngineConfig =
+  struct
+    type nonrec t =
+      {
+      engineArn: FunctionArn.t option
+        [@ocaml.doc
+          "Each engine configuration contains the ARN of the Lambda function that is used as the canary's engine for a specific browser type."];
+      browserType: BrowserType.t option
+        [@ocaml.doc
+          "The browser type associated with this engine configuration."]}
+    let make ?engineArn =
+      fun ?browserType -> fun () -> { engineArn; browserType }
+    let to_value x =
+      structure_to_value
+        [("EngineArn", (Option.map x.engineArn ~f:FunctionArn.to_value));
+        ("BrowserType", (Option.map x.browserType ~f:BrowserType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let browserType =
+        (Option.map ~f:BrowserType.of_xml) (Xml.child xml_arg0 "BrowserType") in
+      let engineArn =
+        (Option.map ~f:FunctionArn.of_xml) (Xml.child xml_arg0 "EngineArn") in
+      make ?browserType ?engineArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let browserType = field_map json__ "BrowserType" BrowserType.of_json in
+      let engineArn = field_map json__ "EngineArn" FunctionArn.of_json in
+      make ?browserType ?engineArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure of engine configurations for the canary, one for each browser type that the canary is configured to run on."]
 module TagKey =
   struct
     type nonrec t = string
@@ -479,30 +880,51 @@ module TagValue =
     let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
-module BaseScreenshots =
+module VisualReferenceOutput =
   struct
-    type nonrec t = BaseScreenshot.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:BaseScreenshot.to_value)) |> (fun x -> `List x)
+    type nonrec t =
+      {
+      baseScreenshots: BaseScreenshots.t option
+        [@ocaml.doc
+          "An array of screenshots that are used as the baseline for comparisons during visual monitoring."];
+      baseCanaryRunId: String_.t option
+        [@ocaml.doc
+          "The ID of the canary run that produced the baseline screenshots that are used for visual monitoring comparisons by this canary."];
+      browserType: BrowserType.t option
+        [@ocaml.doc
+          "The browser type associated with this visual reference."]}
+    let make ?baseScreenshots =
+      fun ?baseCanaryRunId ->
+        fun ?browserType ->
+          fun () -> { baseScreenshots; baseCanaryRunId; browserType }
+    let to_value x =
+      structure_to_value
+        [("BaseScreenshots",
+           (Option.map x.baseScreenshots ~f:BaseScreenshots.to_value));
+        ("BaseCanaryRunId",
+          (Option.map x.baseCanaryRunId ~f:String_.to_value));
+        ("BrowserType", (Option.map x.browserType ~f:BrowserType.to_value))]
     let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:BaseScreenshot.of_xml)
-    let of_json j =
-      list_of_json ~kind:"BaseScreenshots" ~of_json:BaseScreenshot.of_json j
+    let of_xml xml_arg0 =
+      let browserType =
+        (Option.map ~f:BrowserType.of_xml) (Xml.child xml_arg0 "BrowserType") in
+      let baseCanaryRunId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "BaseCanaryRunId") in
+      let baseScreenshots =
+        (Option.map ~f:BaseScreenshots.of_xml)
+          (Xml.child xml_arg0 "BaseScreenshots") in
+      make ?browserType ?baseCanaryRunId ?baseScreenshots ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let browserType = field_map json__ "BrowserType" BrowserType.of_json in
+      let baseCanaryRunId =
+        field_map json__ "BaseCanaryRunId" String_.of_json in
+      let baseScreenshots =
+        field_map json__ "BaseScreenshots" BaseScreenshots.of_json in
+      make ?browserType ?baseCanaryRunId ?baseScreenshots ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "If this canary performs visual monitoring by comparing screenshots, this structure contains the ID of the canary run that is used as the baseline for screenshots, and the coordinates of any parts of those screenshots that are ignored during visual monitoring comparison. Visual monitoring is supported only on canaries running the syn-puppeteer-node-3.2 runtime or later."]
 module SecurityGroupIds =
   struct
     type nonrec t = SecurityGroupId.t list
@@ -511,6 +933,9 @@ module SecurityGroupIds =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -540,6 +965,9 @@ module SubnetIds =
         ok_or_failwith
           ((check_list_max i ~max:16) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -573,6 +1001,28 @@ module VpcId =
     let of_json j = string_of_json ~kind:"VpcId" j
     let to_json = simple_to_json to_value
   end
+module CanaryDryRunConfigOutput =
+  struct
+    type nonrec t =
+      {
+      dryRunId: UUID.t option
+        [@ocaml.doc
+          "The DryRunId associated with an existing canary\226\128\153s dry run. You can use this DryRunId to retrieve information about the dry run."]}
+    let make ?dryRunId = fun () -> { dryRunId }
+    let to_value x =
+      structure_to_value
+        [("DryRunId", (Option.map x.dryRunId ~f:UUID.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dryRunId =
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "DryRunId") in
+      make ?dryRunId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dryRunId = field_map json__ "DryRunId" UUID.of_json in
+      make ?dryRunId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns the dry run configurations set for a canary."]
 module CanaryName =
   struct
     type nonrec t = string
@@ -582,7 +1032,7 @@ module CanaryName =
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:21) >>=
+                (check_string_max i ~max:255) >>=
                   (fun () -> check_pattern i ~pattern:"^[0-9a-z_\\-]+$")));
         i
     let of_string x = x
@@ -604,19 +1054,28 @@ module CanaryRunStatus =
           "If run of the canary failed, this field contains the reason for the error."];
       stateReasonCode: CanaryRunStateReasonCode.t option
         [@ocaml.doc
-          "If this value is CANARY_FAILURE, an exception occurred in the canary code. If this value is EXECUTION_FAILURE, an exception occurred in CloudWatch Synthetics."]}
+          "If this value is CANARY_FAILURE, either the canary script failed or Synthetics ran into a fatal error when running the canary. For example, a canary timeout misconfiguration setting can cause the canary to timeout before Synthetics can evaluate its status. If this value is EXECUTION_FAILURE, a non-critical failure occurred such as failing to save generated debug artifacts (for example, screenshots or har files). If both types of failures occurred, the CANARY_FAILURE takes precedence. To understand the exact error, use the StateReason API."];
+      testResult: CanaryRunTestResult.t option
+        [@ocaml.doc
+          "Specifies the status of canary script for this run. When Synthetics tries to determine the status but fails, the result is marked as UNKNOWN. For the overall status of canary run, see State."]}
     let make ?state =
       fun ?stateReason ->
         fun ?stateReasonCode ->
-          fun () -> { state; stateReason; stateReasonCode }
+          fun ?testResult ->
+            fun () -> { state; stateReason; stateReasonCode; testResult }
     let to_value x =
       structure_to_value
         [("State", (Option.map x.state ~f:CanaryRunState.to_value));
         ("StateReason", (Option.map x.stateReason ~f:String_.to_value));
         ("StateReasonCode",
-          (Option.map x.stateReasonCode ~f:CanaryRunStateReasonCode.to_value))]
+          (Option.map x.stateReasonCode ~f:CanaryRunStateReasonCode.to_value));
+        ("TestResult",
+          (Option.map x.testResult ~f:CanaryRunTestResult.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let testResult =
+        (Option.map ~f:CanaryRunTestResult.of_xml)
+          (Xml.child xml_arg0 "TestResult") in
       let stateReasonCode =
         (Option.map ~f:CanaryRunStateReasonCode.of_xml)
           (Xml.child xml_arg0 "StateReasonCode") in
@@ -624,14 +1083,16 @@ module CanaryRunStatus =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StateReason") in
       let state =
         (Option.map ~f:CanaryRunState.of_xml) (Xml.child xml_arg0 "State") in
-      make ?stateReasonCode ?stateReason ?state ()
+      make ?testResult ?stateReasonCode ?stateReason ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let testResult =
+        field_map json__ "TestResult" CanaryRunTestResult.of_json in
       let stateReasonCode =
-        field_map json "StateReasonCode" CanaryRunStateReasonCode.of_json in
-      let stateReason = field_map json "StateReason" String_.of_json in
-      let state = field_map json "State" CanaryRunState.of_json in
-      make ?stateReasonCode ?stateReason ?state ()
+        field_map json__ "StateReasonCode" CanaryRunStateReasonCode.of_json in
+      let stateReason = field_map json__ "StateReason" String_.of_json in
+      let state = field_map json__ "State" CanaryRunState.of_json in
+      make ?testResult ?stateReasonCode ?stateReason ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This structure contains the status information about a canary run."]
@@ -640,43 +1101,56 @@ module CanaryRunTimeline =
     type nonrec t =
       {
       started: Timestamp.t option [@ocaml.doc "The start time of the run."];
-      completed: Timestamp.t option [@ocaml.doc "The end time of the run."]}
-    let make ?started = fun ?completed -> fun () -> { started; completed }
+      completed: Timestamp.t option [@ocaml.doc "The end time of the run."];
+      metricTimestampForRunAndRetries: Timestamp.t option
+        [@ocaml.doc
+          "The time at which the metrics will be generated for this run or retries."]}
+    let make ?started =
+      fun ?completed ->
+        fun ?metricTimestampForRunAndRetries ->
+          fun () -> { started; completed; metricTimestampForRunAndRetries }
     let to_value x =
       structure_to_value
         [("Started", (Option.map x.started ~f:Timestamp.to_value));
-        ("Completed", (Option.map x.completed ~f:Timestamp.to_value))]
+        ("Completed", (Option.map x.completed ~f:Timestamp.to_value));
+        ("MetricTimestampForRunAndRetries",
+          (Option.map x.metricTimestampForRunAndRetries ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let metricTimestampForRunAndRetries =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "MetricTimestampForRunAndRetries") in
       let completed =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Completed") in
       let started =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Started") in
-      make ?completed ?started ()
+      make ?metricTimestampForRunAndRetries ?completed ?started ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let completed = field_map json "Completed" Timestamp.of_json in
-      let started = field_map json "Started" Timestamp.of_json in
-      make ?completed ?started ()
+    let of_json json__ =
+      let metricTimestampForRunAndRetries =
+        field_map json__ "MetricTimestampForRunAndRetries" Timestamp.of_json in
+      let completed = field_map json__ "Completed" Timestamp.of_json in
+      let started = field_map json__ "Started" Timestamp.of_json in
+      make ?metricTimestampForRunAndRetries ?completed ?started ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This structure contains the start and end times of a single canary run."]
-module UUID =
+module RetryAttempt =
   struct
-    type nonrec t = string
-    let context_ = "UUID"
+    type nonrec t = int
     let make i =
       let open Result in
         ok_or_failwith
-          (check_pattern i
-             ~pattern:"^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$");
+          ((check_int_max i ~max:2) >>= (fun () -> check_int_min i ~min:1));
         i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string = Int.of_string
+    let to_value x = `Integer x
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"UUID" j
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RetryAttempt" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module EnvironmentVariableName =
@@ -708,6 +1182,46 @@ module EnvironmentVariableValue =
     let of_json j = string_of_json ~kind:"EnvironmentVariableValue" j
     let to_json = simple_to_json to_value
   end
+module GroupArn =
+  struct
+    type nonrec t = string
+    let context_ = "GroupArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:(aws[a-zA-Z-]*)?:synthetics:[a-z]{2,4}(-[a-z]{2,4})?-[a-z]+-\\d{1}:\\d{12}:group:[0-9a-z]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GroupArn" j
+    let to_json = simple_to_json to_value
+  end
+module GroupName =
+  struct
+    type nonrec t = string
+    let context_ = "GroupName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GroupName" j
+    let to_json = simple_to_json to_value
+  end
 module ArtifactConfigOutput =
   struct
     type nonrec t =
@@ -727,13 +1241,44 @@ module ArtifactConfigOutput =
           (Xml.child xml_arg0 "S3Encryption") in
       make ?s3Encryption ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3Encryption =
-        field_map json "S3Encryption" S3EncryptionConfig.of_json in
+        field_map json__ "S3Encryption" S3EncryptionConfig.of_json in
       make ?s3Encryption ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that contains the configuration for canary artifacts, including the encryption-at-rest settings for artifacts that the canary uploads to Amazon S3."]
+module BrowserConfigs =
+  struct
+    type nonrec t = BrowserConfig.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BrowserConfig.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BrowserConfig.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BrowserConfigs" ~of_json:BrowserConfig.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module CanaryCodeOutput =
   struct
     type nonrec t =
@@ -743,28 +1288,51 @@ module CanaryCodeOutput =
           "The ARN of the Lambda layer where Synthetics stores the canary script code."];
       handler: String_.t option
         [@ocaml.doc
-          "The entry point to use for the source code when running the canary."]}
+          "The entry point to use for the source code when running the canary. This field is required when you don't specify BlueprintTypes and is not allowed when you specify BlueprintTypes."];
+      blueprintTypes: BlueprintTypes.t option
+        [@ocaml.doc
+          "BlueprintTypes is a list of templates that enable simplified canary creation. You can create canaries for common monitoring scenarios by providing only a JSON configuration file instead of writing custom scripts. The only supported value is multi-checks. Multi-checks monitors HTTP/DNS/SSL/TCP endpoints with built-in authentication schemes (Basic, API Key, OAuth, SigV4) and assertion capabilities. When you specify BlueprintTypes, the Handler field cannot be specified since the blueprint provides a pre-defined entry point. BlueprintTypes is supported only on canaries for syn-nodejs-3.0 runtime or later."];
+      dependencies: Dependencies.t option
+        [@ocaml.doc
+          "A list of dependencies that are used for running this canary. The dependencies are specified as a key-value pair, where the key is the type of dependency and the value is the dependency reference."]}
     let make ?sourceLocationArn =
-      fun ?handler -> fun () -> { sourceLocationArn; handler }
+      fun ?handler ->
+        fun ?blueprintTypes ->
+          fun ?dependencies ->
+            fun () ->
+              { sourceLocationArn; handler; blueprintTypes; dependencies }
     let to_value x =
       structure_to_value
         [("SourceLocationArn",
            (Option.map x.sourceLocationArn ~f:String_.to_value));
-        ("Handler", (Option.map x.handler ~f:String_.to_value))]
+        ("Handler", (Option.map x.handler ~f:String_.to_value));
+        ("BlueprintTypes",
+          (Option.map x.blueprintTypes ~f:BlueprintTypes.to_value));
+        ("Dependencies",
+          (Option.map x.dependencies ~f:Dependencies.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dependencies =
+        (Option.map ~f:Dependencies.of_xml)
+          (Xml.child xml_arg0 "Dependencies") in
+      let blueprintTypes =
+        (Option.map ~f:BlueprintTypes.of_xml)
+          (Xml.child xml_arg0 "BlueprintTypes") in
       let handler =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Handler") in
       let sourceLocationArn =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "SourceLocationArn") in
-      make ?handler ?sourceLocationArn ()
+      make ?dependencies ?blueprintTypes ?handler ?sourceLocationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let handler = field_map json "Handler" String_.of_json in
+    let of_json json__ =
+      let dependencies = field_map json__ "Dependencies" Dependencies.of_json in
+      let blueprintTypes =
+        field_map json__ "BlueprintTypes" BlueprintTypes.of_json in
+      let handler = field_map json__ "Handler" String_.of_json in
       let sourceLocationArn =
-        field_map json "SourceLocationArn" String_.of_json in
-      make ?handler ?sourceLocationArn ()
+        field_map json__ "SourceLocationArn" String_.of_json in
+      make ?dependencies ?blueprintTypes ?handler ?sourceLocationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This structure contains information about the canary's Lambda handler and where its code is stored by CloudWatch Synthetics."]
@@ -780,11 +1348,17 @@ module CanaryRunConfigOutput =
           "The maximum amount of memory available to the canary while it is running, in MB. This value must be a multiple of 64."];
       activeTracing: NullableBoolean.t option
         [@ocaml.doc
-          "Displays whether this canary run used active X-Ray tracing."]}
+          "Displays whether this canary run used active X-Ray tracing."];
+      ephemeralStorage: EphemeralStorageSize.t option
+        [@ocaml.doc
+          "Specifies the amount of ephemeral storage (in MB) to allocate for the canary run during execution. This temporary storage is used for storing canary run artifacts (which are uploaded to an Amazon S3 bucket at the end of the run), and any canary browser operations. This temporary storage is cleared after the run is completed. Default storage value is 1024 MB."]}
     let make ?timeoutInSeconds =
       fun ?memoryInMB ->
         fun ?activeTracing ->
-          fun () -> { timeoutInSeconds; memoryInMB; activeTracing }
+          fun ?ephemeralStorage ->
+            fun () ->
+              { timeoutInSeconds; memoryInMB; activeTracing; ephemeralStorage
+              }
     let to_value x =
       structure_to_value
         [("TimeoutInSeconds",
@@ -792,9 +1366,14 @@ module CanaryRunConfigOutput =
               ~f:MaxFifteenMinutesInSeconds.to_value));
         ("MemoryInMB", (Option.map x.memoryInMB ~f:MaxSize3008.to_value));
         ("ActiveTracing",
-          (Option.map x.activeTracing ~f:NullableBoolean.to_value))]
+          (Option.map x.activeTracing ~f:NullableBoolean.to_value));
+        ("EphemeralStorage",
+          (Option.map x.ephemeralStorage ~f:EphemeralStorageSize.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ephemeralStorage =
+        (Option.map ~f:EphemeralStorageSize.of_xml)
+          (Xml.child xml_arg0 "EphemeralStorage") in
       let activeTracing =
         (Option.map ~f:NullableBoolean.of_xml)
           (Xml.child xml_arg0 "ActiveTracing") in
@@ -803,15 +1382,18 @@ module CanaryRunConfigOutput =
       let timeoutInSeconds =
         (Option.map ~f:MaxFifteenMinutesInSeconds.of_xml)
           (Xml.child xml_arg0 "TimeoutInSeconds") in
-      make ?activeTracing ?memoryInMB ?timeoutInSeconds ()
+      make ?ephemeralStorage ?activeTracing ?memoryInMB ?timeoutInSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ephemeralStorage =
+        field_map json__ "EphemeralStorage" EphemeralStorageSize.of_json in
       let activeTracing =
-        field_map json "ActiveTracing" NullableBoolean.of_json in
-      let memoryInMB = field_map json "MemoryInMB" MaxSize3008.of_json in
+        field_map json__ "ActiveTracing" NullableBoolean.of_json in
+      let memoryInMB = field_map json__ "MemoryInMB" MaxSize3008.of_json in
       let timeoutInSeconds =
-        field_map json "TimeoutInSeconds" MaxFifteenMinutesInSeconds.of_json in
-      make ?activeTracing ?memoryInMB ?timeoutInSeconds ()
+        field_map json__ "TimeoutInSeconds"
+          MaxFifteenMinutesInSeconds.of_json in
+      make ?ephemeralStorage ?activeTracing ?memoryInMB ?timeoutInSeconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that contains information about a canary run."]
@@ -824,28 +1406,40 @@ module CanaryScheduleOutput =
           "A rate expression or a cron expression that defines how often the canary is to run. For a rate expression, The syntax is rate(number unit). unit can be minute, minutes, or hour. For example, rate(1 minute) runs the canary once a minute, rate(10 minutes) runs it once every 10 minutes, and rate(1 hour) runs it once every hour. You can specify a frequency between rate(1 minute) and rate(1 hour). Specifying rate(0 minute) or rate(0 hour) is a special value that causes the canary to run only once when it is started. Use cron(expression) to specify a cron expression. For information about the syntax for cron expressions, see Scheduling canary runs using cron."];
       durationInSeconds: MaxOneYearInSeconds.t option
         [@ocaml.doc
-          "How long, in seconds, for the canary to continue making regular runs after it was created. The runs are performed according to the schedule in the Expression value."]}
+          "How long, in seconds, for the canary to continue making regular runs after it was created. The runs are performed according to the schedule in the Expression value."];
+      retryConfig: RetryConfigOutput.t option
+        [@ocaml.doc
+          "A structure that contains the retry configuration for a canary"]}
     let make ?expression =
-      fun ?durationInSeconds -> fun () -> { expression; durationInSeconds }
+      fun ?durationInSeconds ->
+        fun ?retryConfig ->
+          fun () -> { expression; durationInSeconds; retryConfig }
     let to_value x =
       structure_to_value
         [("Expression", (Option.map x.expression ~f:String_.to_value));
         ("DurationInSeconds",
-          (Option.map x.durationInSeconds ~f:MaxOneYearInSeconds.to_value))]
+          (Option.map x.durationInSeconds ~f:MaxOneYearInSeconds.to_value));
+        ("RetryConfig",
+          (Option.map x.retryConfig ~f:RetryConfigOutput.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let retryConfig =
+        (Option.map ~f:RetryConfigOutput.of_xml)
+          (Xml.child xml_arg0 "RetryConfig") in
       let durationInSeconds =
         (Option.map ~f:MaxOneYearInSeconds.of_xml)
           (Xml.child xml_arg0 "DurationInSeconds") in
       let expression =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Expression") in
-      make ?durationInSeconds ?expression ()
+      make ?retryConfig ?durationInSeconds ?expression ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let retryConfig =
+        field_map json__ "RetryConfig" RetryConfigOutput.of_json in
       let durationInSeconds =
-        field_map json "DurationInSeconds" MaxOneYearInSeconds.of_json in
-      let expression = field_map json "Expression" String_.of_json in
-      make ?durationInSeconds ?expression ()
+        field_map json__ "DurationInSeconds" MaxOneYearInSeconds.of_json in
+      let expression = field_map json__ "Expression" String_.of_json in
+      make ?retryConfig ?durationInSeconds ?expression ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "How long, in seconds, for the canary to continue making regular runs according to the schedule in the Expression value."]
@@ -857,10 +1451,10 @@ module CanaryStatus =
         [@ocaml.doc "The current state of the canary."];
       stateReason: String_.t option
         [@ocaml.doc
-          "If the canary has insufficient permissions to run, this field provides more details."];
+          "If the canary creation or update failed, this field provides details on the failure."];
       stateReasonCode: CanaryStateReasonCode.t option
         [@ocaml.doc
-          "If the canary cannot run or has failed, this field displays the reason."]}
+          "If the canary creation or update failed, this field displays the reason code."]}
     let make ?state =
       fun ?stateReason ->
         fun ?stateReasonCode ->
@@ -882,11 +1476,11 @@ module CanaryStatus =
         (Option.map ~f:CanaryState.of_xml) (Xml.child xml_arg0 "State") in
       make ?stateReasonCode ?stateReason ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stateReasonCode =
-        field_map json "StateReasonCode" CanaryStateReasonCode.of_json in
-      let stateReason = field_map json "StateReason" String_.of_json in
-      let state = field_map json "State" CanaryState.of_json in
+        field_map json__ "StateReasonCode" CanaryStateReasonCode.of_json in
+      let stateReason = field_map json__ "StateReason" String_.of_json in
+      let state = field_map json__ "State" CanaryState.of_json in
       make ?stateReasonCode ?stateReason ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -929,36 +1523,75 @@ module CanaryTimeline =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Created") in
       make ?lastStopped ?lastStarted ?lastModified ?created ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastStopped = field_map json "LastStopped" Timestamp.of_json in
-      let lastStarted = field_map json "LastStarted" Timestamp.of_json in
-      let lastModified = field_map json "LastModified" Timestamp.of_json in
-      let created = field_map json "Created" Timestamp.of_json in
+    let of_json json__ =
+      let lastStopped = field_map json__ "LastStopped" Timestamp.of_json in
+      let lastStarted = field_map json__ "LastStarted" Timestamp.of_json in
+      let lastModified = field_map json__ "LastModified" Timestamp.of_json in
+      let created = field_map json__ "Created" Timestamp.of_json in
       make ?lastStopped ?lastStarted ?lastModified ?created ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This structure contains information about when the canary was created and modified."]
-module FunctionArn =
+module DryRunConfigOutput =
   struct
-    type nonrec t = string
-    let context_ = "FunctionArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:2048) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"arn:(aws[a-zA-Z-]*)?:lambda:[a-z]{2}((-gov)|(-iso(b?)))?-[a-z]+-\\d{1}:\\d{12}:function:[a-zA-Z0-9-_]+(:(\\$LATEST|[a-zA-Z0-9-_]+))?")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      dryRunId: UUID.t option
+        [@ocaml.doc
+          "The DryRunId associated with an existing canary\226\128\153s dry run. You can use this DryRunId to retrieve information about the dry run."];
+      lastDryRunExecutionStatus: String_.t option
+        [@ocaml.doc
+          "Returns the last execution status for a canary's dry run."]}
+    let make ?dryRunId =
+      fun ?lastDryRunExecutionStatus ->
+        fun () -> { dryRunId; lastDryRunExecutionStatus }
+    let to_value x =
+      structure_to_value
+        [("DryRunId", (Option.map x.dryRunId ~f:UUID.to_value));
+        ("LastDryRunExecutionStatus",
+          (Option.map x.lastDryRunExecutionStatus ~f:String_.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"FunctionArn" j
-    let to_json = simple_to_json to_value
+    let of_xml xml_arg0 =
+      let lastDryRunExecutionStatus =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "LastDryRunExecutionStatus") in
+      let dryRunId =
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "DryRunId") in
+      make ?lastDryRunExecutionStatus ?dryRunId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastDryRunExecutionStatus =
+        field_map json__ "LastDryRunExecutionStatus" String_.of_json in
+      let dryRunId = field_map json__ "DryRunId" UUID.of_json in
+      make ?lastDryRunExecutionStatus ?dryRunId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns the dry run configurations set for a canary."]
+module EngineConfigs =
+  struct
+    type nonrec t = EngineConfig.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EngineConfig.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EngineConfig.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EngineConfigs" ~of_json:EngineConfig.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module MaxSize1024 =
   struct
@@ -976,6 +1609,34 @@ module MaxSize1024 =
       Int.of_string
         (string_of_xml ~kind:"an integer for MaxSize1024" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ProvisionedResourceCleanupSetting =
+  struct
+    type nonrec t =
+      | AUTOMATIC 
+      | OFF 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AUTOMATIC -> "AUTOMATIC"
+      | OFF -> "OFF"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AUTOMATIC" -> AUTOMATIC
+      | "OFF" -> OFF
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ProvisionedResourceCleanupSetting"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ProvisionedResourceCleanupSetting" j)
     let to_json = simple_to_json to_value
   end
 module RoleArn =
@@ -1025,6 +1686,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1032,41 +1695,39 @@ module TagMap =
         ~of_json:TagValue.of_json j
     let to_json v = composed_to_json to_value v
   end
-module VisualReferenceOutput =
+module VisualReferencesOutput =
   struct
-    type nonrec t =
-      {
-      baseScreenshots: BaseScreenshots.t option
-        [@ocaml.doc
-          "An array of screenshots that are used as the baseline for comparisons during visual monitoring."];
-      baseCanaryRunId: String_.t option
-        [@ocaml.doc
-          "The ID of the canary run that produced the screenshots that are used as the baseline for visual monitoring comparisons during future runs of this canary."]}
-    let make ?baseScreenshots =
-      fun ?baseCanaryRunId -> fun () -> { baseScreenshots; baseCanaryRunId }
-    let to_value x =
-      structure_to_value
-        [("BaseScreenshots",
-           (Option.map x.baseScreenshots ~f:BaseScreenshots.to_value));
-        ("BaseCanaryRunId",
-          (Option.map x.baseCanaryRunId ~f:String_.to_value))]
+    type nonrec t = VisualReferenceOutput.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VisualReferenceOutput.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let baseCanaryRunId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "BaseCanaryRunId") in
-      let baseScreenshots =
-        (Option.map ~f:BaseScreenshots.of_xml)
-          (Xml.child xml_arg0 "BaseScreenshots") in
-      make ?baseCanaryRunId ?baseScreenshots ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let baseCanaryRunId = field_map json "BaseCanaryRunId" String_.of_json in
-      let baseScreenshots =
-        field_map json "BaseScreenshots" BaseScreenshots.of_json in
-      make ?baseCanaryRunId ?baseScreenshots ()
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VisualReferenceOutput.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VisualReferencesOutput"
+        ~of_json:VisualReferenceOutput.of_json j
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "If this canary performs visual monitoring by comparing screenshots, this structure contains the ID of the canary run that is used as the baseline for screenshots, and the coordinates of any parts of those screenshots that are ignored during visual monitoring comparison. Visual monitoring is supported only on canaries running the syn-puppeteer-node-3.2 runtime or later."]
+  end
 module VpcConfigOutput =
   struct
     type nonrec t =
@@ -1076,33 +1737,45 @@ module VpcConfigOutput =
       subnetIds: SubnetIds.t option
         [@ocaml.doc "The IDs of the subnets where this canary is to run."];
       securityGroupIds: SecurityGroupIds.t option
-        [@ocaml.doc "The IDs of the security groups for this canary."]}
+        [@ocaml.doc "The IDs of the security groups for this canary."];
+      ipv6AllowedForDualStack: NullableBoolean.t option
+        [@ocaml.doc
+          "Indicates whether this canary allows outbound IPv6 traffic if it is connected to dual-stack subnets."]}
     let make ?vpcId =
       fun ?subnetIds ->
         fun ?securityGroupIds ->
-          fun () -> { vpcId; subnetIds; securityGroupIds }
+          fun ?ipv6AllowedForDualStack ->
+            fun () ->
+              { vpcId; subnetIds; securityGroupIds; ipv6AllowedForDualStack }
     let to_value x =
       structure_to_value
         [("VpcId", (Option.map x.vpcId ~f:VpcId.to_value));
         ("SubnetIds", (Option.map x.subnetIds ~f:SubnetIds.to_value));
         ("SecurityGroupIds",
-          (Option.map x.securityGroupIds ~f:SecurityGroupIds.to_value))]
+          (Option.map x.securityGroupIds ~f:SecurityGroupIds.to_value));
+        ("Ipv6AllowedForDualStack",
+          (Option.map x.ipv6AllowedForDualStack ~f:NullableBoolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipv6AllowedForDualStack =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "Ipv6AllowedForDualStack") in
       let securityGroupIds =
         (Option.map ~f:SecurityGroupIds.of_xml)
           (Xml.child xml_arg0 "SecurityGroupIds") in
       let subnetIds =
         (Option.map ~f:SubnetIds.of_xml) (Xml.child xml_arg0 "SubnetIds") in
       let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "VpcId") in
-      make ?securityGroupIds ?subnetIds ?vpcId ()
+      make ?ipv6AllowedForDualStack ?securityGroupIds ?subnetIds ?vpcId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ipv6AllowedForDualStack =
+        field_map json__ "Ipv6AllowedForDualStack" NullableBoolean.of_json in
       let securityGroupIds =
-        field_map json "SecurityGroupIds" SecurityGroupIds.of_json in
-      let subnetIds = field_map json "SubnetIds" SubnetIds.of_json in
-      let vpcId = field_map json "VpcId" VpcId.of_json in
-      make ?securityGroupIds ?subnetIds ?vpcId ()
+        field_map json__ "SecurityGroupIds" SecurityGroupIds.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetIds.of_json in
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
+      make ?ipv6AllowedForDualStack ?securityGroupIds ?subnetIds ?vpcId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "If this canary is to test an endpoint in a VPC, this structure contains information about the subnets and security groups of the VPC endpoint. For more information, see Running a Canary in a VPC."]
@@ -1112,6 +1785,10 @@ module CanaryRun =
       {
       id: UUID.t option
         [@ocaml.doc "A unique ID that identifies this canary run."];
+      scheduledRunId: UUID.t option
+        [@ocaml.doc "The ID of the scheduled canary run."];
+      retryAttempt: RetryAttempt.t option
+        [@ocaml.doc "The count in number of the retry attempt."];
       name: CanaryName.t option [@ocaml.doc "The name of the canary."];
       status: CanaryRunStatus.t option [@ocaml.doc "The status of this run."];
       timeline: CanaryRunTimeline.t option
@@ -1119,23 +1796,53 @@ module CanaryRun =
           "A structure that contains the start and end times of this run."];
       artifactS3Location: String_.t option
         [@ocaml.doc
-          "The location where the canary stored artifacts from the run. Artifacts include the log file, screenshots, and HAR files."]}
+          "The location where the canary stored artifacts from the run. Artifacts include the log file, screenshots, and HAR files."];
+      dryRunConfig: CanaryDryRunConfigOutput.t option
+        [@ocaml.doc "Returns the dry run configurations for a canary."];
+      browserType: BrowserType.t option
+        [@ocaml.doc "The browser type associated with this canary run."]}
     let make ?id =
-      fun ?name ->
-        fun ?status ->
-          fun ?timeline ->
-            fun ?artifactS3Location ->
-              fun () -> { id; name; status; timeline; artifactS3Location }
+      fun ?scheduledRunId ->
+        fun ?retryAttempt ->
+          fun ?name ->
+            fun ?status ->
+              fun ?timeline ->
+                fun ?artifactS3Location ->
+                  fun ?dryRunConfig ->
+                    fun ?browserType ->
+                      fun () ->
+                        {
+                          id;
+                          scheduledRunId;
+                          retryAttempt;
+                          name;
+                          status;
+                          timeline;
+                          artifactS3Location;
+                          dryRunConfig;
+                          browserType
+                        }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:UUID.to_value));
+        ("ScheduledRunId", (Option.map x.scheduledRunId ~f:UUID.to_value));
+        ("RetryAttempt",
+          (Option.map x.retryAttempt ~f:RetryAttempt.to_value));
         ("Name", (Option.map x.name ~f:CanaryName.to_value));
         ("Status", (Option.map x.status ~f:CanaryRunStatus.to_value));
         ("Timeline", (Option.map x.timeline ~f:CanaryRunTimeline.to_value));
         ("ArtifactS3Location",
-          (Option.map x.artifactS3Location ~f:String_.to_value))]
+          (Option.map x.artifactS3Location ~f:String_.to_value));
+        ("DryRunConfig",
+          (Option.map x.dryRunConfig ~f:CanaryDryRunConfigOutput.to_value));
+        ("BrowserType", (Option.map x.browserType ~f:BrowserType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let browserType =
+        (Option.map ~f:BrowserType.of_xml) (Xml.child xml_arg0 "BrowserType") in
+      let dryRunConfig =
+        (Option.map ~f:CanaryDryRunConfigOutput.of_xml)
+          (Xml.child xml_arg0 "DryRunConfig") in
       let artifactS3Location =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ArtifactS3Location") in
@@ -1146,17 +1853,29 @@ module CanaryRun =
         (Option.map ~f:CanaryRunStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let name =
         (Option.map ~f:CanaryName.of_xml) (Xml.child xml_arg0 "Name") in
+      let retryAttempt =
+        (Option.map ~f:RetryAttempt.of_xml)
+          (Xml.child xml_arg0 "RetryAttempt") in
+      let scheduledRunId =
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "ScheduledRunId") in
       let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?artifactS3Location ?timeline ?status ?name ?id ()
+      make ?browserType ?dryRunConfig ?artifactS3Location ?timeline ?status
+        ?name ?retryAttempt ?scheduledRunId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let browserType = field_map json__ "BrowserType" BrowserType.of_json in
+      let dryRunConfig =
+        field_map json__ "DryRunConfig" CanaryDryRunConfigOutput.of_json in
       let artifactS3Location =
-        field_map json "ArtifactS3Location" String_.of_json in
-      let timeline = field_map json "Timeline" CanaryRunTimeline.of_json in
-      let status = field_map json "Status" CanaryRunStatus.of_json in
-      let name = field_map json "Name" CanaryName.of_json in
-      let id = field_map json "Id" UUID.of_json in
-      make ?artifactS3Location ?timeline ?status ?name ?id ()
+        field_map json__ "ArtifactS3Location" String_.of_json in
+      let timeline = field_map json__ "Timeline" CanaryRunTimeline.of_json in
+      let status = field_map json__ "Status" CanaryRunStatus.of_json in
+      let name = field_map json__ "Name" CanaryName.of_json in
+      let retryAttempt = field_map json__ "RetryAttempt" RetryAttempt.of_json in
+      let scheduledRunId = field_map json__ "ScheduledRunId" UUID.of_json in
+      let id = field_map json__ "Id" UUID.of_json in
+      make ?browserType ?dryRunConfig ?artifactS3Location ?timeline ?status
+        ?name ?retryAttempt ?scheduledRunId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This structure contains the details about one run of one canary."]
@@ -1192,12 +1911,12 @@ module CodeHandler =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
+          ((check_string_min i ~min:0) >>=
              (fun () ->
                 (check_string_max i ~max:128) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^([0-9a-zA-Z_-]+\\/)*[0-9A-Za-z_\\\\-]+\\.[A-Za-z_][A-Za-z0-9_]*$")));
+                       ~pattern:"^(([0-9a-zA-Z_-]+(\\/|\\.))*[0-9A-Za-z_\\\\-]+(\\.|::)[A-Za-z_][A-Za-z0-9_]*)?$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1231,6 +1950,8 @@ module EnvironmentVariablesMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1238,6 +1959,104 @@ module EnvironmentVariablesMap =
         ~of_json:EnvironmentVariableValue.of_json j
     let to_json v = composed_to_json to_value v
   end
+module RetryConfigInput =
+  struct
+    type nonrec t =
+      {
+      maxRetries: MaxRetries.t
+        [@ocaml.doc
+          "The maximum number of retries. The value must be less than or equal to 2."]}
+    let context_ = "RetryConfigInput"
+    let make ~maxRetries = fun () -> { maxRetries }
+    let to_value x =
+      structure_to_value
+        [("MaxRetries", (Some (MaxRetries.to_value x.maxRetries)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxRetries =
+        MaxRetries.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MaxRetries") in
+      make ~maxRetries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxRetries = field_map_exn json__ "MaxRetries" MaxRetries.of_json in
+      make ~maxRetries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This structure contains information about the canary's retry configuration. The default account level concurrent execution limit from Lambda is 1000. When you have more than 1000 canaries, it's possible there are more than 1000 Lambda invocations due to retries and the console might hang. For more information on the Lambda execution limit, see Understanding Lambda function scaling. For canary with MaxRetries = 2, you need to set the CanaryRunConfigInput.TimeoutInSeconds to less than 600 seconds to avoid validation errors."]
+module VisualReferenceInput =
+  struct
+    type nonrec t =
+      {
+      baseScreenshots: BaseScreenshots.t option
+        [@ocaml.doc
+          "An array of screenshots that will be used as the baseline for visual monitoring in future runs of this canary. If there is a screenshot that you don't want to be used for visual monitoring, remove it from this array."];
+      baseCanaryRunId: String_.t
+        [@ocaml.doc
+          "Specifies which canary run to use the screenshots from as the baseline for future visual monitoring with this canary. Valid values are nextrun to use the screenshots from the next run after this update is made, lastrun to use the screenshots from the most recent run before this update was made, or the value of Id in the CanaryRun from a run of this a canary in the past 31 days. If you specify the Id of a canary run older than 31 days, the operation returns a 400 validation exception error.."];
+      browserType: BrowserType.t option
+        [@ocaml.doc
+          "The browser type associated with this visual reference."]}
+    let context_ = "VisualReferenceInput"
+    let make ?baseScreenshots =
+      fun ?browserType ->
+        fun ~baseCanaryRunId ->
+          fun () -> { baseScreenshots; browserType; baseCanaryRunId }
+    let to_value x =
+      structure_to_value
+        [("BaseScreenshots",
+           (Option.map x.baseScreenshots ~f:BaseScreenshots.to_value));
+        ("BaseCanaryRunId", (Some (String_.to_value x.baseCanaryRunId)));
+        ("BrowserType", (Option.map x.browserType ~f:BrowserType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let browserType =
+        (Option.map ~f:BrowserType.of_xml) (Xml.child xml_arg0 "BrowserType") in
+      let baseCanaryRunId =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BaseCanaryRunId") in
+      let baseScreenshots =
+        (Option.map ~f:BaseScreenshots.of_xml)
+          (Xml.child xml_arg0 "BaseScreenshots") in
+      make ?browserType ~baseCanaryRunId ?baseScreenshots ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let browserType = field_map json__ "BrowserType" BrowserType.of_json in
+      let baseCanaryRunId =
+        field_map_exn json__ "BaseCanaryRunId" String_.of_json in
+      let baseScreenshots =
+        field_map json__ "BaseScreenshots" BaseScreenshots.of_json in
+      make ?browserType ~baseCanaryRunId ?baseScreenshots ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that specifies what screenshots to use as a baseline for visual monitoring by this canary. It can optionally also specify parts of the screenshots to ignore during the visual monitoring comparison. Visual monitoring is supported only on canaries running the syn-puppeteer-node-3.2 runtime or later. For more information, see Visual monitoring and Visual monitoring blueprint"]
+module GroupSummary =
+  struct
+    type nonrec t =
+      {
+      id: String_.t option [@ocaml.doc "The unique ID of the group."];
+      name: GroupName.t option [@ocaml.doc "The name of the group."];
+      arn: GroupArn.t option [@ocaml.doc "The ARN of the group."]}
+    let make ?id = fun ?name -> fun ?arn -> fun () -> { id; name; arn }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:String_.to_value));
+        ("Name", (Option.map x.name ~f:GroupName.to_value));
+        ("Arn", (Option.map x.arn ~f:GroupArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn = (Option.map ~f:GroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
+      let name = (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "Name") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?arn ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn = field_map json__ "Arn" GroupArn.of_json in
+      let name = field_map json__ "Name" GroupName.of_json in
+      let id = field_map json__ "Id" String_.of_json in
+      make ?arn ?name ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A structure containing some information about a group."]
 module RuntimeVersion =
   struct
     type nonrec t =
@@ -1279,12 +2098,12 @@ module RuntimeVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "VersionName") in
       make ?deprecationDate ?releaseDate ?description ?versionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deprecationDate =
-        field_map json "DeprecationDate" Timestamp.of_json in
-      let releaseDate = field_map json "ReleaseDate" Timestamp.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let versionName = field_map json "VersionName" String_.of_json in
+        field_map json__ "DeprecationDate" Timestamp.of_json in
+      let releaseDate = field_map json__ "ReleaseDate" Timestamp.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let versionName = field_map json__ "VersionName" String_.of_json in
       make ?deprecationDate ?releaseDate ?description ?versionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1305,10 +2124,10 @@ module Canary =
       runConfig: CanaryRunConfigOutput.t option ;
       successRetentionPeriodInDays: MaxSize1024.t option
         [@ocaml.doc
-          "The number of days to retain data about successful runs of this canary."];
+          "The number of days to retain data about successful runs of this canary. This setting affects the range of information returned by GetCanaryRuns, as well as the range of information displayed in the Synthetics console."];
       failureRetentionPeriodInDays: MaxSize1024.t option
         [@ocaml.doc
-          "The number of days to retain data about failed runs of this canary."];
+          "The number of days to retain data about failed runs of this canary. This setting affects the range of information returned by GetCanaryRuns, as well as the range of information displayed in the Synthetics console."];
       status: CanaryStatus.t option
         [@ocaml.doc
           "A structure that contains information about the canary's status."];
@@ -1328,12 +2147,26 @@ module Canary =
       visualReference: VisualReferenceOutput.t option
         [@ocaml.doc
           "If this canary performs visual monitoring by comparing screenshots, this structure contains the ID of the canary run to use as the baseline for screenshots, and the coordinates of any parts of the screen to ignore during the visual monitoring comparison."];
+      provisionedResourceCleanup: ProvisionedResourceCleanupSetting.t option
+        [@ocaml.doc
+          "Specifies whether to also delete the Lambda functions and layers used by this canary when the canary is deleted. If it is AUTOMATIC, the Lambda functions and layers will be deleted when the canary is deleted. If the value of this parameter is OFF, then the value of the DeleteLambda parameter of the DeleteCanary operation determines whether the Lambda functions and layers will be deleted."];
+      browserConfigs: BrowserConfigs.t option
+        [@ocaml.doc
+          "A structure that specifies the browser type to use for a canary run. CloudWatch Synthetics supports running canaries on both CHROME and FIREFOX browsers. If not specified, browserConfigs defaults to Chrome."];
+      engineConfigs: EngineConfigs.t option
+        [@ocaml.doc
+          "A list of engine configurations for the canary, one for each browser type that the canary is configured to run on. All runtime versions syn-nodejs-puppeteer-11.0 and above, and syn-nodejs-playwright-3.0 and above, use engineConfigs only. You can no longer use engineArn in these versions. Runtime versions older than syn-nodejs-puppeteer-11.0 and syn-nodejs-playwright-3.0 continue to support engineArn to ensure backward compatibility."];
+      visualReferences: VisualReferencesOutput.t option
+        [@ocaml.doc
+          "A list of visual reference configurations for the canary, one for each browser type that the canary is configured to run on. Visual references are used for visual monitoring comparisons. syn-nodejs-puppeteer-11.0 and above, and syn-nodejs-playwright-3.0 and above, only supports visualReferences. visualReference field is not supported. Versions older than syn-nodejs-puppeteer-11.0 supports both visualReference and visualReferences for backward compatibility. It is recommended to use visualReferences for consistency and future compatibility."];
       tags: TagMap.t option
         [@ocaml.doc
           "The list of key-value pairs that are associated with the canary."];
       artifactConfig: ArtifactConfigOutput.t option
         [@ocaml.doc
-          "A structure that contains the configuration for canary artifacts, including the encryption-at-rest settings for artifacts that the canary uploads to Amazon S3."]}
+          "A structure that contains the configuration for canary artifacts, including the encryption-at-rest settings for artifacts that the canary uploads to Amazon S3."];
+      dryRunConfig: DryRunConfigOutput.t option
+        [@ocaml.doc "Returns the dry run configurations for a canary."]}
     let make ?id =
       fun ?name ->
         fun ?code ->
@@ -1349,28 +2182,38 @@ module Canary =
                             fun ?runtimeVersion ->
                               fun ?vpcConfig ->
                                 fun ?visualReference ->
-                                  fun ?tags ->
-                                    fun ?artifactConfig ->
-                                      fun () ->
-                                        {
-                                          id;
-                                          name;
-                                          code;
-                                          executionRoleArn;
-                                          schedule;
-                                          runConfig;
-                                          successRetentionPeriodInDays;
-                                          failureRetentionPeriodInDays;
-                                          status;
-                                          timeline;
-                                          artifactS3Location;
-                                          engineArn;
-                                          runtimeVersion;
-                                          vpcConfig;
-                                          visualReference;
-                                          tags;
-                                          artifactConfig
-                                        }
+                                  fun ?provisionedResourceCleanup ->
+                                    fun ?browserConfigs ->
+                                      fun ?engineConfigs ->
+                                        fun ?visualReferences ->
+                                          fun ?tags ->
+                                            fun ?artifactConfig ->
+                                              fun ?dryRunConfig ->
+                                                fun () ->
+                                                  {
+                                                    id;
+                                                    name;
+                                                    code;
+                                                    executionRoleArn;
+                                                    schedule;
+                                                    runConfig;
+                                                    successRetentionPeriodInDays;
+                                                    failureRetentionPeriodInDays;
+                                                    status;
+                                                    timeline;
+                                                    artifactS3Location;
+                                                    engineArn;
+                                                    runtimeVersion;
+                                                    vpcConfig;
+                                                    visualReference;
+                                                    provisionedResourceCleanup;
+                                                    browserConfigs;
+                                                    engineConfigs;
+                                                    visualReferences;
+                                                    tags;
+                                                    artifactConfig;
+                                                    dryRunConfig
+                                                  }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:UUID.to_value));
@@ -1395,15 +2238,41 @@ module Canary =
         ("VpcConfig", (Option.map x.vpcConfig ~f:VpcConfigOutput.to_value));
         ("VisualReference",
           (Option.map x.visualReference ~f:VisualReferenceOutput.to_value));
+        ("ProvisionedResourceCleanup",
+          (Option.map x.provisionedResourceCleanup
+             ~f:ProvisionedResourceCleanupSetting.to_value));
+        ("BrowserConfigs",
+          (Option.map x.browserConfigs ~f:BrowserConfigs.to_value));
+        ("EngineConfigs",
+          (Option.map x.engineConfigs ~f:EngineConfigs.to_value));
+        ("VisualReferences",
+          (Option.map x.visualReferences ~f:VisualReferencesOutput.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
         ("ArtifactConfig",
-          (Option.map x.artifactConfig ~f:ArtifactConfigOutput.to_value))]
+          (Option.map x.artifactConfig ~f:ArtifactConfigOutput.to_value));
+        ("DryRunConfig",
+          (Option.map x.dryRunConfig ~f:DryRunConfigOutput.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dryRunConfig =
+        (Option.map ~f:DryRunConfigOutput.of_xml)
+          (Xml.child xml_arg0 "DryRunConfig") in
       let artifactConfig =
         (Option.map ~f:ArtifactConfigOutput.of_xml)
           (Xml.child xml_arg0 "ArtifactConfig") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let visualReferences =
+        (Option.map ~f:VisualReferencesOutput.of_xml)
+          (Xml.child xml_arg0 "VisualReferences") in
+      let engineConfigs =
+        (Option.map ~f:EngineConfigs.of_xml)
+          (Xml.child xml_arg0 "EngineConfigs") in
+      let browserConfigs =
+        (Option.map ~f:BrowserConfigs.of_xml)
+          (Xml.child xml_arg0 "BrowserConfigs") in
+      let provisionedResourceCleanup =
+        (Option.map ~f:ProvisionedResourceCleanupSetting.of_xml)
+          (Xml.child xml_arg0 "ProvisionedResourceCleanup") in
       let visualReference =
         (Option.map ~f:VisualReferenceOutput.of_xml)
           (Xml.child xml_arg0 "VisualReference") in
@@ -1441,40 +2310,55 @@ module Canary =
       let name =
         (Option.map ~f:CanaryName.of_xml) (Xml.child xml_arg0 "Name") in
       let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?artifactConfig ?tags ?visualReference ?vpcConfig ?runtimeVersion
-        ?engineArn ?artifactS3Location ?timeline ?status
-        ?failureRetentionPeriodInDays ?successRetentionPeriodInDays
-        ?runConfig ?schedule ?executionRoleArn ?code ?name ?id ()
+      make ?dryRunConfig ?artifactConfig ?tags ?visualReferences
+        ?engineConfigs ?browserConfigs ?provisionedResourceCleanup
+        ?visualReference ?vpcConfig ?runtimeVersion ?engineArn
+        ?artifactS3Location ?timeline ?status ?failureRetentionPeriodInDays
+        ?successRetentionPeriodInDays ?runConfig ?schedule ?executionRoleArn
+        ?code ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let dryRunConfig =
+        field_map json__ "DryRunConfig" DryRunConfigOutput.of_json in
       let artifactConfig =
-        field_map json "ArtifactConfig" ArtifactConfigOutput.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
+        field_map json__ "ArtifactConfig" ArtifactConfigOutput.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let visualReferences =
+        field_map json__ "VisualReferences" VisualReferencesOutput.of_json in
+      let engineConfigs =
+        field_map json__ "EngineConfigs" EngineConfigs.of_json in
+      let browserConfigs =
+        field_map json__ "BrowserConfigs" BrowserConfigs.of_json in
+      let provisionedResourceCleanup =
+        field_map json__ "ProvisionedResourceCleanup"
+          ProvisionedResourceCleanupSetting.of_json in
       let visualReference =
-        field_map json "VisualReference" VisualReferenceOutput.of_json in
-      let vpcConfig = field_map json "VpcConfig" VpcConfigOutput.of_json in
-      let runtimeVersion = field_map json "RuntimeVersion" String_.of_json in
-      let engineArn = field_map json "EngineArn" FunctionArn.of_json in
+        field_map json__ "VisualReference" VisualReferenceOutput.of_json in
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfigOutput.of_json in
+      let runtimeVersion = field_map json__ "RuntimeVersion" String_.of_json in
+      let engineArn = field_map json__ "EngineArn" FunctionArn.of_json in
       let artifactS3Location =
-        field_map json "ArtifactS3Location" String_.of_json in
-      let timeline = field_map json "Timeline" CanaryTimeline.of_json in
-      let status = field_map json "Status" CanaryStatus.of_json in
+        field_map json__ "ArtifactS3Location" String_.of_json in
+      let timeline = field_map json__ "Timeline" CanaryTimeline.of_json in
+      let status = field_map json__ "Status" CanaryStatus.of_json in
       let failureRetentionPeriodInDays =
-        field_map json "FailureRetentionPeriodInDays" MaxSize1024.of_json in
+        field_map json__ "FailureRetentionPeriodInDays" MaxSize1024.of_json in
       let successRetentionPeriodInDays =
-        field_map json "SuccessRetentionPeriodInDays" MaxSize1024.of_json in
+        field_map json__ "SuccessRetentionPeriodInDays" MaxSize1024.of_json in
       let runConfig =
-        field_map json "RunConfig" CanaryRunConfigOutput.of_json in
-      let schedule = field_map json "Schedule" CanaryScheduleOutput.of_json in
+        field_map json__ "RunConfig" CanaryRunConfigOutput.of_json in
+      let schedule = field_map json__ "Schedule" CanaryScheduleOutput.of_json in
       let executionRoleArn =
-        field_map json "ExecutionRoleArn" RoleArn.of_json in
-      let code = field_map json "Code" CanaryCodeOutput.of_json in
-      let name = field_map json "Name" CanaryName.of_json in
-      let id = field_map json "Id" UUID.of_json in
-      make ?artifactConfig ?tags ?visualReference ?vpcConfig ?runtimeVersion
-        ?engineArn ?artifactS3Location ?timeline ?status
-        ?failureRetentionPeriodInDays ?successRetentionPeriodInDays
-        ?runConfig ?schedule ?executionRoleArn ?code ?name ?id ()
+        field_map json__ "ExecutionRoleArn" RoleArn.of_json in
+      let code = field_map json__ "Code" CanaryCodeOutput.of_json in
+      let name = field_map json__ "Name" CanaryName.of_json in
+      let id = field_map json__ "Id" UUID.of_json in
+      make ?dryRunConfig ?artifactConfig ?tags ?visualReferences
+        ?engineConfigs ?browserConfigs ?provisionedResourceCleanup
+        ?visualReference ?vpcConfig ?runtimeVersion ?engineArn
+        ?artifactS3Location ?timeline ?status ?failureRetentionPeriodInDays
+        ?successRetentionPeriodInDays ?runConfig ?schedule ?executionRoleArn
+        ?code ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This structure contains all information about one canary in your account."]
@@ -1498,13 +2382,51 @@ module CanaryLastRun =
         (Option.map ~f:CanaryName.of_xml) (Xml.child xml_arg0 "CanaryName") in
       make ?lastRun ?canaryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastRun = field_map json "LastRun" CanaryRun.of_json in
-      let canaryName = field_map json "CanaryName" CanaryName.of_json in
+    let of_json json__ =
+      let lastRun = field_map json__ "LastRun" CanaryRun.of_json in
+      let canaryName = field_map json__ "CanaryName" CanaryName.of_json in
       make ?lastRun ?canaryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This structure contains information about the most recent run of a single canary."]
+module ResourceToTag =
+  struct
+    type nonrec t =
+      | Lambda_function 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Lambda_function -> "lambda-function" | Non_static_id s -> s
+    let of_string =
+      function | "lambda-function" -> Lambda_function | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ResourceToTag" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResourceToTag" j)
+    let to_json = simple_to_json to_value
+  end
+module AccessDeniedException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You don't have permission to perform this operation on this resource."]
 module ConflictException =
   struct
     type nonrec t = {
@@ -1519,8 +2441,8 @@ module ConflictException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A conflicting operation is already in progress."]
@@ -1538,8 +2460,8 @@ module InternalServerException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An unknown internal error occurred."]
@@ -1557,8 +2479,8 @@ module RequestEntityTooLargeException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One of the input resources is larger than is allowed."]
@@ -1576,8 +2498,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One of the specified resources was not found."]
@@ -1595,8 +2517,8 @@ module ValidationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A parameter could not be validated."]
@@ -1619,9 +2541,9 @@ module ArtifactConfigInput =
           (Xml.child xml_arg0 "S3Encryption") in
       make ?s3Encryption ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3Encryption =
-        field_map json "S3Encryption" S3EncryptionConfig.of_json in
+        field_map json__ "S3Encryption" S3EncryptionConfig.of_json in
       make ?s3Encryption ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1632,37 +2554,62 @@ module CanaryCodeInput =
       {
       s3Bucket: String_.t option
         [@ocaml.doc
-          "If your canary script is located in S3, specify the bucket name here. Do not include s3:// as the start of the bucket name."];
+          "If your canary script is located in Amazon S3, specify the bucket name here. Do not include s3:// as the start of the bucket name."];
       s3Key: String_.t option
         [@ocaml.doc
-          "The S3 key of your script. For more information, see Working with Amazon S3 Objects."];
+          "The Amazon S3 key of your script. For more information, see Working with Amazon S3 Objects."];
       s3Version: String_.t option
-        [@ocaml.doc "The S3 version ID of your script."];
+        [@ocaml.doc "The Amazon S3 version ID of your script."];
       zipFile: Blob.t option
         [@ocaml.doc
-          "If you input your canary script directly into the canary instead of referring to an S3 location, the value of this parameter is the base64-encoded contents of the .zip file that contains the script. It must be smaller than 225 Kb. For large canary scripts, we recommend that you use an S3 location instead of inputting it directly with this parameter."];
-      handler: CodeHandler.t
+          "If you input your canary script directly into the canary instead of referring to an Amazon S3 location, the value of this parameter is the base64-encoded contents of the .zip file that contains the script. It must be smaller than 225 Kb. For large canary scripts, we recommend that you use an Amazon S3 location instead of inputting it directly with this parameter."];
+      handler: CodeHandler.t option
         [@ocaml.doc
-          "The entry point to use for the source code when running the canary. For canaries that use the syn-python-selenium-1.0 runtime or a syn-nodejs.puppeteer runtime earlier than syn-nodejs.puppeteer-3.4, the handler must be specified as fileName.handler. For syn-python-selenium-1.1, syn-nodejs.puppeteer-3.4, and later runtimes, the handler can be specified as fileName.functionName , or you can specify a folder where canary scripts reside as folder/fileName.functionName ."]}
-    let context_ = "CanaryCodeInput"
+          "The entry point to use for the source code when running the canary. For canaries that use the syn-python-selenium-1.0 runtime or a syn-nodejs.puppeteer runtime earlier than syn-nodejs.puppeteer-3.4, the handler must be specified as fileName.handler. For syn-python-selenium-1.1, syn-nodejs.puppeteer-3.4, and later runtimes, the handler can be specified as fileName.functionName , or you can specify a folder where canary scripts reside as folder/fileName.functionName . This field is required when you don't specify BlueprintTypes and is not allowed when you specify BlueprintTypes."];
+      blueprintTypes: BlueprintTypes.t option
+        [@ocaml.doc
+          "BlueprintTypes is a list of templates that enable simplified canary creation. You can create canaries for common monitoring scenarios by providing only a JSON configuration file instead of writing custom scripts. The only supported value is multi-checks. Multi-checks monitors HTTP/DNS/SSL/TCP endpoints with built-in authentication schemes (Basic, API Key, OAuth, SigV4) and assertion capabilities. When you specify BlueprintTypes, the Handler field cannot be specified since the blueprint provides a pre-defined entry point. BlueprintTypes is supported only on canaries for syn-nodejs-3.0 runtime or later."];
+      dependencies: Dependencies.t option
+        [@ocaml.doc
+          "A list of dependencies that should be used for running this canary. Specify the dependencies as a key-value pair, where the key is the type of dependency and the value is the dependency reference."]}
     let make ?s3Bucket =
       fun ?s3Key ->
         fun ?s3Version ->
           fun ?zipFile ->
-            fun ~handler ->
-              fun () -> { s3Bucket; s3Key; s3Version; zipFile; handler }
+            fun ?handler ->
+              fun ?blueprintTypes ->
+                fun ?dependencies ->
+                  fun () ->
+                    {
+                      s3Bucket;
+                      s3Key;
+                      s3Version;
+                      zipFile;
+                      handler;
+                      blueprintTypes;
+                      dependencies
+                    }
     let to_value x =
       structure_to_value
         [("S3Bucket", (Option.map x.s3Bucket ~f:String_.to_value));
         ("S3Key", (Option.map x.s3Key ~f:String_.to_value));
         ("S3Version", (Option.map x.s3Version ~f:String_.to_value));
         ("ZipFile", (Option.map x.zipFile ~f:Blob.to_value));
-        ("Handler", (Some (CodeHandler.to_value x.handler)))]
+        ("Handler", (Option.map x.handler ~f:CodeHandler.to_value));
+        ("BlueprintTypes",
+          (Option.map x.blueprintTypes ~f:BlueprintTypes.to_value));
+        ("Dependencies",
+          (Option.map x.dependencies ~f:Dependencies.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dependencies =
+        (Option.map ~f:Dependencies.of_xml)
+          (Xml.child xml_arg0 "Dependencies") in
+      let blueprintTypes =
+        (Option.map ~f:BlueprintTypes.of_xml)
+          (Xml.child xml_arg0 "BlueprintTypes") in
       let handler =
-        CodeHandler.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Handler") in
+        (Option.map ~f:CodeHandler.of_xml) (Xml.child xml_arg0 "Handler") in
       let zipFile =
         (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "ZipFile") in
       let s3Version =
@@ -1670,18 +2617,23 @@ module CanaryCodeInput =
       let s3Key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "S3Key") in
       let s3Bucket =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "S3Bucket") in
-      make ~handler ?zipFile ?s3Version ?s3Key ?s3Bucket ()
+      make ?dependencies ?blueprintTypes ?handler ?zipFile ?s3Version ?s3Key
+        ?s3Bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let handler = field_map_exn json "Handler" CodeHandler.of_json in
-      let zipFile = field_map json "ZipFile" Blob.of_json in
-      let s3Version = field_map json "S3Version" String_.of_json in
-      let s3Key = field_map json "S3Key" String_.of_json in
-      let s3Bucket = field_map json "S3Bucket" String_.of_json in
-      make ~handler ?zipFile ?s3Version ?s3Key ?s3Bucket ()
+    let of_json json__ =
+      let dependencies = field_map json__ "Dependencies" Dependencies.of_json in
+      let blueprintTypes =
+        field_map json__ "BlueprintTypes" BlueprintTypes.of_json in
+      let handler = field_map json__ "Handler" CodeHandler.of_json in
+      let zipFile = field_map json__ "ZipFile" Blob.of_json in
+      let s3Version = field_map json__ "S3Version" String_.of_json in
+      let s3Key = field_map json__ "S3Key" String_.of_json in
+      let s3Bucket = field_map json__ "S3Bucket" String_.of_json in
+      make ?dependencies ?blueprintTypes ?handler ?zipFile ?s3Version ?s3Key
+        ?s3Bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Use this structure to input your script code for the canary. This structure contains the Lambda handler with the location where the canary should start running the script. If the script is stored in an S3 bucket, the bucket name, key, and version are also included. If the script was passed into the canary directly, the script code is contained in the value of Zipfile."]
+       "Use this structure to input your script code for the canary. This structure contains the Lambda handler with the location where the canary should start running the script. If the script is stored in an Amazon S3 bucket, the bucket name, key, and version are also included. If the script was passed into the canary directly, the script code is contained in the value of Zipfile. If you are uploading your canary scripts with an Amazon S3 bucket, your zip file should include your script in a certain folder structure. For Node.js canaries, the folder structure must be nodejs/node_modules/myCanaryFilename.js For more information, see Packaging your Node.js canary files For Python canaries, the folder structure must be python/myCanaryFilename.py or python/myFolder/myCanaryFilename.py For more information, see Packaging your Python canary files"]
 module CanaryRunConfigInput =
   struct
     type nonrec t =
@@ -1697,18 +2649,23 @@ module CanaryRunConfigInput =
           "Specifies whether this canary is to use active X-Ray tracing when it runs. Active tracing enables this canary run to be displayed in the ServiceLens and X-Ray service maps even if the canary does not hit an endpoint that has X-Ray tracing enabled. Using X-Ray tracing incurs charges. For more information, see Canaries and X-Ray tracing. You can enable active tracing only for canaries that use version syn-nodejs-2.0 or later for their canary runtime."];
       environmentVariables: EnvironmentVariablesMap.t option
         [@ocaml.doc
-          "Specifies the keys and values to use for any environment variables used in the canary script. Use the following format: \\{ \"key1\" : \"value1\", \"key2\" : \"value2\", ...\\} Keys must start with a letter and be at least two characters. The total size of your environment variables cannot exceed 4 KB. You can't specify any Lambda reserved environment variables as the keys for your environment variables. For more information about reserved keys, see Runtime environment variables."]}
+          "Specifies the keys and values to use for any environment variables used in the canary script. Use the following format: \\{ \"key1\" : \"value1\", \"key2\" : \"value2\", ...\\} Keys must start with a letter and be at least two characters. The total size of your environment variables cannot exceed 4 KB. You can't specify any Lambda reserved environment variables as the keys for your environment variables. For more information about reserved keys, see Runtime environment variables. Environment variable keys and values are encrypted at rest using Amazon Web Services owned KMS keys. However, the environment variables are not encrypted on the client side. Do not store sensitive information in them."];
+      ephemeralStorage: EphemeralStorageSize.t option
+        [@ocaml.doc
+          "Specifies the amount of ephemeral storage (in MB) to allocate for the canary run during execution. This temporary storage is used for storing canary run artifacts (which are uploaded to an Amazon S3 bucket at the end of the run), and any canary browser operations. This temporary storage is cleared after the run is completed. Default storage value is 1024 MB."]}
     let make ?timeoutInSeconds =
       fun ?memoryInMB ->
         fun ?activeTracing ->
           fun ?environmentVariables ->
-            fun () ->
-              {
-                timeoutInSeconds;
-                memoryInMB;
-                activeTracing;
-                environmentVariables
-              }
+            fun ?ephemeralStorage ->
+              fun () ->
+                {
+                  timeoutInSeconds;
+                  memoryInMB;
+                  activeTracing;
+                  environmentVariables;
+                  ephemeralStorage
+                }
     let to_value x =
       structure_to_value
         [("TimeoutInSeconds",
@@ -1719,9 +2676,14 @@ module CanaryRunConfigInput =
           (Option.map x.activeTracing ~f:NullableBoolean.to_value));
         ("EnvironmentVariables",
           (Option.map x.environmentVariables
-             ~f:EnvironmentVariablesMap.to_value))]
+             ~f:EnvironmentVariablesMap.to_value));
+        ("EphemeralStorage",
+          (Option.map x.ephemeralStorage ~f:EphemeralStorageSize.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ephemeralStorage =
+        (Option.map ~f:EphemeralStorageSize.of_xml)
+          (Xml.child xml_arg0 "EphemeralStorage") in
       let environmentVariables =
         (Option.map ~f:EnvironmentVariablesMap.of_xml)
           (Xml.child xml_arg0 "EnvironmentVariables") in
@@ -1733,19 +2695,23 @@ module CanaryRunConfigInput =
       let timeoutInSeconds =
         (Option.map ~f:MaxFifteenMinutesInSeconds.of_xml)
           (Xml.child xml_arg0 "TimeoutInSeconds") in
-      make ?environmentVariables ?activeTracing ?memoryInMB ?timeoutInSeconds
-        ()
+      make ?ephemeralStorage ?environmentVariables ?activeTracing ?memoryInMB
+        ?timeoutInSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ephemeralStorage =
+        field_map json__ "EphemeralStorage" EphemeralStorageSize.of_json in
       let environmentVariables =
-        field_map json "EnvironmentVariables" EnvironmentVariablesMap.of_json in
+        field_map json__ "EnvironmentVariables"
+          EnvironmentVariablesMap.of_json in
       let activeTracing =
-        field_map json "ActiveTracing" NullableBoolean.of_json in
-      let memoryInMB = field_map json "MemoryInMB" MaxSize3008.of_json in
+        field_map json__ "ActiveTracing" NullableBoolean.of_json in
+      let memoryInMB = field_map json__ "MemoryInMB" MaxSize3008.of_json in
       let timeoutInSeconds =
-        field_map json "TimeoutInSeconds" MaxFifteenMinutesInSeconds.of_json in
-      make ?environmentVariables ?activeTracing ?memoryInMB ?timeoutInSeconds
-        ()
+        field_map json__ "TimeoutInSeconds"
+          MaxFifteenMinutesInSeconds.of_json in
+      make ?ephemeralStorage ?environmentVariables ?activeTracing ?memoryInMB
+        ?timeoutInSeconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that contains input information for a canary run."]
@@ -1758,70 +2724,78 @@ module CanaryScheduleInput =
           "A rate expression or a cron expression that defines how often the canary is to run. For a rate expression, The syntax is rate(number unit). unit can be minute, minutes, or hour. For example, rate(1 minute) runs the canary once a minute, rate(10 minutes) runs it once every 10 minutes, and rate(1 hour) runs it once every hour. You can specify a frequency between rate(1 minute) and rate(1 hour). Specifying rate(0 minute) or rate(0 hour) is a special value that causes the canary to run only once when it is started. Use cron(expression) to specify a cron expression. You can't schedule a canary to wait for more than a year before running. For information about the syntax for cron expressions, see Scheduling canary runs using cron."];
       durationInSeconds: MaxOneYearInSeconds.t option
         [@ocaml.doc
-          "How long, in seconds, for the canary to continue making regular runs according to the schedule in the Expression value. If you specify 0, the canary continues making runs until you stop it. If you omit this field, the default of 0 is used."]}
+          "How long, in seconds, for the canary to continue making regular runs according to the schedule in the Expression value. If you specify 0, the canary continues making runs until you stop it. If you omit this field, the default of 0 is used."];
+      retryConfig: RetryConfigInput.t option
+        [@ocaml.doc
+          "A structure that contains the retry configuration for a canary"]}
     let context_ = "CanaryScheduleInput"
     let make ?durationInSeconds =
-      fun ~expression -> fun () -> { durationInSeconds; expression }
+      fun ?retryConfig ->
+        fun ~expression ->
+          fun () -> { durationInSeconds; retryConfig; expression }
     let to_value x =
       structure_to_value
         [("Expression", (Some (String_.to_value x.expression)));
         ("DurationInSeconds",
-          (Option.map x.durationInSeconds ~f:MaxOneYearInSeconds.to_value))]
+          (Option.map x.durationInSeconds ~f:MaxOneYearInSeconds.to_value));
+        ("RetryConfig",
+          (Option.map x.retryConfig ~f:RetryConfigInput.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let retryConfig =
+        (Option.map ~f:RetryConfigInput.of_xml)
+          (Xml.child xml_arg0 "RetryConfig") in
       let durationInSeconds =
         (Option.map ~f:MaxOneYearInSeconds.of_xml)
           (Xml.child xml_arg0 "DurationInSeconds") in
       let expression =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Expression") in
-      make ?durationInSeconds ~expression ()
+      make ?retryConfig ?durationInSeconds ~expression ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let retryConfig =
+        field_map json__ "RetryConfig" RetryConfigInput.of_json in
       let durationInSeconds =
-        field_map json "DurationInSeconds" MaxOneYearInSeconds.of_json in
-      let expression = field_map_exn json "Expression" String_.of_json in
-      make ?durationInSeconds ~expression ()
+        field_map json__ "DurationInSeconds" MaxOneYearInSeconds.of_json in
+      let expression = field_map_exn json__ "Expression" String_.of_json in
+      make ?retryConfig ?durationInSeconds ~expression ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This structure specifies how often a canary is to make runs and the date and time when it should stop making runs."]
-module VisualReferenceInput =
+module VisualReferences =
   struct
-    type nonrec t =
-      {
-      baseScreenshots: BaseScreenshots.t option
-        [@ocaml.doc
-          "An array of screenshots that will be used as the baseline for visual monitoring in future runs of this canary. If there is a screenshot that you don't want to be used for visual monitoring, remove it from this array."];
-      baseCanaryRunId: String_.t
-        [@ocaml.doc
-          "Specifies which canary run to use the screenshots from as the baseline for future visual monitoring with this canary. Valid values are nextrun to use the screenshots from the next run after this update is made, lastrun to use the screenshots from the most recent run before this update was made, or the value of Id in the CanaryRun from any past run of this canary."]}
-    let context_ = "VisualReferenceInput"
-    let make ?baseScreenshots =
-      fun ~baseCanaryRunId -> fun () -> { baseScreenshots; baseCanaryRunId }
-    let to_value x =
-      structure_to_value
-        [("BaseScreenshots",
-           (Option.map x.baseScreenshots ~f:BaseScreenshots.to_value));
-        ("BaseCanaryRunId", (Some (String_.to_value x.baseCanaryRunId)))]
+    type nonrec t = VisualReferenceInput.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VisualReferenceInput.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let baseCanaryRunId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BaseCanaryRunId") in
-      let baseScreenshots =
-        (Option.map ~f:BaseScreenshots.of_xml)
-          (Xml.child xml_arg0 "BaseScreenshots") in
-      make ~baseCanaryRunId ?baseScreenshots ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let baseCanaryRunId =
-        field_map_exn json "BaseCanaryRunId" String_.of_json in
-      let baseScreenshots =
-        field_map json "BaseScreenshots" BaseScreenshots.of_json in
-      make ~baseCanaryRunId ?baseScreenshots ()
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VisualReferenceInput.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VisualReferences"
+        ~of_json:VisualReferenceInput.of_json j
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "An object that specifies what screenshots to use as a baseline for visual monitoring by this canary, and optionally the parts of the screenshots to ignore during the visual monitoring comparison. Visual monitoring is supported only on canaries running the syn-puppeteer-node-3.2 runtime or later. For more information, see Visual monitoring and Visual monitoring blueprint"]
+  end
 module VpcConfigInput =
   struct
     type nonrec t =
@@ -1829,35 +2803,124 @@ module VpcConfigInput =
       subnetIds: SubnetIds.t option
         [@ocaml.doc "The IDs of the subnets where this canary is to run."];
       securityGroupIds: SecurityGroupIds.t option
-        [@ocaml.doc "The IDs of the security groups for this canary."]}
+        [@ocaml.doc "The IDs of the security groups for this canary."];
+      ipv6AllowedForDualStack: NullableBoolean.t option
+        [@ocaml.doc
+          "Set this to true to allow outbound IPv6 traffic on VPC canaries that are connected to dual-stack subnets. The default is false"]}
     let make ?subnetIds =
-      fun ?securityGroupIds -> fun () -> { subnetIds; securityGroupIds }
+      fun ?securityGroupIds ->
+        fun ?ipv6AllowedForDualStack ->
+          fun () -> { subnetIds; securityGroupIds; ipv6AllowedForDualStack }
     let to_value x =
       structure_to_value
         [("SubnetIds", (Option.map x.subnetIds ~f:SubnetIds.to_value));
         ("SecurityGroupIds",
-          (Option.map x.securityGroupIds ~f:SecurityGroupIds.to_value))]
+          (Option.map x.securityGroupIds ~f:SecurityGroupIds.to_value));
+        ("Ipv6AllowedForDualStack",
+          (Option.map x.ipv6AllowedForDualStack ~f:NullableBoolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipv6AllowedForDualStack =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "Ipv6AllowedForDualStack") in
       let securityGroupIds =
         (Option.map ~f:SecurityGroupIds.of_xml)
           (Xml.child xml_arg0 "SecurityGroupIds") in
       let subnetIds =
         (Option.map ~f:SubnetIds.of_xml) (Xml.child xml_arg0 "SubnetIds") in
-      make ?securityGroupIds ?subnetIds ()
+      make ?ipv6AllowedForDualStack ?securityGroupIds ?subnetIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ipv6AllowedForDualStack =
+        field_map json__ "Ipv6AllowedForDualStack" NullableBoolean.of_json in
       let securityGroupIds =
-        field_map json "SecurityGroupIds" SecurityGroupIds.of_json in
-      let subnetIds = field_map json "SubnetIds" SubnetIds.of_json in
-      make ?securityGroupIds ?subnetIds ()
+        field_map json__ "SecurityGroupIds" SecurityGroupIds.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetIds.of_json in
+      make ?ipv6AllowedForDualStack ?securityGroupIds ?subnetIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "If this canary is to test an endpoint in a VPC, this structure contains information about the subnets and security groups of the VPC endpoint. For more information, see Running a Canary in a VPC."]
-module CanaryArn =
+module BadRequestException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request was not valid."]
+module InternalFailureException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An internal failure occurred. Try the operation again."]
+module NotFoundException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified resource was not found."]
+module TooManyRequestsException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "There were too many simultaneous requests. Try the operation again."]
+module ResourceArn =
   struct
     type nonrec t = string
-    let context_ = "CanaryArn"
+    let context_ = "ResourceArn"
     let make i =
       let open Result in
         ok_or_failwith
@@ -1866,14 +2929,14 @@ module CanaryArn =
                 (check_string_max i ~max:2048) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"arn:(aws[a-zA-Z-]*)?:synthetics:[a-z]{2}((-gov)|(-iso(b?)))?-[a-z]+-\\d{1}:\\d{12}:canary:[0-9a-z_\\-]{1,21}")));
+                       ~pattern:"arn:(aws[a-zA-Z-]*)?:synthetics:[a-z]{2,4}(-[a-z]{2,4})?-[a-z]+-\\d{1}:\\d{12}:(canary|group):[0-9a-z_\\-]+")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"CanaryArn" j
+    let of_json j = string_of_json ~kind:"ResourceArn" j
     let to_json = simple_to_json to_value
   end
 module TagKeyList =
@@ -1884,6 +2947,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1903,12 +2969,15 @@ module TagKeyList =
     let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
     let to_json v = composed_to_json to_value v
   end
-module CanaryRuns =
+module GroupSummaryList =
   struct
-    type nonrec t = CanaryRun.t list
+    type nonrec t = GroupSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:CanaryRun.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:GroupSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -1922,9 +2991,9 @@ module CanaryRuns =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:CanaryRun.of_xml)
+                     | _ -> true))) ~f:GroupSummary.of_xml)
     let of_json j =
-      list_of_json ~kind:"CanaryRuns" ~of_json:CanaryRun.of_json j
+      list_of_json ~kind:"GroupSummaryList" ~of_json:GroupSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
 module Token =
@@ -1945,6 +3014,194 @@ module Token =
     let of_json j = string_of_json ~kind:"Token" j
     let to_json = simple_to_json to_value
   end
+module MaxGroupResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:20) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxGroupResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PaginationToken =
+  struct
+    type nonrec t = string
+    let context_ = "PaginationToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:"^.+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PaginationToken" j
+    let to_json = simple_to_json to_value
+  end
+module StringList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"StringList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GroupIdentifier =
+  struct
+    type nonrec t = string
+    let context_ = "GroupIdentifier"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GroupIdentifier" j
+    let to_json = simple_to_json to_value
+  end
+module CanaryArn =
+  struct
+    type nonrec t = string
+    let context_ = "CanaryArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:(aws[a-zA-Z-]*)?:synthetics:[a-z]{2,4}(-[a-z]{2,4})?-[a-z]+-\\d{1}:\\d{12}:canary:[0-9a-z_\\-]{1,255}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CanaryArn" j
+    let to_json = simple_to_json to_value
+  end
+module Group =
+  struct
+    type nonrec t =
+      {
+      id: String_.t option [@ocaml.doc "The unique ID of the group."];
+      name: GroupName.t option [@ocaml.doc "The name of the group."];
+      arn: GroupArn.t option [@ocaml.doc "The ARN of the group."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "The list of key-value pairs that are associated with the canary."];
+      createdTime: Timestamp.t option
+        [@ocaml.doc "The date and time that the group was created."];
+      lastModifiedTime: Timestamp.t option
+        [@ocaml.doc
+          "The date and time that the group was most recently updated."]}
+    let make ?id =
+      fun ?name ->
+        fun ?arn ->
+          fun ?tags ->
+            fun ?createdTime ->
+              fun ?lastModifiedTime ->
+                fun () ->
+                  { id; name; arn; tags; createdTime; lastModifiedTime }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:String_.to_value));
+        ("Name", (Option.map x.name ~f:GroupName.to_value));
+        ("Arn", (Option.map x.arn ~f:GroupArn.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("CreatedTime", (Option.map x.createdTime ~f:Timestamp.to_value));
+        ("LastModifiedTime",
+          (Option.map x.lastModifiedTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModifiedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModifiedTime") in
+      let createdTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedTime") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let arn = (Option.map ~f:GroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
+      let name = (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "Name") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?lastModifiedTime ?createdTime ?tags ?arn ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModifiedTime =
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let arn = field_map json__ "Arn" GroupArn.of_json in
+      let name = field_map json__ "Name" GroupName.of_json in
+      let id = field_map json__ "Id" String_.of_json in
+      make ?lastModifiedTime ?createdTime ?tags ?arn ?name ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "This structure contains information about one group."]
+module CanaryRuns =
+  struct
+    type nonrec t = CanaryRun.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CanaryRun.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CanaryRun.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CanaryRuns" ~of_json:CanaryRun.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module MaxSize100 =
   struct
     type nonrec t = int
@@ -1963,10 +3220,38 @@ module MaxSize100 =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module RunType =
+  struct
+    type nonrec t =
+      | CANARY_RUN 
+      | DRY_RUN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CANARY_RUN -> "CANARY_RUN"
+      | DRY_RUN -> "DRY_RUN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CANARY_RUN" -> CANARY_RUN
+      | "DRY_RUN" -> DRY_RUN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RunType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RunType" j)
+    let to_json = simple_to_json to_value
+  end
 module RuntimeVersionList =
   struct
     type nonrec t = RuntimeVersion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RuntimeVersion.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1992,6 +3277,9 @@ module Canaries =
   struct
     type nonrec t = Canary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Canary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2019,6 +3307,9 @@ module DescribeCanariesNameFilter =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CanaryName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2062,6 +3353,9 @@ module CanariesLastRun =
   struct
     type nonrec t = CanaryLastRun.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CanaryLastRun.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2090,6 +3384,9 @@ module DescribeCanariesLastRunNameFilter =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CanaryName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2111,11 +3408,75 @@ module DescribeCanariesLastRunNameFilter =
         ~of_json:CanaryName.of_json j
     let to_json v = composed_to_json to_value v
   end
+module Boolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module ServiceQuotaExceededException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request exceeded a service quota value."]
+module ResourceList =
+  struct
+    type nonrec t = ResourceToTag.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceToTag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceToTag.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceList" ~of_json:ResourceToTag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module UpdateCanaryResponse =
   struct
     type nonrec t = unit
     type nonrec error =
-      [ `ConflictException of ConflictException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `RequestEntityTooLargeException of RequestEntityTooLargeException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -2124,6 +3485,8 @@ module UpdateCanaryResponse =
     let make () = ()
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
@@ -2140,6 +3503,8 @@ module UpdateCanaryResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
@@ -2155,6 +3520,10 @@ module UpdateCanaryResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `ConflictException e ->
           `Assoc
             [("error", (`String "ConflictException"));
@@ -2188,7 +3557,7 @@ module UpdateCanaryResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Use this operation to change the settings of a canary that has already been created. You can't use this operation to update the tags of an existing canary. To change the tags of an existing canary, use TagResource."]
+       "Updates the configuration of a canary that has already been created. For multibrowser canaries, you can add or remove browsers by updating the browserConfig list in the update call. For example: To add Firefox to a canary that currently uses Chrome, specify browserConfigs as \\[CHROME, FIREFOX\\] To remove Firefox and keep only Chrome, specify browserConfigs as \\[CHROME\\] You can't use this operation to update the tags of an existing canary. To change the tags of an existing canary, use TagResource. When you use the dryRunId field when updating a canary, the only other field you can provide is the Schedule. Adding any other field will thrown an exception."]
 module UpdateCanaryRequest =
   struct
     type nonrec t =
@@ -2198,7 +3567,7 @@ module UpdateCanaryRequest =
           "The name of the canary that you want to update. To find the names of your canaries, use DescribeCanaries. You cannot change the name of a canary that has already been created."];
       code: CanaryCodeInput.t option
         [@ocaml.doc
-          "A structure that includes the entry point from which the canary should start running your script. If the script is stored in an S3 bucket, the bucket name, key, and version are also included."];
+          "A structure that includes the entry point from which the canary should start running your script. If the script is stored in an Amazon S3 bucket, the bucket name, key, and version are also included."];
       executionRoleArn: RoleArn.t option
         [@ocaml.doc
           "The ARN of the IAM role to be used to run the canary. This role must already exist, and must include lambda.amazonaws.com as a principal in the trust policy. The role must also have the following permissions: s3:PutObject s3:GetBucketLocation s3:ListAllMyBuckets cloudwatch:PutMetricData logs:CreateLogGroup logs:CreateLogStream logs:CreateLogStream"];
@@ -2210,13 +3579,13 @@ module UpdateCanaryRequest =
           "A structure that contains information about how often the canary is to run, and when these runs are to stop."];
       runConfig: CanaryRunConfigInput.t option
         [@ocaml.doc
-          "A structure that contains the timeout value that is used for each individual run of the canary."];
+          "A structure that contains the timeout value that is used for each individual run of the canary. Environment variable keys and values are encrypted at rest using Amazon Web Services owned KMS keys. However, the environment variables are not encrypted on the client side. Do not store sensitive information in them."];
       successRetentionPeriodInDays: MaxSize1024.t option
         [@ocaml.doc
-          "The number of days to retain data about successful runs of this canary."];
+          "The number of days to retain data about successful runs of this canary. This setting affects the range of information returned by GetCanaryRuns, as well as the range of information displayed in the Synthetics console."];
       failureRetentionPeriodInDays: MaxSize1024.t option
         [@ocaml.doc
-          "The number of days to retain data about failed runs of this canary."];
+          "The number of days to retain data about failed runs of this canary. This setting affects the range of information returned by GetCanaryRuns, as well as the range of information displayed in the Synthetics console."];
       vpcConfig: VpcConfigInput.t option
         [@ocaml.doc
           "If this canary is to test an endpoint in a VPC, this structure contains information about the subnet and security groups of the VPC endpoint. For more information, see Running a Canary in a VPC."];
@@ -2225,10 +3594,22 @@ module UpdateCanaryRequest =
           "Defines the screenshots to use as the baseline for comparisons during visual monitoring comparisons during future runs of this canary. If you omit this parameter, no changes are made to any baseline screenshots that the canary might be using already. Visual monitoring is supported only on canaries running the syn-puppeteer-node-3.2 runtime or later. For more information, see Visual monitoring and Visual monitoring blueprint"];
       artifactS3Location: String_.t option
         [@ocaml.doc
-          "The location in Amazon S3 where Synthetics stores artifacts from the test runs of this canary. Artifacts include the log file, screenshots, and HAR files. The name of the S3 bucket can't include a period (.)."];
+          "The location in Amazon S3 where Synthetics stores artifacts from the test runs of this canary. Artifacts include the log file, screenshots, and HAR files. The name of the Amazon S3 bucket can't include a period (.)."];
       artifactConfig: ArtifactConfigInput.t option
         [@ocaml.doc
-          "A structure that contains the configuration for canary artifacts, including the encryption-at-rest settings for artifacts that the canary uploads to Amazon S3."]}
+          "A structure that contains the configuration for canary artifacts, including the encryption-at-rest settings for artifacts that the canary uploads to Amazon S3."];
+      provisionedResourceCleanup: ProvisionedResourceCleanupSetting.t option
+        [@ocaml.doc
+          "Specifies whether to also delete the Lambda functions and layers used by this canary when the canary is deleted. If the value of this parameter is OFF, then the value of the DeleteLambda parameter of the DeleteCanary operation determines whether the Lambda functions and layers will be deleted."];
+      dryRunId: UUID.t option
+        [@ocaml.doc
+          "Update the existing canary using the updated configurations from the DryRun associated with the DryRunId. When you use the dryRunId field when updating a canary, the only other field you can provide is the Schedule. Adding any other field will thrown an exception."];
+      visualReferences: VisualReferences.t option
+        [@ocaml.doc
+          "A list of visual reference configurations for the canary, one for each browser type that the canary is configured to run on. Visual references are used for visual monitoring comparisons. syn-nodejs-puppeteer-11.0 and above, and syn-nodejs-playwright-3.0 and above, only supports visualReferences. visualReference field is not supported. Versions older than syn-nodejs-puppeteer-11.0 supports both visualReference and visualReferences for backward compatibility. It is recommended to use visualReferences for consistency and future compatibility. For multibrowser visual monitoring, you can update the baseline for all configured browsers in a single update call by specifying a list of VisualReference objects, one per browser. Each VisualReference object maps to a specific browser configuration, allowing you to manage visual baselines for multiple browsers simultaneously. For single configuration canaries using Chrome browser (default browser), use visualReferences for syn-nodejs-puppeteer-11.0 and above, and syn-nodejs-playwright-3.0 and above canaries. The browserType in the visualReference object is not mandatory."];
+      browserConfigs: BrowserConfigs.t option
+        [@ocaml.doc
+          "A structure that specifies the browser type to use for a canary run. CloudWatch Synthetics supports running canaries on both CHROME and FIREFOX browsers. If not specified, browserConfigs defaults to Chrome."]}
     let context_ = "UpdateCanaryRequest"
     let make ?code =
       fun ?executionRoleArn ->
@@ -2241,22 +3622,30 @@ module UpdateCanaryRequest =
                     fun ?visualReference ->
                       fun ?artifactS3Location ->
                         fun ?artifactConfig ->
-                          fun ~name ->
-                            fun () ->
-                              {
-                                code;
-                                executionRoleArn;
-                                runtimeVersion;
-                                schedule;
-                                runConfig;
-                                successRetentionPeriodInDays;
-                                failureRetentionPeriodInDays;
-                                vpcConfig;
-                                visualReference;
-                                artifactS3Location;
-                                artifactConfig;
-                                name
-                              }
+                          fun ?provisionedResourceCleanup ->
+                            fun ?dryRunId ->
+                              fun ?visualReferences ->
+                                fun ?browserConfigs ->
+                                  fun ~name ->
+                                    fun () ->
+                                      {
+                                        code;
+                                        executionRoleArn;
+                                        runtimeVersion;
+                                        schedule;
+                                        runConfig;
+                                        successRetentionPeriodInDays;
+                                        failureRetentionPeriodInDays;
+                                        vpcConfig;
+                                        visualReference;
+                                        artifactS3Location;
+                                        artifactConfig;
+                                        provisionedResourceCleanup;
+                                        dryRunId;
+                                        visualReferences;
+                                        browserConfigs;
+                                        name
+                                      }
     let to_value x =
       structure_to_value
         [("name", (Some (CanaryName.to_value x.name)));
@@ -2277,9 +3666,28 @@ module UpdateCanaryRequest =
         ("ArtifactS3Location",
           (Option.map x.artifactS3Location ~f:String_.to_value));
         ("ArtifactConfig",
-          (Option.map x.artifactConfig ~f:ArtifactConfigInput.to_value))]
+          (Option.map x.artifactConfig ~f:ArtifactConfigInput.to_value));
+        ("ProvisionedResourceCleanup",
+          (Option.map x.provisionedResourceCleanup
+             ~f:ProvisionedResourceCleanupSetting.to_value));
+        ("DryRunId", (Option.map x.dryRunId ~f:UUID.to_value));
+        ("VisualReferences",
+          (Option.map x.visualReferences ~f:VisualReferences.to_value));
+        ("BrowserConfigs",
+          (Option.map x.browserConfigs ~f:BrowserConfigs.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let browserConfigs =
+        (Option.map ~f:BrowserConfigs.of_xml)
+          (Xml.child xml_arg0 "BrowserConfigs") in
+      let visualReferences =
+        (Option.map ~f:VisualReferences.of_xml)
+          (Xml.child xml_arg0 "VisualReferences") in
+      let dryRunId =
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "DryRunId") in
+      let provisionedResourceCleanup =
+        (Option.map ~f:ProvisionedResourceCleanupSetting.of_xml)
+          (Xml.child xml_arg0 "ProvisionedResourceCleanup") in
       let artifactConfig =
         (Option.map ~f:ArtifactConfigInput.of_xml)
           (Xml.child xml_arg0 "ArtifactConfig") in
@@ -2313,79 +3721,110 @@ module UpdateCanaryRequest =
         (Option.map ~f:CanaryCodeInput.of_xml) (Xml.child xml_arg0 "Code") in
       let name =
         CanaryName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?artifactConfig ?artifactS3Location ?visualReference ?vpcConfig
-        ?failureRetentionPeriodInDays ?successRetentionPeriodInDays
-        ?runConfig ?schedule ?runtimeVersion ?executionRoleArn ?code ~name ()
+      make ?browserConfigs ?visualReferences ?dryRunId
+        ?provisionedResourceCleanup ?artifactConfig ?artifactS3Location
+        ?visualReference ?vpcConfig ?failureRetentionPeriodInDays
+        ?successRetentionPeriodInDays ?runConfig ?schedule ?runtimeVersion
+        ?executionRoleArn ?code ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let browserConfigs =
+        field_map json__ "BrowserConfigs" BrowserConfigs.of_json in
+      let visualReferences =
+        field_map json__ "VisualReferences" VisualReferences.of_json in
+      let dryRunId = field_map json__ "DryRunId" UUID.of_json in
+      let provisionedResourceCleanup =
+        field_map json__ "ProvisionedResourceCleanup"
+          ProvisionedResourceCleanupSetting.of_json in
       let artifactConfig =
-        field_map json "ArtifactConfig" ArtifactConfigInput.of_json in
+        field_map json__ "ArtifactConfig" ArtifactConfigInput.of_json in
       let artifactS3Location =
-        field_map json "ArtifactS3Location" String_.of_json in
+        field_map json__ "ArtifactS3Location" String_.of_json in
       let visualReference =
-        field_map json "VisualReference" VisualReferenceInput.of_json in
-      let vpcConfig = field_map json "VpcConfig" VpcConfigInput.of_json in
+        field_map json__ "VisualReference" VisualReferenceInput.of_json in
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfigInput.of_json in
       let failureRetentionPeriodInDays =
-        field_map json "FailureRetentionPeriodInDays" MaxSize1024.of_json in
+        field_map json__ "FailureRetentionPeriodInDays" MaxSize1024.of_json in
       let successRetentionPeriodInDays =
-        field_map json "SuccessRetentionPeriodInDays" MaxSize1024.of_json in
-      let runConfig = field_map json "RunConfig" CanaryRunConfigInput.of_json in
-      let schedule = field_map json "Schedule" CanaryScheduleInput.of_json in
-      let runtimeVersion = field_map json "RuntimeVersion" String_.of_json in
+        field_map json__ "SuccessRetentionPeriodInDays" MaxSize1024.of_json in
+      let runConfig =
+        field_map json__ "RunConfig" CanaryRunConfigInput.of_json in
+      let schedule = field_map json__ "Schedule" CanaryScheduleInput.of_json in
+      let runtimeVersion = field_map json__ "RuntimeVersion" String_.of_json in
       let executionRoleArn =
-        field_map json "ExecutionRoleArn" RoleArn.of_json in
-      let code = field_map json "Code" CanaryCodeInput.of_json in
-      let name = field_map_exn json "Name" CanaryName.of_json in
-      make ?artifactConfig ?artifactS3Location ?visualReference ?vpcConfig
-        ?failureRetentionPeriodInDays ?successRetentionPeriodInDays
-        ?runConfig ?schedule ?runtimeVersion ?executionRoleArn ?code ~name ()
+        field_map json__ "ExecutionRoleArn" RoleArn.of_json in
+      let code = field_map json__ "Code" CanaryCodeInput.of_json in
+      let name = field_map_exn json__ "Name" CanaryName.of_json in
+      make ?browserConfigs ?visualReferences ?dryRunId
+        ?provisionedResourceCleanup ?artifactConfig ?artifactS3Location
+        ?visualReference ?vpcConfig ?failureRetentionPeriodInDays
+        ?successRetentionPeriodInDays ?runConfig ?schedule ?runtimeVersion
+        ?executionRoleArn ?code ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Use this operation to change the settings of a canary that has already been created. You can't use this operation to update the tags of an existing canary. To change the tags of an existing canary, use TagResource."]
+       "Updates the configuration of a canary that has already been created. For multibrowser canaries, you can add or remove browsers by updating the browserConfig list in the update call. For example: To add Firefox to a canary that currently uses Chrome, specify browserConfigs as \\[CHROME, FIREFOX\\] To remove Firefox and keep only Chrome, specify browserConfigs as \\[CHROME\\] You can't use this operation to update the tags of an existing canary. To change the tags of an existing canary, use TagResource. When you use the dryRunId field when updating a canary, the only other field you can provide is the Schedule. Adding any other field will thrown an exception."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `ValidationException of ValidationException.t 
+      [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalFailureException of InternalFailureException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
       match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_json json)
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_xml xml)
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
-      | `InternalServerException e ->
+      | `BadRequestException e ->
           `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `ResourceNotFoundException e ->
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
           `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `ValidationException e ->
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalFailureException e ->
           `Assoc
-            [("error", (`String "ValidationException"));
-            ("details", (ValidationException.to_json e))]
+            [("error", (`String "InternalFailureException"));
+            ("details", (InternalFailureException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -2398,14 +3837,14 @@ module UntagResourceResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Removes one or more tags from the specified canary."]
+  end[@@ocaml.doc "Removes one or more tags from the specified resource."]
 module UntagResourceRequest =
   struct
     type nonrec t =
       {
-      resourceArn: CanaryArn.t
+      resourceArn: ResourceArn.t
         [@ocaml.doc
-          "The ARN of the canary that you're removing tags from. The ARN format of a canary is arn:aws:synthetics:Region:account-id:canary:canary-name ."];
+          "The ARN of the canary or group that you're removing tags from. The ARN format of a canary is arn:aws:synthetics:Region:account-id:canary:canary-name . The ARN format of a group is arn:aws:synthetics:Region:account-id:group:group-name"];
       tagKeys: TagKeyList.t
         [@ocaml.doc "The list of tag keys to remove from the resource."]}
     let context_ = "UntagResourceRequest"
@@ -2413,7 +3852,7 @@ module UntagResourceRequest =
       fun ~tagKeys -> fun () -> { resourceArn; tagKeys }
     let to_value x =
       structure_to_value
-        [("resourceArn", (Some (CanaryArn.to_value x.resourceArn)));
+        [("resourceArn", (Some (ResourceArn.to_value x.resourceArn)));
         ("tagKeys", (Some (TagKeyList.to_value x.tagKeys)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -2421,60 +3860,79 @@ module UntagResourceRequest =
         TagKeyList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "tagKeys") in
       let resourceArn =
-        CanaryArn.of_xml
+        ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" CanaryArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Removes one or more tags from the specified canary."]
+  end[@@ocaml.doc "Removes one or more tags from the specified resource."]
 module TagResourceResponse =
   struct
     type nonrec t = unit
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `ValidationException of ValidationException.t 
+      [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalFailureException of InternalFailureException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
       match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_json json)
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
-      | "InternalServerException" ->
-          `InternalServerException (InternalServerException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_xml xml)
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
-      | `InternalServerException e ->
+      | `BadRequestException e ->
           `Assoc
-            [("error", (`String "InternalServerException"));
-            ("details", (InternalServerException.to_json e))]
-      | `ResourceNotFoundException e ->
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
           `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `ValidationException e ->
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalFailureException e ->
           `Assoc
-            [("error", (`String "ValidationException"));
-            ("details", (ValidationException.to_json e))]
+            [("error", (`String "InternalFailureException"));
+            ("details", (InternalFailureException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -2488,39 +3946,40 @@ module TagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Assigns one or more tags (key-value pairs) to the specified canary. Tags can help you organize and categorize your resources. You can also use them to scope user permissions, by granting a user permission to access or change only resources with certain tag values. Tags don't have any semantic meaning to Amazon Web Services and are interpreted strictly as strings of characters. You can use the TagResource action with a canary that already has tags. If you specify a new tag key for the alarm, this tag is appended to the list of tags associated with the alarm. If you specify a tag key that is already associated with the alarm, the new tag value that you specify replaces the previous value for that tag. You can associate as many as 50 tags with a canary."]
+       "Assigns one or more tags (key-value pairs) to the specified canary or group. Tags can help you organize and categorize your resources. You can also use them to scope user permissions, by granting a user permission to access or change only resources with certain tag values. Tags don't have any semantic meaning to Amazon Web Services and are interpreted strictly as strings of characters. You can use the TagResource action with a resource that already has tags. If you specify a new tag key for the resource, this tag is appended to the list of tags associated with the resource. If you specify a tag key that is already associated with the resource, the new tag value that you specify replaces the previous value for that tag. You can associate as many as 50 tags with a canary or group."]
 module TagResourceRequest =
   struct
     type nonrec t =
       {
-      resourceArn: CanaryArn.t
+      resourceArn: ResourceArn.t
         [@ocaml.doc
-          "The ARN of the canary that you're adding tags to. The ARN format of a canary is arn:aws:synthetics:Region:account-id:canary:canary-name ."];
+          "The ARN of the canary or group that you're adding tags to. The ARN format of a canary is arn:aws:synthetics:Region:account-id:canary:canary-name . The ARN format of a group is arn:aws:synthetics:Region:account-id:group:group-name"];
       tags: TagMap.t
         [@ocaml.doc
-          "The list of key-value pairs to associate with the canary."]}
+          "The list of key-value pairs to associate with the resource."]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
       structure_to_value
-        [("resourceArn", (Some (CanaryArn.to_value x.resourceArn)));
+        [("resourceArn", (Some (ResourceArn.to_value x.resourceArn)));
         ("Tags", (Some (TagMap.to_value x.tags)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags =
         TagMap.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       let resourceArn =
-        CanaryArn.of_xml
+        ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" CanaryArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Assigns one or more tags (key-value pairs) to the specified canary. Tags can help you organize and categorize your resources. You can also use them to scope user permissions, by granting a user permission to access or change only resources with certain tag values. Tags don't have any semantic meaning to Amazon Web Services and are interpreted strictly as strings of characters. You can use the TagResource action with a canary that already has tags. If you specify a new tag key for the alarm, this tag is appended to the list of tags associated with the alarm. If you specify a tag key that is already associated with the alarm, the new tag value that you specify replaces the previous value for that tag. You can associate as many as 50 tags with a canary."]
+       "Assigns one or more tags (key-value pairs) to the specified canary or group. Tags can help you organize and categorize your resources. You can also use them to scope user permissions, by granting a user permission to access or change only resources with certain tag values. Tags don't have any semantic meaning to Amazon Web Services and are interpreted strictly as strings of characters. You can use the TagResource action with a resource that already has tags. If you specify a new tag key for the resource, this tag is appended to the list of tags associated with the resource. If you specify a tag key that is already associated with the resource, the new tag value that you specify replaces the previous value for that tag. You can associate as many as 50 tags with a canary or group."]
 module StopCanaryResponse =
   struct
     type nonrec t = unit
@@ -2587,14 +4046,14 @@ module StopCanaryResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Stops the canary to prevent all future runs. If the canary is currently running, Synthetics stops waiting for the current run of the specified canary to complete. The run that is in progress completes on its own, publishes metrics, and uploads artifacts, but it is not recorded in Synthetics as a completed run. You can use StartCanary to start it running again with the canary\226\128\153s current schedule at any point in the future."]
+       "Stops the canary to prevent all future runs. If the canary is currently running,the run that is in progress completes on its own, publishes metrics, and uploads artifacts, but it is not recorded in Synthetics as a completed run. You can use StartCanary to start it running again with the canary\226\128\153s current schedule at any point in the future."]
 module StopCanaryRequest =
   struct
     type nonrec t =
       {
       name: CanaryName.t
         [@ocaml.doc
-          "The name of the canary that you want to stop. To find the names of your canaries, use DescribeCanaries."]}
+          "The name of the canary that you want to stop. To find the names of your canaries, use ListCanaries."]}
     let context_ = "StopCanaryRequest"
     let make ~name = fun () -> { name }
     let to_value x =
@@ -2605,12 +4064,12 @@ module StopCanaryRequest =
         CanaryName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" CanaryName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" CanaryName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Stops the canary to prevent all future runs. If the canary is currently running, Synthetics stops waiting for the current run of the specified canary to complete. The run that is in progress completes on its own, publishes metrics, and uploads artifacts, but it is not recorded in Synthetics as a completed run. You can use StartCanary to start it running again with the canary\226\128\153s current schedule at any point in the future."]
+       "Stops the canary to prevent all future runs. If the canary is currently running,the run that is in progress completes on its own, publishes metrics, and uploads artifacts, but it is not recorded in Synthetics as a completed run. You can use StartCanary to start it running again with the canary\226\128\153s current schedule at any point in the future."]
 module StartCanaryResponse =
   struct
     type nonrec t = unit
@@ -2695,25 +4154,630 @@ module StartCanaryRequest =
         CanaryName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" CanaryName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" CanaryName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Use this operation to run a canary that has already been created. The frequency of the canary runs is determined by the value of the canary's Schedule. To see a canary's schedule, use GetCanary."]
+module StartCanaryDryRunResponse =
+  struct
+    type nonrec t =
+      {
+      dryRunConfig: DryRunConfigOutput.t option
+        [@ocaml.doc "Returns the dry run configurations for a canary."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dryRunConfig = fun () -> { dryRunConfig }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DryRunConfig",
+           (Option.map x.dryRunConfig ~f:DryRunConfigOutput.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dryRunConfig =
+        (Option.map ~f:DryRunConfigOutput.of_xml)
+          (Xml.child xml_arg0 "DryRunConfig") in
+      make ?dryRunConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dryRunConfig =
+        field_map json__ "DryRunConfig" DryRunConfigOutput.of_json in
+      make ?dryRunConfig ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Use this operation to start a dry run for a canary that has already been created"]
+module StartCanaryDryRunRequest =
+  struct
+    type nonrec t =
+      {
+      name: CanaryName.t
+        [@ocaml.doc
+          "The name of the canary that you want to dry run. To find canary names, use DescribeCanaries."];
+      code: CanaryCodeInput.t option ;
+      runtimeVersion: String_.t option
+        [@ocaml.doc
+          "Specifies the runtime version to use for the canary. For a list of valid runtime versions and for more information about runtime versions, see Canary Runtime Versions."];
+      runConfig: CanaryRunConfigInput.t option ;
+      vpcConfig: VpcConfigInput.t option ;
+      executionRoleArn: RoleArn.t option
+        [@ocaml.doc
+          "The ARN of the IAM role to be used to run the canary. This role must already exist, and must include lambda.amazonaws.com as a principal in the trust policy. The role must also have the following permissions:"];
+      successRetentionPeriodInDays: MaxSize1024.t option
+        [@ocaml.doc
+          "The number of days to retain data about successful runs of this canary. If you omit this field, the default of 31 days is used. The valid range is 1 to 455 days. This setting affects the range of information returned by GetCanaryRuns, as well as the range of information displayed in the Synthetics console."];
+      failureRetentionPeriodInDays: MaxSize1024.t option
+        [@ocaml.doc
+          "The number of days to retain data about failed runs of this canary. If you omit this field, the default of 31 days is used. The valid range is 1 to 455 days. This setting affects the range of information returned by GetCanaryRuns, as well as the range of information displayed in the Synthetics console."];
+      visualReference: VisualReferenceInput.t option ;
+      artifactS3Location: String_.t option
+        [@ocaml.doc
+          "The location in Amazon S3 where Synthetics stores artifacts from the test runs of this canary. Artifacts include the log file, screenshots, and HAR files. The name of the Amazon S3 bucket can't include a period (.)."];
+      artifactConfig: ArtifactConfigInput.t option ;
+      provisionedResourceCleanup: ProvisionedResourceCleanupSetting.t option
+        [@ocaml.doc
+          "Specifies whether to also delete the Lambda functions and layers used by this canary when the canary is deleted. If you omit this parameter, the default of AUTOMATIC is used, which means that the Lambda functions and layers will be deleted when the canary is deleted. If the value of this parameter is OFF, then the value of the DeleteLambda parameter of the DeleteCanary operation determines whether the Lambda functions and layers will be deleted."];
+      browserConfigs: BrowserConfigs.t option
+        [@ocaml.doc
+          "A structure that specifies the browser type to use for a canary run. CloudWatch Synthetics supports running canaries on both CHROME and FIREFOX browsers. If not specified, browserConfigs defaults to Chrome."];
+      visualReferences: VisualReferences.t option
+        [@ocaml.doc
+          "A list of visual reference configurations for the canary, one for each browser type that the canary is configured to run on. Visual references are used for visual monitoring comparisons. syn-nodejs-puppeteer-11.0 and above, and syn-nodejs-playwright-3.0 and above, only supports visualReferences. visualReference field is not supported. Versions older than syn-nodejs-puppeteer-11.0 supports both visualReference and visualReferences for backward compatibility. It is recommended to use visualReferences for consistency and future compatibility."]}
+    let context_ = "StartCanaryDryRunRequest"
+    let make ?code =
+      fun ?runtimeVersion ->
+        fun ?runConfig ->
+          fun ?vpcConfig ->
+            fun ?executionRoleArn ->
+              fun ?successRetentionPeriodInDays ->
+                fun ?failureRetentionPeriodInDays ->
+                  fun ?visualReference ->
+                    fun ?artifactS3Location ->
+                      fun ?artifactConfig ->
+                        fun ?provisionedResourceCleanup ->
+                          fun ?browserConfigs ->
+                            fun ?visualReferences ->
+                              fun ~name ->
+                                fun () ->
+                                  {
+                                    code;
+                                    runtimeVersion;
+                                    runConfig;
+                                    vpcConfig;
+                                    executionRoleArn;
+                                    successRetentionPeriodInDays;
+                                    failureRetentionPeriodInDays;
+                                    visualReference;
+                                    artifactS3Location;
+                                    artifactConfig;
+                                    provisionedResourceCleanup;
+                                    browserConfigs;
+                                    visualReferences;
+                                    name
+                                  }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (CanaryName.to_value x.name)));
+        ("Code", (Option.map x.code ~f:CanaryCodeInput.to_value));
+        ("RuntimeVersion", (Option.map x.runtimeVersion ~f:String_.to_value));
+        ("RunConfig",
+          (Option.map x.runConfig ~f:CanaryRunConfigInput.to_value));
+        ("VpcConfig", (Option.map x.vpcConfig ~f:VpcConfigInput.to_value));
+        ("ExecutionRoleArn",
+          (Option.map x.executionRoleArn ~f:RoleArn.to_value));
+        ("SuccessRetentionPeriodInDays",
+          (Option.map x.successRetentionPeriodInDays ~f:MaxSize1024.to_value));
+        ("FailureRetentionPeriodInDays",
+          (Option.map x.failureRetentionPeriodInDays ~f:MaxSize1024.to_value));
+        ("VisualReference",
+          (Option.map x.visualReference ~f:VisualReferenceInput.to_value));
+        ("ArtifactS3Location",
+          (Option.map x.artifactS3Location ~f:String_.to_value));
+        ("ArtifactConfig",
+          (Option.map x.artifactConfig ~f:ArtifactConfigInput.to_value));
+        ("ProvisionedResourceCleanup",
+          (Option.map x.provisionedResourceCleanup
+             ~f:ProvisionedResourceCleanupSetting.to_value));
+        ("BrowserConfigs",
+          (Option.map x.browserConfigs ~f:BrowserConfigs.to_value));
+        ("VisualReferences",
+          (Option.map x.visualReferences ~f:VisualReferences.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let visualReferences =
+        (Option.map ~f:VisualReferences.of_xml)
+          (Xml.child xml_arg0 "VisualReferences") in
+      let browserConfigs =
+        (Option.map ~f:BrowserConfigs.of_xml)
+          (Xml.child xml_arg0 "BrowserConfigs") in
+      let provisionedResourceCleanup =
+        (Option.map ~f:ProvisionedResourceCleanupSetting.of_xml)
+          (Xml.child xml_arg0 "ProvisionedResourceCleanup") in
+      let artifactConfig =
+        (Option.map ~f:ArtifactConfigInput.of_xml)
+          (Xml.child xml_arg0 "ArtifactConfig") in
+      let artifactS3Location =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ArtifactS3Location") in
+      let visualReference =
+        (Option.map ~f:VisualReferenceInput.of_xml)
+          (Xml.child xml_arg0 "VisualReference") in
+      let failureRetentionPeriodInDays =
+        (Option.map ~f:MaxSize1024.of_xml)
+          (Xml.child xml_arg0 "FailureRetentionPeriodInDays") in
+      let successRetentionPeriodInDays =
+        (Option.map ~f:MaxSize1024.of_xml)
+          (Xml.child xml_arg0 "SuccessRetentionPeriodInDays") in
+      let executionRoleArn =
+        (Option.map ~f:RoleArn.of_xml)
+          (Xml.child xml_arg0 "ExecutionRoleArn") in
+      let vpcConfig =
+        (Option.map ~f:VpcConfigInput.of_xml)
+          (Xml.child xml_arg0 "VpcConfig") in
+      let runConfig =
+        (Option.map ~f:CanaryRunConfigInput.of_xml)
+          (Xml.child xml_arg0 "RunConfig") in
+      let runtimeVersion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RuntimeVersion") in
+      let code =
+        (Option.map ~f:CanaryCodeInput.of_xml) (Xml.child xml_arg0 "Code") in
+      let name =
+        CanaryName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?visualReferences ?browserConfigs ?provisionedResourceCleanup
+        ?artifactConfig ?artifactS3Location ?visualReference
+        ?failureRetentionPeriodInDays ?successRetentionPeriodInDays
+        ?executionRoleArn ?vpcConfig ?runConfig ?runtimeVersion ?code ~name
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let visualReferences =
+        field_map json__ "VisualReferences" VisualReferences.of_json in
+      let browserConfigs =
+        field_map json__ "BrowserConfigs" BrowserConfigs.of_json in
+      let provisionedResourceCleanup =
+        field_map json__ "ProvisionedResourceCleanup"
+          ProvisionedResourceCleanupSetting.of_json in
+      let artifactConfig =
+        field_map json__ "ArtifactConfig" ArtifactConfigInput.of_json in
+      let artifactS3Location =
+        field_map json__ "ArtifactS3Location" String_.of_json in
+      let visualReference =
+        field_map json__ "VisualReference" VisualReferenceInput.of_json in
+      let failureRetentionPeriodInDays =
+        field_map json__ "FailureRetentionPeriodInDays" MaxSize1024.of_json in
+      let successRetentionPeriodInDays =
+        field_map json__ "SuccessRetentionPeriodInDays" MaxSize1024.of_json in
+      let executionRoleArn =
+        field_map json__ "ExecutionRoleArn" RoleArn.of_json in
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfigInput.of_json in
+      let runConfig =
+        field_map json__ "RunConfig" CanaryRunConfigInput.of_json in
+      let runtimeVersion = field_map json__ "RuntimeVersion" String_.of_json in
+      let code = field_map json__ "Code" CanaryCodeInput.of_json in
+      let name = field_map_exn json__ "Name" CanaryName.of_json in
+      make ?visualReferences ?browserConfigs ?provisionedResourceCleanup
+        ?artifactConfig ?artifactS3Location ?visualReference
+        ?failureRetentionPeriodInDays ?successRetentionPeriodInDays
+        ?executionRoleArn ?vpcConfig ?runConfig ?runtimeVersion ?code ~name
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Use this operation to start a dry run for a canary that has already been created"]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
       {
       tags: TagMap.t option
         [@ocaml.doc
-          "The list of tag keys and values associated with the canary that you specified."]}
+          "The list of tag keys and values associated with the resource that you specified."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalFailureException of InternalFailureException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tags = fun () -> { tags }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalFailureException e ->
+          `Assoc
+            [("error", (`String "InternalFailureException"));
+            ("details", (InternalFailureException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in make ?tags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Displays the tags associated with a canary or group."]
+module ListTagsForResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t
+        [@ocaml.doc
+          "The ARN of the canary or group that you want to view tags for. The ARN format of a canary is arn:aws:synthetics:Region:account-id:canary:canary-name . The ARN format of a group is arn:aws:synthetics:Region:account-id:group:group-name"]}
+    let context_ = "ListTagsForResourceRequest"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Some (ResourceArn.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        ResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Displays the tags associated with a canary or group."]
+module ListGroupsResponse =
+  struct
+    type nonrec t =
+      {
+      groups: GroupSummaryList.t option
+        [@ocaml.doc
+          "An array of structures that each contain information about one group."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "A token that indicates that there is more data available. You can use this token in a subsequent ListGroups operation to retrieve the next set of results."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?groups = fun ?nextToken -> fun () -> { groups; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Groups", (Option.map x.groups ~f:GroupSummaryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let groups =
+        (Option.map ~f:GroupSummaryList.of_xml) (Xml.child xml_arg0 "Groups") in
+      make ?nextToken ?groups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let groups = field_map json__ "Groups" GroupSummaryList.of_json in
+      make ?nextToken ?groups ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of all groups in the account, displaying their names, unique IDs, and ARNs. The groups from all Regions are returned."]
+module ListGroupsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates that there is more data available. You can use this token in a subsequent operation to retrieve the next set of results."];
+      maxResults: MaxGroupResults.t option
+        [@ocaml.doc
+          "Specify this parameter to limit how many groups are returned each time you use the ListGroups operation. If you omit this parameter, the default of 20 is used."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxGroupResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxGroupResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxGroupResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of all groups in the account, displaying their names, unique IDs, and ARNs. The groups from all Regions are returned."]
+module ListGroupResourcesResponse =
+  struct
+    type nonrec t =
+      {
+      resources: StringList.t option
+        [@ocaml.doc
+          "An array of ARNs. These ARNs are for the canaries that are associated with the group."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates that there is more data available. You can use this token in a subsequent ListGroupResources operation to retrieve the next set of results."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resources =
+      fun ?nextToken -> fun () -> { resources; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Resources", (Option.map x.resources ~f:StringList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let resources =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "Resources") in
+      make ?nextToken ?resources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let resources = field_map json__ "Resources" StringList.of_json in
+      make ?nextToken ?resources ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation returns a list of the ARNs of the canaries that are associated with the specified group."]
+module ListGroupResourcesRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates that there is more data available. You can use this token in a subsequent operation to retrieve the next set of results."];
+      maxResults: MaxGroupResults.t option
+        [@ocaml.doc
+          "Specify this parameter to limit how many canary ARNs are returned each time you use the ListGroupResources operation. If you omit this parameter, the default of 20 is used."];
+      groupIdentifier: GroupIdentifier.t
+        [@ocaml.doc
+          "Specifies the group to return information for. You can specify the group name, the ARN, or the group ID as the GroupIdentifier."]}
+    let context_ = "ListGroupResourcesRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~groupIdentifier ->
+          fun () -> { nextToken; maxResults; groupIdentifier }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxGroupResults.to_value));
+        ("groupIdentifier",
+          (Some (GroupIdentifier.to_value x.groupIdentifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let groupIdentifier =
+        GroupIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "groupIdentifier") in
+      let maxResults =
+        (Option.map ~f:MaxGroupResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      make ~groupIdentifier ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let groupIdentifier =
+        field_map_exn json__ "GroupIdentifier" GroupIdentifier.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxGroupResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      make ~groupIdentifier ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation returns a list of the ARNs of the canaries that are associated with the specified group."]
+module ListAssociatedGroupsResponse =
+  struct
+    type nonrec t =
+      {
+      groups: GroupSummaryList.t option
+        [@ocaml.doc
+          "An array of structures that contain information about the groups that this canary is associated with."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates that there is more data available. You can use this token in a subsequent ListAssociatedGroups operation to retrieve the next set of results."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?tags = fun () -> { tags }
+    let make ?groups = fun ?nextToken -> fun () -> { groups; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -2755,40 +4819,168 @@ module ListTagsForResourceResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+      structure_to_value
+        [("Groups", (Option.map x.groups ~f:GroupSummaryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
-      make ?tags ()
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let groups =
+        (Option.map ~f:GroupSummaryList.of_xml) (Xml.child xml_arg0 "Groups") in
+      make ?nextToken ?groups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let groups = field_map json__ "Groups" GroupSummaryList.of_json in
+      make ?nextToken ?groups ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Displays the tags associated with a canary."]
-module ListTagsForResourceRequest =
+  end[@@ocaml.doc
+       "Returns a list of the groups that the specified canary is associated with. The canary that you specify must be in the current Region."]
+module ListAssociatedGroupsRequest =
   struct
     type nonrec t =
       {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates that there is more data available. You can use this token in a subsequent operation to retrieve the next set of results."];
+      maxResults: MaxGroupResults.t option
+        [@ocaml.doc
+          "Specify this parameter to limit how many groups are returned each time you use the ListAssociatedGroups operation. If you omit this parameter, the default of 20 is used."];
       resourceArn: CanaryArn.t
         [@ocaml.doc
-          "The ARN of the canary that you want to view tags for. The ARN format of a canary is arn:aws:synthetics:Region:account-id:canary:canary-name ."]}
-    let context_ = "ListTagsForResourceRequest"
-    let make ~resourceArn = fun () -> { resourceArn }
+          "The ARN of the canary that you want to view groups for."]}
+    let context_ = "ListAssociatedGroupsRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~resourceArn -> fun () -> { nextToken; maxResults; resourceArn }
     let to_value x =
       structure_to_value
-        [("resourceArn", (Some (CanaryArn.to_value x.resourceArn)))]
+        [("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxGroupResults.to_value));
+        ("resourceArn", (Some (CanaryArn.to_value x.resourceArn)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceArn =
         CanaryArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
-      make ~resourceArn ()
+      let maxResults =
+        (Option.map ~f:MaxGroupResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      make ~resourceArn ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" CanaryArn.of_json in
-      make ~resourceArn ()
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" CanaryArn.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxGroupResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      make ~resourceArn ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Displays the tags associated with a canary."]
+  end[@@ocaml.doc
+       "Returns a list of the groups that the specified canary is associated with. The canary that you specify must be in the current Region."]
+module GetGroupResponse =
+  struct
+    type nonrec t =
+      {
+      group: Group.t option
+        [@ocaml.doc "A structure that contains information about the group."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?group = fun () -> { group }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("Group", (Option.map x.group ~f:Group.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let group = (Option.map ~f:Group.of_xml) (Xml.child xml_arg0 "Group") in
+      make ?group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let group = field_map json__ "Group" Group.of_json in make ?group ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about one group. Groups are a global resource, so you can use this operation from any Region."]
+module GetGroupRequest =
+  struct
+    type nonrec t =
+      {
+      groupIdentifier: GroupIdentifier.t
+        [@ocaml.doc
+          "Specifies the group to return information for. You can specify the group name, the ARN, or the group ID as the GroupIdentifier."]}
+    let context_ = "GetGroupRequest"
+    let make ~groupIdentifier = fun () -> { groupIdentifier }
+    let to_value x =
+      structure_to_value
+        [("groupIdentifier",
+           (Some (GroupIdentifier.to_value x.groupIdentifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let groupIdentifier =
+        GroupIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "groupIdentifier") in
+      make ~groupIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let groupIdentifier =
+        field_map_exn json__ "GroupIdentifier" GroupIdentifier.of_json in
+      make ~groupIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about one group. Groups are a global resource, so you can use this operation from any Region."]
 module GetCanaryRunsResponse =
   struct
     type nonrec t =
@@ -2858,9 +5050,9 @@ module GetCanaryRunsResponse =
         (Option.map ~f:CanaryRuns.of_xml) (Xml.child xml_arg0 "CanaryRuns") in
       make ?nextToken ?canaryRuns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let canaryRuns = field_map json "CanaryRuns" CanaryRuns.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let canaryRuns = field_map json__ "CanaryRuns" CanaryRuns.of_json in
       make ?nextToken ?canaryRuns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of runs for a specified canary."]
@@ -2872,34 +5064,51 @@ module GetCanaryRunsRequest =
         [@ocaml.doc "The name of the canary that you want to see runs for."];
       nextToken: Token.t option
         [@ocaml.doc
-          "A token that indicates that there is more data available. You can use this token in a subsequent GetCanaryRuns operation to retrieve the next set of results."];
+          "A token that indicates that there is more data available. You can use this token in a subsequent GetCanaryRuns operation to retrieve the next set of results. When auto retry is enabled for the canary, the first subsequent retry is suffixed with *1 indicating its the first retry and the next subsequent try is suffixed with *2."];
       maxResults: MaxSize100.t option
         [@ocaml.doc
-          "Specify this parameter to limit how many runs are returned each time you use the GetCanaryRuns operation. If you omit this parameter, the default of 100 is used."]}
+          "Specify this parameter to limit how many runs are returned each time you use the GetCanaryRuns operation. If you omit this parameter, the default of 100 is used."];
+      dryRunId: UUID.t option
+        [@ocaml.doc
+          "The DryRunId associated with an existing canary\226\128\153s dry run. You can use this DryRunId to retrieve information about the dry run."];
+      runType: RunType.t option
+        [@ocaml.doc
+          "When you provide RunType=CANARY_RUN and dryRunId, you will get an exception When a value is not provided for RunType, the default value is CANARY_RUN When CANARY_RUN is provided, all canary runs excluding dry runs are returned When DRY_RUN is provided, all dry runs excluding canary runs are returned"]}
     let context_ = "GetCanaryRunsRequest"
     let make ?nextToken =
       fun ?maxResults ->
-        fun ~name -> fun () -> { nextToken; maxResults; name }
+        fun ?dryRunId ->
+          fun ?runType ->
+            fun ~name ->
+              fun () -> { nextToken; maxResults; dryRunId; runType; name }
     let to_value x =
       structure_to_value
         [("name", (Some (CanaryName.to_value x.name)));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxSize100.to_value))]
+        ("MaxResults", (Option.map x.maxResults ~f:MaxSize100.to_value));
+        ("DryRunId", (Option.map x.dryRunId ~f:UUID.to_value));
+        ("RunType", (Option.map x.runType ~f:RunType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let runType =
+        (Option.map ~f:RunType.of_xml) (Xml.child xml_arg0 "RunType") in
+      let dryRunId =
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "DryRunId") in
       let maxResults =
         (Option.map ~f:MaxSize100.of_xml) (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let name =
         CanaryName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?maxResults ?nextToken ~name ()
+      make ?runType ?dryRunId ?maxResults ?nextToken ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxSize100.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let name = field_map_exn json "Name" CanaryName.of_json in
-      make ?maxResults ?nextToken ~name ()
+    let of_json json__ =
+      let runType = field_map json__ "RunType" RunType.of_json in
+      let dryRunId = field_map json__ "DryRunId" UUID.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxSize100.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let name = field_map_exn json__ "Name" CanaryName.of_json in
+      make ?runType ?dryRunId ?maxResults ?nextToken ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of runs for a specified canary."]
 module GetCanaryResponse =
@@ -2908,7 +5117,7 @@ module GetCanaryResponse =
       {
       canary: Canary.t option
         [@ocaml.doc
-          "A strucure that contains the full information about the canary."]}
+          "A structure that contains the full information about the canary."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ValidationException of ValidationException.t 
@@ -2955,8 +5164,9 @@ module GetCanaryResponse =
         (Option.map ~f:Canary.of_xml) (Xml.child xml_arg0 "Canary") in
       make ?canary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let canary = field_map json "Canary" Canary.of_json in make ?canary ()
+    let of_json json__ =
+      let canary = field_map json__ "Canary" Canary.of_json in
+      make ?canary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves complete information about one canary. You must specify the name of the canary that you want. To get a list of canaries and their names, use DescribeCanaries."]
@@ -2965,23 +5175,134 @@ module GetCanaryRequest =
     type nonrec t =
       {
       name: CanaryName.t
-        [@ocaml.doc "The name of the canary that you want details for."]}
+        [@ocaml.doc "The name of the canary that you want details for."];
+      dryRunId: UUID.t option
+        [@ocaml.doc
+          "The DryRunId associated with an existing canary\226\128\153s dry run. You can use this DryRunId to retrieve information about the dry run."]}
     let context_ = "GetCanaryRequest"
-    let make ~name = fun () -> { name }
+    let make ?dryRunId = fun ~name -> fun () -> { dryRunId; name }
     let to_value x =
-      structure_to_value [("name", (Some (CanaryName.to_value x.name)))]
+      structure_to_value
+        [("name", (Some (CanaryName.to_value x.name)));
+        ("dryRunId", (Option.map x.dryRunId ~f:UUID.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dryRunId =
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "dryRunId") in
       let name =
         CanaryName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~name ()
+      make ?dryRunId ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" CanaryName.of_json in
-      make ~name ()
+    let of_json json__ =
+      let dryRunId = field_map json__ "DryRunId" UUID.of_json in
+      let name = field_map_exn json__ "Name" CanaryName.of_json in
+      make ?dryRunId ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves complete information about one canary. You must specify the name of the canary that you want. To get a list of canaries and their names, use DescribeCanaries."]
+module DisassociateResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes a canary from a group. You must run this operation in the Region where the canary exists."]
+module DisassociateResourceRequest =
+  struct
+    type nonrec t =
+      {
+      groupIdentifier: GroupIdentifier.t
+        [@ocaml.doc
+          "Specifies the group. You can specify the group name, the ARN, or the group ID as the GroupIdentifier."];
+      resourceArn: CanaryArn.t
+        [@ocaml.doc
+          "The ARN of the canary that you want to remove from the specified group."]}
+    let context_ = "DisassociateResourceRequest"
+    let make ~groupIdentifier =
+      fun ~resourceArn -> fun () -> { groupIdentifier; resourceArn }
+    let to_value x =
+      structure_to_value
+        [("groupIdentifier",
+           (Some (GroupIdentifier.to_value x.groupIdentifier)));
+        ("ResourceArn", (Some (CanaryArn.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        CanaryArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      let groupIdentifier =
+        GroupIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "groupIdentifier") in
+      make ~resourceArn ~groupIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" CanaryArn.of_json in
+      let groupIdentifier =
+        field_map_exn json__ "GroupIdentifier" GroupIdentifier.of_json in
+      make ~resourceArn ~groupIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes a canary from a group. You must run this operation in the Region where the canary exists."]
 module DescribeRuntimeVersionsResponse =
   struct
     type nonrec t =
@@ -3044,10 +5365,10 @@ module DescribeRuntimeVersionsResponse =
           (Xml.child xml_arg0 "RuntimeVersions") in
       make ?nextToken ?runtimeVersions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let runtimeVersions =
-        field_map json "RuntimeVersions" RuntimeVersionList.of_json in
+        field_map json__ "RuntimeVersions" RuntimeVersionList.of_json in
       make ?nextToken ?runtimeVersions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3076,9 +5397,9 @@ module DescribeRuntimeVersionsRequest =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxSize100.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxSize100.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3142,9 +5463,9 @@ module DescribeCanariesResponse =
         (Option.map ~f:Canaries.of_xml) (Xml.child xml_arg0 "Canaries") in
       make ?nextToken ?canaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let canaries = field_map json "Canaries" Canaries.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let canaries = field_map json__ "Canaries" Canaries.of_json in
       make ?nextToken ?canaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3158,7 +5479,7 @@ module DescribeCanariesRequest =
           "A token that indicates that there is more data available. You can use this token in a subsequent operation to retrieve the next set of results."];
       maxResults: MaxCanaryResults.t option
         [@ocaml.doc
-          "Specify this parameter to limit how many canaries are returned each time you use the DescribeCanaries operation. If you omit this parameter, the default of 100 is used."];
+          "Specify this parameter to limit how many canaries are returned each time you use the DescribeCanaries operation. If you omit this parameter, the default of 20 is used."];
       names: DescribeCanariesNameFilter.t option
         [@ocaml.doc
           "Use this parameter to return only canaries that match the names that you specify here. You can specify as many as five canary names. If you specify this parameter, the operation is successful only if you have authorization to view all the canaries that you specify in your request. If you do not have permission to view any of the canaries, the request fails with a 403 response. You are required to use this parameter if you are logged on to a user or role that has an IAM policy that restricts which canaries that you are allowed to view. For more information, see Limiting a user to viewing specific canaries."]}
@@ -3184,10 +5505,10 @@ module DescribeCanariesRequest =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?names ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let names = field_map json "Names" DescribeCanariesNameFilter.of_json in
-      let maxResults = field_map json "MaxResults" MaxCanaryResults.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let names = field_map json__ "Names" DescribeCanariesNameFilter.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxCanaryResults.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       make ?names ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3254,10 +5575,10 @@ module DescribeCanariesLastRunResponse =
           (Xml.child xml_arg0 "CanariesLastRun") in
       make ?nextToken ?canariesLastRun ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let canariesLastRun =
-        field_map json "CanariesLastRun" CanariesLastRun.of_json in
+        field_map json__ "CanariesLastRun" CanariesLastRun.of_json in
       make ?nextToken ?canariesLastRun ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3268,24 +5589,31 @@ module DescribeCanariesLastRunRequest =
       {
       nextToken: Token.t option
         [@ocaml.doc
-          "A token that indicates that there is more data available. You can use this token in a subsequent DescribeCanaries operation to retrieve the next set of results."];
+          "A token that indicates that there is more data available. You can use this token in a subsequent DescribeCanariesLastRun operation to retrieve the next set of results."];
       maxResults: MaxSize100.t option
         [@ocaml.doc
           "Specify this parameter to limit how many runs are returned each time you use the DescribeLastRun operation. If you omit this parameter, the default of 100 is used."];
       names: DescribeCanariesLastRunNameFilter.t option
         [@ocaml.doc
-          "Use this parameter to return only canaries that match the names that you specify here. You can specify as many as five canary names. If you specify this parameter, the operation is successful only if you have authorization to view all the canaries that you specify in your request. If you do not have permission to view any of the canaries, the request fails with a 403 response. You are required to use the Names parameter if you are logged on to a user or role that has an IAM policy that restricts which canaries that you are allowed to view. For more information, see Limiting a user to viewing specific canaries."]}
+          "Use this parameter to return only canaries that match the names that you specify here. You can specify as many as five canary names. If you specify this parameter, the operation is successful only if you have authorization to view all the canaries that you specify in your request. If you do not have permission to view any of the canaries, the request fails with a 403 response. You are required to use the Names parameter if you are logged on to a user or role that has an IAM policy that restricts which canaries that you are allowed to view. For more information, see Limiting a user to viewing specific canaries."];
+      browserType: BrowserType.t option
+        [@ocaml.doc "The type of browser to use for the canary run."]}
     let make ?nextToken =
       fun ?maxResults ->
-        fun ?names -> fun () -> { nextToken; maxResults; names }
+        fun ?names ->
+          fun ?browserType ->
+            fun () -> { nextToken; maxResults; names; browserType }
     let to_value x =
       structure_to_value
         [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxSize100.to_value));
         ("Names",
-          (Option.map x.names ~f:DescribeCanariesLastRunNameFilter.to_value))]
+          (Option.map x.names ~f:DescribeCanariesLastRunNameFilter.to_value));
+        ("BrowserType", (Option.map x.browserType ~f:BrowserType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let browserType =
+        (Option.map ~f:BrowserType.of_xml) (Xml.child xml_arg0 "BrowserType") in
       let names =
         (Option.map ~f:DescribeCanariesLastRunNameFilter.of_xml)
           (Xml.child xml_arg0 "Names") in
@@ -3293,17 +5621,112 @@ module DescribeCanariesLastRunRequest =
         (Option.map ~f:MaxSize100.of_xml) (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ?names ?maxResults ?nextToken ()
+      make ?browserType ?names ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let browserType = field_map json__ "BrowserType" BrowserType.of_json in
       let names =
-        field_map json "Names" DescribeCanariesLastRunNameFilter.of_json in
-      let maxResults = field_map json "MaxResults" MaxSize100.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      make ?names ?maxResults ?nextToken ()
+        field_map json__ "Names" DescribeCanariesLastRunNameFilter.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxSize100.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      make ?browserType ?names ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Use this operation to see information from the most recent run of each canary that you have created. This operation supports resource-level authorization using an IAM policy and the Names parameter. If you specify the Names parameter, the operation is successful only if you have authorization to view all the canaries that you specify in your request. If you do not have permission to view any of the canaries, the request fails with a 403 response. You are required to use the Names parameter if you are logged on to a user or role that has an IAM policy that restricts which canaries that you are allowed to view. For more information, see Limiting a user to viewing specific canaries."]
+module DeleteGroupResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a group. The group doesn't need to be empty to be deleted. If there are canaries in the group, they are not deleted when you delete the group. Groups are a global resource that appear in all Regions, but the request to delete a group must be made from its home Region. You can find the home Region of a group within its ARN."]
+module DeleteGroupRequest =
+  struct
+    type nonrec t =
+      {
+      groupIdentifier: GroupIdentifier.t
+        [@ocaml.doc
+          "Specifies which group to delete. You can specify the group name, the ARN, or the group ID as the GroupIdentifier."]}
+    let context_ = "DeleteGroupRequest"
+    let make ~groupIdentifier = fun () -> { groupIdentifier }
+    let to_value x =
+      structure_to_value
+        [("groupIdentifier",
+           (Some (GroupIdentifier.to_value x.groupIdentifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let groupIdentifier =
+        GroupIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "groupIdentifier") in
+      make ~groupIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let groupIdentifier =
+        field_map_exn json__ "GroupIdentifier" GroupIdentifier.of_json in
+      make ~groupIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a group. The group doesn't need to be empty to be deleted. If there are canaries in the group, they are not deleted when you delete the group. Groups are a global resource that appear in all Regions, but the request to delete a group must be made from its home Region. You can find the home Region of a group within its ARN."]
 module DeleteCanaryResponse =
   struct
     type nonrec t = unit
@@ -3370,30 +5793,144 @@ module DeleteCanaryResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Permanently deletes the specified canary. When you delete a canary, resources used and created by the canary are not automatically deleted. After you delete a canary that you do not intend to use again, you should also delete the following: The Lambda functions and layers used by this canary. These have the prefix cwsyn-MyCanaryName . The CloudWatch alarms created for this canary. These alarms have a name of Synthetics-SharpDrop-Alarm-MyCanaryName . Amazon S3 objects and buckets, such as the canary's artifact location. IAM roles created for the canary. If they were created in the console, these roles have the name role/service-role/CloudWatchSyntheticsRole-MyCanaryName . CloudWatch Logs log groups created for the canary. These logs groups have the name /aws/lambda/cwsyn-MyCanaryName . Before you delete a canary, you might want to use GetCanary to display the information about this canary. Make note of the information returned by this operation so that you can delete these resources after you delete the canary."]
+       "Permanently deletes the specified canary. If the canary's ProvisionedResourceCleanup field is set to AUTOMATIC or you specify DeleteLambda in this operation as true, CloudWatch Synthetics also deletes the Lambda functions and layers that are used by the canary. Other resources used and created by the canary are not automatically deleted. After you delete a canary, you should also delete the following: The CloudWatch alarms created for this canary. These alarms have a name of Synthetics-Alarm-first-198-characters-of-canary-name-canaryId-alarm number Amazon S3 objects and buckets, such as the canary's artifact location. IAM roles created for the canary. If they were created in the console, these roles have the name role/service-role/CloudWatchSyntheticsRole-First-21-Characters-of-CanaryName CloudWatch Logs log groups created for the canary. These logs groups have the name /aws/lambda/cwsyn-First-21-Characters-of-CanaryName Before you delete a canary, you might want to use GetCanary to display the information about this canary. Make note of the information returned by this operation so that you can delete these resources after you delete the canary."]
 module DeleteCanaryRequest =
   struct
     type nonrec t =
       {
       name: CanaryName.t
         [@ocaml.doc
-          "The name of the canary that you want to delete. To find the names of your canaries, use DescribeCanaries."]}
+          "The name of the canary that you want to delete. To find the names of your canaries, use DescribeCanaries."];
+      deleteLambda: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether to also delete the Lambda functions and layers used by this canary. The default is false. Your setting for this parameter is used only if the canary doesn't have AUTOMATIC for its ProvisionedResourceCleanup field. If that field is set to AUTOMATIC, then the Lambda functions and layers will be deleted when this canary is deleted. Type: Boolean"]}
     let context_ = "DeleteCanaryRequest"
-    let make ~name = fun () -> { name }
+    let make ?deleteLambda = fun ~name -> fun () -> { deleteLambda; name }
     let to_value x =
-      structure_to_value [("name", (Some (CanaryName.to_value x.name)))]
+      structure_to_value
+        [("name", (Some (CanaryName.to_value x.name)));
+        ("deleteLambda", (Option.map x.deleteLambda ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let deleteLambda =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "deleteLambda") in
       let name =
         CanaryName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~name ()
+      make ?deleteLambda ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" CanaryName.of_json in
-      make ~name ()
+    let of_json json__ =
+      let deleteLambda = field_map json__ "DeleteLambda" Boolean.of_json in
+      let name = field_map_exn json__ "Name" CanaryName.of_json in
+      make ?deleteLambda ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Permanently deletes the specified canary. When you delete a canary, resources used and created by the canary are not automatically deleted. After you delete a canary that you do not intend to use again, you should also delete the following: The Lambda functions and layers used by this canary. These have the prefix cwsyn-MyCanaryName . The CloudWatch alarms created for this canary. These alarms have a name of Synthetics-SharpDrop-Alarm-MyCanaryName . Amazon S3 objects and buckets, such as the canary's artifact location. IAM roles created for the canary. If they were created in the console, these roles have the name role/service-role/CloudWatchSyntheticsRole-MyCanaryName . CloudWatch Logs log groups created for the canary. These logs groups have the name /aws/lambda/cwsyn-MyCanaryName . Before you delete a canary, you might want to use GetCanary to display the information about this canary. Make note of the information returned by this operation so that you can delete these resources after you delete the canary."]
+       "Permanently deletes the specified canary. If the canary's ProvisionedResourceCleanup field is set to AUTOMATIC or you specify DeleteLambda in this operation as true, CloudWatch Synthetics also deletes the Lambda functions and layers that are used by the canary. Other resources used and created by the canary are not automatically deleted. After you delete a canary, you should also delete the following: The CloudWatch alarms created for this canary. These alarms have a name of Synthetics-Alarm-first-198-characters-of-canary-name-canaryId-alarm number Amazon S3 objects and buckets, such as the canary's artifact location. IAM roles created for the canary. If they were created in the console, these roles have the name role/service-role/CloudWatchSyntheticsRole-First-21-Characters-of-CanaryName CloudWatch Logs log groups created for the canary. These logs groups have the name /aws/lambda/cwsyn-First-21-Characters-of-CanaryName Before you delete a canary, you might want to use GetCanary to display the information about this canary. Make note of the information returned by this operation so that you can delete these resources after you delete the canary."]
+module CreateGroupResponse =
+  struct
+    type nonrec t =
+      {
+      group: Group.t option
+        [@ocaml.doc
+          "A structure that contains information about the group that was just created."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?group = fun () -> { group }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("Group", (Option.map x.group ~f:Group.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let group = (Option.map ~f:Group.of_xml) (Xml.child xml_arg0 "Group") in
+      make ?group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let group = field_map json__ "Group" Group.of_json in make ?group ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a group which you can use to associate canaries with each other, including cross-Region canaries. Using groups can help you with managing and automating your canaries, and you can also view aggregated run results and statistics for all canaries in a group. Groups are global resources. When you create a group, it is replicated across Amazon Web Services Regions, and you can view it and add canaries to it from any Region. Although the group ARN format reflects the Region name where it was created, a group is not constrained to any Region. This means that you can put canaries from multiple Regions into the same group, and then use that group to view and manage all of those canaries in a single view. Groups are supported in all Regions except the Regions that are disabled by default. For more information about these Regions, see Enabling a Region. Each group can contain as many as 10 canaries. You can have as many as 20 groups in your account. Any single canary can be a member of up to 10 groups."]
+module CreateGroupRequest =
+  struct
+    type nonrec t =
+      {
+      name: GroupName.t
+        [@ocaml.doc
+          "The name for the group. It can include any Unicode characters. The names for all groups in your account, across all Regions, must be unique."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A list of key-value pairs to associate with the group. You can associate as many as 50 tags with a group. Tags can help you organize and categorize your resources. You can also use them to scope user permissions, by granting a user permission to access or change only the resources that have certain tag values."]}
+    let context_ = "CreateGroupRequest"
+    let make ?tags = fun ~name -> fun () -> { tags; name }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (GroupName.to_value x.name)));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let name =
+        GroupName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?tags ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let name = field_map_exn json__ "Name" GroupName.of_json in
+      make ?tags ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a group which you can use to associate canaries with each other, including cross-Region canaries. Using groups can help you with managing and automating your canaries, and you can also view aggregated run results and statistics for all canaries in a group. Groups are global resources. When you create a group, it is replicated across Amazon Web Services Regions, and you can view it and add canaries to it from any Region. Although the group ARN format reflects the Region name where it was created, a group is not constrained to any Region. This means that you can put canaries from multiple Regions into the same group, and then use that group to view and manage all of those canaries in a single view. Groups are supported in all Regions except the Regions that are disabled by default. For more information about these Regions, see Enabling a Region. Each group can contain as many as 10 canaries. You can have as many as 20 groups in your account. Any single canary can be a member of up to 10 groups."]
 module CreateCanaryResponse =
   struct
     type nonrec t =
@@ -3457,11 +5994,12 @@ module CreateCanaryResponse =
         (Option.map ~f:Canary.of_xml) (Xml.child xml_arg0 "Canary") in
       make ?canary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let canary = field_map json "Canary" Canary.of_json in make ?canary ()
+    let of_json json__ =
+      let canary = field_map json__ "Canary" Canary.of_json in
+      make ?canary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a canary. Canaries are scripts that monitor your endpoints and APIs from the outside-in. Canaries help you check the availability and latency of your web services and troubleshoot anomalies by investigating load time data, screenshots of the UI, logs, and metrics. You can set up a canary to run continuously or just once. Do not use CreateCanary to modify an existing canary. Use UpdateCanary instead. To create canaries, you must have the CloudWatchSyntheticsFullAccess policy. If you are creating a new IAM role for the canary, you also need the the iam:CreateRole, iam:CreatePolicy and iam:AttachRolePolicy permissions. For more information, see Necessary Roles and Permissions. Do not include secrets or proprietary information in your canary names. The canary name makes up part of the Amazon Resource Name (ARN) for the canary, and the ARN is included in outbound calls over the internet. For more information, see Security Considerations for Synthetics Canaries."]
+       "Creates a canary. Canaries are scripts that monitor your endpoints and APIs from the outside-in. Canaries help you check the availability and latency of your web services and troubleshoot anomalies by investigating load time data, screenshots of the UI, logs, and metrics. You can set up a canary to run continuously or just once. Do not use CreateCanary to modify an existing canary. Use UpdateCanary instead. To create canaries, you must have the CloudWatchSyntheticsFullAccess policy. If you are creating a new IAM role for the canary, you also need the iam:CreateRole, iam:CreatePolicy and iam:AttachRolePolicy permissions. For more information, see Necessary Roles and Permissions. Do not include secrets or proprietary information in your canary names. The canary name makes up part of the Amazon Resource Name (ARN) for the canary, and the ARN is included in outbound calls over the internet. For more information, see Security Considerations for Synthetics Canaries."]
 module CreateCanaryRequest =
   struct
     type nonrec t =
@@ -3471,10 +6009,10 @@ module CreateCanaryRequest =
           "The name for this canary. Be sure to give it a descriptive name that distinguishes it from other canaries in your account. Do not include secrets or proprietary information in your canary names. The canary name makes up part of the canary ARN, and the ARN is included in outbound calls over the internet. For more information, see Security Considerations for Synthetics Canaries."];
       code: CanaryCodeInput.t
         [@ocaml.doc
-          "A structure that includes the entry point from which the canary should start running your script. If the script is stored in an S3 bucket, the bucket name, key, and version are also included."];
+          "A structure that includes the entry point from which the canary should start running your script. If the script is stored in an Amazon S3 bucket, the bucket name, key, and version are also included."];
       artifactS3Location: String_.t
         [@ocaml.doc
-          "The location in Amazon S3 where Synthetics stores artifacts from the test runs of this canary. Artifacts include the log file, screenshots, and HAR files. The name of the S3 bucket can't include a period (.)."];
+          "The location in Amazon S3 where Synthetics stores artifacts from the test runs of this canary. Artifacts include the log file, screenshots, and HAR files. The name of the Amazon S3 bucket can't include a period (.)."];
       executionRoleArn: RoleArn.t
         [@ocaml.doc
           "The ARN of the IAM role to be used to run the canary. This role must already exist, and must include lambda.amazonaws.com as a principal in the trust policy. The role must also have the following permissions: s3:PutObject s3:GetBucketLocation s3:ListAllMyBuckets cloudwatch:PutMetricData logs:CreateLogGroup logs:CreateLogStream logs:PutLogEvents"];
@@ -3483,22 +6021,31 @@ module CreateCanaryRequest =
           "A structure that contains information about how often the canary is to run and when these test runs are to stop."];
       runConfig: CanaryRunConfigInput.t option
         [@ocaml.doc
-          "A structure that contains the configuration for individual canary runs, such as timeout value."];
+          "A structure that contains the configuration for individual canary runs, such as timeout value and environment variables. Environment variable keys and values are encrypted at rest using Amazon Web Services owned KMS keys. However, the environment variables are not encrypted on the client side. Do not store sensitive information in them."];
       successRetentionPeriodInDays: MaxSize1024.t option
         [@ocaml.doc
-          "The number of days to retain data about successful runs of this canary. If you omit this field, the default of 31 days is used. The valid range is 1 to 455 days."];
+          "The number of days to retain data about successful runs of this canary. If you omit this field, the default of 31 days is used. The valid range is 1 to 455 days. This setting affects the range of information returned by GetCanaryRuns, as well as the range of information displayed in the Synthetics console."];
       failureRetentionPeriodInDays: MaxSize1024.t option
         [@ocaml.doc
-          "The number of days to retain data about failed runs of this canary. If you omit this field, the default of 31 days is used. The valid range is 1 to 455 days."];
+          "The number of days to retain data about failed runs of this canary. If you omit this field, the default of 31 days is used. The valid range is 1 to 455 days. This setting affects the range of information returned by GetCanaryRuns, as well as the range of information displayed in the Synthetics console."];
       runtimeVersion: String_.t
         [@ocaml.doc
           "Specifies the runtime version to use for the canary. For a list of valid runtime versions and more information about runtime versions, see Canary Runtime Versions."];
       vpcConfig: VpcConfigInput.t option
         [@ocaml.doc
           "If this canary is to test an endpoint in a VPC, this structure contains information about the subnet and security groups of the VPC endpoint. For more information, see Running a Canary in a VPC."];
+      resourcesToReplicateTags: ResourceList.t option
+        [@ocaml.doc
+          "To have the tags that you apply to this canary also be applied to the Lambda function that the canary uses, specify this parameter with the value lambda-function. If you specify this parameter and don't specify any tags in the Tags parameter, the canary creation fails."];
+      provisionedResourceCleanup: ProvisionedResourceCleanupSetting.t option
+        [@ocaml.doc
+          "Specifies whether to also delete the Lambda functions and layers used by this canary when the canary is deleted. If you omit this parameter, the default of AUTOMATIC is used, which means that the Lambda functions and layers will be deleted when the canary is deleted. If the value of this parameter is OFF, then the value of the DeleteLambda parameter of the DeleteCanary operation determines whether the Lambda functions and layers will be deleted."];
+      browserConfigs: BrowserConfigs.t option
+        [@ocaml.doc
+          "CloudWatch Synthetics now supports multibrowser canaries for syn-nodejs-puppeteer-11.0 and syn-nodejs-playwright-3.0 runtimes. This feature allows you to run your canaries on both Firefox and Chrome browsers. To create a multibrowser canary, you need to specify the BrowserConfigs with a list of browsers you want to use. If not specified, browserConfigs defaults to Chrome."];
       tags: TagMap.t option
         [@ocaml.doc
-          "A list of key-value pairs to associate with the canary. You can associate as many as 50 tags with a canary. Tags can help you organize and categorize your resources. You can also use them to scope user permissions, by granting a user permission to access or change only the resources that have certain tag values."];
+          "A list of key-value pairs to associate with the canary. You can associate as many as 50 tags with a canary. Tags can help you organize and categorize your resources. You can also use them to scope user permissions, by granting a user permission to access or change only the resources that have certain tag values. To have the tags that you apply to this canary also be applied to the Lambda function that the canary uses, specify this parameter with the value lambda-function."];
       artifactConfig: ArtifactConfigInput.t option
         [@ocaml.doc
           "A structure that contains the configuration for canary artifacts, including the encryption-at-rest settings for artifacts that the canary uploads to Amazon S3."]}
@@ -3507,29 +6054,35 @@ module CreateCanaryRequest =
       fun ?successRetentionPeriodInDays ->
         fun ?failureRetentionPeriodInDays ->
           fun ?vpcConfig ->
-            fun ?tags ->
-              fun ?artifactConfig ->
-                fun ~name ->
-                  fun ~code ->
-                    fun ~artifactS3Location ->
-                      fun ~executionRoleArn ->
-                        fun ~schedule ->
-                          fun ~runtimeVersion ->
-                            fun () ->
-                              {
-                                runConfig;
-                                successRetentionPeriodInDays;
-                                failureRetentionPeriodInDays;
-                                vpcConfig;
-                                tags;
-                                artifactConfig;
-                                name;
-                                code;
-                                artifactS3Location;
-                                executionRoleArn;
-                                schedule;
-                                runtimeVersion
-                              }
+            fun ?resourcesToReplicateTags ->
+              fun ?provisionedResourceCleanup ->
+                fun ?browserConfigs ->
+                  fun ?tags ->
+                    fun ?artifactConfig ->
+                      fun ~name ->
+                        fun ~code ->
+                          fun ~artifactS3Location ->
+                            fun ~executionRoleArn ->
+                              fun ~schedule ->
+                                fun ~runtimeVersion ->
+                                  fun () ->
+                                    {
+                                      runConfig;
+                                      successRetentionPeriodInDays;
+                                      failureRetentionPeriodInDays;
+                                      vpcConfig;
+                                      resourcesToReplicateTags;
+                                      provisionedResourceCleanup;
+                                      browserConfigs;
+                                      tags;
+                                      artifactConfig;
+                                      name;
+                                      code;
+                                      artifactS3Location;
+                                      executionRoleArn;
+                                      schedule;
+                                      runtimeVersion
+                                    }
     let to_value x =
       structure_to_value
         [("Name", (Some (CanaryName.to_value x.name)));
@@ -3546,6 +6099,13 @@ module CreateCanaryRequest =
           (Option.map x.failureRetentionPeriodInDays ~f:MaxSize1024.to_value));
         ("RuntimeVersion", (Some (String_.to_value x.runtimeVersion)));
         ("VpcConfig", (Option.map x.vpcConfig ~f:VpcConfigInput.to_value));
+        ("ResourcesToReplicateTags",
+          (Option.map x.resourcesToReplicateTags ~f:ResourceList.to_value));
+        ("ProvisionedResourceCleanup",
+          (Option.map x.provisionedResourceCleanup
+             ~f:ProvisionedResourceCleanupSetting.to_value));
+        ("BrowserConfigs",
+          (Option.map x.browserConfigs ~f:BrowserConfigs.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
         ("ArtifactConfig",
           (Option.map x.artifactConfig ~f:ArtifactConfigInput.to_value))]
@@ -3555,6 +6115,15 @@ module CreateCanaryRequest =
         (Option.map ~f:ArtifactConfigInput.of_xml)
           (Xml.child xml_arg0 "ArtifactConfig") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let browserConfigs =
+        (Option.map ~f:BrowserConfigs.of_xml)
+          (Xml.child xml_arg0 "BrowserConfigs") in
+      let provisionedResourceCleanup =
+        (Option.map ~f:ProvisionedResourceCleanupSetting.of_xml)
+          (Xml.child xml_arg0 "ProvisionedResourceCleanup") in
+      let resourcesToReplicateTags =
+        (Option.map ~f:ResourceList.of_xml)
+          (Xml.child xml_arg0 "ResourcesToReplicateTags") in
       let vpcConfig =
         (Option.map ~f:VpcConfigInput.of_xml)
           (Xml.child xml_arg0 "VpcConfig") in
@@ -3584,35 +6153,159 @@ module CreateCanaryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Code") in
       let name =
         CanaryName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?artifactConfig ?tags ?vpcConfig ~runtimeVersion
+      make ?artifactConfig ?tags ?browserConfigs ?provisionedResourceCleanup
+        ?resourcesToReplicateTags ?vpcConfig ~runtimeVersion
         ?failureRetentionPeriodInDays ?successRetentionPeriodInDays
         ?runConfig ~schedule ~executionRoleArn ~artifactS3Location ~code
         ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let artifactConfig =
-        field_map json "ArtifactConfig" ArtifactConfigInput.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let vpcConfig = field_map json "VpcConfig" VpcConfigInput.of_json in
+        field_map json__ "ArtifactConfig" ArtifactConfigInput.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let browserConfigs =
+        field_map json__ "BrowserConfigs" BrowserConfigs.of_json in
+      let provisionedResourceCleanup =
+        field_map json__ "ProvisionedResourceCleanup"
+          ProvisionedResourceCleanupSetting.of_json in
+      let resourcesToReplicateTags =
+        field_map json__ "ResourcesToReplicateTags" ResourceList.of_json in
+      let vpcConfig = field_map json__ "VpcConfig" VpcConfigInput.of_json in
       let runtimeVersion =
-        field_map_exn json "RuntimeVersion" String_.of_json in
+        field_map_exn json__ "RuntimeVersion" String_.of_json in
       let failureRetentionPeriodInDays =
-        field_map json "FailureRetentionPeriodInDays" MaxSize1024.of_json in
+        field_map json__ "FailureRetentionPeriodInDays" MaxSize1024.of_json in
       let successRetentionPeriodInDays =
-        field_map json "SuccessRetentionPeriodInDays" MaxSize1024.of_json in
-      let runConfig = field_map json "RunConfig" CanaryRunConfigInput.of_json in
+        field_map json__ "SuccessRetentionPeriodInDays" MaxSize1024.of_json in
+      let runConfig =
+        field_map json__ "RunConfig" CanaryRunConfigInput.of_json in
       let schedule =
-        field_map_exn json "Schedule" CanaryScheduleInput.of_json in
+        field_map_exn json__ "Schedule" CanaryScheduleInput.of_json in
       let executionRoleArn =
-        field_map_exn json "ExecutionRoleArn" RoleArn.of_json in
+        field_map_exn json__ "ExecutionRoleArn" RoleArn.of_json in
       let artifactS3Location =
-        field_map_exn json "ArtifactS3Location" String_.of_json in
-      let code = field_map_exn json "Code" CanaryCodeInput.of_json in
-      let name = field_map_exn json "Name" CanaryName.of_json in
-      make ?artifactConfig ?tags ?vpcConfig ~runtimeVersion
+        field_map_exn json__ "ArtifactS3Location" String_.of_json in
+      let code = field_map_exn json__ "Code" CanaryCodeInput.of_json in
+      let name = field_map_exn json__ "Name" CanaryName.of_json in
+      make ?artifactConfig ?tags ?browserConfigs ?provisionedResourceCleanup
+        ?resourcesToReplicateTags ?vpcConfig ~runtimeVersion
         ?failureRetentionPeriodInDays ?successRetentionPeriodInDays
         ?runConfig ~schedule ~executionRoleArn ~artifactS3Location ~code
         ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a canary. Canaries are scripts that monitor your endpoints and APIs from the outside-in. Canaries help you check the availability and latency of your web services and troubleshoot anomalies by investigating load time data, screenshots of the UI, logs, and metrics. You can set up a canary to run continuously or just once. Do not use CreateCanary to modify an existing canary. Use UpdateCanary instead. To create canaries, you must have the CloudWatchSyntheticsFullAccess policy. If you are creating a new IAM role for the canary, you also need the the iam:CreateRole, iam:CreatePolicy and iam:AttachRolePolicy permissions. For more information, see Necessary Roles and Permissions. Do not include secrets or proprietary information in your canary names. The canary name makes up part of the Amazon Resource Name (ARN) for the canary, and the ARN is included in outbound calls over the internet. For more information, see Security Considerations for Synthetics Canaries."]
+       "Creates a canary. Canaries are scripts that monitor your endpoints and APIs from the outside-in. Canaries help you check the availability and latency of your web services and troubleshoot anomalies by investigating load time data, screenshots of the UI, logs, and metrics. You can set up a canary to run continuously or just once. Do not use CreateCanary to modify an existing canary. Use UpdateCanary instead. To create canaries, you must have the CloudWatchSyntheticsFullAccess policy. If you are creating a new IAM role for the canary, you also need the iam:CreateRole, iam:CreatePolicy and iam:AttachRolePolicy permissions. For more information, see Necessary Roles and Permissions. Do not include secrets or proprietary information in your canary names. The canary name makes up part of the Amazon Resource Name (ARN) for the canary, and the ARN is included in outbound calls over the internet. For more information, see Security Considerations for Synthetics Canaries."]
+module AssociateResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates a canary with a group. Using groups can help you with managing and automating your canaries, and you can also view aggregated run results and statistics for all canaries in a group. You must run this operation in the Region where the canary exists."]
+module AssociateResourceRequest =
+  struct
+    type nonrec t =
+      {
+      groupIdentifier: GroupIdentifier.t
+        [@ocaml.doc
+          "Specifies the group. You can specify the group name, the ARN, or the group ID as the GroupIdentifier."];
+      resourceArn: CanaryArn.t
+        [@ocaml.doc
+          "The ARN of the canary that you want to associate with the specified group."]}
+    let context_ = "AssociateResourceRequest"
+    let make ~groupIdentifier =
+      fun ~resourceArn -> fun () -> { groupIdentifier; resourceArn }
+    let to_value x =
+      structure_to_value
+        [("groupIdentifier",
+           (Some (GroupIdentifier.to_value x.groupIdentifier)));
+        ("ResourceArn", (Some (CanaryArn.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        CanaryArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      let groupIdentifier =
+        GroupIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "groupIdentifier") in
+      make ~resourceArn ~groupIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" CanaryArn.of_json in
+      let groupIdentifier =
+        field_map_exn json__ "GroupIdentifier" GroupIdentifier.of_json in
+      make ~resourceArn ~groupIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates a canary with a group. Using groups can help you with managing and automating your canaries, and you can also view aggregated run results and statistics for all canaries in a group. You must run this operation in the Region where the canary exists."]

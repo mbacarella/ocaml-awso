@@ -22,8 +22,16 @@ let export_e_b_s_volume_recommendations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ExportEBSVolumeRecommendations input
 let export_e_c2_instance_recommendations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ExportEC2InstanceRecommendations input
+let export_e_c_s_service_recommendations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ExportECSServiceRecommendations input
+let export_idle_recommendations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ExportIdleRecommendations input
 let export_lambda_function_recommendations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ExportLambdaFunctionRecommendations input
+let export_license_recommendations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ExportLicenseRecommendations input
+let export_r_d_s_database_recommendations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ExportRDSDatabaseRecommendations input
 let get_auto_scaling_group_recommendations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAutoScalingGroupRecommendations input
 let get_e_b_s_volume_recommendations ?endpoint_url ?cfg input =
@@ -33,6 +41,12 @@ let get_e_c2_instance_recommendations ?endpoint_url ?cfg input =
 let get_e_c2_recommendation_projected_metrics ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetEC2RecommendationProjectedMetrics
     input
+let get_e_c_s_service_recommendation_projected_metrics ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.GetECSServiceRecommendationProjectedMetrics input
+let get_e_c_s_service_recommendations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetECSServiceRecommendations input
 let get_effective_recommendation_preferences ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetEffectiveRecommendationPreferences
     input
@@ -41,8 +55,18 @@ let get_enrollment_status ?endpoint_url ?cfg input =
 let get_enrollment_statuses_for_organization ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetEnrollmentStatusesForOrganization
     input
+let get_idle_recommendations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetIdleRecommendations input
 let get_lambda_function_recommendations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetLambdaFunctionRecommendations input
+let get_license_recommendations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetLicenseRecommendations input
+let get_r_d_s_database_recommendation_projected_metrics ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.GetRDSDatabaseRecommendationProjectedMetrics input
+let get_r_d_s_database_recommendations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRDSDatabaseRecommendations input
 let get_recommendation_preferences ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetRecommendationPreferences input
 let get_recommendation_summaries ?endpoint_url ?cfg input =

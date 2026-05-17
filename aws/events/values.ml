@@ -68,6 +68,19 @@ module Boolean =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module SensitiveString =
+  struct
+    type nonrec t = string
+    let context_ = "SensitiveString"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SensitiveString" j
+    let to_json = simple_to_json to_value
+  end
 module HeaderKey =
   struct
     type nonrec t = string
@@ -87,10 +100,10 @@ module HeaderKey =
     let of_json j = string_of_json ~kind:"HeaderKey" j
     let to_json = simple_to_json to_value
   end
-module HeaderValue =
+module HeaderValueSensitive =
   struct
     type nonrec t = string
-    let context_ = "HeaderValue"
+    let context_ = "HeaderValueSensitive"
     let make i =
       let open Result in
         ok_or_failwith
@@ -104,7 +117,7 @@ module HeaderValue =
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"HeaderValue" j
+    let of_json j = string_of_json ~kind:"HeaderValueSensitive" j
     let to_json = simple_to_json to_value
   end
 module QueryStringKey =
@@ -125,10 +138,10 @@ module QueryStringKey =
     let of_json j = string_of_json ~kind:"QueryStringKey" j
     let to_json = simple_to_json to_value
   end
-module QueryStringValue =
+module QueryStringValueSensitive =
   struct
     type nonrec t = string
-    let context_ = "QueryStringValue"
+    let context_ = "QueryStringValueSensitive"
     let make i =
       let open Result in
         ok_or_failwith
@@ -142,7 +155,7 @@ module QueryStringValue =
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"QueryStringValue" j
+    let of_json j = string_of_json ~kind:"QueryStringValueSensitive" j
     let to_json = simple_to_json to_value
   end
 module CapacityProvider =
@@ -231,6 +244,9 @@ module StringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -402,6 +418,9 @@ module RunCommandTargetValues =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RunCommandTargetValue.to_value)) |>
         (fun x -> `List x)
@@ -506,30 +525,31 @@ module ConnectionBodyParameter =
     type nonrec t =
       {
       key: String_.t option [@ocaml.doc "The key for the parameter."];
-      value: String_.t option
+      value: SensitiveString.t option
         [@ocaml.doc "The value associated with the key."];
       isValueSecret: Boolean.t option
-        [@ocaml.doc "Specified whether the value is secret."]}
+        [@ocaml.doc "Specifies whether the value is secret."]}
     let make ?key =
       fun ?value ->
         fun ?isValueSecret -> fun () -> { key; value; isValueSecret }
     let to_value x =
       structure_to_value
         [("Key", (Option.map x.key ~f:String_.to_value));
-        ("Value", (Option.map x.value ~f:String_.to_value));
+        ("Value", (Option.map x.value ~f:SensitiveString.to_value));
         ("IsValueSecret", (Option.map x.isValueSecret ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let isValueSecret =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "IsValueSecret") in
-      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
+      let value =
+        (Option.map ~f:SensitiveString.of_xml) (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
       make ?isValueSecret ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isValueSecret = field_map json "IsValueSecret" Boolean.of_json in
-      let value = field_map json "Value" String_.of_json in
-      let key = field_map json "Key" String_.of_json in
+    let of_json json__ =
+      let isValueSecret = field_map json__ "IsValueSecret" Boolean.of_json in
+      let value = field_map json__ "Value" SensitiveString.of_json in
+      let key = field_map json__ "Key" String_.of_json in
       make ?isValueSecret ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -539,31 +559,32 @@ module ConnectionHeaderParameter =
     type nonrec t =
       {
       key: HeaderKey.t option [@ocaml.doc "The key for the parameter."];
-      value: HeaderValue.t option
+      value: HeaderValueSensitive.t option
         [@ocaml.doc "The value associated with the key."];
       isValueSecret: Boolean.t option
-        [@ocaml.doc "Specified whether the value is a secret."]}
+        [@ocaml.doc "Specifies whether the value is a secret."]}
     let make ?key =
       fun ?value ->
         fun ?isValueSecret -> fun () -> { key; value; isValueSecret }
     let to_value x =
       structure_to_value
         [("Key", (Option.map x.key ~f:HeaderKey.to_value));
-        ("Value", (Option.map x.value ~f:HeaderValue.to_value));
+        ("Value", (Option.map x.value ~f:HeaderValueSensitive.to_value));
         ("IsValueSecret", (Option.map x.isValueSecret ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let isValueSecret =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "IsValueSecret") in
       let value =
-        (Option.map ~f:HeaderValue.of_xml) (Xml.child xml_arg0 "Value") in
+        (Option.map ~f:HeaderValueSensitive.of_xml)
+          (Xml.child xml_arg0 "Value") in
       let key = (Option.map ~f:HeaderKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?isValueSecret ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isValueSecret = field_map json "IsValueSecret" Boolean.of_json in
-      let value = field_map json "Value" HeaderValue.of_json in
-      let key = field_map json "Key" HeaderKey.of_json in
+    let of_json json__ =
+      let isValueSecret = field_map json__ "IsValueSecret" Boolean.of_json in
+      let value = field_map json__ "Value" HeaderValueSensitive.of_json in
+      let key = field_map json__ "Key" HeaderKey.of_json in
       make ?isValueSecret ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -574,7 +595,7 @@ module ConnectionQueryStringParameter =
       {
       key: QueryStringKey.t option
         [@ocaml.doc "The key for a query string parameter."];
-      value: QueryStringValue.t option
+      value: QueryStringValueSensitive.t option
         [@ocaml.doc
           "The value associated with the key for the query string parameter."];
       isValueSecret: Boolean.t option
@@ -585,26 +606,27 @@ module ConnectionQueryStringParameter =
     let to_value x =
       structure_to_value
         [("Key", (Option.map x.key ~f:QueryStringKey.to_value));
-        ("Value", (Option.map x.value ~f:QueryStringValue.to_value));
+        ("Value", (Option.map x.value ~f:QueryStringValueSensitive.to_value));
         ("IsValueSecret", (Option.map x.isValueSecret ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let isValueSecret =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "IsValueSecret") in
       let value =
-        (Option.map ~f:QueryStringValue.of_xml) (Xml.child xml_arg0 "Value") in
+        (Option.map ~f:QueryStringValueSensitive.of_xml)
+          (Xml.child xml_arg0 "Value") in
       let key =
         (Option.map ~f:QueryStringKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?isValueSecret ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isValueSecret = field_map json "IsValueSecret" Boolean.of_json in
-      let value = field_map json "Value" QueryStringValue.of_json in
-      let key = field_map json "Key" QueryStringKey.of_json in
+    let of_json json__ =
+      let isValueSecret = field_map json__ "IsValueSecret" Boolean.of_json in
+      let value = field_map json__ "Value" QueryStringValueSensitive.of_json in
+      let key = field_map json__ "Key" QueryStringKey.of_json in
       make ?isValueSecret ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Additional query string parameter for the connection. You can include up to 100 additional query string parameters per request. Each additional parameter counts towards the event payload size, which cannot exceed 64 KB."]
+       "Any additional query string parameter for the connection. You can include up to 100 additional query string parameters per request. Each additional parameter counts towards the event payload size, which cannot exceed 64 KB."]
 module Integer =
   struct
     type nonrec t = int
@@ -655,13 +677,13 @@ module CapacityProviderStrategyItem =
           (Xml.child_exn ~context:context_ xml_arg0 "capacityProvider") in
       make ?base ?weight ~capacityProvider ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let base =
-        field_map json "base" CapacityProviderStrategyItemBase.of_json in
+        field_map json__ "base" CapacityProviderStrategyItemBase.of_json in
       let weight =
-        field_map json "weight" CapacityProviderStrategyItemWeight.of_json in
+        field_map json__ "weight" CapacityProviderStrategyItemWeight.of_json in
       let capacityProvider =
-        field_map_exn json "capacityProvider" CapacityProvider.of_json in
+        field_map_exn json__ "capacityProvider" CapacityProvider.of_json in
       make ?base ?weight ~capacityProvider ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -703,11 +725,12 @@ module AwsVpcConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "Subnets") in
       make ?assignPublicIp ?securityGroups ~subnets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assignPublicIp =
-        field_map json "AssignPublicIp" AssignPublicIp.of_json in
-      let securityGroups = field_map json "SecurityGroups" StringList.of_json in
-      let subnets = field_map_exn json "Subnets" StringList.of_json in
+        field_map json__ "AssignPublicIp" AssignPublicIp.of_json in
+      let securityGroups =
+        field_map json__ "SecurityGroups" StringList.of_json in
+      let subnets = field_map_exn json__ "Subnets" StringList.of_json in
       make ?assignPublicIp ?securityGroups ~subnets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -738,10 +761,10 @@ module PlacementConstraint =
           (Xml.child xml_arg0 "type") in
       make ?expression ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let expression =
-        field_map json "expression" PlacementConstraintExpression.of_json in
-      let type_ = field_map json "type" PlacementConstraintType.of_json in
+        field_map json__ "expression" PlacementConstraintExpression.of_json in
+      let type_ = field_map json__ "type" PlacementConstraintType.of_json in
       make ?expression ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -771,9 +794,9 @@ module PlacementStrategy =
           (Xml.child xml_arg0 "type") in
       make ?field ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let field = field_map json "field" PlacementStrategyField.of_json in
-      let type_ = field_map json "type" PlacementStrategyType.of_json in
+    let of_json json__ =
+      let field = field_map json__ "field" PlacementStrategyField.of_json in
+      let type_ = field_map json__ "type" PlacementStrategyType.of_json in
       make ?field ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -800,13 +823,33 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A key-value pair associated with an Amazon Web Services resource. In EventBridge, rules and event buses support tagging."]
+module HeaderValue =
+  struct
+    type nonrec t = string
+    let context_ = "HeaderValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^[ \\t]*[\\x20-\\x7E]+([ \\t]+[\\x20-\\x7E]+)*[ \\t]*$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HeaderValue" j
+    let to_json = simple_to_json to_value
+  end
 module PathParameter =
   struct
     type nonrec t = string
@@ -820,6 +863,26 @@ module PathParameter =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"PathParameter" j
+    let to_json = simple_to_json to_value
+  end
+module QueryStringValue =
+  struct
+    type nonrec t = string
+    let context_ = "QueryStringValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"[^\\x00-\\x09\\x0B\\x0C\\x0E-\\x1F\\x7F]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QueryStringValue" j
     let to_json = simple_to_json to_value
   end
 module InputTransformerPathKey =
@@ -856,6 +919,24 @@ module TargetInputPath =
     let of_json j = string_of_json ~kind:"TargetInputPath" j
     let to_json = simple_to_json to_value
   end
+module Sql =
+  struct
+    type nonrec t = string[@@ocaml.doc "A single Redshift SQL"]
+    let context_ = "Sql"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Sql" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "A single Redshift SQL"]
 module RunCommandTarget =
   struct
     type nonrec t =
@@ -881,9 +962,10 @@ module RunCommandTarget =
           (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~values ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map_exn json "Values" RunCommandTargetValues.of_json in
-      let key = field_map_exn json "Key" RunCommandTargetKey.of_json in
+    let of_json json__ =
+      let values =
+        field_map_exn json__ "Values" RunCommandTargetValues.of_json in
+      let key = field_map_exn json__ "Key" RunCommandTargetKey.of_json in
       make ~values ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -894,10 +976,10 @@ module SageMakerPipelineParameter =
       {
       name: SageMakerPipelineParameterName.t
         [@ocaml.doc
-          "Name of parameter to start execution of a SageMaker Model Building Pipeline."];
+          "Name of parameter to start execution of a SageMaker AI Model Building Pipeline."];
       value: SageMakerPipelineParameterValue.t
         [@ocaml.doc
-          "Value of parameter to start execution of a SageMaker Model Building Pipeline."]}
+          "Value of parameter to start execution of a SageMaker AI Model Building Pipeline."]}
     let context_ = "SageMakerPipelineParameter"
     let make ~name = fun ~value -> fun () -> { name; value }
     let to_value x =
@@ -914,15 +996,15 @@ module SageMakerPipelineParameter =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let value =
-        field_map_exn json "Value" SageMakerPipelineParameterValue.of_json in
+        field_map_exn json__ "Value" SageMakerPipelineParameterValue.of_json in
       let name =
-        field_map_exn json "Name" SageMakerPipelineParameterName.of_json in
+        field_map_exn json__ "Name" SageMakerPipelineParameterName.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Name/Value pair of a parameter to start execution of a SageMaker Model Building Pipeline."]
+       "Name/Value pair of a parameter to start execution of a SageMaker AI Model Building Pipeline."]
 module NonPartnerEventBusArn =
   struct
     type nonrec t = string
@@ -935,7 +1017,7 @@ module NonPartnerEventBusArn =
                 (check_string_max i ~max:512) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^arn:aws[a-z-]*:events:[a-z]{2}-[a-z-]+-\\d+:\\d{12}:event-bus/[\\w.-]+$")));
+                       ~pattern:"^arn:aws[a-z-]*:events:[a-z]+-[a-z-]+-\\d+:\\d{12}:event-bus/[\\w.-]+$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -964,8 +1046,9 @@ module Primary =
           (Xml.child_exn ~context:context_ xml_arg0 "HealthCheck") in
       make ~healthCheck ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let healthCheck = field_map_exn json "HealthCheck" HealthCheck.of_json in
+    let of_json json__ =
+      let healthCheck =
+        field_map_exn json__ "HealthCheck" HealthCheck.of_json in
       make ~healthCheck ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The primary Region of the endpoint."]
@@ -984,11 +1067,34 @@ module Secondary =
         Route.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Route") in
       make ~route ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let route = field_map_exn json "Route" Route.of_json in make ~route ()
+    let of_json json__ =
+      let route = field_map_exn json__ "Route" Route.of_json in
+      make ~route ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The secondary Region that processes events when failover is triggered or replication is enabled."]
+module ResourceConfigurationArn =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceConfigurationArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(?:^arn:[a-z0-9\\-]+:vpc-lattice:[a-zA-Z0-9\\-]+:\\d{12}:resourceconfiguration/rcfg-[0-9a-z]{17}$|^$)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceConfigurationArn" j
+    let to_json = simple_to_json to_value
+  end
 module ConnectionBodyParametersList =
   struct
     type nonrec t = ConnectionBodyParameter.t list
@@ -998,6 +1104,9 @@ module ConnectionBodyParametersList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectionBodyParameter.to_value)) |>
         (fun x -> `List x)
@@ -1029,6 +1138,9 @@ module ConnectionHeaderParametersList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectionHeaderParameter.to_value)) |>
         (fun x -> `List x)
@@ -1060,6 +1172,9 @@ module ConnectionQueryStringParametersList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectionQueryStringParameter.to_value)) |>
         (fun x -> `List x)
@@ -1104,6 +1219,46 @@ module AuthHeaderParameters =
     let of_json j = string_of_json ~kind:"AuthHeaderParameters" j
     let to_json = simple_to_json to_value
   end
+module AuthHeaderParametersSensitive =
+  struct
+    type nonrec t = string
+    let context_ = "AuthHeaderParametersSensitive"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[ \\t]*[^\\x00-\\x1F:\\x7F]+([ \\t]+[^\\x00-\\x1F:\\x7F]+)*[ \\t]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AuthHeaderParametersSensitive" j
+    let to_json = simple_to_json to_value
+  end
+module GraphQLOperation =
+  struct
+    type nonrec t = string
+    let context_ = "GraphQLOperation"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1048576) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GraphQLOperation" j
+    let to_json = simple_to_json to_value
+  end
 module BatchArrayProperties =
   struct
     type nonrec t =
@@ -1119,8 +1274,8 @@ module BatchArrayProperties =
       let size = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Size") in
       make ?size ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let size = field_map json "Size" Integer.of_json in make ?size ()
+    let of_json json__ =
+      let size = field_map json__ "Size" Integer.of_json in make ?size ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The array properties for the submitted job, such as the size of the array. The array size can be between 2 and 10,000. If you specify array properties for a job, it becomes an array job. This parameter is used only if the target is an Batch job."]
@@ -1141,8 +1296,8 @@ module BatchRetryStrategy =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Attempts") in
       make ?attempts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attempts = field_map json "Attempts" Integer.of_json in
+    let of_json json__ =
+      let attempts = field_map json__ "Attempts" Integer.of_json in
       make ?attempts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1188,6 +1343,9 @@ module CapacityProviderStrategy =
     type nonrec t = CapacityProviderStrategyItem.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:6); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CapacityProviderStrategyItem.to_value)) |>
         (fun x -> `List x)
@@ -1271,9 +1429,9 @@ module NetworkConfiguration =
           (Xml.child xml_arg0 "awsvpcConfiguration") in
       make ?awsvpcConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let awsvpcConfiguration =
-        field_map json "awsvpcConfiguration" AwsVpcConfiguration.of_json in
+        field_map json__ "awsvpcConfiguration" AwsVpcConfiguration.of_json in
       make ?awsvpcConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1283,6 +1441,9 @@ module PlacementConstraints =
     type nonrec t = PlacementConstraint.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PlacementConstraint.to_value)) |>
         (fun x -> `List x)
@@ -1310,6 +1471,9 @@ module PlacementStrategies =
     type nonrec t = PlacementStrategy.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:5); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PlacementStrategy.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1367,6 +1531,9 @@ module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1407,6 +1574,8 @@ module HeaderParametersMap =
                     (fun x -> (HeaderValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1418,6 +1587,9 @@ module PathParameterList =
   struct
     type nonrec t = PathParameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PathParameter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1460,6 +1632,8 @@ module QueryStringParametersMap =
                        (QueryStringValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1508,6 +1682,8 @@ module TransformerPaths =
                        (TargetInputPath.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1531,7 +1707,7 @@ module TargetPartitionKeyPath =
   end
 module Database =
   struct
-    type nonrec t = string
+    type nonrec t = string[@@ocaml.doc "Redshift Database"]
     let context_ = "Database"
     let make i =
       let open Result in
@@ -1546,10 +1722,10 @@ module Database =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"Database" j
     let to_json = simple_to_json to_value
-  end
+  end[@@ocaml.doc "Redshift Database"]
 module DbUser =
   struct
-    type nonrec t = string
+    type nonrec t = string[@@ocaml.doc "Database user name"]
     let context_ = "DbUser"
     let make i =
       let open Result in
@@ -1564,10 +1740,11 @@ module DbUser =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"DbUser" j
     let to_json = simple_to_json to_value
-  end
+  end[@@ocaml.doc "Database user name"]
 module RedshiftSecretManagerArn =
   struct
-    type nonrec t = string
+    type nonrec t = string[@@ocaml.doc
+                            "Optional SecretManager ARN which stores the database credentials"]
     let context_ = "RedshiftSecretManagerArn"
     let make i =
       let open Result in
@@ -1586,28 +1763,42 @@ module RedshiftSecretManagerArn =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"RedshiftSecretManagerArn" j
     let to_json = simple_to_json to_value
-  end
-module Sql =
+  end[@@ocaml.doc
+       "Optional SecretManager ARN which stores the database credentials"]
+module Sqls =
   struct
-    type nonrec t = string
-    let context_ = "Sql"
+    type nonrec t = Sql.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:100000) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_list_max i ~max:40) >>= (fun () -> check_list_min i ~min:0));
         i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Sql.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Sql" j
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Sql.of_xml)
+    let of_json j = list_of_json ~kind:"Sqls" ~of_json:Sql.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module StatementName =
   struct
-    type nonrec t = string
+    type nonrec t = string[@@ocaml.doc
+                            "A name for Redshift DataAPI statement which can be used as filter of ListStatement."]
     let context_ = "StatementName"
     let make i =
       let open Result in
@@ -1622,7 +1813,8 @@ module StatementName =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"StatementName" j
     let to_json = simple_to_json to_value
-  end
+  end[@@ocaml.doc
+       "A name for Redshift DataAPI statement which can be used as filter of ListStatement."]
 module MaximumEventAgeInSeconds =
   struct
     type nonrec t = int
@@ -1669,6 +1861,9 @@ module RunCommandTargets =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RunCommandTarget.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1699,6 +1894,9 @@ module SageMakerPipelineParameterList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SageMakerPipelineParameter.to_value)) |>
         (fun x -> `List x)
@@ -1769,9 +1967,9 @@ module EndpointEventBus =
           (Xml.child_exn ~context:context_ xml_arg0 "EventBusArn") in
       make ~eventBusArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventBusArn =
-        field_map_exn json "EventBusArn" NonPartnerEventBusArn.of_json in
+        field_map_exn json__ "EventBusArn" NonPartnerEventBusArn.of_json in
       make ~eventBusArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The event buses the endpoint is associated with."]
@@ -1823,26 +2021,78 @@ module FailoverConfig =
         Primary.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Primary") in
       make ~secondary ~primary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secondary = field_map_exn json "Secondary" Secondary.of_json in
-      let primary = field_map_exn json "Primary" Primary.of_json in
+    let of_json json__ =
+      let secondary = field_map_exn json__ "Secondary" Secondary.of_json in
+      let primary = field_map_exn json__ "Primary" Primary.of_json in
       make ~secondary ~primary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The failover configuration for an endpoint. This includes what triggers failover and what happens when it's triggered."]
+module ResourceAssociationArn =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceAssociationArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:17) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:[a-z0-9\\\\-]+:vpc-lattice:[a-zA-Z0-9\\\\-]+:\\\\d{12}:servicenetworkresourceassociation/snra-[0-9a-z]{17}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceAssociationArn" j
+    let to_json = simple_to_json to_value
+  end
+module ConnectivityResourceConfigurationArn =
+  struct
+    type nonrec t =
+      {
+      resourceConfigurationArn: ResourceConfigurationArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon VPC Lattice resource configuration for the resource endpoint."]}
+    let context_ = "ConnectivityResourceConfigurationArn"
+    let make ~resourceConfigurationArn =
+      fun () -> { resourceConfigurationArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceConfigurationArn",
+           (Some
+              (ResourceConfigurationArn.to_value x.resourceConfigurationArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceConfigurationArn =
+        ResourceConfigurationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "ResourceConfigurationArn") in
+      make ~resourceConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceConfigurationArn =
+        field_map_exn json__ "ResourceConfigurationArn"
+          ResourceConfigurationArn.of_json in
+      make ~resourceConfigurationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon Resource Name (ARN) of the Amazon VPC Lattice resource configuration for the resource endpoint."]
 module ConnectionHttpParameters =
   struct
     type nonrec t =
       {
       headerParameters: ConnectionHeaderParametersList.t option
-        [@ocaml.doc
-          "Contains additional header parameters for the connection."];
+        [@ocaml.doc "Any additional header parameters for the connection."];
       queryStringParameters: ConnectionQueryStringParametersList.t option
         [@ocaml.doc
-          "Contains additional query string parameters for the connection."];
+          "Any additional query string parameters for the connection."];
       bodyParameters: ConnectionBodyParametersList.t option
         [@ocaml.doc
-          "Contains additional body string parameters for the connection."]}
+          "Any additional body string parameters for the connection."]}
     let make ?headerParameters =
       fun ?queryStringParameters ->
         fun ?bodyParameters ->
@@ -1872,18 +2122,19 @@ module ConnectionHttpParameters =
           (Xml.child xml_arg0 "HeaderParameters") in
       make ?bodyParameters ?queryStringParameters ?headerParameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bodyParameters =
-        field_map json "BodyParameters" ConnectionBodyParametersList.of_json in
+        field_map json__ "BodyParameters"
+          ConnectionBodyParametersList.of_json in
       let queryStringParameters =
-        field_map json "QueryStringParameters"
+        field_map json__ "QueryStringParameters"
           ConnectionQueryStringParametersList.of_json in
       let headerParameters =
-        field_map json "HeaderParameters"
+        field_map json__ "HeaderParameters"
           ConnectionHeaderParametersList.of_json in
       make ?bodyParameters ?queryStringParameters ?headerParameters ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains additional parameters for the connection."]
+  end[@@ocaml.doc "Any additional parameters for the connection."]
 module ConnectionOAuthHttpMethod =
   struct
     type nonrec t =
@@ -1942,7 +2193,7 @@ module UpdateConnectionOAuthClientRequestParameters =
       {
       clientID: AuthHeaderParameters.t option
         [@ocaml.doc "The client ID to use for OAuth authorization."];
-      clientSecret: AuthHeaderParameters.t option
+      clientSecret: AuthHeaderParametersSensitive.t option
         [@ocaml.doc
           "The client secret assciated with the client ID to use for OAuth authorization."]}
     let make ?clientID =
@@ -1952,25 +2203,26 @@ module UpdateConnectionOAuthClientRequestParameters =
         [("ClientID",
            (Option.map x.clientID ~f:AuthHeaderParameters.to_value));
         ("ClientSecret",
-          (Option.map x.clientSecret ~f:AuthHeaderParameters.to_value))]
+          (Option.map x.clientSecret
+             ~f:AuthHeaderParametersSensitive.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let clientSecret =
-        (Option.map ~f:AuthHeaderParameters.of_xml)
+        (Option.map ~f:AuthHeaderParametersSensitive.of_xml)
           (Xml.child xml_arg0 "ClientSecret") in
       let clientID =
         (Option.map ~f:AuthHeaderParameters.of_xml)
           (Xml.child xml_arg0 "ClientID") in
       make ?clientSecret ?clientID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientSecret =
-        field_map json "ClientSecret" AuthHeaderParameters.of_json in
-      let clientID = field_map json "ClientID" AuthHeaderParameters.of_json in
+        field_map json__ "ClientSecret" AuthHeaderParametersSensitive.of_json in
+      let clientID = field_map json__ "ClientID" AuthHeaderParameters.of_json in
       make ?clientSecret ?clientID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains the OAuth authorization parameters to use for the connection."]
+       "The OAuth authorization parameters to use for the connection."]
 module ErrorCode =
   struct
     type nonrec t = string
@@ -2017,6 +2269,32 @@ module TargetId =
     let of_json j = string_of_json ~kind:"TargetId" j
     let to_json = simple_to_json to_value
   end
+module AppSyncParameters =
+  struct
+    type nonrec t =
+      {
+      graphQLOperation: GraphQLOperation.t option
+        [@ocaml.doc
+          "The GraphQL operation; that is, the query, mutation, or subscription to be parsed and executed by the GraphQL service. For more information, see Operations in the AppSync User Guide."]}
+    let make ?graphQLOperation = fun () -> { graphQLOperation }
+    let to_value x =
+      structure_to_value
+        [("GraphQLOperation",
+           (Option.map x.graphQLOperation ~f:GraphQLOperation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let graphQLOperation =
+        (Option.map ~f:GraphQLOperation.of_xml)
+          (Xml.child xml_arg0 "GraphQLOperation") in
+      make ?graphQLOperation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let graphQLOperation =
+        field_map json__ "GraphQLOperation" GraphQLOperation.of_json in
+      make ?graphQLOperation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the GraphQL operation to be parsed and executed, if the event target is an AppSync API."]
 module BatchParameters =
   struct
     type nonrec t =
@@ -2063,13 +2341,14 @@ module BatchParameters =
           (Xml.child_exn ~context:context_ xml_arg0 "JobDefinition") in
       make ?retryStrategy ?arrayProperties ~jobName ~jobDefinition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryStrategy =
-        field_map json "RetryStrategy" BatchRetryStrategy.of_json in
+        field_map json__ "RetryStrategy" BatchRetryStrategy.of_json in
       let arrayProperties =
-        field_map json "ArrayProperties" BatchArrayProperties.of_json in
-      let jobName = field_map_exn json "JobName" String_.of_json in
-      let jobDefinition = field_map_exn json "JobDefinition" String_.of_json in
+        field_map json__ "ArrayProperties" BatchArrayProperties.of_json in
+      let jobName = field_map_exn json__ "JobName" String_.of_json in
+      let jobDefinition =
+        field_map_exn json__ "JobDefinition" String_.of_json in
       make ?retryStrategy ?arrayProperties ~jobName ~jobDefinition ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2090,11 +2369,11 @@ module DeadLetterConfig =
       let arn = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" ResourceArn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" ResourceArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A DeadLetterConfig object that contains information about a dead-letter queue configuration."]
+       "Configuration details of the Amazon SQS queue for EventBridge to use as a dead-letter queue (DLQ). For more information, see Using dead-letter queues to process undelivered events in the EventBridge User Guide."]
 module EcsParameters =
   struct
     type nonrec t =
@@ -2238,30 +2517,31 @@ module EcsParameters =
         ?capacityProviderStrategy ?group ?platformVersion
         ?networkConfiguration ?launchType ?taskCount ~taskDefinitionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let referenceId = field_map json "ReferenceId" ReferenceId.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let referenceId = field_map json__ "ReferenceId" ReferenceId.of_json in
       let propagateTags =
-        field_map json "PropagateTags" PropagateTags.of_json in
+        field_map json__ "PropagateTags" PropagateTags.of_json in
       let placementStrategy =
-        field_map json "PlacementStrategy" PlacementStrategies.of_json in
+        field_map json__ "PlacementStrategy" PlacementStrategies.of_json in
       let placementConstraints =
-        field_map json "PlacementConstraints" PlacementConstraints.of_json in
+        field_map json__ "PlacementConstraints" PlacementConstraints.of_json in
       let enableExecuteCommand =
-        field_map json "EnableExecuteCommand" Boolean.of_json in
+        field_map json__ "EnableExecuteCommand" Boolean.of_json in
       let enableECSManagedTags =
-        field_map json "EnableECSManagedTags" Boolean.of_json in
+        field_map json__ "EnableECSManagedTags" Boolean.of_json in
       let capacityProviderStrategy =
-        field_map json "CapacityProviderStrategy"
+        field_map json__ "CapacityProviderStrategy"
           CapacityProviderStrategy.of_json in
-      let group = field_map json "Group" String_.of_json in
-      let platformVersion = field_map json "PlatformVersion" String_.of_json in
+      let group = field_map json__ "Group" String_.of_json in
+      let platformVersion =
+        field_map json__ "PlatformVersion" String_.of_json in
       let networkConfiguration =
-        field_map json "NetworkConfiguration" NetworkConfiguration.of_json in
-      let launchType = field_map json "LaunchType" LaunchType.of_json in
-      let taskCount = field_map json "TaskCount" LimitMin1.of_json in
+        field_map json__ "NetworkConfiguration" NetworkConfiguration.of_json in
+      let launchType = field_map json__ "LaunchType" LaunchType.of_json in
+      let taskCount = field_map json__ "TaskCount" LimitMin1.of_json in
       let taskDefinitionArn =
-        field_map_exn json "TaskDefinitionArn" Arn.of_json in
+        field_map_exn json__ "TaskDefinitionArn" Arn.of_json in
       make ?tags ?referenceId ?propagateTags ?placementStrategy
         ?placementConstraints ?enableExecuteCommand ?enableECSManagedTags
         ?capacityProviderStrategy ?group ?platformVersion
@@ -2275,13 +2555,13 @@ module HttpParameters =
       {
       pathParameterValues: PathParameterList.t option
         [@ocaml.doc
-          "The path parameter values to be used to populate API Gateway REST API or EventBridge ApiDestination path wildcards (\"*\")."];
+          "The path parameter values to be used to populate API Gateway API or EventBridge ApiDestination path wildcards (\"*\")."];
       headerParameters: HeaderParametersMap.t option
         [@ocaml.doc
-          "The headers that need to be sent as part of request invoking the API Gateway REST API or EventBridge ApiDestination."];
+          "The headers that need to be sent as part of request invoking the API Gateway API or EventBridge ApiDestination."];
       queryStringParameters: QueryStringParametersMap.t option
         [@ocaml.doc
-          "The query string keys/values that need to be sent as part of request invoking the API Gateway REST API or EventBridge ApiDestination."]}
+          "The query string keys/values that need to be sent as part of request invoking the API Gateway API or EventBridge ApiDestination."]}
     let make ?pathParameterValues =
       fun ?headerParameters ->
         fun ?queryStringParameters ->
@@ -2309,18 +2589,18 @@ module HttpParameters =
           (Xml.child xml_arg0 "PathParameterValues") in
       make ?queryStringParameters ?headerParameters ?pathParameterValues ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let queryStringParameters =
-        field_map json "QueryStringParameters"
+        field_map json__ "QueryStringParameters"
           QueryStringParametersMap.of_json in
       let headerParameters =
-        field_map json "HeaderParameters" HeaderParametersMap.of_json in
+        field_map json__ "HeaderParameters" HeaderParametersMap.of_json in
       let pathParameterValues =
-        field_map json "PathParameterValues" PathParameterList.of_json in
+        field_map json__ "PathParameterValues" PathParameterList.of_json in
       make ?queryStringParameters ?headerParameters ?pathParameterValues ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "These are custom parameter to be used when the target is an API Gateway REST APIs or EventBridge ApiDestinations. In the latter case, these are merged with any InvocationParameters specified on the Connection, with any values from the Connection taking precedence."]
+       "These are custom parameter to be used when the target is an API Gateway APIs or EventBridge ApiDestinations. In the latter case, these are merged with any InvocationParameters specified on the Connection, with any values from the Connection taking precedence."]
 module InputTransformer =
   struct
     type nonrec t =
@@ -2330,7 +2610,7 @@ module InputTransformer =
           "Map of JSON paths to be extracted from the event. You can then insert these in the template in InputTemplate to produce the output you want to be sent to the target. InputPathsMap is an array key-value pairs, where each value is a valid JSON path. You can have as many as 100 key-value pairs. You must use JSON dot notation, not bracket notation. The keys cannot start with \"Amazon Web Services.\""];
       inputTemplate: TransformerInput.t
         [@ocaml.doc
-          "Input template where you specify placeholders that will be filled with the values of the keys from InputPathsMap to customize the data sent to the target. Enclose each InputPathsMaps value in brackets: <value> The InputTemplate must be valid JSON. If InputTemplate is a JSON object (surrounded by curly braces), the following restrictions apply: The placeholder cannot be used as an object key. The following example shows the syntax for using InputPathsMap and InputTemplate. \"InputTransformer\": \\{ \"InputPathsMap\": \\{\"instance\": \"$.detail.instance\",\"status\": \"$.detail.status\"\\}, \"InputTemplate\": \"<instance> is in state <status>\" \\} To have the InputTemplate include quote marks within a JSON string, escape each quote marks with a slash, as in the following example: \"InputTransformer\": \\{ \"InputPathsMap\": \\{\"instance\": \"$.detail.instance\",\"status\": \"$.detail.status\"\\}, \"InputTemplate\": \"<instance> is in state \\\"<status>\\\"\" \\} The InputTemplate can also be valid JSON with varibles in quotes or out, as in the following example: \"InputTransformer\": \\{ \"InputPathsMap\": \\{\"instance\": \"$.detail.instance\",\"status\": \"$.detail.status\"\\}, \"InputTemplate\": '\\{\"myInstance\": <instance>,\"myStatus\": \"<instance> is in state \\\"<status>\\\"\"\\}' \\}"]}
+          "Input template where you specify placeholders that will be filled with the values of the keys from InputPathsMap to customize the data sent to the target. Enclose each InputPathsMaps value in brackets: <value> If InputTemplate is a JSON object (surrounded by curly braces), the following restrictions apply: The placeholder cannot be used as an object key. The following example shows the syntax for using InputPathsMap and InputTemplate. \"InputTransformer\": \\{ \"InputPathsMap\": \\{\"instance\": \"$.detail.instance\",\"status\": \"$.detail.status\"\\}, \"InputTemplate\": \"<instance> is in state <status>\" \\} To have the InputTemplate include quote marks within a JSON string, escape each quote marks with a slash, as in the following example: \"InputTransformer\": \\{ \"InputPathsMap\": \\{\"instance\": \"$.detail.instance\",\"status\": \"$.detail.status\"\\}, \"InputTemplate\": \"<instance> is in state \\\"<status>\\\"\" \\} The InputTemplate can also be valid JSON with varibles in quotes or out, as in the following example: \"InputTransformer\": \\{ \"InputPathsMap\": \\{\"instance\": \"$.detail.instance\",\"status\": \"$.detail.status\"\\}, \"InputTemplate\": '\\{\"myInstance\": <instance>,\"myStatus\": \"<instance> is in state \\\"<status>\\\"\"\\}' \\}"]}
     let context_ = "InputTransformer"
     let make ?inputPathsMap =
       fun ~inputTemplate -> fun () -> { inputPathsMap; inputTemplate }
@@ -2349,11 +2629,11 @@ module InputTransformer =
           (Xml.child xml_arg0 "InputPathsMap") in
       make ~inputTemplate ?inputPathsMap ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputTemplate =
-        field_map_exn json "InputTemplate" TransformerInput.of_json in
+        field_map_exn json__ "InputTemplate" TransformerInput.of_json in
       let inputPathsMap =
-        field_map json "InputPathsMap" TransformerPaths.of_json in
+        field_map json__ "InputPathsMap" TransformerPaths.of_json in
       make ~inputTemplate ?inputPathsMap ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2378,9 +2658,10 @@ module KinesisParameters =
           (Xml.child_exn ~context:context_ xml_arg0 "PartitionKeyPath") in
       make ~partitionKeyPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let partitionKeyPath =
-        field_map_exn json "PartitionKeyPath" TargetPartitionKeyPath.of_json in
+        field_map_exn json__ "PartitionKeyPath"
+          TargetPartitionKeyPath.of_json in
       make ~partitionKeyPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2398,29 +2679,34 @@ module RedshiftDataParameters =
       dbUser: DbUser.t option
         [@ocaml.doc
           "The database user name. Required when authenticating using temporary credentials."];
-      sql: Sql.t [@ocaml.doc "The SQL statement text to run."];
+      sql: Sql.t option [@ocaml.doc "The SQL statement text to run."];
       statementName: StatementName.t option
         [@ocaml.doc
           "The name of the SQL statement. You can name the SQL statement when you create it to identify the query."];
       withEvent: Boolean.t option
         [@ocaml.doc
-          "Indicates whether to send an event back to EventBridge after the SQL statement runs."]}
+          "Indicates whether to send an event back to EventBridge after the SQL statement runs."];
+      sqls: Sqls.t option
+        [@ocaml.doc
+          "One or more SQL statements to run. The SQL statements are run as a single transaction. They run serially in the order of the array. Subsequent SQL statements don't start until the previous statement in the array completes. If any SQL statement fails, then because they are run as one transaction, all work is rolled back."]}
     let context_ = "RedshiftDataParameters"
     let make ?secretManagerArn =
       fun ?dbUser ->
-        fun ?statementName ->
-          fun ?withEvent ->
-            fun ~database ->
-              fun ~sql ->
-                fun () ->
-                  {
-                    secretManagerArn;
-                    dbUser;
-                    statementName;
-                    withEvent;
-                    database;
-                    sql
-                  }
+        fun ?sql ->
+          fun ?statementName ->
+            fun ?withEvent ->
+              fun ?sqls ->
+                fun ~database ->
+                  fun () ->
+                    {
+                      secretManagerArn;
+                      dbUser;
+                      sql;
+                      statementName;
+                      withEvent;
+                      sqls;
+                      database
+                    }
     let to_value x =
       structure_to_value
         [("SecretManagerArn",
@@ -2428,18 +2714,20 @@ module RedshiftDataParameters =
               ~f:RedshiftSecretManagerArn.to_value));
         ("Database", (Some (Database.to_value x.database)));
         ("DbUser", (Option.map x.dbUser ~f:DbUser.to_value));
-        ("Sql", (Some (Sql.to_value x.sql)));
+        ("Sql", (Option.map x.sql ~f:Sql.to_value));
         ("StatementName",
           (Option.map x.statementName ~f:StatementName.to_value));
-        ("WithEvent", (Option.map x.withEvent ~f:Boolean.to_value))]
+        ("WithEvent", (Option.map x.withEvent ~f:Boolean.to_value));
+        ("Sqls", (Option.map x.sqls ~f:Sqls.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sqls = (Option.map ~f:Sqls.of_xml) (Xml.child xml_arg0 "Sqls") in
       let withEvent =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "WithEvent") in
       let statementName =
         (Option.map ~f:StatementName.of_xml)
           (Xml.child xml_arg0 "StatementName") in
-      let sql = Sql.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Sql") in
+      let sql = (Option.map ~f:Sql.of_xml) (Xml.child xml_arg0 "Sql") in
       let dbUser =
         (Option.map ~f:DbUser.of_xml) (Xml.child xml_arg0 "DbUser") in
       let database =
@@ -2447,20 +2735,21 @@ module RedshiftDataParameters =
       let secretManagerArn =
         (Option.map ~f:RedshiftSecretManagerArn.of_xml)
           (Xml.child xml_arg0 "SecretManagerArn") in
-      make ?withEvent ?statementName ~sql ?dbUser ~database ?secretManagerArn
-        ()
+      make ?sqls ?withEvent ?statementName ?sql ?dbUser ~database
+        ?secretManagerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let withEvent = field_map json "WithEvent" Boolean.of_json in
+    let of_json json__ =
+      let sqls = field_map json__ "Sqls" Sqls.of_json in
+      let withEvent = field_map json__ "WithEvent" Boolean.of_json in
       let statementName =
-        field_map json "StatementName" StatementName.of_json in
-      let sql = field_map_exn json "Sql" Sql.of_json in
-      let dbUser = field_map json "DbUser" DbUser.of_json in
-      let database = field_map_exn json "Database" Database.of_json in
+        field_map json__ "StatementName" StatementName.of_json in
+      let sql = field_map json__ "Sql" Sql.of_json in
+      let dbUser = field_map json__ "DbUser" DbUser.of_json in
+      let database = field_map_exn json__ "Database" Database.of_json in
       let secretManagerArn =
-        field_map json "SecretManagerArn" RedshiftSecretManagerArn.of_json in
-      make ?withEvent ?statementName ~sql ?dbUser ~database ?secretManagerArn
-        ()
+        field_map json__ "SecretManagerArn" RedshiftSecretManagerArn.of_json in
+      make ?sqls ?withEvent ?statementName ?sql ?dbUser ~database
+        ?secretManagerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "These are custom parameters to be used when the target is a Amazon Redshift cluster to invoke the Amazon Redshift Data API ExecuteStatement based on EventBridge events."]
@@ -2495,12 +2784,12 @@ module RetryPolicy =
           (Xml.child xml_arg0 "MaximumRetryAttempts") in
       make ?maximumEventAgeInSeconds ?maximumRetryAttempts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maximumEventAgeInSeconds =
-        field_map json "MaximumEventAgeInSeconds"
+        field_map json__ "MaximumEventAgeInSeconds"
           MaximumEventAgeInSeconds.of_json in
       let maximumRetryAttempts =
-        field_map json "MaximumRetryAttempts" MaximumRetryAttempts.of_json in
+        field_map json__ "MaximumRetryAttempts" MaximumRetryAttempts.of_json in
       make ?maximumEventAgeInSeconds ?maximumRetryAttempts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2543,9 +2832,9 @@ module RunCommandParameters =
           (Xml.child_exn ~context:context_ xml_arg0 "RunCommandTargets") in
       make ~runCommandTargets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let runCommandTargets =
-        field_map_exn json "RunCommandTargets" RunCommandTargets.of_json in
+        field_map_exn json__ "RunCommandTargets" RunCommandTargets.of_json in
       make ~runCommandTargets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2556,7 +2845,7 @@ module SageMakerPipelineParameters =
       {
       pipelineParameterList: SageMakerPipelineParameterList.t option
         [@ocaml.doc
-          "List of Parameter names and values for SageMaker Model Building Pipeline execution."]}
+          "List of Parameter names and values for SageMaker AI Model Building Pipeline execution."]}
     let make ?pipelineParameterList = fun () -> { pipelineParameterList }
     let to_value x =
       structure_to_value
@@ -2570,14 +2859,14 @@ module SageMakerPipelineParameters =
           (Xml.child xml_arg0 "PipelineParameterList") in
       make ?pipelineParameterList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pipelineParameterList =
-        field_map json "PipelineParameterList"
+        field_map json__ "PipelineParameterList"
           SageMakerPipelineParameterList.of_json in
       make ?pipelineParameterList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "These are custom parameters to use when the target is a SageMaker Model Building Pipeline that starts based on EventBridge events."]
+       "These are custom parameters to use when the target is a SageMaker AI Model Building Pipeline that starts based on EventBridge events."]
 module SqsParameters =
   struct
     type nonrec t =
@@ -2596,9 +2885,9 @@ module SqsParameters =
           (Xml.child xml_arg0 "MessageGroupId") in
       make ?messageGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let messageGroupId =
-        field_map json "MessageGroupId" MessageGroupId.of_json in
+        field_map json__ "MessageGroupId" MessageGroupId.of_json in
       make ?messageGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2653,6 +2942,9 @@ module EventResourceList =
   struct
     type nonrec t = EventResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventResource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2719,7 +3011,7 @@ module NonPartnerEventBusNameOrArn =
                 (check_string_max i ~max:1600) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"(arn:aws[\\w-]*:events:[a-z]{2}-[a-z]+-[\\w-]+:[0-9]{12}:event-bus\\/)?[\\.\\-_A-Za-z0-9]+")));
+                       ~pattern:"(arn:aws[\\w-]*:events:[a-z]+-[a-z]+-[\\w-]+:[0-9]{12}:event-bus\\/)?[\\.\\-_A-Za-z0-9]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2856,17 +3148,22 @@ module RuleState =
     type nonrec t =
       | ENABLED 
       | DISABLED 
+      | ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | ENABLED -> "ENABLED"
       | DISABLED -> "DISABLED"
+      | ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS ->
+          "ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS"
       | Non_static_id s -> s
     let of_string =
       function
       | "ENABLED" -> ENABLED
       | "DISABLED" -> DISABLED
+      | "ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS" ->
+          ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2888,6 +3185,28 @@ module ScheduleExpression =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ScheduleExpression" j
+    let to_json = simple_to_json to_value
+  end
+module ArchiveArn =
+  struct
+    type nonrec t = string
+    let context_ = "ArchiveArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1600) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws([a-z]|\\-)*:events:([a-z]|\\d|\\-)*:([0-9]{12})?:.+\\/.+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ArchiveArn" j
     let to_json = simple_to_json to_value
   end
 module ReplayName =
@@ -3025,6 +3344,20 @@ module EventSourceState =
     let of_json j = of_string (string_of_json ~kind:"EventSourceState" j)
     let to_json = simple_to_json to_value
   end
+module EventBusDescription =
+  struct
+    type nonrec t = string
+    let context_ = "EventBusDescription"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:512); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EventBusDescription" j
+    let to_json = simple_to_json to_value
+  end
 module EndpointArn =
   struct
     type nonrec t = string
@@ -3073,6 +3406,9 @@ module EndpointEventBusList =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:2));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EndpointEventBus.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3255,8 +3591,8 @@ module ReplicationConfig =
         (Option.map ~f:ReplicationState.of_xml) (Xml.child xml_arg0 "State") in
       make ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" ReplicationState.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" ReplicationState.of_json in
       make ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3281,9 +3617,9 @@ module RoutingConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "FailoverConfig") in
       make ~failoverConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failoverConfig =
-        field_map_exn json "FailoverConfig" FailoverConfig.of_json in
+        field_map_exn json__ "FailoverConfig" FailoverConfig.of_json in
       make ~failoverConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The routing configuration of the endpoint."]
@@ -3370,6 +3706,8 @@ module ConnectionState =
       | DEAUTHORIZED 
       | AUTHORIZING 
       | DEAUTHORIZING 
+      | ACTIVE 
+      | FAILED_CONNECTIVITY 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -3381,6 +3719,8 @@ module ConnectionState =
       | DEAUTHORIZED -> "DEAUTHORIZED"
       | AUTHORIZING -> "AUTHORIZING"
       | DEAUTHORIZING -> "DEAUTHORIZING"
+      | ACTIVE -> "ACTIVE"
+      | FAILED_CONNECTIVITY -> "FAILED_CONNECTIVITY"
       | Non_static_id s -> s
     let of_string =
       function
@@ -3391,6 +3731,8 @@ module ConnectionState =
       | "DEAUTHORIZED" -> DEAUTHORIZED
       | "AUTHORIZING" -> AUTHORIZING
       | "DEAUTHORIZING" -> DEAUTHORIZING
+      | "ACTIVE" -> ACTIVE
+      | "FAILED_CONNECTIVITY" -> FAILED_CONNECTIVITY
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3491,6 +3833,28 @@ module ArchiveStateReason =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ArchiveStateReason" j
+    let to_json = simple_to_json to_value
+  end
+module EventBusArn =
+  struct
+    type nonrec t = string
+    let context_ = "EventBusArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1600) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws([a-z]|\\-)*:events:([a-z]|\\d|\\-)*:([0-9]{12})?:.+\\/.+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EventBusArn" j
     let to_json = simple_to_json to_value
   end
 module Long =
@@ -3667,12 +4031,54 @@ module ConnectionOAuthClientResponseParameters =
           (Xml.child xml_arg0 "ClientID") in
       make ?clientID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientID = field_map json "ClientID" AuthHeaderParameters.of_json in
+    let of_json json__ =
+      let clientID = field_map json__ "ClientID" AuthHeaderParameters.of_json in
       make ?clientID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains the client response parameters for the connection when OAuth is specified as the authorization type."]
+       "The client response parameters for the connection when OAuth is specified as the authorization type."]
+module DescribeConnectionResourceParameters =
+  struct
+    type nonrec t =
+      {
+      resourceConfigurationArn: ResourceConfigurationArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource configuration for the private API."];
+      resourceAssociationArn: ResourceAssociationArn.t option
+        [@ocaml.doc
+          "For connections to private APIs, the Amazon Resource Name (ARN) of the resource association EventBridge created between the connection and the private API's resource configuration. For more information, see Managing service network resource associations for connections in the Amazon EventBridge User Guide ."]}
+    let make ?resourceConfigurationArn =
+      fun ?resourceAssociationArn ->
+        fun () -> { resourceConfigurationArn; resourceAssociationArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceConfigurationArn",
+           (Option.map x.resourceConfigurationArn
+              ~f:ResourceConfigurationArn.to_value));
+        ("ResourceAssociationArn",
+          (Option.map x.resourceAssociationArn
+             ~f:ResourceAssociationArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceAssociationArn =
+        (Option.map ~f:ResourceAssociationArn.of_xml)
+          (Xml.child xml_arg0 "ResourceAssociationArn") in
+      let resourceConfigurationArn =
+        (Option.map ~f:ResourceConfigurationArn.of_xml)
+          (Xml.child xml_arg0 "ResourceConfigurationArn") in
+      make ?resourceAssociationArn ?resourceConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceAssociationArn =
+        field_map json__ "ResourceAssociationArn"
+          ResourceAssociationArn.of_json in
+      let resourceConfigurationArn =
+        field_map json__ "ResourceConfigurationArn"
+          ResourceConfigurationArn.of_json in
+      make ?resourceAssociationArn ?resourceConfigurationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The parameters for EventBridge to use when invoking the resource endpoint."]
 module CreateConnectionOAuthClientRequestParameters =
   struct
     type nonrec t =
@@ -3680,7 +4086,7 @@ module CreateConnectionOAuthClientRequestParameters =
       clientID: AuthHeaderParameters.t
         [@ocaml.doc
           "The client ID to use for OAuth authorization for the connection."];
-      clientSecret: AuthHeaderParameters.t
+      clientSecret: AuthHeaderParametersSensitive.t
         [@ocaml.doc
           "The client secret associated with the client ID to use for OAuth authorization for the connection."]}
     let context_ = "CreateConnectionOAuthClientRequestParameters"
@@ -3690,35 +4096,116 @@ module CreateConnectionOAuthClientRequestParameters =
       structure_to_value
         [("ClientID", (Some (AuthHeaderParameters.to_value x.clientID)));
         ("ClientSecret",
-          (Some (AuthHeaderParameters.to_value x.clientSecret)))]
+          (Some (AuthHeaderParametersSensitive.to_value x.clientSecret)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let clientSecret =
-        AuthHeaderParameters.of_xml
+        AuthHeaderParametersSensitive.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClientSecret") in
       let clientID =
         AuthHeaderParameters.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClientID") in
       make ~clientSecret ~clientID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientSecret =
-        field_map_exn json "ClientSecret" AuthHeaderParameters.of_json in
+        field_map_exn json__ "ClientSecret"
+          AuthHeaderParametersSensitive.of_json in
       let clientID =
-        field_map_exn json "ClientID" AuthHeaderParameters.of_json in
+        field_map_exn json__ "ClientID" AuthHeaderParameters.of_json in
       make ~clientSecret ~clientID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains the Basic authorization parameters to use for the connection."]
+       "The Basic authorization parameters to use for the connection."]
+module IncludeDetail =
+  struct
+    type nonrec t =
+      | NONE 
+      | FULL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | NONE -> "NONE" | FULL -> "FULL" | Non_static_id s -> s
+    let of_string =
+      function | "NONE" -> NONE | "FULL" -> FULL | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IncludeDetail" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IncludeDetail" j)
+    let to_json = simple_to_json to_value
+  end
+module Level =
+  struct
+    type nonrec t =
+      | OFF 
+      | ERROR 
+      | INFO 
+      | TRACE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | OFF -> "OFF"
+      | ERROR -> "ERROR"
+      | INFO -> "INFO"
+      | TRACE -> "TRACE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "OFF" -> OFF
+      | "ERROR" -> ERROR
+      | "INFO" -> INFO
+      | "TRACE" -> TRACE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Level" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Level" j)
+    let to_json = simple_to_json to_value
+  end
+module ConnectivityResourceParameters =
+  struct
+    type nonrec t =
+      {
+      resourceParameters: ConnectivityResourceConfigurationArn.t
+        [@ocaml.doc
+          "The parameters for EventBridge to use when invoking the resource endpoint."]}
+    let context_ = "ConnectivityResourceParameters"
+    let make ~resourceParameters = fun () -> { resourceParameters }
+    let to_value x =
+      structure_to_value
+        [("ResourceParameters",
+           (Some
+              (ConnectivityResourceConfigurationArn.to_value
+                 x.resourceParameters)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceParameters =
+        ConnectivityResourceConfigurationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceParameters") in
+      make ~resourceParameters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceParameters =
+        field_map_exn json__ "ResourceParameters"
+          ConnectivityResourceConfigurationArn.of_json in
+      make ~resourceParameters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The parameters for EventBridge to use when invoking the resource endpoint."]
 module UpdateConnectionApiKeyAuthRequestParameters =
   struct
     type nonrec t =
       {
       apiKeyName: AuthHeaderParameters.t option
         [@ocaml.doc "The name of the API key to use for authorization."];
-      apiKeyValue: AuthHeaderParameters.t option
+      apiKeyValue: AuthHeaderParametersSensitive.t option
         [@ocaml.doc
-          "The value associated with teh API key to use for authorization."]}
+          "The value associated with the API key to use for authorization."]}
     let make ?apiKeyName =
       fun ?apiKeyValue -> fun () -> { apiKeyName; apiKeyValue }
     let to_value x =
@@ -3726,22 +4213,22 @@ module UpdateConnectionApiKeyAuthRequestParameters =
         [("ApiKeyName",
            (Option.map x.apiKeyName ~f:AuthHeaderParameters.to_value));
         ("ApiKeyValue",
-          (Option.map x.apiKeyValue ~f:AuthHeaderParameters.to_value))]
+          (Option.map x.apiKeyValue ~f:AuthHeaderParametersSensitive.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let apiKeyValue =
-        (Option.map ~f:AuthHeaderParameters.of_xml)
+        (Option.map ~f:AuthHeaderParametersSensitive.of_xml)
           (Xml.child xml_arg0 "ApiKeyValue") in
       let apiKeyName =
         (Option.map ~f:AuthHeaderParameters.of_xml)
           (Xml.child xml_arg0 "ApiKeyName") in
       make ?apiKeyValue ?apiKeyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let apiKeyValue =
-        field_map json "ApiKeyValue" AuthHeaderParameters.of_json in
+        field_map json__ "ApiKeyValue" AuthHeaderParametersSensitive.of_json in
       let apiKeyName =
-        field_map json "ApiKeyName" AuthHeaderParameters.of_json in
+        field_map json__ "ApiKeyName" AuthHeaderParameters.of_json in
       make ?apiKeyValue ?apiKeyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3752,7 +4239,7 @@ module UpdateConnectionBasicAuthRequestParameters =
       {
       username: AuthHeaderParameters.t option
         [@ocaml.doc "The user name to use for Basic authorization."];
-      password: AuthHeaderParameters.t option
+      password: AuthHeaderParametersSensitive.t option
         [@ocaml.doc
           "The password associated with the user name to use for Basic authorization."]}
     let make ?username = fun ?password -> fun () -> { username; password }
@@ -3761,31 +4248,31 @@ module UpdateConnectionBasicAuthRequestParameters =
         [("Username",
            (Option.map x.username ~f:AuthHeaderParameters.to_value));
         ("Password",
-          (Option.map x.password ~f:AuthHeaderParameters.to_value))]
+          (Option.map x.password ~f:AuthHeaderParametersSensitive.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let password =
-        (Option.map ~f:AuthHeaderParameters.of_xml)
+        (Option.map ~f:AuthHeaderParametersSensitive.of_xml)
           (Xml.child xml_arg0 "Password") in
       let username =
         (Option.map ~f:AuthHeaderParameters.of_xml)
           (Xml.child xml_arg0 "Username") in
       make ?password ?username ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let password = field_map json "Password" AuthHeaderParameters.of_json in
-      let username = field_map json "Username" AuthHeaderParameters.of_json in
+    let of_json json__ =
+      let password =
+        field_map json__ "Password" AuthHeaderParametersSensitive.of_json in
+      let username = field_map json__ "Username" AuthHeaderParameters.of_json in
       make ?password ?username ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Contains the Basic authorization parameters for the connection."]
+  end[@@ocaml.doc "The Basic authorization parameters for the connection."]
 module UpdateConnectionOAuthRequestParameters =
   struct
     type nonrec t =
       {
       clientParameters: UpdateConnectionOAuthClientRequestParameters.t option
         [@ocaml.doc
-          "A UpdateConnectionOAuthClientRequestParameters object that contains the client parameters to use for the connection when OAuth is specified as the authorization type."];
+          "The client parameters to use for the connection when OAuth is specified as the authorization type."];
       authorizationEndpoint: HttpsEndpoint.t option
         [@ocaml.doc
           "The URL to the authorization endpoint when OAuth is specified as the authorization type."];
@@ -3834,25 +4321,28 @@ module UpdateConnectionOAuthRequestParameters =
       make ?oAuthHttpParameters ?httpMethod ?authorizationEndpoint
         ?clientParameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let oAuthHttpParameters =
-        field_map json "OAuthHttpParameters" ConnectionHttpParameters.of_json in
+        field_map json__ "OAuthHttpParameters"
+          ConnectionHttpParameters.of_json in
       let httpMethod =
-        field_map json "HttpMethod" ConnectionOAuthHttpMethod.of_json in
+        field_map json__ "HttpMethod" ConnectionOAuthHttpMethod.of_json in
       let authorizationEndpoint =
-        field_map json "AuthorizationEndpoint" HttpsEndpoint.of_json in
+        field_map json__ "AuthorizationEndpoint" HttpsEndpoint.of_json in
       let clientParameters =
-        field_map json "ClientParameters"
+        field_map json__ "ClientParameters"
           UpdateConnectionOAuthClientRequestParameters.of_json in
       make ?oAuthHttpParameters ?httpMethod ?authorizationEndpoint
         ?clientParameters ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Contains the OAuth request parameters to use for the connection."]
+  end[@@ocaml.doc "The OAuth request parameters to use for the connection."]
 module ReplayDestinationFilters =
   struct
     type nonrec t = Arn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3904,10 +4394,10 @@ module RemoveTargetsResultEntry =
         (Option.map ~f:TargetId.of_xml) (Xml.child xml_arg0 "TargetId") in
       make ?errorMessage ?errorCode ?targetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
-      let targetId = field_map json "TargetId" TargetId.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let targetId = field_map json__ "TargetId" TargetId.of_json in
       make ?errorMessage ?errorCode ?targetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3943,10 +4433,10 @@ module PutTargetsResultEntry =
         (Option.map ~f:TargetId.of_xml) (Xml.child xml_arg0 "TargetId") in
       make ?errorMessage ?errorCode ?targetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
-      let targetId = field_map json "TargetId" TargetId.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let targetId = field_map json__ "TargetId" TargetId.of_json in
       make ?errorMessage ?errorCode ?targetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a target that failed to be added to a rule."]
@@ -3967,7 +4457,7 @@ module Target =
           "Valid JSON text passed to the target. In this case, nothing from the event itself is passed to the target. For more information, see The JavaScript Object Notation (JSON) Data Interchange Format."];
       inputPath: TargetInputPath.t option
         [@ocaml.doc
-          "The value of the JSONPath that is used for extracting part of the matched event when passing it to the target. You must use JSON dot notation, not bracket notation. For more information about JSON paths, see JSONPath."];
+          "The value of the JSONPath that is used for extracting part of the matched event when passing it to the target. You may use JSON dot notation or bracket notation. For more information about JSON paths, see JSONPath."];
       inputTransformer: InputTransformer.t option
         [@ocaml.doc
           "Settings to enable you to provide custom input to a target based on certain event data. You can extract one or more key-value pairs from the event and then use that data to send customized input to the target."];
@@ -3988,19 +4478,22 @@ module Target =
           "Contains the message group ID to use when the target is a FIFO queue. If you specify an SQS FIFO queue as a target, the queue must have content-based deduplication enabled."];
       httpParameters: HttpParameters.t option
         [@ocaml.doc
-          "Contains the HTTP parameters to use when the target is a API Gateway REST endpoint or EventBridge ApiDestination. If you specify an API Gateway REST API or EventBridge ApiDestination as a target, you can use this parameter to specify headers, path parameters, and query string keys/values as part of your target invoking request. If you're using ApiDestinations, the corresponding Connection can also have these values configured. In case of any conflicting keys, values from the Connection take precedence."];
+          "Contains the HTTP parameters to use when the target is a API Gateway endpoint or EventBridge ApiDestination. If you specify an API Gateway API or EventBridge ApiDestination as a target, you can use this parameter to specify headers, path parameters, and query string keys/values as part of your target invoking request. If you're using ApiDestinations, the corresponding Connection can also have these values configured. In case of any conflicting keys, values from the Connection take precedence."];
       redshiftDataParameters: RedshiftDataParameters.t option
         [@ocaml.doc
           "Contains the Amazon Redshift Data API parameters to use when the target is a Amazon Redshift cluster. If you specify a Amazon Redshift Cluster as a Target, you can use this to specify parameters to invoke the Amazon Redshift Data API ExecuteStatement based on EventBridge events."];
       sageMakerPipelineParameters: SageMakerPipelineParameters.t option
         [@ocaml.doc
-          "Contains the SageMaker Model Building Pipeline parameters to start execution of a SageMaker Model Building Pipeline. If you specify a SageMaker Model Building Pipeline as a target, you can use this to specify parameters to start a pipeline execution based on EventBridge events."];
+          "Contains the SageMaker AI Model Building Pipeline parameters to start execution of a SageMaker AI Model Building Pipeline. If you specify a SageMaker AI Model Building Pipeline as a target, you can use this to specify parameters to start a pipeline execution based on EventBridge events."];
       deadLetterConfig: DeadLetterConfig.t option
         [@ocaml.doc
           "The DeadLetterConfig that defines the target queue to send dead-letter queue events to."];
       retryPolicy: RetryPolicy.t option
         [@ocaml.doc
-          "The RetryPolicy object that contains the retry policy configuration to use for the dead-letter queue."]}
+          "The retry policy configuration to use for the dead-letter queue."];
+      appSyncParameters: AppSyncParameters.t option
+        [@ocaml.doc
+          "Contains the GraphQL operation to be parsed and executed, if the event target is an AppSync API."]}
     let context_ = "Target"
     let make ?roleArn =
       fun ?input ->
@@ -4016,27 +4509,29 @@ module Target =
                           fun ?sageMakerPipelineParameters ->
                             fun ?deadLetterConfig ->
                               fun ?retryPolicy ->
-                                fun ~id ->
-                                  fun ~arn ->
-                                    fun () ->
-                                      {
-                                        roleArn;
-                                        input;
-                                        inputPath;
-                                        inputTransformer;
-                                        kinesisParameters;
-                                        runCommandParameters;
-                                        ecsParameters;
-                                        batchParameters;
-                                        sqsParameters;
-                                        httpParameters;
-                                        redshiftDataParameters;
-                                        sageMakerPipelineParameters;
-                                        deadLetterConfig;
-                                        retryPolicy;
-                                        id;
-                                        arn
-                                      }
+                                fun ?appSyncParameters ->
+                                  fun ~id ->
+                                    fun ~arn ->
+                                      fun () ->
+                                        {
+                                          roleArn;
+                                          input;
+                                          inputPath;
+                                          inputTransformer;
+                                          kinesisParameters;
+                                          runCommandParameters;
+                                          ecsParameters;
+                                          batchParameters;
+                                          sqsParameters;
+                                          httpParameters;
+                                          redshiftDataParameters;
+                                          sageMakerPipelineParameters;
+                                          deadLetterConfig;
+                                          retryPolicy;
+                                          appSyncParameters;
+                                          id;
+                                          arn
+                                        }
     let to_value x =
       structure_to_value
         [("Id", (Some (TargetId.to_value x.id)));
@@ -4066,9 +4561,14 @@ module Target =
              ~f:SageMakerPipelineParameters.to_value));
         ("DeadLetterConfig",
           (Option.map x.deadLetterConfig ~f:DeadLetterConfig.to_value));
-        ("RetryPolicy", (Option.map x.retryPolicy ~f:RetryPolicy.to_value))]
+        ("RetryPolicy", (Option.map x.retryPolicy ~f:RetryPolicy.to_value));
+        ("AppSyncParameters",
+          (Option.map x.appSyncParameters ~f:AppSyncParameters.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let appSyncParameters =
+        (Option.map ~f:AppSyncParameters.of_xml)
+          (Xml.child xml_arg0 "AppSyncParameters") in
       let retryPolicy =
         (Option.map ~f:RetryPolicy.of_xml) (Xml.child xml_arg0 "RetryPolicy") in
       let deadLetterConfig =
@@ -4112,44 +4612,46 @@ module Target =
         TargetArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       let id =
         TargetId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ?retryPolicy ?deadLetterConfig ?sageMakerPipelineParameters
-        ?redshiftDataParameters ?httpParameters ?sqsParameters
-        ?batchParameters ?ecsParameters ?runCommandParameters
+      make ?appSyncParameters ?retryPolicy ?deadLetterConfig
+        ?sageMakerPipelineParameters ?redshiftDataParameters ?httpParameters
+        ?sqsParameters ?batchParameters ?ecsParameters ?runCommandParameters
         ?kinesisParameters ?inputTransformer ?inputPath ?input ?roleArn ~arn
         ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let retryPolicy = field_map json "RetryPolicy" RetryPolicy.of_json in
+    let of_json json__ =
+      let appSyncParameters =
+        field_map json__ "AppSyncParameters" AppSyncParameters.of_json in
+      let retryPolicy = field_map json__ "RetryPolicy" RetryPolicy.of_json in
       let deadLetterConfig =
-        field_map json "DeadLetterConfig" DeadLetterConfig.of_json in
+        field_map json__ "DeadLetterConfig" DeadLetterConfig.of_json in
       let sageMakerPipelineParameters =
-        field_map json "SageMakerPipelineParameters"
+        field_map json__ "SageMakerPipelineParameters"
           SageMakerPipelineParameters.of_json in
       let redshiftDataParameters =
-        field_map json "RedshiftDataParameters"
+        field_map json__ "RedshiftDataParameters"
           RedshiftDataParameters.of_json in
       let httpParameters =
-        field_map json "HttpParameters" HttpParameters.of_json in
+        field_map json__ "HttpParameters" HttpParameters.of_json in
       let sqsParameters =
-        field_map json "SqsParameters" SqsParameters.of_json in
+        field_map json__ "SqsParameters" SqsParameters.of_json in
       let batchParameters =
-        field_map json "BatchParameters" BatchParameters.of_json in
+        field_map json__ "BatchParameters" BatchParameters.of_json in
       let ecsParameters =
-        field_map json "EcsParameters" EcsParameters.of_json in
+        field_map json__ "EcsParameters" EcsParameters.of_json in
       let runCommandParameters =
-        field_map json "RunCommandParameters" RunCommandParameters.of_json in
+        field_map json__ "RunCommandParameters" RunCommandParameters.of_json in
       let kinesisParameters =
-        field_map json "KinesisParameters" KinesisParameters.of_json in
+        field_map json__ "KinesisParameters" KinesisParameters.of_json in
       let inputTransformer =
-        field_map json "InputTransformer" InputTransformer.of_json in
-      let inputPath = field_map json "InputPath" TargetInputPath.of_json in
-      let input = field_map json "Input" TargetInput.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let arn = field_map_exn json "Arn" TargetArn.of_json in
-      let id = field_map_exn json "Id" TargetId.of_json in
-      make ?retryPolicy ?deadLetterConfig ?sageMakerPipelineParameters
-        ?redshiftDataParameters ?httpParameters ?sqsParameters
-        ?batchParameters ?ecsParameters ?runCommandParameters
+        field_map json__ "InputTransformer" InputTransformer.of_json in
+      let inputPath = field_map json__ "InputPath" TargetInputPath.of_json in
+      let input = field_map json__ "Input" TargetInput.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let arn = field_map_exn json__ "Arn" TargetArn.of_json in
+      let id = field_map_exn json__ "Id" TargetId.of_json in
+      make ?appSyncParameters ?retryPolicy ?deadLetterConfig
+        ?sageMakerPipelineParameters ?redshiftDataParameters ?httpParameters
+        ?sqsParameters ?batchParameters ?ecsParameters ?runCommandParameters
         ?kinesisParameters ?inputTransformer ?inputPath ?input ?roleArn ~arn
         ~id ()
     let to_json v = composed_to_json to_value v
@@ -4186,30 +4688,31 @@ module PutPartnerEventsResultEntry =
         (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "EventId") in
       make ?errorMessage ?errorCode ?eventId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
-      let eventId = field_map json "EventId" EventId.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let eventId = field_map json__ "EventId" EventId.of_json in
       make ?errorMessage ?errorCode ?eventId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents an event that a partner tried to generate, but failed."]
+       "The result of an event entry the partner submitted in this request. If the event was successfully submitted, the entry has the event ID in it. Otherwise, you can use the error code and error message to identify the problem with the entry."]
 module PutPartnerEventsRequestEntry =
   struct
     type nonrec t =
       {
       time: EventTime.t option [@ocaml.doc "The date and time of the event."];
       source: EventSourceName.t option
-        [@ocaml.doc "The event source that is generating the entry."];
+        [@ocaml.doc
+          "The event source that is generating the entry. Detail, DetailType, and Source are required for EventBridge to successfully send an event to an event bus. If you include event entries in a request that do not include each of those properties, EventBridge fails that entry. If you submit a request in which none of the entries have each of these properties, EventBridge fails the entire request."];
       resources: EventResourceList.t option
         [@ocaml.doc
           "Amazon Web Services resources, identified by Amazon Resource Name (ARN), which the event primarily concerns. Any number, including zero, may be present."];
       detailType: String_.t option
         [@ocaml.doc
-          "A free-form string used to decide what fields to expect in the event detail."];
+          "A free-form string, with a maximum of 128 characters, used to decide what fields to expect in the event detail. Detail, DetailType, and Source are required for EventBridge to successfully send an event to an event bus. If you include event entries in a request that do not include each of those properties, EventBridge fails that entry. If you submit a request in which none of the entries have each of these properties, EventBridge fails the entire request."];
       detail: String_.t option
         [@ocaml.doc
-          "A valid JSON string. There is no other schema imposed. The JSON string may contain fields and nested subobjects."]}
+          "A valid JSON string. There is no other schema imposed. The JSON string may contain fields and nested sub-objects. Detail, DetailType, and Source are required for EventBridge to successfully send an event to an event bus. If you include event entries in a request that do not include each of those properties, EventBridge fails that entry. If you submit a request in which none of the entries have each of these properties, EventBridge fails the entire request."]}
     let make ?time =
       fun ?source ->
         fun ?resources ->
@@ -4237,12 +4740,12 @@ module PutPartnerEventsRequestEntry =
       let time = (Option.map ~f:EventTime.of_xml) (Xml.child xml_arg0 "Time") in
       make ?detail ?detailType ?resources ?source ?time ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let detail = field_map json "Detail" String_.of_json in
-      let detailType = field_map json "DetailType" String_.of_json in
-      let resources = field_map json "Resources" EventResourceList.of_json in
-      let source = field_map json "Source" EventSourceName.of_json in
-      let time = field_map json "Time" EventTime.of_json in
+    let of_json json__ =
+      let detail = field_map json__ "Detail" String_.of_json in
+      let detailType = field_map json__ "DetailType" String_.of_json in
+      let resources = field_map json__ "Resources" EventResourceList.of_json in
+      let source = field_map json__ "Source" EventSourceName.of_json in
+      let time = field_map json__ "Time" EventTime.of_json in
       make ?detail ?detailType ?resources ?source ?time ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details about an event generated by an SaaS partner."]
@@ -4253,7 +4756,7 @@ module PutEventsResultEntry =
       eventId: EventId.t option [@ocaml.doc "The ID of the event."];
       errorCode: ErrorCode.t option
         [@ocaml.doc
-          "The error code that indicates why the event submission failed."];
+          "The error code that indicates why the event submission failed. Retryable errors include: InternalFailure The request processing has failed because of an unknown error, exception or failure. ThrottlingException The request was denied due to request throttling. Non-retryable errors include: AccessDeniedException You do not have sufficient access to perform this action. InvalidAccountIdException The account ID provided is not valid. InvalidArgument A specified parameter is not valid. MalformedDetail The JSON provided is not valid. RedactionFailure Redacting the CloudTrail event failed. NotAuthorizedForSourceException You do not have permissions to publish events with this source onto this event bus. NotAuthorizedForDetailTypeException You do not have permissions to publish events with this detail type onto this event bus."];
       errorMessage: ErrorMessage.t option
         [@ocaml.doc
           "The error message that explains why the event submission failed."]}
@@ -4277,14 +4780,14 @@ module PutEventsResultEntry =
         (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "EventId") in
       make ?errorMessage ?errorCode ?eventId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
-      let eventId = field_map json "EventId" EventId.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let eventId = field_map json__ "EventId" EventId.of_json in
       make ?errorMessage ?errorCode ?eventId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents an event that failed to be submitted. For information about the errors that are common to all actions, see Common Errors."]
+       "Represents the results of an event submitted to an event bus. If the submission was successful, the entry has the event ID in it. Otherwise, you can use the error code and error message to identify the problem with the entry. For information about the errors that are common to all actions, see Common Errors."]
 module PutEventsRequestEntry =
   struct
     type nonrec t =
@@ -4292,19 +4795,21 @@ module PutEventsRequestEntry =
       time: EventTime.t option
         [@ocaml.doc
           "The time stamp of the event, per RFC3339. If no time stamp is provided, the time stamp of the PutEvents call is used."];
-      source: String_.t option [@ocaml.doc "The source of the event."];
+      source: String_.t option
+        [@ocaml.doc
+          "The source of the event. Detail, DetailType, and Source are required for EventBridge to successfully send an event to an event bus. If you include event entries in a request that do not include each of those properties, EventBridge fails that entry. If you submit a request in which none of the entries have each of these properties, EventBridge fails the entire request."];
       resources: EventResourceList.t option
         [@ocaml.doc
           "Amazon Web Services resources, identified by Amazon Resource Name (ARN), which the event primarily concerns. Any number, including zero, may be present."];
       detailType: String_.t option
         [@ocaml.doc
-          "Free-form string used to decide what fields to expect in the event detail."];
+          "Free-form string, with a maximum of 128 characters, used to decide what fields to expect in the event detail. Detail, DetailType, and Source are required for EventBridge to successfully send an event to an event bus. If you include event entries in a request that do not include each of those properties, EventBridge fails that entry. If you submit a request in which none of the entries have each of these properties, EventBridge fails the entire request."];
       detail: String_.t option
         [@ocaml.doc
-          "A valid JSON object. There is no other schema imposed. The JSON object may contain fields and nested subobjects."];
+          "A valid JSON object. There is no other schema imposed. The JSON object may contain fields and nested sub-objects. Detail, DetailType, and Source are required for EventBridge to successfully send an event to an event bus. If you include event entries in a request that do not include each of those properties, EventBridge fails that entry. If you submit a request in which none of the entries have each of these properties, EventBridge fails the entire request."];
       eventBusName: NonPartnerEventBusNameOrArn.t option
         [@ocaml.doc
-          "The name or ARN of the event bus to receive the event. Only the rules that are associated with this event bus are used to match the event. If you omit this, the default event bus is used. If you're using a global endpoint with a custom bus, you must enter the name, not the ARN, of the event bus in either the primary or secondary Region here and the corresponding event bus in the other Region will be determined based on the endpoint referenced by the EndpointId."];
+          "The name or ARN of the event bus to receive the event. Only the rules that are associated with this event bus are used to match the event. If you omit this, the default event bus is used. If you're using a global endpoint with a custom bus, you can enter either the name or Amazon Resource Name (ARN) of the event bus in either the primary or secondary Region here. EventBridge then determines the corresponding event bus in the other Region based on the endpoint referenced by the EndpointId. Specifying the event bus ARN is preferred."];
       traceHeader: TraceHeader.t option
         [@ocaml.doc
           "An X-Ray trace header, which is an http header (X-Amzn-Trace-Id) that contains the trace-id associated with the event. To learn more about X-Ray trace headers, see Tracing header in the X-Ray Developer Guide."]}
@@ -4355,15 +4860,15 @@ module PutEventsRequestEntry =
       make ?traceHeader ?eventBusName ?detail ?detailType ?resources ?source
         ?time ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let traceHeader = field_map json "TraceHeader" TraceHeader.of_json in
+    let of_json json__ =
+      let traceHeader = field_map json__ "TraceHeader" TraceHeader.of_json in
       let eventBusName =
-        field_map json "EventBusName" NonPartnerEventBusNameOrArn.of_json in
-      let detail = field_map json "Detail" String_.of_json in
-      let detailType = field_map json "DetailType" String_.of_json in
-      let resources = field_map json "Resources" EventResourceList.of_json in
-      let source = field_map json "Source" String_.of_json in
-      let time = field_map json "Time" EventTime.of_json in
+        field_map json__ "EventBusName" NonPartnerEventBusNameOrArn.of_json in
+      let detail = field_map json__ "Detail" String_.of_json in
+      let detailType = field_map json__ "DetailType" String_.of_json in
+      let resources = field_map json__ "Resources" EventResourceList.of_json in
+      let source = field_map json__ "Source" String_.of_json in
+      let time = field_map json__ "Time" EventTime.of_json in
       make ?traceHeader ?eventBusName ?detail ?detailType ?resources ?source
         ?time ()
     let to_json v = composed_to_json to_value v
@@ -4377,8 +4882,10 @@ module Rule =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the rule."];
       eventPattern: EventPattern.t option
         [@ocaml.doc
-          "The event pattern of the rule. For more information, see Events and Event Patterns in the Amazon EventBridge User Guide."];
-      state: RuleState.t option [@ocaml.doc "The state of the rule."];
+          "The event pattern of the rule. For more information, see Events and Event Patterns in the Amazon EventBridge User Guide ."];
+      state: RuleState.t option
+        [@ocaml.doc
+          "The state of the rule. Valid values include: DISABLED: The rule is disabled. EventBridge does not match any events against the rule. ENABLED: The rule is enabled. EventBridge matches events against the rule, except for Amazon Web Services management events delivered through CloudTrail. ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS: The rule is enabled for all events, including Amazon Web Services management events delivered through CloudTrail. Management events provide visibility into management operations that are performed on resources in your Amazon Web Services account. These are also known as control plane operations. For more information, see Logging management events in the CloudTrail User Guide, and Filtering management events from Amazon Web Services services in the Amazon EventBridge User Guide . This value is only valid for rules on the default event bus or custom event buses. It does not apply to partner event buses."];
       description: RuleDescription.t option
         [@ocaml.doc "The description of the rule."];
       scheduleExpression: ScheduleExpression.t option
@@ -4454,17 +4961,18 @@ module Rule =
       make ?eventBusName ?managedBy ?roleArn ?scheduleExpression ?description
         ?state ?eventPattern ?arn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let eventBusName = field_map json "EventBusName" EventBusName.of_json in
-      let managedBy = field_map json "ManagedBy" ManagedBy.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
+    let of_json json__ =
+      let eventBusName = field_map json__ "EventBusName" EventBusName.of_json in
+      let managedBy = field_map json__ "ManagedBy" ManagedBy.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
       let scheduleExpression =
-        field_map json "ScheduleExpression" ScheduleExpression.of_json in
-      let description = field_map json "Description" RuleDescription.of_json in
-      let state = field_map json "State" RuleState.of_json in
-      let eventPattern = field_map json "EventPattern" EventPattern.of_json in
-      let arn = field_map json "Arn" RuleArn.of_json in
-      let name = field_map json "Name" RuleName.of_json in
+        field_map json__ "ScheduleExpression" ScheduleExpression.of_json in
+      let description =
+        field_map json__ "Description" RuleDescription.of_json in
+      let state = field_map json__ "State" RuleState.of_json in
+      let eventPattern = field_map json__ "EventPattern" EventPattern.of_json in
+      let arn = field_map json__ "Arn" RuleArn.of_json in
+      let name = field_map json__ "Name" RuleName.of_json in
       make ?eventBusName ?managedBy ?roleArn ?scheduleExpression ?description
         ?state ?eventPattern ?arn ?name ()
     let to_json v = composed_to_json to_value v
@@ -4474,7 +4982,7 @@ module Replay =
     type nonrec t =
       {
       replayName: ReplayName.t option [@ocaml.doc "The name of the replay."];
-      eventSourceArn: Arn.t option
+      eventSourceArn: ArchiveArn.t option
         [@ocaml.doc "The ARN of the archive to replay event from."];
       state: ReplayState.t option
         [@ocaml.doc "The current state of the replay."];
@@ -4518,7 +5026,8 @@ module Replay =
     let to_value x =
       structure_to_value
         [("ReplayName", (Option.map x.replayName ~f:ReplayName.to_value));
-        ("EventSourceArn", (Option.map x.eventSourceArn ~f:Arn.to_value));
+        ("EventSourceArn",
+          (Option.map x.eventSourceArn ~f:ArchiveArn.to_value));
         ("State", (Option.map x.state ~f:ReplayState.to_value));
         ("StateReason",
           (Option.map x.stateReason ~f:ReplayStateReason.to_value));
@@ -4551,26 +5060,29 @@ module Replay =
       let state =
         (Option.map ~f:ReplayState.of_xml) (Xml.child xml_arg0 "State") in
       let eventSourceArn =
-        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "EventSourceArn") in
+        (Option.map ~f:ArchiveArn.of_xml)
+          (Xml.child xml_arg0 "EventSourceArn") in
       let replayName =
         (Option.map ~f:ReplayName.of_xml) (Xml.child xml_arg0 "ReplayName") in
       make ?replayEndTime ?replayStartTime ?eventLastReplayedTime
         ?eventEndTime ?eventStartTime ?stateReason ?state ?eventSourceArn
         ?replayName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let replayEndTime = field_map json "ReplayEndTime" Timestamp.of_json in
+    let of_json json__ =
+      let replayEndTime = field_map json__ "ReplayEndTime" Timestamp.of_json in
       let replayStartTime =
-        field_map json "ReplayStartTime" Timestamp.of_json in
+        field_map json__ "ReplayStartTime" Timestamp.of_json in
       let eventLastReplayedTime =
-        field_map json "EventLastReplayedTime" Timestamp.of_json in
-      let eventEndTime = field_map json "EventEndTime" Timestamp.of_json in
-      let eventStartTime = field_map json "EventStartTime" Timestamp.of_json in
+        field_map json__ "EventLastReplayedTime" Timestamp.of_json in
+      let eventEndTime = field_map json__ "EventEndTime" Timestamp.of_json in
+      let eventStartTime =
+        field_map json__ "EventStartTime" Timestamp.of_json in
       let stateReason =
-        field_map json "StateReason" ReplayStateReason.of_json in
-      let state = field_map json "State" ReplayState.of_json in
-      let eventSourceArn = field_map json "EventSourceArn" Arn.of_json in
-      let replayName = field_map json "ReplayName" ReplayName.of_json in
+        field_map json__ "StateReason" ReplayStateReason.of_json in
+      let state = field_map json__ "State" ReplayState.of_json in
+      let eventSourceArn =
+        field_map json__ "EventSourceArn" ArchiveArn.of_json in
+      let replayName = field_map json__ "ReplayName" ReplayName.of_json in
       make ?replayEndTime ?replayStartTime ?eventLastReplayedTime
         ?eventEndTime ?eventStartTime ?stateReason ?state ?eventSourceArn
         ?replayName ()
@@ -4595,9 +5107,9 @@ module PartnerEventSource =
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" String_.of_json in
-      let arn = field_map json "Arn" String_.of_json in make ?name ?arn ()
+    let of_json json__ =
+      let name = field_map json__ "Name" String_.of_json in
+      let arn = field_map json__ "Arn" String_.of_json in make ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A partner event source is created by an SaaS partner. If a customer creates a partner event bus that matches this event source, that Amazon Web Services account can receive events from the partner's applications or services."]
@@ -4641,11 +5153,12 @@ module PartnerEventSourceAccount =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "Account") in
       make ?state ?expirationTime ?creationTime ?account ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" EventSourceState.of_json in
-      let expirationTime = field_map json "ExpirationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let account = field_map json "Account" AccountId.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" EventSourceState.of_json in
+      let expirationTime =
+        field_map json__ "ExpirationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let account = field_map json__ "Account" AccountId.of_json in
       make ?state ?expirationTime ?creationTime ?account ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4699,13 +5212,14 @@ module EventSource =
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?state ?name ?expirationTime ?creationTime ?createdBy ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" EventSourceState.of_json in
-      let name = field_map json "Name" String_.of_json in
-      let expirationTime = field_map json "ExpirationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let createdBy = field_map json "CreatedBy" String_.of_json in
-      let arn = field_map json "Arn" String_.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" EventSourceState.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let expirationTime =
+        field_map json__ "ExpirationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let createdBy = field_map json__ "CreatedBy" String_.of_json in
+      let arn = field_map json__ "Arn" String_.of_json in
       make ?state ?name ?expirationTime ?creationTime ?createdBy ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4716,32 +5230,69 @@ module EventBus =
       {
       name: String_.t option [@ocaml.doc "The name of the event bus."];
       arn: String_.t option [@ocaml.doc "The ARN of the event bus."];
+      description: EventBusDescription.t option
+        [@ocaml.doc "The event bus description."];
       policy: String_.t option
         [@ocaml.doc
-          "The permissions policy of the event bus, describing which other Amazon Web Services accounts can write events to this event bus."]}
+          "The permissions policy of the event bus, describing which other Amazon Web Services accounts can write events to this event bus."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc "The time the event bus was created."];
+      lastModifiedTime: Timestamp.t option
+        [@ocaml.doc "The time the event bus was last modified."]}
     let make ?name =
-      fun ?arn -> fun ?policy -> fun () -> { name; arn; policy }
+      fun ?arn ->
+        fun ?description ->
+          fun ?policy ->
+            fun ?creationTime ->
+              fun ?lastModifiedTime ->
+                fun () ->
+                  {
+                    name;
+                    arn;
+                    description;
+                    policy;
+                    creationTime;
+                    lastModifiedTime
+                  }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:String_.to_value));
         ("Arn", (Option.map x.arn ~f:String_.to_value));
-        ("Policy", (Option.map x.policy ~f:String_.to_value))]
+        ("Description",
+          (Option.map x.description ~f:EventBusDescription.to_value));
+        ("Policy", (Option.map x.policy ~f:String_.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("LastModifiedTime",
+          (Option.map x.lastModifiedTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let lastModifiedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModifiedTime") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
       let policy =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Policy") in
+      let description =
+        (Option.map ~f:EventBusDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Arn") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?policy ?arn ?name ()
+      make ?lastModifiedTime ?creationTime ?policy ?description ?arn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" String_.of_json in
-      let arn = field_map json "Arn" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
-      make ?policy ?arn ?name ()
+    let of_json json__ =
+      let lastModifiedTime =
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let policy = field_map json__ "Policy" String_.of_json in
+      let description =
+        field_map json__ "Description" EventBusDescription.of_json in
+      let arn = field_map json__ "Arn" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?lastModifiedTime ?creationTime ?policy ?description ?arn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An event bus receives events from a source and routes them to rules associated with that event bus. Your account's default event bus receives events from Amazon Web Services services. A custom event bus can receive events from your custom applications and services. A partner event bus receives events from an event source created by an SaaS partner. These events come from the partners services or applications."]
+       "An event bus receives events from a source, uses rules to evaluate them, applies any configured input transformation, and routes them to the appropriate target(s). Your account's default event bus receives events from Amazon Web Services services. A custom event bus can receive events from your custom applications and services. A partner event bus receives events from an event source created by an SaaS partner. These events come from the partners services or applications."]
 module Endpoint =
   struct
     type nonrec t =
@@ -4754,7 +5305,7 @@ module Endpoint =
         [@ocaml.doc "The routing configuration of the endpoint."];
       replicationConfig: ReplicationConfig.t option
         [@ocaml.doc
-          "Whether event replication was enabled or disabled for this endpoint."];
+          "Whether event replication was enabled or disabled for this endpoint. The default state is ENABLED which means you must supply a RoleArn. If you don't have a RoleArn or you don't want event replication enabled, set the state to DISABLED."];
       eventBuses: EndpointEventBusList.t option
         [@ocaml.doc "The event buses being used by the endpoint."];
       roleArn: IamRoleArn.t option
@@ -4762,7 +5313,7 @@ module Endpoint =
           "The ARN of the role used by event replication for the endpoint."];
       endpointId: EndpointId.t option
         [@ocaml.doc
-          "The URL subdomain of the endpoint. For example, if the URL for Endpoint is abcde.veo.endpoints.event.amazonaws.com, then the EndpointId is abcde.veo."];
+          "The URL subdomain of the endpoint. For example, if the URL for Endpoint is https://abcde.veo.endpoints.event.amazonaws.com, then the EndpointId is abcde.veo."];
       endpointUrl: EndpointUrl.t option
         [@ocaml.doc "The URL of the endpoint."];
       state: EndpointState.t option
@@ -4860,32 +5411,32 @@ module Endpoint =
         ?endpointId ?roleArn ?eventBuses ?replicationConfig ?routingConfig
         ?arn ?description ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let stateReason =
-        field_map json "StateReason" EndpointStateReason.of_json in
-      let state = field_map json "State" EndpointState.of_json in
-      let endpointUrl = field_map json "EndpointUrl" EndpointUrl.of_json in
-      let endpointId = field_map json "EndpointId" EndpointId.of_json in
-      let roleArn = field_map json "RoleArn" IamRoleArn.of_json in
+        field_map json__ "StateReason" EndpointStateReason.of_json in
+      let state = field_map json__ "State" EndpointState.of_json in
+      let endpointUrl = field_map json__ "EndpointUrl" EndpointUrl.of_json in
+      let endpointId = field_map json__ "EndpointId" EndpointId.of_json in
+      let roleArn = field_map json__ "RoleArn" IamRoleArn.of_json in
       let eventBuses =
-        field_map json "EventBuses" EndpointEventBusList.of_json in
+        field_map json__ "EventBuses" EndpointEventBusList.of_json in
       let replicationConfig =
-        field_map json "ReplicationConfig" ReplicationConfig.of_json in
+        field_map json__ "ReplicationConfig" ReplicationConfig.of_json in
       let routingConfig =
-        field_map json "RoutingConfig" RoutingConfig.of_json in
-      let arn = field_map json "Arn" EndpointArn.of_json in
+        field_map json__ "RoutingConfig" RoutingConfig.of_json in
+      let arn = field_map json__ "Arn" EndpointArn.of_json in
       let description =
-        field_map json "Description" EndpointDescription.of_json in
-      let name = field_map json "Name" EndpointName.of_json in
+        field_map json__ "Description" EndpointDescription.of_json in
+      let name = field_map json__ "Name" EndpointName.of_json in
       make ?lastModifiedTime ?creationTime ?stateReason ?state ?endpointUrl
         ?endpointId ?roleArn ?eventBuses ?replicationConfig ?routingConfig
         ?arn ?description ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An global endpoint used to improve your application's availability by making it regional-fault tolerant. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide.."]
+       "A global endpoint used to improve your application's availability by making it regional-fault tolerant. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide ."]
 module Connection =
   struct
     type nonrec t =
@@ -4900,7 +5451,8 @@ module Connection =
         [@ocaml.doc
           "The reason that the connection is in the connection state."];
       authorizationType: ConnectionAuthorizationType.t option
-        [@ocaml.doc "The authorization type specified for the connection."];
+        [@ocaml.doc
+          "The authorization type specified for the connection. OAUTH tokens are refreshed when a 401 or 407 response is returned."];
       creationTime: Timestamp.t option
         [@ocaml.doc
           "A time stamp for the time that the connection was created."];
@@ -4974,22 +5526,22 @@ module Connection =
         ?authorizationType ?stateReason ?connectionState ?name ?connectionArn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastAuthorizedTime =
-        field_map json "LastAuthorizedTime" Timestamp.of_json in
+        field_map json__ "LastAuthorizedTime" Timestamp.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let authorizationType =
-        field_map json "AuthorizationType"
+        field_map json__ "AuthorizationType"
           ConnectionAuthorizationType.of_json in
       let stateReason =
-        field_map json "StateReason" ConnectionStateReason.of_json in
+        field_map json__ "StateReason" ConnectionStateReason.of_json in
       let connectionState =
-        field_map json "ConnectionState" ConnectionState.of_json in
-      let name = field_map json "Name" ConnectionName.of_json in
+        field_map json__ "ConnectionState" ConnectionState.of_json in
+      let name = field_map json__ "Name" ConnectionName.of_json in
       let connectionArn =
-        field_map json "ConnectionArn" ConnectionArn.of_json in
+        field_map json__ "ConnectionArn" ConnectionArn.of_json in
       make ?lastAuthorizedTime ?lastModifiedTime ?creationTime
         ?authorizationType ?stateReason ?connectionState ?name ?connectionArn
         ()
@@ -5001,7 +5553,7 @@ module Archive =
       {
       archiveName: ArchiveName.t option
         [@ocaml.doc "The name of the archive."];
-      eventSourceArn: Arn.t option
+      eventSourceArn: EventBusArn.t option
         [@ocaml.doc
           "The ARN of the event bus associated with the archive. Only events from this event bus are sent to the archive."];
       state: ArchiveState.t option
@@ -5041,7 +5593,8 @@ module Archive =
     let to_value x =
       structure_to_value
         [("ArchiveName", (Option.map x.archiveName ~f:ArchiveName.to_value));
-        ("EventSourceArn", (Option.map x.eventSourceArn ~f:Arn.to_value));
+        ("EventSourceArn",
+          (Option.map x.eventSourceArn ~f:EventBusArn.to_value));
         ("State", (Option.map x.state ~f:ArchiveState.to_value));
         ("StateReason",
           (Option.map x.stateReason ~f:ArchiveStateReason.to_value));
@@ -5067,23 +5620,25 @@ module Archive =
       let state =
         (Option.map ~f:ArchiveState.of_xml) (Xml.child xml_arg0 "State") in
       let eventSourceArn =
-        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "EventSourceArn") in
+        (Option.map ~f:EventBusArn.of_xml)
+          (Xml.child xml_arg0 "EventSourceArn") in
       let archiveName =
         (Option.map ~f:ArchiveName.of_xml) (Xml.child xml_arg0 "ArchiveName") in
       make ?creationTime ?eventCount ?sizeBytes ?retentionDays ?stateReason
         ?state ?eventSourceArn ?archiveName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let eventCount = field_map json "EventCount" Long.of_json in
-      let sizeBytes = field_map json "SizeBytes" Long.of_json in
+    let of_json json__ =
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let eventCount = field_map json__ "EventCount" Long.of_json in
+      let sizeBytes = field_map json__ "SizeBytes" Long.of_json in
       let retentionDays =
-        field_map json "RetentionDays" RetentionDays.of_json in
+        field_map json__ "RetentionDays" RetentionDays.of_json in
       let stateReason =
-        field_map json "StateReason" ArchiveStateReason.of_json in
-      let state = field_map json "State" ArchiveState.of_json in
-      let eventSourceArn = field_map json "EventSourceArn" Arn.of_json in
-      let archiveName = field_map json "ArchiveName" ArchiveName.of_json in
+        field_map json__ "StateReason" ArchiveStateReason.of_json in
+      let state = field_map json__ "State" ArchiveState.of_json in
+      let eventSourceArn =
+        field_map json__ "EventSourceArn" EventBusArn.of_json in
+      let archiveName = field_map json__ "ArchiveName" ArchiveName.of_json in
       make ?creationTime ?eventCount ?sizeBytes ?retentionDays ?stateReason
         ?state ?eventSourceArn ?archiveName ()
     let to_json v = composed_to_json to_value v
@@ -5187,24 +5742,24 @@ module ApiDestination =
         ?httpMethod ?invocationEndpoint ?connectionArn ?apiDestinationState
         ?name ?apiDestinationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let invocationRateLimitPerSecond =
-        field_map json "InvocationRateLimitPerSecond"
+        field_map json__ "InvocationRateLimitPerSecond"
           ApiDestinationInvocationRateLimitPerSecond.of_json in
       let httpMethod =
-        field_map json "HttpMethod" ApiDestinationHttpMethod.of_json in
+        field_map json__ "HttpMethod" ApiDestinationHttpMethod.of_json in
       let invocationEndpoint =
-        field_map json "InvocationEndpoint" HttpsEndpoint.of_json in
+        field_map json__ "InvocationEndpoint" HttpsEndpoint.of_json in
       let connectionArn =
-        field_map json "ConnectionArn" ConnectionArn.of_json in
+        field_map json__ "ConnectionArn" ConnectionArn.of_json in
       let apiDestinationState =
-        field_map json "ApiDestinationState" ApiDestinationState.of_json in
-      let name = field_map json "Name" ApiDestinationName.of_json in
+        field_map json__ "ApiDestinationState" ApiDestinationState.of_json in
+      let name = field_map json__ "Name" ApiDestinationName.of_json in
       let apiDestinationArn =
-        field_map json "ApiDestinationArn" ApiDestinationArn.of_json in
+        field_map json__ "ApiDestinationArn" ApiDestinationArn.of_json in
       make ?lastModifiedTime ?creationTime ?invocationRateLimitPerSecond
         ?httpMethod ?invocationEndpoint ?connectionArn ?apiDestinationState
         ?name ?apiDestinationArn ()
@@ -5229,9 +5784,9 @@ module ConnectionApiKeyAuthResponseParameters =
           (Xml.child xml_arg0 "ApiKeyName") in
       make ?apiKeyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let apiKeyName =
-        field_map json "ApiKeyName" AuthHeaderParameters.of_json in
+        field_map json__ "ApiKeyName" AuthHeaderParameters.of_json in
       make ?apiKeyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5254,19 +5809,19 @@ module ConnectionBasicAuthResponseParameters =
           (Xml.child xml_arg0 "Username") in
       make ?username ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let username = field_map json "Username" AuthHeaderParameters.of_json in
+    let of_json json__ =
+      let username = field_map json__ "Username" AuthHeaderParameters.of_json in
       make ?username ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains the authorization parameters for the connection if Basic is specified as the authorization type."]
+       "The authorization parameters for the connection if Basic is specified as the authorization type."]
 module ConnectionOAuthResponseParameters =
   struct
     type nonrec t =
       {
       clientParameters: ConnectionOAuthClientResponseParameters.t option
         [@ocaml.doc
-          "A ConnectionOAuthClientResponseParameters object that contains details about the client parameters returned when OAuth is specified as the authorization type."];
+          "Details about the client parameters returned when OAuth is specified as the authorization type."];
       authorizationEndpoint: HttpsEndpoint.t option
         [@ocaml.doc
           "The URL to the HTTP endpoint that authorized the request."];
@@ -5315,28 +5870,57 @@ module ConnectionOAuthResponseParameters =
       make ?oAuthHttpParameters ?httpMethod ?authorizationEndpoint
         ?clientParameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let oAuthHttpParameters =
-        field_map json "OAuthHttpParameters" ConnectionHttpParameters.of_json in
+        field_map json__ "OAuthHttpParameters"
+          ConnectionHttpParameters.of_json in
       let httpMethod =
-        field_map json "HttpMethod" ConnectionOAuthHttpMethod.of_json in
+        field_map json__ "HttpMethod" ConnectionOAuthHttpMethod.of_json in
       let authorizationEndpoint =
-        field_map json "AuthorizationEndpoint" HttpsEndpoint.of_json in
+        field_map json__ "AuthorizationEndpoint" HttpsEndpoint.of_json in
       let clientParameters =
-        field_map json "ClientParameters"
+        field_map json__ "ClientParameters"
           ConnectionOAuthClientResponseParameters.of_json in
       make ?oAuthHttpParameters ?httpMethod ?authorizationEndpoint
         ?clientParameters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains the response parameters when OAuth is specified as the authorization type."]
+       "The response parameters when OAuth is specified as the authorization type."]
+module DescribeConnectionConnectivityParameters =
+  struct
+    type nonrec t =
+      {
+      resourceParameters: DescribeConnectionResourceParameters.t option
+        [@ocaml.doc
+          "The parameters for EventBridge to use when invoking the resource endpoint."]}
+    let make ?resourceParameters = fun () -> { resourceParameters }
+    let to_value x =
+      structure_to_value
+        [("ResourceParameters",
+           (Option.map x.resourceParameters
+              ~f:DescribeConnectionResourceParameters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceParameters =
+        (Option.map ~f:DescribeConnectionResourceParameters.of_xml)
+          (Xml.child xml_arg0 "ResourceParameters") in
+      make ?resourceParameters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceParameters =
+        field_map json__ "ResourceParameters"
+          DescribeConnectionResourceParameters.of_json in
+      make ?resourceParameters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "If the connection uses a private OAuth endpoint, the parameters for EventBridge to use when authenticating against the endpoint. For more information, see Authorization methods for connections in the Amazon EventBridge User Guide ."]
 module CreateConnectionApiKeyAuthRequestParameters =
   struct
     type nonrec t =
       {
       apiKeyName: AuthHeaderParameters.t
         [@ocaml.doc "The name of the API key to use for authorization."];
-      apiKeyValue: AuthHeaderParameters.t
+      apiKeyValue: AuthHeaderParametersSensitive.t
         [@ocaml.doc "The value for the API key to use for authorization."]}
     let context_ = "CreateConnectionApiKeyAuthRequestParameters"
     let make ~apiKeyName =
@@ -5344,33 +5928,34 @@ module CreateConnectionApiKeyAuthRequestParameters =
     let to_value x =
       structure_to_value
         [("ApiKeyName", (Some (AuthHeaderParameters.to_value x.apiKeyName)));
-        ("ApiKeyValue", (Some (AuthHeaderParameters.to_value x.apiKeyValue)))]
+        ("ApiKeyValue",
+          (Some (AuthHeaderParametersSensitive.to_value x.apiKeyValue)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let apiKeyValue =
-        AuthHeaderParameters.of_xml
+        AuthHeaderParametersSensitive.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ApiKeyValue") in
       let apiKeyName =
         AuthHeaderParameters.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ApiKeyName") in
       make ~apiKeyValue ~apiKeyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let apiKeyValue =
-        field_map_exn json "ApiKeyValue" AuthHeaderParameters.of_json in
+        field_map_exn json__ "ApiKeyValue"
+          AuthHeaderParametersSensitive.of_json in
       let apiKeyName =
-        field_map_exn json "ApiKeyName" AuthHeaderParameters.of_json in
+        field_map_exn json__ "ApiKeyName" AuthHeaderParameters.of_json in
       make ~apiKeyValue ~apiKeyName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Contains the API key authorization parameters for the connection."]
+  end[@@ocaml.doc "The API key authorization parameters for the connection."]
 module CreateConnectionBasicAuthRequestParameters =
   struct
     type nonrec t =
       {
       username: AuthHeaderParameters.t
         [@ocaml.doc "The user name to use for Basic authorization."];
-      password: AuthHeaderParameters.t
+      password: AuthHeaderParametersSensitive.t
         [@ocaml.doc
           "The password associated with the user name to use for Basic authorization."]}
     let context_ = "CreateConnectionBasicAuthRequestParameters"
@@ -5378,22 +5963,23 @@ module CreateConnectionBasicAuthRequestParameters =
     let to_value x =
       structure_to_value
         [("Username", (Some (AuthHeaderParameters.to_value x.username)));
-        ("Password", (Some (AuthHeaderParameters.to_value x.password)))]
+        ("Password",
+          (Some (AuthHeaderParametersSensitive.to_value x.password)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let password =
-        AuthHeaderParameters.of_xml
+        AuthHeaderParametersSensitive.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Password") in
       let username =
         AuthHeaderParameters.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Username") in
       make ~password ~username ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let password =
-        field_map_exn json "Password" AuthHeaderParameters.of_json in
+        field_map_exn json__ "Password" AuthHeaderParametersSensitive.of_json in
       let username =
-        field_map_exn json "Username" AuthHeaderParameters.of_json in
+        field_map_exn json__ "Username" AuthHeaderParameters.of_json in
       make ~password ~username ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5403,8 +5989,7 @@ module CreateConnectionOAuthRequestParameters =
     type nonrec t =
       {
       clientParameters: CreateConnectionOAuthClientRequestParameters.t
-        [@ocaml.doc
-          "A CreateConnectionOAuthClientRequestParameters object that contains the client parameters for OAuth authorization."];
+        [@ocaml.doc "The client parameters for OAuth authorization."];
       authorizationEndpoint: HttpsEndpoint.t
         [@ocaml.doc
           "The URL to the authorization endpoint when OAuth is specified as the authorization type."];
@@ -5412,7 +5997,7 @@ module CreateConnectionOAuthRequestParameters =
         [@ocaml.doc "The method to use for the authorization request."];
       oAuthHttpParameters: ConnectionHttpParameters.t option
         [@ocaml.doc
-          "A ConnectionHttpParameters object that contains details about the additional parameters to use for the connection."]}
+          "Details about the additional parameters to use for the connection."]}
     let context_ = "CreateConnectionOAuthRequestParameters"
     let make ?oAuthHttpParameters =
       fun ~clientParameters ->
@@ -5455,15 +6040,16 @@ module CreateConnectionOAuthRequestParameters =
       make ?oAuthHttpParameters ~httpMethod ~authorizationEndpoint
         ~clientParameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let oAuthHttpParameters =
-        field_map json "OAuthHttpParameters" ConnectionHttpParameters.of_json in
+        field_map json__ "OAuthHttpParameters"
+          ConnectionHttpParameters.of_json in
       let httpMethod =
-        field_map_exn json "HttpMethod" ConnectionOAuthHttpMethod.of_json in
+        field_map_exn json__ "HttpMethod" ConnectionOAuthHttpMethod.of_json in
       let authorizationEndpoint =
-        field_map_exn json "AuthorizationEndpoint" HttpsEndpoint.of_json in
+        field_map_exn json__ "AuthorizationEndpoint" HttpsEndpoint.of_json in
       let clientParameters =
-        field_map_exn json "ClientParameters"
+        field_map_exn json__ "ClientParameters"
           CreateConnectionOAuthClientRequestParameters.of_json in
       make ?oAuthHttpParameters ~httpMethod ~authorizationEndpoint
         ~clientParameters ()
@@ -5495,6 +6081,70 @@ module InternalException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This exception occurs due to unexpected causes."]
+module KmsKeyIdentifier =
+  struct
+    type nonrec t = string
+    let context_ = "KmsKeyIdentifier"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9_\\-/:]*$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KmsKeyIdentifier" j
+    let to_json = simple_to_json to_value
+  end
+module LogConfig =
+  struct
+    type nonrec t =
+      {
+      includeDetail: IncludeDetail.t option
+        [@ocaml.doc
+          "Whether EventBridge include detailed event information in the records it generates. Detailed data can be useful for troubleshooting and debugging. This information includes details of the event itself, as well as target details. For more information, see Including detail data in event bus logs in the EventBridge User Guide."];
+      level: Level.t option
+        [@ocaml.doc
+          "The level of logging detail to include. This applies to all log destinations for the event bus. For more information, see Specifying event bus log level in the EventBridge User Guide."]}
+    let make ?includeDetail =
+      fun ?level -> fun () -> { includeDetail; level }
+    let to_value x =
+      structure_to_value
+        [("IncludeDetail",
+           (Option.map x.includeDetail ~f:IncludeDetail.to_value));
+        ("Level", (Option.map x.level ~f:Level.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let level = (Option.map ~f:Level.of_xml) (Xml.child xml_arg0 "Level") in
+      let includeDetail =
+        (Option.map ~f:IncludeDetail.of_xml)
+          (Xml.child xml_arg0 "IncludeDetail") in
+      make ?level ?includeDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let level = field_map json__ "Level" Level.of_json in
+      let includeDetail =
+        field_map json__ "IncludeDetail" IncludeDetail.of_json in
+      make ?level ?includeDetail ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The logging configuration settings for the event bus. For more information, see Configuring logs for event buses in the EventBridge User Guide."]
+module OperationDisabledException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation you are attempting is not available in this region."]
 module ResourceNotFoundException =
   struct
     type nonrec t = unit
@@ -5507,6 +6157,19 @@ module ResourceNotFoundException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An entity that you specified does not exist."]
+module AccessDeniedException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You do not have the necessary permissions for this action."]
 module LimitExceededException =
   struct
     type nonrec t = unit
@@ -5520,6 +6183,19 @@ module LimitExceededException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request failed because it attempted to create resource beyond the allowed service quota."]
+module ThrottlingException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This request cannot be completed due to throttling issues."]
 module ConnectionDescription =
   struct
     type nonrec t = string
@@ -5544,29 +6220,31 @@ module UpdateConnectionAuthRequestParameters =
       {
       basicAuthParameters:
         UpdateConnectionBasicAuthRequestParameters.t option
-        [@ocaml.doc
-          "A UpdateConnectionBasicAuthRequestParameters object that contains the authorization parameters for Basic authorization."];
+        [@ocaml.doc "The authorization parameters for Basic authorization."];
       oAuthParameters: UpdateConnectionOAuthRequestParameters.t option
-        [@ocaml.doc
-          "A UpdateConnectionOAuthRequestParameters object that contains the authorization parameters for OAuth authorization."];
+        [@ocaml.doc "The authorization parameters for OAuth authorization."];
       apiKeyAuthParameters:
         UpdateConnectionApiKeyAuthRequestParameters.t option
         [@ocaml.doc
-          "A UpdateConnectionApiKeyAuthRequestParameters object that contains the authorization parameters for API key authorization."];
+          "The authorization parameters for API key authorization."];
       invocationHttpParameters: ConnectionHttpParameters.t option
+        [@ocaml.doc "The additional parameters to use for the connection."];
+      connectivityParameters: ConnectivityResourceParameters.t option
         [@ocaml.doc
-          "A ConnectionHttpParameters object that contains the additional parameters to use for the connection."]}
+          "If you specify a private OAuth endpoint, the parameters for EventBridge to use when authenticating against the endpoint. For more information, see Authorization methods for connections in the Amazon EventBridge User Guide ."]}
     let make ?basicAuthParameters =
       fun ?oAuthParameters ->
         fun ?apiKeyAuthParameters ->
           fun ?invocationHttpParameters ->
-            fun () ->
-              {
-                basicAuthParameters;
-                oAuthParameters;
-                apiKeyAuthParameters;
-                invocationHttpParameters
-              }
+            fun ?connectivityParameters ->
+              fun () ->
+                {
+                  basicAuthParameters;
+                  oAuthParameters;
+                  apiKeyAuthParameters;
+                  invocationHttpParameters;
+                  connectivityParameters
+                }
     let to_value x =
       structure_to_value
         [("BasicAuthParameters",
@@ -5580,9 +6258,15 @@ module UpdateConnectionAuthRequestParameters =
              ~f:UpdateConnectionApiKeyAuthRequestParameters.to_value));
         ("InvocationHttpParameters",
           (Option.map x.invocationHttpParameters
-             ~f:ConnectionHttpParameters.to_value))]
+             ~f:ConnectionHttpParameters.to_value));
+        ("ConnectivityParameters",
+          (Option.map x.connectivityParameters
+             ~f:ConnectivityResourceParameters.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let connectivityParameters =
+        (Option.map ~f:ConnectivityResourceParameters.of_xml)
+          (Xml.child xml_arg0 "ConnectivityParameters") in
       let invocationHttpParameters =
         (Option.map ~f:ConnectionHttpParameters.of_xml)
           (Xml.child xml_arg0 "InvocationHttpParameters") in
@@ -5595,49 +6279,30 @@ module UpdateConnectionAuthRequestParameters =
       let basicAuthParameters =
         (Option.map ~f:UpdateConnectionBasicAuthRequestParameters.of_xml)
           (Xml.child xml_arg0 "BasicAuthParameters") in
-      make ?invocationHttpParameters ?apiKeyAuthParameters ?oAuthParameters
-        ?basicAuthParameters ()
+      make ?connectivityParameters ?invocationHttpParameters
+        ?apiKeyAuthParameters ?oAuthParameters ?basicAuthParameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let connectivityParameters =
+        field_map json__ "ConnectivityParameters"
+          ConnectivityResourceParameters.of_json in
       let invocationHttpParameters =
-        field_map json "InvocationHttpParameters"
+        field_map json__ "InvocationHttpParameters"
           ConnectionHttpParameters.of_json in
       let apiKeyAuthParameters =
-        field_map json "ApiKeyAuthParameters"
+        field_map json__ "ApiKeyAuthParameters"
           UpdateConnectionApiKeyAuthRequestParameters.of_json in
       let oAuthParameters =
-        field_map json "OAuthParameters"
+        field_map json__ "OAuthParameters"
           UpdateConnectionOAuthRequestParameters.of_json in
       let basicAuthParameters =
-        field_map json "BasicAuthParameters"
+        field_map json__ "BasicAuthParameters"
           UpdateConnectionBasicAuthRequestParameters.of_json in
-      make ?invocationHttpParameters ?apiKeyAuthParameters ?oAuthParameters
-        ?basicAuthParameters ()
+      make ?connectivityParameters ?invocationHttpParameters
+        ?apiKeyAuthParameters ?oAuthParameters ?basicAuthParameters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the additional parameters to use for the connection."]
-module ArchiveArn =
-  struct
-    type nonrec t = string
-    let context_ = "ArchiveArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:1600) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^arn:aws([a-z]|\\-)*:events:([a-z]|\\d|\\-)*:([0-9]{12})?:.+\\/.+$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ArchiveArn" j
-    let to_json = simple_to_json to_value
-  end
 module InvalidEventPatternException =
   struct
     type nonrec t = unit
@@ -5703,6 +6368,9 @@ module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5798,10 +6466,10 @@ module ReplayDestination =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?filterArns ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let filterArns =
-        field_map json "FilterArns" ReplayDestinationFilters.of_json in
-      let arn = field_map_exn json "Arn" Arn.of_json in
+        field_map json__ "FilterArns" ReplayDestinationFilters.of_json in
+      let arn = field_map_exn json__ "Arn" Arn.of_json in
       make ?filterArns ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5810,6 +6478,9 @@ module RemoveTargetsResultEntryList =
   struct
     type nonrec t = RemoveTargetsResultEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RemoveTargetsResultEntry.to_value)) |>
         (fun x -> `List x)
@@ -5844,7 +6515,7 @@ module EventBusNameOrArn =
                 (check_string_max i ~max:1600) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"(arn:aws[\\w-]*:events:[a-z]{2}-[a-z]+-[\\w-]+:[0-9]{12}:event-bus\\/)?[/\\.\\-_A-Za-z0-9]+")));
+                       ~pattern:"(arn:aws[\\w-]*:events:[a-z]+-[a-z]+-[\\w-]+:[0-9]{12}:event-bus\\/)?[/\\.\\-_A-Za-z0-9]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -5863,6 +6534,9 @@ module TargetIdList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5927,6 +6601,9 @@ module PutTargetsResultEntryList =
   struct
     type nonrec t = PutTargetsResultEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PutTargetsResultEntry.to_value)) |>
         (fun x -> `List x)
@@ -5958,6 +6635,9 @@ module TargetList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Target.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6028,10 +6708,10 @@ module Condition =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~value ~key ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" String_.of_json in
-      let key = field_map_exn json "Key" String_.of_json in
-      let type_ = field_map_exn json "Type" String_.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" String_.of_json in
+      let key = field_map_exn json__ "Key" String_.of_json in
+      let type_ = field_map_exn json__ "Type" String_.of_json in
       make ~value ~key ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6056,23 +6736,13 @@ module Principal =
     let of_json j = string_of_json ~kind:"Principal" j
     let to_json = simple_to_json to_value
   end
-module OperationDisabledException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The operation you are attempting is not available in this region."]
 module PutPartnerEventsResultEntryList =
   struct
     type nonrec t = PutPartnerEventsResultEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PutPartnerEventsResultEntry.to_value)) |>
         (fun x -> `List x)
@@ -6103,6 +6773,9 @@ module PutPartnerEventsRequestEntryList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PutPartnerEventsRequestEntry.to_value)) |>
         (fun x -> `List x)
@@ -6129,6 +6802,9 @@ module PutEventsResultEntryList =
   struct
     type nonrec t = PutEventsResultEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PutEventsResultEntry.to_value)) |>
         (fun x -> `List x)
@@ -6159,6 +6835,9 @@ module PutEventsRequestEntryList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PutEventsRequestEntry.to_value)) |>
         (fun x -> `List x)
@@ -6221,6 +6900,9 @@ module RuleResponseList =
   struct
     type nonrec t = Rule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Rule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6245,6 +6927,9 @@ module RuleNameList =
   struct
     type nonrec t = RuleName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RuleName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6269,6 +6954,9 @@ module ReplayList =
   struct
     type nonrec t = Replay.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Replay.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6292,6 +6980,9 @@ module PartnerEventSourceList =
   struct
     type nonrec t = PartnerEventSource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PartnerEventSource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6339,6 +7030,9 @@ module PartnerEventSourceAccountList =
   struct
     type nonrec t = PartnerEventSourceAccount.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PartnerEventSourceAccount.to_value)) |>
         (fun x -> `List x)
@@ -6365,6 +7059,9 @@ module EventSourceList =
   struct
     type nonrec t = EventSource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventSource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6409,6 +7106,9 @@ module EventBusList =
   struct
     type nonrec t = EventBus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventBus.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6433,6 +7133,9 @@ module EndpointList =
   struct
     type nonrec t = Endpoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Endpoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6477,6 +7180,9 @@ module ConnectionResponseList =
   struct
     type nonrec t = Connection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Connection.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6502,6 +7208,9 @@ module ArchiveResponseList =
   struct
     type nonrec t = Archive.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Archive.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6526,6 +7235,9 @@ module ApiDestinationResponseList =
   struct
     type nonrec t = ApiDestination.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApiDestination.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6577,18 +7289,24 @@ module ConnectionAuthResponseParameters =
         [@ocaml.doc "The API Key parameters to use for authorization."];
       invocationHttpParameters: ConnectionHttpParameters.t option
         [@ocaml.doc
-          "Additional parameters for the connection that are passed through with every invocation to the HTTP endpoint."]}
+          "Additional parameters for the connection that are passed through with every invocation to the HTTP endpoint."];
+      connectivityParameters:
+        DescribeConnectionConnectivityParameters.t option
+        [@ocaml.doc
+          "For private OAuth authentication endpoints. The parameters EventBridge uses to authenticate against the endpoint. For more information, see Authorization methods for connections in the Amazon EventBridge User Guide ."]}
     let make ?basicAuthParameters =
       fun ?oAuthParameters ->
         fun ?apiKeyAuthParameters ->
           fun ?invocationHttpParameters ->
-            fun () ->
-              {
-                basicAuthParameters;
-                oAuthParameters;
-                apiKeyAuthParameters;
-                invocationHttpParameters
-              }
+            fun ?connectivityParameters ->
+              fun () ->
+                {
+                  basicAuthParameters;
+                  oAuthParameters;
+                  apiKeyAuthParameters;
+                  invocationHttpParameters;
+                  connectivityParameters
+                }
     let to_value x =
       structure_to_value
         [("BasicAuthParameters",
@@ -6602,9 +7320,15 @@ module ConnectionAuthResponseParameters =
              ~f:ConnectionApiKeyAuthResponseParameters.to_value));
         ("InvocationHttpParameters",
           (Option.map x.invocationHttpParameters
-             ~f:ConnectionHttpParameters.to_value))]
+             ~f:ConnectionHttpParameters.to_value));
+        ("ConnectivityParameters",
+          (Option.map x.connectivityParameters
+             ~f:DescribeConnectionConnectivityParameters.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let connectivityParameters =
+        (Option.map ~f:DescribeConnectionConnectivityParameters.of_xml)
+          (Xml.child xml_arg0 "ConnectivityParameters") in
       let invocationHttpParameters =
         (Option.map ~f:ConnectionHttpParameters.of_xml)
           (Xml.child xml_arg0 "InvocationHttpParameters") in
@@ -6617,27 +7341,29 @@ module ConnectionAuthResponseParameters =
       let basicAuthParameters =
         (Option.map ~f:ConnectionBasicAuthResponseParameters.of_xml)
           (Xml.child xml_arg0 "BasicAuthParameters") in
-      make ?invocationHttpParameters ?apiKeyAuthParameters ?oAuthParameters
-        ?basicAuthParameters ()
+      make ?connectivityParameters ?invocationHttpParameters
+        ?apiKeyAuthParameters ?oAuthParameters ?basicAuthParameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let connectivityParameters =
+        field_map json__ "ConnectivityParameters"
+          DescribeConnectionConnectivityParameters.of_json in
       let invocationHttpParameters =
-        field_map json "InvocationHttpParameters"
+        field_map json__ "InvocationHttpParameters"
           ConnectionHttpParameters.of_json in
       let apiKeyAuthParameters =
-        field_map json "ApiKeyAuthParameters"
+        field_map json__ "ApiKeyAuthParameters"
           ConnectionApiKeyAuthResponseParameters.of_json in
       let oAuthParameters =
-        field_map json "OAuthParameters"
+        field_map json__ "OAuthParameters"
           ConnectionOAuthResponseParameters.of_json in
       let basicAuthParameters =
-        field_map json "BasicAuthParameters"
+        field_map json__ "BasicAuthParameters"
           ConnectionBasicAuthResponseParameters.of_json in
-      make ?invocationHttpParameters ?apiKeyAuthParameters ?oAuthParameters
-        ?basicAuthParameters ()
+      make ?connectivityParameters ?invocationHttpParameters
+        ?apiKeyAuthParameters ?oAuthParameters ?basicAuthParameters ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Contains the authorization parameters to use for the connection."]
+  end[@@ocaml.doc "Tthe authorization parameters to use for the connection."]
 module SecretsManagerSecretArn =
   struct
     type nonrec t = string
@@ -6680,28 +7406,33 @@ module CreateConnectionAuthRequestParameters =
       basicAuthParameters:
         CreateConnectionBasicAuthRequestParameters.t option
         [@ocaml.doc
-          "A CreateConnectionBasicAuthRequestParameters object that contains the Basic authorization parameters to use for the connection."];
+          "The Basic authorization parameters to use for the connection."];
       oAuthParameters: CreateConnectionOAuthRequestParameters.t option
         [@ocaml.doc
-          "A CreateConnectionOAuthRequestParameters object that contains the OAuth authorization parameters to use for the connection."];
+          "The OAuth authorization parameters to use for the connection."];
       apiKeyAuthParameters:
         CreateConnectionApiKeyAuthRequestParameters.t option
         [@ocaml.doc
-          "A CreateConnectionApiKeyAuthRequestParameters object that contains the API key authorization parameters to use for the connection."];
+          "The API key authorization parameters to use for the connection."];
       invocationHttpParameters: ConnectionHttpParameters.t option
         [@ocaml.doc
-          "A ConnectionHttpParameters object that contains the API key authorization parameters to use for the connection. Note that if you include additional parameters for the target of a rule via HttpParameters, including query strings, the parameters added for the connection take precedence."]}
+          "The API key authorization parameters to use for the connection. Note that if you include additional parameters for the target of a rule via HttpParameters, including query strings, the parameters added for the connection take precedence."];
+      connectivityParameters: ConnectivityResourceParameters.t option
+        [@ocaml.doc
+          "If you specify a private OAuth endpoint, the parameters for EventBridge to use when authenticating against the endpoint. For more information, see Authorization methods for connections in the Amazon EventBridge User Guide ."]}
     let make ?basicAuthParameters =
       fun ?oAuthParameters ->
         fun ?apiKeyAuthParameters ->
           fun ?invocationHttpParameters ->
-            fun () ->
-              {
-                basicAuthParameters;
-                oAuthParameters;
-                apiKeyAuthParameters;
-                invocationHttpParameters
-              }
+            fun ?connectivityParameters ->
+              fun () ->
+                {
+                  basicAuthParameters;
+                  oAuthParameters;
+                  apiKeyAuthParameters;
+                  invocationHttpParameters;
+                  connectivityParameters
+                }
     let to_value x =
       structure_to_value
         [("BasicAuthParameters",
@@ -6715,9 +7446,15 @@ module CreateConnectionAuthRequestParameters =
              ~f:CreateConnectionApiKeyAuthRequestParameters.to_value));
         ("InvocationHttpParameters",
           (Option.map x.invocationHttpParameters
-             ~f:ConnectionHttpParameters.to_value))]
+             ~f:ConnectionHttpParameters.to_value));
+        ("ConnectivityParameters",
+          (Option.map x.connectivityParameters
+             ~f:ConnectivityResourceParameters.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let connectivityParameters =
+        (Option.map ~f:ConnectivityResourceParameters.of_xml)
+          (Xml.child xml_arg0 "ConnectivityParameters") in
       let invocationHttpParameters =
         (Option.map ~f:ConnectionHttpParameters.of_xml)
           (Xml.child xml_arg0 "InvocationHttpParameters") in
@@ -6730,27 +7467,30 @@ module CreateConnectionAuthRequestParameters =
       let basicAuthParameters =
         (Option.map ~f:CreateConnectionBasicAuthRequestParameters.of_xml)
           (Xml.child xml_arg0 "BasicAuthParameters") in
-      make ?invocationHttpParameters ?apiKeyAuthParameters ?oAuthParameters
-        ?basicAuthParameters ()
+      make ?connectivityParameters ?invocationHttpParameters
+        ?apiKeyAuthParameters ?oAuthParameters ?basicAuthParameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let connectivityParameters =
+        field_map json__ "ConnectivityParameters"
+          ConnectivityResourceParameters.of_json in
       let invocationHttpParameters =
-        field_map json "InvocationHttpParameters"
+        field_map json__ "InvocationHttpParameters"
           ConnectionHttpParameters.of_json in
       let apiKeyAuthParameters =
-        field_map json "ApiKeyAuthParameters"
+        field_map json__ "ApiKeyAuthParameters"
           CreateConnectionApiKeyAuthRequestParameters.of_json in
       let oAuthParameters =
-        field_map json "OAuthParameters"
+        field_map json__ "OAuthParameters"
           CreateConnectionOAuthRequestParameters.of_json in
       let basicAuthParameters =
-        field_map json "BasicAuthParameters"
+        field_map json__ "BasicAuthParameters"
           CreateConnectionBasicAuthRequestParameters.of_json in
-      make ?invocationHttpParameters ?apiKeyAuthParameters ?oAuthParameters
-        ?basicAuthParameters ()
+      make ?connectivityParameters ?invocationHttpParameters
+        ?apiKeyAuthParameters ?oAuthParameters ?basicAuthParameters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains the authorization parameters for the connection."]
+       "The authorization parameters for the connection. You must include only authorization parameters for the AuthorizationType you specify."]
 module IllegalStatusException =
   struct
     type nonrec t = unit
@@ -6764,6 +7504,207 @@ module IllegalStatusException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An error occurred because a replay can be canceled only when the state is Running or Starting."]
+module UpdateEventBusResponse =
+  struct
+    type nonrec t =
+      {
+      arn: String_.t option
+        [@ocaml.doc "The event bus Amazon Resource Name (ARN)."];
+      name: EventBusName.t option [@ocaml.doc "The event bus name."];
+      kmsKeyIdentifier: KmsKeyIdentifier.t option
+        [@ocaml.doc
+          "The identifier of the KMS customer managed key for EventBridge to use to encrypt events on this event bus, if one has been specified. For more information, see Data encryption in EventBridge in the Amazon EventBridge User Guide."];
+      description: EventBusDescription.t option
+        [@ocaml.doc "The event bus description."];
+      deadLetterConfig: DeadLetterConfig.t option ;
+      logConfig: LogConfig.t option
+        [@ocaml.doc
+          "The logging configuration settings for the event bus. For more information, see Configuring logs for event buses in the EventBridge User Guide."]}
+    type nonrec error =
+      [
+        `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `InternalException of InternalException.t 
+      | `OperationDisabledException of OperationDisabledException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?arn =
+      fun ?name ->
+        fun ?kmsKeyIdentifier ->
+          fun ?description ->
+            fun ?deadLetterConfig ->
+              fun ?logConfig ->
+                fun () ->
+                  {
+                    arn;
+                    name;
+                    kmsKeyIdentifier;
+                    description;
+                    deadLetterConfig;
+                    logConfig
+                  }
+    let error_of_json name json =
+      match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "OperationDisabledException" ->
+          `OperationDisabledException
+            (OperationDisabledException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "OperationDisabledException" ->
+          `OperationDisabledException (OperationDisabledException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `OperationDisabledException e ->
+          `Assoc
+            [("error", (`String "OperationDisabledException"));
+            ("details", (OperationDisabledException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:String_.to_value));
+        ("Name", (Option.map x.name ~f:EventBusName.to_value));
+        ("KmsKeyIdentifier",
+          (Option.map x.kmsKeyIdentifier ~f:KmsKeyIdentifier.to_value));
+        ("Description",
+          (Option.map x.description ~f:EventBusDescription.to_value));
+        ("DeadLetterConfig",
+          (Option.map x.deadLetterConfig ~f:DeadLetterConfig.to_value));
+        ("LogConfig", (Option.map x.logConfig ~f:LogConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let logConfig =
+        (Option.map ~f:LogConfig.of_xml) (Xml.child xml_arg0 "LogConfig") in
+      let deadLetterConfig =
+        (Option.map ~f:DeadLetterConfig.of_xml)
+          (Xml.child xml_arg0 "DeadLetterConfig") in
+      let description =
+        (Option.map ~f:EventBusDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let kmsKeyIdentifier =
+        (Option.map ~f:KmsKeyIdentifier.of_xml)
+          (Xml.child xml_arg0 "KmsKeyIdentifier") in
+      let name =
+        (Option.map ~f:EventBusName.of_xml) (Xml.child xml_arg0 "Name") in
+      let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?logConfig ?deadLetterConfig ?description ?kmsKeyIdentifier ?name
+        ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let logConfig = field_map json__ "LogConfig" LogConfig.of_json in
+      let deadLetterConfig =
+        field_map json__ "DeadLetterConfig" DeadLetterConfig.of_json in
+      let description =
+        field_map json__ "Description" EventBusDescription.of_json in
+      let kmsKeyIdentifier =
+        field_map json__ "KmsKeyIdentifier" KmsKeyIdentifier.of_json in
+      let name = field_map json__ "Name" EventBusName.of_json in
+      let arn = field_map json__ "Arn" String_.of_json in
+      make ?logConfig ?deadLetterConfig ?description ?kmsKeyIdentifier ?name
+        ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the specified event bus."]
+module UpdateEventBusRequest =
+  struct
+    type nonrec t =
+      {
+      name: EventBusName.t option [@ocaml.doc "The name of the event bus."];
+      kmsKeyIdentifier: KmsKeyIdentifier.t option
+        [@ocaml.doc
+          "The identifier of the KMS customer managed key for EventBridge to use, if you choose to use a customer managed key to encrypt events on this event bus. The identifier can be the key Amazon Resource Name (ARN), KeyId, key alias, or key alias ARN. If you do not specify a customer managed key identifier, EventBridge uses an Amazon Web Services owned key to encrypt events on the event bus. For more information, see Identify and view keys in the Key Management Service Developer Guide. Schema discovery is not supported for event buses encrypted using a customer managed key. EventBridge returns an error if: You call CreateDiscoverer on an event bus set to use a customer managed key for encryption. You call UpdatedEventBus to set a customer managed key on an event bus with schema discovery enabled. To enable schema discovery on an event bus, choose to use an Amazon Web Services owned key. For more information, see Encrypting events in the Amazon EventBridge User Guide. If you have specified that EventBridge use a customer managed key for encrypting the source event bus, we strongly recommend you also specify a customer managed key for any archives for the event bus as well. For more information, see Encrypting archives in the Amazon EventBridge User Guide."];
+      description: EventBusDescription.t option
+        [@ocaml.doc "The event bus description."];
+      deadLetterConfig: DeadLetterConfig.t option ;
+      logConfig: LogConfig.t option
+        [@ocaml.doc
+          "The logging configuration settings for the event bus. For more information, see Configuring logs for event buses in the EventBridge User Guide."]}
+    let make ?name =
+      fun ?kmsKeyIdentifier ->
+        fun ?description ->
+          fun ?deadLetterConfig ->
+            fun ?logConfig ->
+              fun () ->
+                {
+                  name;
+                  kmsKeyIdentifier;
+                  description;
+                  deadLetterConfig;
+                  logConfig
+                }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:EventBusName.to_value));
+        ("KmsKeyIdentifier",
+          (Option.map x.kmsKeyIdentifier ~f:KmsKeyIdentifier.to_value));
+        ("Description",
+          (Option.map x.description ~f:EventBusDescription.to_value));
+        ("DeadLetterConfig",
+          (Option.map x.deadLetterConfig ~f:DeadLetterConfig.to_value));
+        ("LogConfig", (Option.map x.logConfig ~f:LogConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let logConfig =
+        (Option.map ~f:LogConfig.of_xml) (Xml.child xml_arg0 "LogConfig") in
+      let deadLetterConfig =
+        (Option.map ~f:DeadLetterConfig.of_xml)
+          (Xml.child xml_arg0 "DeadLetterConfig") in
+      let description =
+        (Option.map ~f:EventBusDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let kmsKeyIdentifier =
+        (Option.map ~f:KmsKeyIdentifier.of_xml)
+          (Xml.child xml_arg0 "KmsKeyIdentifier") in
+      let name =
+        (Option.map ~f:EventBusName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?logConfig ?deadLetterConfig ?description ?kmsKeyIdentifier ?name
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let logConfig = field_map json__ "LogConfig" LogConfig.of_json in
+      let deadLetterConfig =
+        field_map json__ "DeadLetterConfig" DeadLetterConfig.of_json in
+      let description =
+        field_map json__ "Description" EventBusDescription.of_json in
+      let kmsKeyIdentifier =
+        field_map json__ "KmsKeyIdentifier" KmsKeyIdentifier.of_json in
+      let name = field_map json__ "Name" EventBusName.of_json in
+      make ?logConfig ?deadLetterConfig ?description ?kmsKeyIdentifier ?name
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the specified event bus."]
 module UpdateEndpointResponse =
   struct
     type nonrec t =
@@ -6897,24 +7838,24 @@ module UpdateEndpointResponse =
       make ?state ?endpointUrl ?endpointId ?roleArn ?eventBuses
         ?replicationConfig ?routingConfig ?arn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" EndpointState.of_json in
-      let endpointUrl = field_map json "EndpointUrl" EndpointUrl.of_json in
-      let endpointId = field_map json "EndpointId" EndpointId.of_json in
-      let roleArn = field_map json "RoleArn" IamRoleArn.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" EndpointState.of_json in
+      let endpointUrl = field_map json__ "EndpointUrl" EndpointUrl.of_json in
+      let endpointId = field_map json__ "EndpointId" EndpointId.of_json in
+      let roleArn = field_map json__ "RoleArn" IamRoleArn.of_json in
       let eventBuses =
-        field_map json "EventBuses" EndpointEventBusList.of_json in
+        field_map json__ "EventBuses" EndpointEventBusList.of_json in
       let replicationConfig =
-        field_map json "ReplicationConfig" ReplicationConfig.of_json in
+        field_map json__ "ReplicationConfig" ReplicationConfig.of_json in
       let routingConfig =
-        field_map json "RoutingConfig" RoutingConfig.of_json in
-      let arn = field_map json "Arn" EndpointArn.of_json in
-      let name = field_map json "Name" EndpointName.of_json in
+        field_map json__ "RoutingConfig" RoutingConfig.of_json in
+      let arn = field_map json__ "Arn" EndpointArn.of_json in
+      let name = field_map json__ "Name" EndpointName.of_json in
       make ?state ?endpointUrl ?endpointId ?roleArn ?eventBuses
         ?replicationConfig ?routingConfig ?arn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Update an existing endpoint. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide.."]
+       "Update an existing endpoint. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide ."]
 module UpdateEndpointRequest =
   struct
     type nonrec t =
@@ -6925,7 +7866,7 @@ module UpdateEndpointRequest =
         [@ocaml.doc "A description for the endpoint."];
       routingConfig: RoutingConfig.t option
         [@ocaml.doc
-          "Configure the routing policy, including the health check and secondary Region.."];
+          "Configure the routing policy, including the health check and secondary Region."];
       replicationConfig: ReplicationConfig.t option
         [@ocaml.doc
           "Whether event replication was enabled or disabled by this request."];
@@ -6983,22 +7924,22 @@ module UpdateEndpointRequest =
       make ?roleArn ?eventBuses ?replicationConfig ?routingConfig
         ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "RoleArn" IamRoleArn.of_json in
+    let of_json json__ =
+      let roleArn = field_map json__ "RoleArn" IamRoleArn.of_json in
       let eventBuses =
-        field_map json "EventBuses" EndpointEventBusList.of_json in
+        field_map json__ "EventBuses" EndpointEventBusList.of_json in
       let replicationConfig =
-        field_map json "ReplicationConfig" ReplicationConfig.of_json in
+        field_map json__ "ReplicationConfig" ReplicationConfig.of_json in
       let routingConfig =
-        field_map json "RoutingConfig" RoutingConfig.of_json in
+        field_map json__ "RoutingConfig" RoutingConfig.of_json in
       let description =
-        field_map json "Description" EndpointDescription.of_json in
-      let name = field_map_exn json "Name" EndpointName.of_json in
+        field_map json__ "Description" EndpointDescription.of_json in
+      let name = field_map_exn json__ "Name" EndpointName.of_json in
       make ?roleArn ?eventBuses ?replicationConfig ?routingConfig
         ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Update an existing endpoint. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide.."]
+       "Update an existing endpoint. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide ."]
 module UpdateConnectionResponse =
   struct
     type nonrec t =
@@ -7017,11 +7958,12 @@ module UpdateConnectionResponse =
         [@ocaml.doc
           "A time stamp for the time that the connection was last authorized."]}
     type nonrec error =
-      [
-        `ConcurrentModificationException of ConcurrentModificationException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
       | `InternalException of InternalException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?connectionArn =
       fun ?connectionState ->
@@ -7038,6 +7980,8 @@ module UpdateConnectionResponse =
                 }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "ConcurrentModificationException" ->
           `ConcurrentModificationException
             (ConcurrentModificationException.of_json json)
@@ -7047,11 +7991,15 @@ module UpdateConnectionResponse =
           `LimitExceededException (LimitExceededException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "ConcurrentModificationException" ->
           `ConcurrentModificationException
             (ConcurrentModificationException.of_xml xml)
@@ -7061,10 +8009,16 @@ module UpdateConnectionResponse =
           `LimitExceededException (LimitExceededException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `ConcurrentModificationException e ->
           `Assoc
             [("error", (`String "ConcurrentModificationException"));
@@ -7081,6 +8035,10 @@ module UpdateConnectionResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -7116,16 +8074,16 @@ module UpdateConnectionResponse =
       make ?lastAuthorizedTime ?lastModifiedTime ?creationTime
         ?connectionState ?connectionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastAuthorizedTime =
-        field_map json "LastAuthorizedTime" Timestamp.of_json in
+        field_map json__ "LastAuthorizedTime" Timestamp.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let connectionState =
-        field_map json "ConnectionState" ConnectionState.of_json in
+        field_map json__ "ConnectionState" ConnectionState.of_json in
       let connectionArn =
-        field_map json "ConnectionArn" ConnectionArn.of_json in
+        field_map json__ "ConnectionArn" ConnectionArn.of_json in
       make ?lastAuthorizedTime ?lastModifiedTime ?creationTime
         ?connectionState ?connectionArn ()
     let to_json v = composed_to_json to_value v
@@ -7142,14 +8100,30 @@ module UpdateConnectionRequest =
         [@ocaml.doc "The type of authorization to use for the connection."];
       authParameters: UpdateConnectionAuthRequestParameters.t option
         [@ocaml.doc
-          "The authorization parameters to use for the connection."]}
+          "The authorization parameters to use for the connection."];
+      invocationConnectivityParameters:
+        ConnectivityResourceParameters.t option
+        [@ocaml.doc
+          "For connections to private APIs, the parameters to use for invoking the API. For more information, see Connecting to private APIs in the Amazon EventBridge User Guide ."];
+      kmsKeyIdentifier: KmsKeyIdentifier.t option
+        [@ocaml.doc
+          "The identifier of the KMS customer managed key for EventBridge to use, if you choose to use a customer managed key to encrypt this connection. The identifier can be the key Amazon Resource Name (ARN), KeyId, key alias, or key alias ARN. If you do not specify a customer managed key identifier, EventBridge uses an Amazon Web Services owned key to encrypt the connection. For more information, see Identify and view keys in the Key Management Service Developer Guide."]}
     let context_ = "UpdateConnectionRequest"
     let make ?description =
       fun ?authorizationType ->
         fun ?authParameters ->
-          fun ~name ->
-            fun () ->
-              { description; authorizationType; authParameters; name }
+          fun ?invocationConnectivityParameters ->
+            fun ?kmsKeyIdentifier ->
+              fun ~name ->
+                fun () ->
+                  {
+                    description;
+                    authorizationType;
+                    authParameters;
+                    invocationConnectivityParameters;
+                    kmsKeyIdentifier;
+                    name
+                  }
     let to_value x =
       structure_to_value
         [("Name", (Some (ConnectionName.to_value x.name)));
@@ -7160,9 +8134,20 @@ module UpdateConnectionRequest =
              ~f:ConnectionAuthorizationType.to_value));
         ("AuthParameters",
           (Option.map x.authParameters
-             ~f:UpdateConnectionAuthRequestParameters.to_value))]
+             ~f:UpdateConnectionAuthRequestParameters.to_value));
+        ("InvocationConnectivityParameters",
+          (Option.map x.invocationConnectivityParameters
+             ~f:ConnectivityResourceParameters.to_value));
+        ("KmsKeyIdentifier",
+          (Option.map x.kmsKeyIdentifier ~f:KmsKeyIdentifier.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let kmsKeyIdentifier =
+        (Option.map ~f:KmsKeyIdentifier.of_xml)
+          (Xml.child xml_arg0 "KmsKeyIdentifier") in
+      let invocationConnectivityParameters =
+        (Option.map ~f:ConnectivityResourceParameters.of_xml)
+          (Xml.child xml_arg0 "InvocationConnectivityParameters") in
       let authParameters =
         (Option.map ~f:UpdateConnectionAuthRequestParameters.of_xml)
           (Xml.child xml_arg0 "AuthParameters") in
@@ -7175,19 +8160,26 @@ module UpdateConnectionRequest =
       let name =
         ConnectionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?authParameters ?authorizationType ?description ~name ()
+      make ?kmsKeyIdentifier ?invocationConnectivityParameters
+        ?authParameters ?authorizationType ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let kmsKeyIdentifier =
+        field_map json__ "KmsKeyIdentifier" KmsKeyIdentifier.of_json in
+      let invocationConnectivityParameters =
+        field_map json__ "InvocationConnectivityParameters"
+          ConnectivityResourceParameters.of_json in
       let authParameters =
-        field_map json "AuthParameters"
+        field_map json__ "AuthParameters"
           UpdateConnectionAuthRequestParameters.of_json in
       let authorizationType =
-        field_map json "AuthorizationType"
+        field_map json__ "AuthorizationType"
           ConnectionAuthorizationType.of_json in
       let description =
-        field_map json "Description" ConnectionDescription.of_json in
-      let name = field_map_exn json "Name" ConnectionName.of_json in
-      make ?authParameters ?authorizationType ?description ~name ()
+        field_map json__ "Description" ConnectionDescription.of_json in
+      let name = field_map_exn json__ "Name" ConnectionName.of_json in
+      make ?kmsKeyIdentifier ?invocationConnectivityParameters
+        ?authParameters ?authorizationType ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates settings for a connection."]
 module UpdateArchiveResponse =
@@ -7293,12 +8285,12 @@ module UpdateArchiveResponse =
         (Option.map ~f:ArchiveArn.of_xml) (Xml.child xml_arg0 "ArchiveArn") in
       make ?creationTime ?stateReason ?state ?archiveArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
+    let of_json json__ =
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let stateReason =
-        field_map json "StateReason" ArchiveStateReason.of_json in
-      let state = field_map json "State" ArchiveState.of_json in
-      let archiveArn = field_map json "ArchiveArn" ArchiveArn.of_json in
+        field_map json__ "StateReason" ArchiveStateReason.of_json in
+      let state = field_map json__ "State" ArchiveState.of_json in
+      let archiveArn = field_map json__ "ArchiveArn" ArchiveArn.of_json in
       make ?creationTime ?stateReason ?state ?archiveArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the specified archive."]
@@ -7314,14 +8306,24 @@ module UpdateArchiveRequest =
         [@ocaml.doc
           "The event pattern to use to filter events sent to the archive."];
       retentionDays: RetentionDays.t option
-        [@ocaml.doc "The number of days to retain events in the archive."]}
+        [@ocaml.doc "The number of days to retain events in the archive."];
+      kmsKeyIdentifier: KmsKeyIdentifier.t option
+        [@ocaml.doc
+          "The identifier of the KMS customer managed key for EventBridge to use, if you choose to use a customer managed key to encrypt this archive. The identifier can be the key Amazon Resource Name (ARN), KeyId, key alias, or key alias ARN. If you do not specify a customer managed key identifier, EventBridge uses an Amazon Web Services owned key to encrypt the archive. For more information, see Identify and view keys in the Key Management Service Developer Guide. If you have specified that EventBridge use a customer managed key for encrypting the source event bus, we strongly recommend you also specify a customer managed key for any archives for the event bus as well. For more information, see Encrypting archives in the Amazon EventBridge User Guide."]}
     let context_ = "UpdateArchiveRequest"
     let make ?description =
       fun ?eventPattern ->
         fun ?retentionDays ->
-          fun ~archiveName ->
-            fun () ->
-              { description; eventPattern; retentionDays; archiveName }
+          fun ?kmsKeyIdentifier ->
+            fun ~archiveName ->
+              fun () ->
+                {
+                  description;
+                  eventPattern;
+                  retentionDays;
+                  kmsKeyIdentifier;
+                  archiveName
+                }
     let to_value x =
       structure_to_value
         [("ArchiveName", (Some (ArchiveName.to_value x.archiveName)));
@@ -7330,9 +8332,14 @@ module UpdateArchiveRequest =
         ("EventPattern",
           (Option.map x.eventPattern ~f:EventPattern.to_value));
         ("RetentionDays",
-          (Option.map x.retentionDays ~f:RetentionDays.to_value))]
+          (Option.map x.retentionDays ~f:RetentionDays.to_value));
+        ("KmsKeyIdentifier",
+          (Option.map x.kmsKeyIdentifier ~f:KmsKeyIdentifier.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let kmsKeyIdentifier =
+        (Option.map ~f:KmsKeyIdentifier.of_xml)
+          (Xml.child xml_arg0 "KmsKeyIdentifier") in
       let retentionDays =
         (Option.map ~f:RetentionDays.of_xml)
           (Xml.child xml_arg0 "RetentionDays") in
@@ -7345,16 +8352,21 @@ module UpdateArchiveRequest =
       let archiveName =
         ArchiveName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ArchiveName") in
-      make ?retentionDays ?eventPattern ?description ~archiveName ()
+      make ?kmsKeyIdentifier ?retentionDays ?eventPattern ?description
+        ~archiveName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let kmsKeyIdentifier =
+        field_map json__ "KmsKeyIdentifier" KmsKeyIdentifier.of_json in
       let retentionDays =
-        field_map json "RetentionDays" RetentionDays.of_json in
-      let eventPattern = field_map json "EventPattern" EventPattern.of_json in
+        field_map json__ "RetentionDays" RetentionDays.of_json in
+      let eventPattern = field_map json__ "EventPattern" EventPattern.of_json in
       let description =
-        field_map json "Description" ArchiveDescription.of_json in
-      let archiveName = field_map_exn json "ArchiveName" ArchiveName.of_json in
-      make ?retentionDays ?eventPattern ?description ~archiveName ()
+        field_map json__ "Description" ArchiveDescription.of_json in
+      let archiveName =
+        field_map_exn json__ "ArchiveName" ArchiveName.of_json in
+      make ?kmsKeyIdentifier ?retentionDays ?eventPattern ?description
+        ~archiveName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the specified archive."]
 module UpdateApiDestinationResponse =
@@ -7464,14 +8476,14 @@ module UpdateApiDestinationResponse =
       make ?lastModifiedTime ?creationTime ?apiDestinationState
         ?apiDestinationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let apiDestinationState =
-        field_map json "ApiDestinationState" ApiDestinationState.of_json in
+        field_map json__ "ApiDestinationState" ApiDestinationState.of_json in
       let apiDestinationArn =
-        field_map json "ApiDestinationArn" ApiDestinationArn.of_json in
+        field_map json__ "ApiDestinationArn" ApiDestinationArn.of_json in
       make ?lastModifiedTime ?creationTime ?apiDestinationState
         ?apiDestinationArn ()
     let to_json v = composed_to_json to_value v
@@ -7549,19 +8561,19 @@ module UpdateApiDestinationRequest =
       make ?invocationRateLimitPerSecond ?httpMethod ?invocationEndpoint
         ?connectionArn ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let invocationRateLimitPerSecond =
-        field_map json "InvocationRateLimitPerSecond"
+        field_map json__ "InvocationRateLimitPerSecond"
           ApiDestinationInvocationRateLimitPerSecond.of_json in
       let httpMethod =
-        field_map json "HttpMethod" ApiDestinationHttpMethod.of_json in
+        field_map json__ "HttpMethod" ApiDestinationHttpMethod.of_json in
       let invocationEndpoint =
-        field_map json "InvocationEndpoint" HttpsEndpoint.of_json in
+        field_map json__ "InvocationEndpoint" HttpsEndpoint.of_json in
       let connectionArn =
-        field_map json "ConnectionArn" ConnectionArn.of_json in
+        field_map json__ "ConnectionArn" ConnectionArn.of_json in
       let description =
-        field_map json "Description" ApiDestinationDescription.of_json in
-      let name = field_map_exn json "Name" ApiDestinationName.of_json in
+        field_map json__ "Description" ApiDestinationDescription.of_json in
+      let name = field_map_exn json__ "Name" ApiDestinationName.of_json in
       make ?invocationRateLimitPerSecond ?httpMethod ?invocationEndpoint
         ?connectionArn ?description ~name ()
     let to_json v = composed_to_json to_value v
@@ -7635,7 +8647,7 @@ module UntagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes one or more tags from the specified EventBridge resource. In Amazon EventBridge (CloudWatch Events), rules and event buses can be tagged."]
+       "Removes one or more tags from the specified EventBridge resource. In Amazon EventBridge, rules and event buses can be tagged."]
 module UntagResourceRequest =
   struct
     type nonrec t =
@@ -7661,13 +8673,13 @@ module UntagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceARN = field_map_exn json__ "ResourceARN" Arn.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes one or more tags from the specified EventBridge resource. In Amazon EventBridge (CloudWatch Events), rules and event buses can be tagged."]
+       "Removes one or more tags from the specified EventBridge resource. In Amazon EventBridge, rules and event buses can be tagged."]
 module TestEventPatternResponse =
   struct
     type nonrec t =
@@ -7722,8 +8734,9 @@ module TestEventPatternResponse =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Result") in
       make ?result ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let result = field_map json "Result" Boolean.of_json in make ?result ()
+    let of_json json__ =
+      let result = field_map json__ "Result" Boolean.of_json in
+      make ?result ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Tests whether the specified event pattern matches the provided event. Most services in Amazon Web Services treat : or / as the same character in Amazon Resource Names (ARNs). However, EventBridge uses an exact match in event patterns and rules. Be sure to use the correct ARN characters when creating event patterns so that they match the ARN syntax in the event you want to match."]
@@ -7733,7 +8746,7 @@ module TestEventPatternRequest =
       {
       eventPattern: EventPattern.t
         [@ocaml.doc
-          "The event pattern. For more information, see Events and Event Patterns in the Amazon EventBridge User Guide."];
+          "The event pattern. For more information, see Events and Event Patterns in the Amazon EventBridge User Guide ."];
       event: String_.t
         [@ocaml.doc
           "The event, in JSON format, to test against the event pattern. The JSON must follow the format specified in Amazon Web Services Events, and the following fields are mandatory: id account source time region resources detail-type"]}
@@ -7752,10 +8765,10 @@ module TestEventPatternRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EventPattern") in
       make ~event ~eventPattern ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let event = field_map_exn json "Event" String_.of_json in
+    let of_json json__ =
+      let event = field_map_exn json__ "Event" String_.of_json in
       let eventPattern =
-        field_map_exn json "EventPattern" EventPattern.of_json in
+        field_map_exn json__ "EventPattern" EventPattern.of_json in
       make ~event ~eventPattern ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7854,9 +8867,9 @@ module TagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceARN = field_map_exn json__ "ResourceARN" Arn.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7965,13 +8978,13 @@ module StartReplayResponse =
         (Option.map ~f:ReplayArn.of_xml) (Xml.child xml_arg0 "ReplayArn") in
       make ?replayStartTime ?stateReason ?state ?replayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replayStartTime =
-        field_map json "ReplayStartTime" Timestamp.of_json in
+        field_map json__ "ReplayStartTime" Timestamp.of_json in
       let stateReason =
-        field_map json "StateReason" ReplayStateReason.of_json in
-      let state = field_map json "State" ReplayState.of_json in
-      let replayArn = field_map json "ReplayArn" ReplayArn.of_json in
+        field_map json__ "StateReason" ReplayStateReason.of_json in
+      let state = field_map json__ "State" ReplayState.of_json in
+      let replayArn = field_map json__ "ReplayArn" ReplayArn.of_json in
       make ?replayStartTime ?stateReason ?state ?replayArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7984,7 +8997,7 @@ module StartReplayRequest =
         [@ocaml.doc "The name of the replay to start."];
       description: ReplayDescription.t option
         [@ocaml.doc "A description for the replay to start."];
-      eventSourceArn: Arn.t
+      eventSourceArn: ArchiveArn.t
         [@ocaml.doc "The ARN of the archive to replay events from."];
       eventStartTime: Timestamp.t
         [@ocaml.doc
@@ -8016,7 +9029,7 @@ module StartReplayRequest =
         [("ReplayName", (Some (ReplayName.to_value x.replayName)));
         ("Description",
           (Option.map x.description ~f:ReplayDescription.to_value));
-        ("EventSourceArn", (Some (Arn.to_value x.eventSourceArn)));
+        ("EventSourceArn", (Some (ArchiveArn.to_value x.eventSourceArn)));
         ("EventStartTime", (Some (Timestamp.to_value x.eventStartTime)));
         ("EventEndTime", (Some (Timestamp.to_value x.eventEndTime)));
         ("Destination", (Some (ReplayDestination.to_value x.destination)))]
@@ -8032,7 +9045,7 @@ module StartReplayRequest =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EventStartTime") in
       let eventSourceArn =
-        Arn.of_xml
+        ArchiveArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EventSourceArn") in
       let description =
         (Option.map ~f:ReplayDescription.of_xml)
@@ -8043,16 +9056,18 @@ module StartReplayRequest =
       make ~destination ~eventEndTime ~eventStartTime ~eventSourceArn
         ?description ~replayName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destination =
-        field_map_exn json "Destination" ReplayDestination.of_json in
-      let eventEndTime = field_map_exn json "EventEndTime" Timestamp.of_json in
+        field_map_exn json__ "Destination" ReplayDestination.of_json in
+      let eventEndTime =
+        field_map_exn json__ "EventEndTime" Timestamp.of_json in
       let eventStartTime =
-        field_map_exn json "EventStartTime" Timestamp.of_json in
-      let eventSourceArn = field_map_exn json "EventSourceArn" Arn.of_json in
+        field_map_exn json__ "EventStartTime" Timestamp.of_json in
+      let eventSourceArn =
+        field_map_exn json__ "EventSourceArn" ArchiveArn.of_json in
       let description =
-        field_map json "Description" ReplayDescription.of_json in
-      let replayName = field_map_exn json "ReplayName" ReplayName.of_json in
+        field_map json__ "Description" ReplayDescription.of_json in
+      let replayName = field_map_exn json__ "ReplayName" ReplayName.of_json in
       make ~destination ~eventEndTime ~eventStartTime ~eventSourceArn
         ?description ~replayName ()
     let to_json v = composed_to_json to_value v
@@ -8142,15 +9157,15 @@ module RemoveTargetsResponse =
           (Xml.child xml_arg0 "FailedEntryCount") in
       make ?failedEntries ?failedEntryCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedEntries =
-        field_map json "FailedEntries" RemoveTargetsResultEntryList.of_json in
+        field_map json__ "FailedEntries" RemoveTargetsResultEntryList.of_json in
       let failedEntryCount =
-        field_map json "FailedEntryCount" Integer.of_json in
+        field_map json__ "FailedEntryCount" Integer.of_json in
       make ?failedEntries ?failedEntryCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specified targets from the specified rule. When the rule is triggered, those targets are no longer be invoked. A successful execution of RemoveTargets doesn't guarantee all targets are removed from the rule, it means that the target(s) listed in the request are removed. When you remove a target, when the associated rule triggers, removed targets might continue to be invoked. Allow a short period of time for changes to take effect. This action can partially fail if too many requests are made at the same time. If that happens, FailedEntryCount is non-zero in the response and each entry in FailedEntries provides the ID of the failed target and the error code."]
+       "Removes the specified targets from the specified rule. When the rule is triggered, those targets are no longer be invoked. A successful execution of RemoveTargets doesn't guarantee all targets are removed from the rule, it means that the target(s) listed in the request are removed. When you remove a target, when the associated rule triggers, removed targets might continue to be invoked. Allow a short period of time for changes to take effect. This action can partially fail if too many requests are made at the same time. If that happens, FailedEntryCount is non-zero in the response and each entry in FailedEntries provides the ID of the failed target and the error code. The maximum number of entries per request is 10."]
 module RemoveTargetsRequest =
   struct
     type nonrec t =
@@ -8187,16 +9202,16 @@ module RemoveTargetsRequest =
         RuleName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Rule") in
       make ?force ~ids ?eventBusName ~rule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let force = field_map json "Force" Boolean.of_json in
-      let ids = field_map_exn json "Ids" TargetIdList.of_json in
+    let of_json json__ =
+      let force = field_map json__ "Force" Boolean.of_json in
+      let ids = field_map_exn json__ "Ids" TargetIdList.of_json in
       let eventBusName =
-        field_map json "EventBusName" EventBusNameOrArn.of_json in
-      let rule = field_map_exn json "Rule" RuleName.of_json in
+        field_map json__ "EventBusName" EventBusNameOrArn.of_json in
+      let rule = field_map_exn json__ "Rule" RuleName.of_json in
       make ?force ~ids ?eventBusName ~rule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the specified targets from the specified rule. When the rule is triggered, those targets are no longer be invoked. A successful execution of RemoveTargets doesn't guarantee all targets are removed from the rule, it means that the target(s) listed in the request are removed. When you remove a target, when the associated rule triggers, removed targets might continue to be invoked. Allow a short period of time for changes to take effect. This action can partially fail if too many requests are made at the same time. If that happens, FailedEntryCount is non-zero in the response and each entry in FailedEntries provides the ID of the failed target and the error code."]
+       "Removes the specified targets from the specified rule. When the rule is triggered, those targets are no longer be invoked. A successful execution of RemoveTargets doesn't guarantee all targets are removed from the rule, it means that the target(s) listed in the request are removed. When you remove a target, when the associated rule triggers, removed targets might continue to be invoked. Allow a short period of time for changes to take effect. This action can partially fail if too many requests are made at the same time. If that happens, FailedEntryCount is non-zero in the response and each entry in FailedEntries provides the ID of the failed target and the error code. The maximum number of entries per request is 10."]
 module RemovePermissionRequest =
   struct
     type nonrec t =
@@ -8232,12 +9247,12 @@ module RemovePermissionRequest =
         (Option.map ~f:StatementId.of_xml) (Xml.child xml_arg0 "StatementId") in
       make ?eventBusName ?removeAllPermissions ?statementId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventBusName =
-        field_map json "EventBusName" NonPartnerEventBusName.of_json in
+        field_map json__ "EventBusName" NonPartnerEventBusName.of_json in
       let removeAllPermissions =
-        field_map json "RemoveAllPermissions" Boolean.of_json in
-      let statementId = field_map json "StatementId" StatementId.of_json in
+        field_map json__ "RemoveAllPermissions" Boolean.of_json in
+      let statementId = field_map json__ "StatementId" StatementId.of_json in
       make ?eventBusName ?removeAllPermissions ?statementId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8334,15 +9349,15 @@ module PutTargetsResponse =
           (Xml.child xml_arg0 "FailedEntryCount") in
       make ?failedEntries ?failedEntryCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedEntries =
-        field_map json "FailedEntries" PutTargetsResultEntryList.of_json in
+        field_map json__ "FailedEntries" PutTargetsResultEntryList.of_json in
       let failedEntryCount =
-        field_map json "FailedEntryCount" Integer.of_json in
+        field_map json__ "FailedEntryCount" Integer.of_json in
       make ?failedEntries ?failedEntryCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the specified targets to the specified rule, or updates the targets if they are already associated with the rule. Targets are the resources that are invoked when a rule is triggered. Each rule can have up to five (5) targets associated with it at one time. You can configure the following as targets for Events: API destination API Gateway Batch job queue CloudWatch group CodeBuild project CodePipeline EC2 CreateSnapshot API call EC2 Image Builder EC2 RebootInstances API call EC2 StopInstances API call EC2 TerminateInstances API call ECS task Event bus in a different account or Region Event bus in the same account and Region Firehose delivery stream Glue workflow Incident Manager response plan Inspector assessment template Kinesis stream Lambda function Redshift cluster SageMaker Pipeline SNS topic SQS queue Step Functions state machine Systems Manager Automation Systems Manager OpsItem Systems Manager Run Command Creating rules with built-in targets is supported only in the Amazon Web Services Management Console. The built-in targets are EC2 CreateSnapshot API call, EC2 RebootInstances API call, EC2 StopInstances API call, and EC2 TerminateInstances API call. For some target types, PutTargets provides target-specific parameters. If the target is a Kinesis data stream, you can optionally specify which shard the event goes to by using the KinesisParameters argument. To invoke a command on multiple EC2 instances with one rule, you can use the RunCommandParameters field. To be able to make API calls against the resources that you own, Amazon EventBridge needs the appropriate permissions. For Lambda and Amazon SNS resources, EventBridge relies on resource-based policies. For EC2 instances, Kinesis Data Streams, Step Functions state machines and API Gateway REST APIs, EventBridge relies on IAM roles that you specify in the RoleARN argument in PutTargets. For more information, see Authentication and Access Control in the Amazon EventBridge User Guide. If another Amazon Web Services account is in the same region and has granted you permission (using PutPermission), you can send events to that account. Set that account's event bus as a target of the rules in your account. To send the matched events to the other account, specify that account's event bus as the Arn value when you run PutTargets. If your account sends events to another account, your account is charged for each sent event. Each event sent to another account is charged as a custom event. The account receiving the event is not charged. For more information, see Amazon EventBridge Pricing. Input, InputPath, and InputTransformer are not available with PutTarget if the target is an event bus of a different Amazon Web Services account. If you are setting the event bus of another account as the target, and that account granted permission to your account through an organization instead of directly by the account ID, then you must specify a RoleArn with proper permissions in the Target structure. For more information, see Sending and Receiving Events Between Amazon Web Services Accounts in the Amazon EventBridge User Guide. For more information about enabling cross-account events, see PutPermission. Input, InputPath, and InputTransformer are mutually exclusive and optional parameters of a target. When a rule is triggered due to a matched event: If none of the following arguments are specified for a target, then the entire event is passed to the target in JSON format (unless the target is Amazon EC2 Run Command or Amazon ECS task, in which case nothing from the event is passed to the target). If Input is specified in the form of valid JSON, then the matched event is overridden with this constant. If InputPath is specified in the form of JSONPath (for example, $.detail), then only the part of the event specified in the path is passed to the target (for example, only the detail part of the event is passed). If InputTransformer is specified, then one or more specified JSONPaths are extracted from the event and used as values in a template that you specify as the input to the target. When you specify InputPath or InputTransformer, you must use JSON dot notation, not bracket notation. When you add targets to a rule and the associated rule triggers soon after, new or updated targets might not be immediately invoked. Allow a short period of time for changes to take effect. This action can partially fail if too many requests are made at the same time. If that happens, FailedEntryCount is non-zero in the response and each entry in FailedEntries provides the ID of the failed target and the error code."]
+       "Adds the specified targets to the specified rule, or updates the targets if they are already associated with the rule. Targets are the resources that are invoked when a rule is triggered. The maximum number of entries per request is 10. Each rule can have up to five (5) targets associated with it at one time. For a list of services you can configure as targets for events, see EventBridge targets in the Amazon EventBridge User Guide . Creating rules with built-in targets is supported only in the Amazon Web Services Management Console. The built-in targets are: Amazon EBS CreateSnapshot API call Amazon EC2 RebootInstances API call Amazon EC2 StopInstances API call Amazon EC2 TerminateInstances API call For some target types, PutTargets provides target-specific parameters. If the target is a Kinesis data stream, you can optionally specify which shard the event goes to by using the KinesisParameters argument. To invoke a command on multiple EC2 instances with one rule, you can use the RunCommandParameters field. To be able to make API calls against the resources that you own, Amazon EventBridge needs the appropriate permissions: For Lambda and Amazon SNS resources, EventBridge relies on resource-based policies. For EC2 instances, Kinesis Data Streams, Step Functions state machines and API Gateway APIs, EventBridge relies on IAM roles that you specify in the RoleARN argument in PutTargets. For more information, see Authentication and Access Control in the Amazon EventBridge User Guide . If another Amazon Web Services account is in the same region and has granted you permission (using PutPermission), you can send events to that account. Set that account's event bus as a target of the rules in your account. To send the matched events to the other account, specify that account's event bus as the Arn value when you run PutTargets. If your account sends events to another account, your account is charged for each sent event. Each event sent to another account is charged as a custom event. The account receiving the event is not charged. For more information, see Amazon EventBridge Pricing. Input, InputPath, and InputTransformer are not available with PutTarget if the target is an event bus of a different Amazon Web Services account. If you are setting the event bus of another account as the target, and that account granted permission to your account through an organization instead of directly by the account ID, then you must specify a RoleArn with proper permissions in the Target structure. For more information, see Sending and Receiving Events Between Amazon Web Services Accounts in the Amazon EventBridge User Guide. If you have an IAM role on a cross-account event bus target, a PutTargets call without a role on the same target (same Id and Arn) will not remove the role. For more information about enabling cross-account events, see PutPermission. Input, InputPath, and InputTransformer are mutually exclusive and optional parameters of a target. When a rule is triggered due to a matched event: If none of the following arguments are specified for a target, then the entire event is passed to the target in JSON format (unless the target is Amazon EC2 Run Command or Amazon ECS task, in which case nothing from the event is passed to the target). If Input is specified in the form of valid JSON, then the matched event is overridden with this constant. If InputPath is specified in the form of JSONPath (for example, $.detail), then only the part of the event specified in the path is passed to the target (for example, only the detail part of the event is passed). If InputTransformer is specified, then one or more specified JSONPaths are extracted from the event and used as values in a template that you specify as the input to the target. When you specify InputPath or InputTransformer, you must use JSON dot notation, not bracket notation. When you add targets to a rule and the associated rule triggers soon after, new or updated targets might not be immediately invoked. Allow a short period of time for changes to take effect. This action can partially fail if too many requests are made at the same time. If that happens, FailedEntryCount is non-zero in the response and each entry in FailedEntries provides the ID of the failed target and the error code."]
 module PutTargetsRequest =
   struct
     type nonrec t =
@@ -8374,15 +9389,15 @@ module PutTargetsRequest =
         RuleName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Rule") in
       make ~targets ?eventBusName ~rule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targets = field_map_exn json "Targets" TargetList.of_json in
+    let of_json json__ =
+      let targets = field_map_exn json__ "Targets" TargetList.of_json in
       let eventBusName =
-        field_map json "EventBusName" EventBusNameOrArn.of_json in
-      let rule = field_map_exn json "Rule" RuleName.of_json in
+        field_map json__ "EventBusName" EventBusNameOrArn.of_json in
+      let rule = field_map_exn json__ "Rule" RuleName.of_json in
       make ~targets ?eventBusName ~rule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the specified targets to the specified rule, or updates the targets if they are already associated with the rule. Targets are the resources that are invoked when a rule is triggered. Each rule can have up to five (5) targets associated with it at one time. You can configure the following as targets for Events: API destination API Gateway Batch job queue CloudWatch group CodeBuild project CodePipeline EC2 CreateSnapshot API call EC2 Image Builder EC2 RebootInstances API call EC2 StopInstances API call EC2 TerminateInstances API call ECS task Event bus in a different account or Region Event bus in the same account and Region Firehose delivery stream Glue workflow Incident Manager response plan Inspector assessment template Kinesis stream Lambda function Redshift cluster SageMaker Pipeline SNS topic SQS queue Step Functions state machine Systems Manager Automation Systems Manager OpsItem Systems Manager Run Command Creating rules with built-in targets is supported only in the Amazon Web Services Management Console. The built-in targets are EC2 CreateSnapshot API call, EC2 RebootInstances API call, EC2 StopInstances API call, and EC2 TerminateInstances API call. For some target types, PutTargets provides target-specific parameters. If the target is a Kinesis data stream, you can optionally specify which shard the event goes to by using the KinesisParameters argument. To invoke a command on multiple EC2 instances with one rule, you can use the RunCommandParameters field. To be able to make API calls against the resources that you own, Amazon EventBridge needs the appropriate permissions. For Lambda and Amazon SNS resources, EventBridge relies on resource-based policies. For EC2 instances, Kinesis Data Streams, Step Functions state machines and API Gateway REST APIs, EventBridge relies on IAM roles that you specify in the RoleARN argument in PutTargets. For more information, see Authentication and Access Control in the Amazon EventBridge User Guide. If another Amazon Web Services account is in the same region and has granted you permission (using PutPermission), you can send events to that account. Set that account's event bus as a target of the rules in your account. To send the matched events to the other account, specify that account's event bus as the Arn value when you run PutTargets. If your account sends events to another account, your account is charged for each sent event. Each event sent to another account is charged as a custom event. The account receiving the event is not charged. For more information, see Amazon EventBridge Pricing. Input, InputPath, and InputTransformer are not available with PutTarget if the target is an event bus of a different Amazon Web Services account. If you are setting the event bus of another account as the target, and that account granted permission to your account through an organization instead of directly by the account ID, then you must specify a RoleArn with proper permissions in the Target structure. For more information, see Sending and Receiving Events Between Amazon Web Services Accounts in the Amazon EventBridge User Guide. For more information about enabling cross-account events, see PutPermission. Input, InputPath, and InputTransformer are mutually exclusive and optional parameters of a target. When a rule is triggered due to a matched event: If none of the following arguments are specified for a target, then the entire event is passed to the target in JSON format (unless the target is Amazon EC2 Run Command or Amazon ECS task, in which case nothing from the event is passed to the target). If Input is specified in the form of valid JSON, then the matched event is overridden with this constant. If InputPath is specified in the form of JSONPath (for example, $.detail), then only the part of the event specified in the path is passed to the target (for example, only the detail part of the event is passed). If InputTransformer is specified, then one or more specified JSONPaths are extracted from the event and used as values in a template that you specify as the input to the target. When you specify InputPath or InputTransformer, you must use JSON dot notation, not bracket notation. When you add targets to a rule and the associated rule triggers soon after, new or updated targets might not be immediately invoked. Allow a short period of time for changes to take effect. This action can partially fail if too many requests are made at the same time. If that happens, FailedEntryCount is non-zero in the response and each entry in FailedEntries provides the ID of the failed target and the error code."]
+       "Adds the specified targets to the specified rule, or updates the targets if they are already associated with the rule. Targets are the resources that are invoked when a rule is triggered. The maximum number of entries per request is 10. Each rule can have up to five (5) targets associated with it at one time. For a list of services you can configure as targets for events, see EventBridge targets in the Amazon EventBridge User Guide . Creating rules with built-in targets is supported only in the Amazon Web Services Management Console. The built-in targets are: Amazon EBS CreateSnapshot API call Amazon EC2 RebootInstances API call Amazon EC2 StopInstances API call Amazon EC2 TerminateInstances API call For some target types, PutTargets provides target-specific parameters. If the target is a Kinesis data stream, you can optionally specify which shard the event goes to by using the KinesisParameters argument. To invoke a command on multiple EC2 instances with one rule, you can use the RunCommandParameters field. To be able to make API calls against the resources that you own, Amazon EventBridge needs the appropriate permissions: For Lambda and Amazon SNS resources, EventBridge relies on resource-based policies. For EC2 instances, Kinesis Data Streams, Step Functions state machines and API Gateway APIs, EventBridge relies on IAM roles that you specify in the RoleARN argument in PutTargets. For more information, see Authentication and Access Control in the Amazon EventBridge User Guide . If another Amazon Web Services account is in the same region and has granted you permission (using PutPermission), you can send events to that account. Set that account's event bus as a target of the rules in your account. To send the matched events to the other account, specify that account's event bus as the Arn value when you run PutTargets. If your account sends events to another account, your account is charged for each sent event. Each event sent to another account is charged as a custom event. The account receiving the event is not charged. For more information, see Amazon EventBridge Pricing. Input, InputPath, and InputTransformer are not available with PutTarget if the target is an event bus of a different Amazon Web Services account. If you are setting the event bus of another account as the target, and that account granted permission to your account through an organization instead of directly by the account ID, then you must specify a RoleArn with proper permissions in the Target structure. For more information, see Sending and Receiving Events Between Amazon Web Services Accounts in the Amazon EventBridge User Guide. If you have an IAM role on a cross-account event bus target, a PutTargets call without a role on the same target (same Id and Arn) will not remove the role. For more information about enabling cross-account events, see PutPermission. Input, InputPath, and InputTransformer are mutually exclusive and optional parameters of a target. When a rule is triggered due to a matched event: If none of the following arguments are specified for a target, then the entire event is passed to the target in JSON format (unless the target is Amazon EC2 Run Command or Amazon ECS task, in which case nothing from the event is passed to the target). If Input is specified in the form of valid JSON, then the matched event is overridden with this constant. If InputPath is specified in the form of JSONPath (for example, $.detail), then only the part of the event specified in the path is passed to the target (for example, only the detail part of the event is passed). If InputTransformer is specified, then one or more specified JSONPaths are extracted from the event and used as values in a template that you specify as the input to the target. When you specify InputPath or InputTransformer, you must use JSON dot notation, not bracket notation. When you add targets to a rule and the associated rule triggers soon after, new or updated targets might not be immediately invoked. Allow a short period of time for changes to take effect. This action can partially fail if too many requests are made at the same time. If that happens, FailedEntryCount is non-zero in the response and each entry in FailedEntries provides the ID of the failed target and the error code."]
 module PutRuleResponse =
   struct
     type nonrec t =
@@ -8476,12 +9491,12 @@ module PutRuleResponse =
         (Option.map ~f:RuleArn.of_xml) (Xml.child xml_arg0 "RuleArn") in
       make ?ruleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ruleArn = field_map json "RuleArn" RuleArn.of_json in
+    let of_json json__ =
+      let ruleArn = field_map json__ "RuleArn" RuleArn.of_json in
       make ?ruleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates the specified rule. Rules are enabled by default, or based on value of the state. You can disable a rule using DisableRule. A single rule watches for events from a single event bus. Events generated by Amazon Web Services services go to your account's default event bus. Events generated by SaaS partner services or applications go to the matching partner event bus. If you have custom applications or services, you can specify whether their events go to your default event bus or a custom event bus that you have created. For more information, see CreateEventBus. If you are updating an existing rule, the rule is replaced with what you specify in this PutRule command. If you omit arguments in PutRule, the old values for those arguments are not kept. Instead, they are replaced with null values. When you create or update a rule, incoming events might not immediately start matching to new or updated rules. Allow a short period of time for changes to take effect. A rule must contain at least an EventPattern or ScheduleExpression. Rules with EventPatterns are triggered when a matching event is observed. Rules with ScheduleExpressions self-trigger based on the given schedule. A rule can have both an EventPattern and a ScheduleExpression, in which case the rule triggers on matching events as well as on a schedule. When you initially create a rule, you can optionally assign one or more tags to the rule. Tags can help you organize and categorize your resources. You can also use them to scope user permissions, by granting a user permission to access or change only rules with certain tag values. To use the PutRule operation and assign tags, you must have both the events:PutRule and events:TagResource permissions. If you are updating an existing rule, any tags you specify in the PutRule operation are ignored. To update the tags of an existing rule, use TagResource and UntagResource. Most services in Amazon Web Services treat : or / as the same character in Amazon Resource Names (ARNs). However, EventBridge uses an exact match in event patterns and rules. Be sure to use the correct ARN characters when creating event patterns so that they match the ARN syntax in the event you want to match. In EventBridge, it is possible to create rules that lead to infinite loops, where a rule is fired repeatedly. For example, a rule might detect that ACLs have changed on an S3 bucket, and trigger software to change them to the desired state. If the rule is not written carefully, the subsequent change to the ACLs fires the rule again, creating an infinite loop. To prevent this, write the rules so that the triggered actions do not re-fire the same rule. For example, your rule could fire only if ACLs are found to be in a bad state, instead of after any change. An infinite loop can quickly cause higher than expected charges. We recommend that you use budgeting, which alerts you when charges exceed your specified limit. For more information, see Managing Your Costs with Budgets."]
+       "Creates or updates the specified rule. Rules are enabled by default, or based on value of the state. You can disable a rule using DisableRule. A single rule watches for events from a single event bus. Events generated by Amazon Web Services services go to your account's default event bus. Events generated by SaaS partner services or applications go to the matching partner event bus. If you have custom applications or services, you can specify whether their events go to your default event bus or a custom event bus that you have created. For more information, see CreateEventBus. If you are updating an existing rule, the rule is replaced with what you specify in this PutRule command. If you omit arguments in PutRule, the old values for those arguments are not kept. Instead, they are replaced with null values. When you create or update a rule, incoming events might not immediately start matching to new or updated rules. Allow a short period of time for changes to take effect. A rule must contain at least an EventPattern or ScheduleExpression. Rules with EventPatterns are triggered when a matching event is observed. Rules with ScheduleExpressions self-trigger based on the given schedule. A rule can have both an EventPattern and a ScheduleExpression, in which case the rule triggers on matching events as well as on a schedule. When you initially create a rule, you can optionally assign one or more tags to the rule. Tags can help you organize and categorize your resources. You can also use them to scope user permissions, by granting a user permission to access or change only rules with certain tag values. To use the PutRule operation and assign tags, you must have both the events:PutRule and events:TagResource permissions. If you are updating an existing rule, any tags you specify in the PutRule operation are ignored. To update the tags of an existing rule, use TagResource and UntagResource. Most services in Amazon Web Services treat : or / as the same character in Amazon Resource Names (ARNs). However, EventBridge uses an exact match in event patterns and rules. Be sure to use the correct ARN characters when creating event patterns so that they match the ARN syntax in the event you want to match. In EventBridge, it is possible to create rules that lead to infinite loops, where a rule is fired repeatedly. For example, a rule might detect that ACLs have changed on an S3 bucket, and trigger software to change them to the desired state. If the rule is not written carefully, the subsequent change to the ACLs fires the rule again, creating an infinite loop. To prevent this, write the rules so that the triggered actions do not re-fire the same rule. For example, your rule could fire only if ACLs are found to be in a bad state, instead of after any change. An infinite loop can quickly cause higher than expected charges. We recommend that you use budgeting, which alerts you when charges exceed your specified limit. For more information, see Managing Your Costs with Budgets. To create a rule that filters for management events from Amazon Web Services services, see Receiving read-only management events from Amazon Web Services services in the EventBridge User Guide."]
 module PutRuleRequest =
   struct
     type nonrec t =
@@ -8494,9 +9509,10 @@ module PutRuleRequest =
           "The scheduling expression. For example, \"cron(0 20 * * ? *)\" or \"rate(5 minutes)\"."];
       eventPattern: EventPattern.t option
         [@ocaml.doc
-          "The event pattern. For more information, see EventBridge event patterns in the Amazon EventBridge User Guide."];
+          "The event pattern. For more information, see Amazon EventBridge event patterns in the Amazon EventBridge User Guide ."];
       state: RuleState.t option
-        [@ocaml.doc "Indicates whether the rule is enabled or disabled."];
+        [@ocaml.doc
+          "The state of the rule. Valid values include: DISABLED: The rule is disabled. EventBridge does not match any events against the rule. ENABLED: The rule is enabled. EventBridge matches events against the rule, except for Amazon Web Services management events delivered through CloudTrail. ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS: The rule is enabled for all events, including Amazon Web Services management events delivered through CloudTrail. Management events provide visibility into management operations that are performed on resources in your Amazon Web Services account. These are also known as control plane operations. For more information, see Logging management events in the CloudTrail User Guide, and Filtering management events from Amazon Web Services services in the Amazon EventBridge User Guide . This value is only valid for rules on the default event bus or custom event buses. It does not apply to partner event buses."];
       description: RuleDescription.t option
         [@ocaml.doc "A description of the rule."];
       roleArn: RoleArn.t option
@@ -8566,22 +9582,23 @@ module PutRuleRequest =
       make ?eventBusName ?tags ?roleArn ?description ?state ?eventPattern
         ?scheduleExpression ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventBusName =
-        field_map json "EventBusName" EventBusNameOrArn.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let description = field_map json "Description" RuleDescription.of_json in
-      let state = field_map json "State" RuleState.of_json in
-      let eventPattern = field_map json "EventPattern" EventPattern.of_json in
+        field_map json__ "EventBusName" EventBusNameOrArn.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let description =
+        field_map json__ "Description" RuleDescription.of_json in
+      let state = field_map json__ "State" RuleState.of_json in
+      let eventPattern = field_map json__ "EventPattern" EventPattern.of_json in
       let scheduleExpression =
-        field_map json "ScheduleExpression" ScheduleExpression.of_json in
-      let name = field_map_exn json "Name" RuleName.of_json in
+        field_map json__ "ScheduleExpression" ScheduleExpression.of_json in
+      let name = field_map_exn json__ "Name" RuleName.of_json in
       make ?eventBusName ?tags ?roleArn ?description ?state ?eventPattern
         ?scheduleExpression ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates the specified rule. Rules are enabled by default, or based on value of the state. You can disable a rule using DisableRule. A single rule watches for events from a single event bus. Events generated by Amazon Web Services services go to your account's default event bus. Events generated by SaaS partner services or applications go to the matching partner event bus. If you have custom applications or services, you can specify whether their events go to your default event bus or a custom event bus that you have created. For more information, see CreateEventBus. If you are updating an existing rule, the rule is replaced with what you specify in this PutRule command. If you omit arguments in PutRule, the old values for those arguments are not kept. Instead, they are replaced with null values. When you create or update a rule, incoming events might not immediately start matching to new or updated rules. Allow a short period of time for changes to take effect. A rule must contain at least an EventPattern or ScheduleExpression. Rules with EventPatterns are triggered when a matching event is observed. Rules with ScheduleExpressions self-trigger based on the given schedule. A rule can have both an EventPattern and a ScheduleExpression, in which case the rule triggers on matching events as well as on a schedule. When you initially create a rule, you can optionally assign one or more tags to the rule. Tags can help you organize and categorize your resources. You can also use them to scope user permissions, by granting a user permission to access or change only rules with certain tag values. To use the PutRule operation and assign tags, you must have both the events:PutRule and events:TagResource permissions. If you are updating an existing rule, any tags you specify in the PutRule operation are ignored. To update the tags of an existing rule, use TagResource and UntagResource. Most services in Amazon Web Services treat : or / as the same character in Amazon Resource Names (ARNs). However, EventBridge uses an exact match in event patterns and rules. Be sure to use the correct ARN characters when creating event patterns so that they match the ARN syntax in the event you want to match. In EventBridge, it is possible to create rules that lead to infinite loops, where a rule is fired repeatedly. For example, a rule might detect that ACLs have changed on an S3 bucket, and trigger software to change them to the desired state. If the rule is not written carefully, the subsequent change to the ACLs fires the rule again, creating an infinite loop. To prevent this, write the rules so that the triggered actions do not re-fire the same rule. For example, your rule could fire only if ACLs are found to be in a bad state, instead of after any change. An infinite loop can quickly cause higher than expected charges. We recommend that you use budgeting, which alerts you when charges exceed your specified limit. For more information, see Managing Your Costs with Budgets."]
+       "Creates or updates the specified rule. Rules are enabled by default, or based on value of the state. You can disable a rule using DisableRule. A single rule watches for events from a single event bus. Events generated by Amazon Web Services services go to your account's default event bus. Events generated by SaaS partner services or applications go to the matching partner event bus. If you have custom applications or services, you can specify whether their events go to your default event bus or a custom event bus that you have created. For more information, see CreateEventBus. If you are updating an existing rule, the rule is replaced with what you specify in this PutRule command. If you omit arguments in PutRule, the old values for those arguments are not kept. Instead, they are replaced with null values. When you create or update a rule, incoming events might not immediately start matching to new or updated rules. Allow a short period of time for changes to take effect. A rule must contain at least an EventPattern or ScheduleExpression. Rules with EventPatterns are triggered when a matching event is observed. Rules with ScheduleExpressions self-trigger based on the given schedule. A rule can have both an EventPattern and a ScheduleExpression, in which case the rule triggers on matching events as well as on a schedule. When you initially create a rule, you can optionally assign one or more tags to the rule. Tags can help you organize and categorize your resources. You can also use them to scope user permissions, by granting a user permission to access or change only rules with certain tag values. To use the PutRule operation and assign tags, you must have both the events:PutRule and events:TagResource permissions. If you are updating an existing rule, any tags you specify in the PutRule operation are ignored. To update the tags of an existing rule, use TagResource and UntagResource. Most services in Amazon Web Services treat : or / as the same character in Amazon Resource Names (ARNs). However, EventBridge uses an exact match in event patterns and rules. Be sure to use the correct ARN characters when creating event patterns so that they match the ARN syntax in the event you want to match. In EventBridge, it is possible to create rules that lead to infinite loops, where a rule is fired repeatedly. For example, a rule might detect that ACLs have changed on an S3 bucket, and trigger software to change them to the desired state. If the rule is not written carefully, the subsequent change to the ACLs fires the rule again, creating an infinite loop. To prevent this, write the rules so that the triggered actions do not re-fire the same rule. For example, your rule could fire only if ACLs are found to be in a bad state, instead of after any change. An infinite loop can quickly cause higher than expected charges. We recommend that you use budgeting, which alerts you when charges exceed your specified limit. For more information, see Managing Your Costs with Budgets. To create a rule that filters for management events from Amazon Web Services services, see Receiving read-only management events from Amazon Web Services services in the EventBridge User Guide."]
 module PutPermissionRequest =
   struct
     type nonrec t =
@@ -8646,19 +9663,19 @@ module PutPermissionRequest =
       make ?policy ?condition ?statementId ?principal ?action ?eventBusName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" String_.of_json in
-      let condition = field_map json "Condition" Condition.of_json in
-      let statementId = field_map json "StatementId" StatementId.of_json in
-      let principal = field_map json "Principal" Principal.of_json in
-      let action = field_map json "Action" Action.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "Policy" String_.of_json in
+      let condition = field_map json__ "Condition" Condition.of_json in
+      let statementId = field_map json__ "StatementId" StatementId.of_json in
+      let principal = field_map json__ "Principal" Principal.of_json in
+      let action = field_map json__ "Action" Action.of_json in
       let eventBusName =
-        field_map json "EventBusName" NonPartnerEventBusName.of_json in
+        field_map json__ "EventBusName" NonPartnerEventBusName.of_json in
       make ?policy ?condition ?statementId ?principal ?action ?eventBusName
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Running PutPermission permits the specified Amazon Web Services account or Amazon Web Services organization to put events to the specified event bus. Amazon EventBridge (CloudWatch Events) rules in your account are triggered by these events arriving to an event bus in your account. For another account to send events to your account, that external account must have an EventBridge rule with your account's event bus as a target. To enable multiple Amazon Web Services accounts to put events to your event bus, run PutPermission once for each of these accounts. Or, if all the accounts are members of the same Amazon Web Services organization, you can run PutPermission once specifying Principal as \"*\" and specifying the Amazon Web Services organization ID in Condition, to grant permissions to all accounts in that organization. If you grant permissions using an organization, then accounts in that organization must specify a RoleArn with proper permissions when they use PutTarget to add your account's event bus as a target. For more information, see Sending and Receiving Events Between Amazon Web Services Accounts in the Amazon EventBridge User Guide. The permission policy on the event bus cannot exceed 10 KB in size."]
+       "Running PutPermission permits the specified Amazon Web Services account or Amazon Web Services organization to put events to the specified event bus. Amazon EventBridge rules in your account are triggered by these events arriving to an event bus in your account. For another account to send events to your account, that external account must have an EventBridge rule with your account's event bus as a target. To enable multiple Amazon Web Services accounts to put events to your event bus, run PutPermission once for each of these accounts. Or, if all the accounts are members of the same Amazon Web Services organization, you can run PutPermission once specifying Principal as \"*\" and specifying the Amazon Web Services organization ID in Condition, to grant permissions to all accounts in that organization. If you grant permissions using an organization, then accounts in that organization must specify a RoleArn with proper permissions when they use PutTarget to add your account's event bus as a target. For more information, see Sending and Receiving Events Between Amazon Web Services Accounts in the Amazon EventBridge User Guide. The permission policy on the event bus cannot exceed 10 KB in size."]
 module PutPartnerEventsResponse =
   struct
     type nonrec t =
@@ -8668,7 +9685,7 @@ module PutPartnerEventsResponse =
           "The number of events from this operation that could not be written to the partner event bus."];
       entries: PutPartnerEventsResultEntryList.t option
         [@ocaml.doc
-          "The list of events from this operation that were successfully written to the partner event bus."]}
+          "The results for each event entry the partner submitted in this request. If the event was successfully submitted, the entry has the event ID in it. Otherwise, you can use the error code and error message to identify the problem with the entry. For each record, the index of the response element is the same as the index in the request array."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `OperationDisabledException of OperationDisabledException.t 
@@ -8724,15 +9741,15 @@ module PutPartnerEventsResponse =
           (Xml.child xml_arg0 "FailedEntryCount") in
       make ?entries ?failedEntryCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entries =
-        field_map json "Entries" PutPartnerEventsResultEntryList.of_json in
+        field_map json__ "Entries" PutPartnerEventsResultEntryList.of_json in
       let failedEntryCount =
-        field_map json "FailedEntryCount" Integer.of_json in
+        field_map json__ "FailedEntryCount" Integer.of_json in
       make ?entries ?failedEntryCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This is used by SaaS partners to write events to a customer's partner event bus. Amazon Web Services customers do not use this operation."]
+       "This is used by SaaS partners to write events to a customer's partner event bus. Amazon Web Services customers do not use this operation. For information on calculating event batch size, see Calculating EventBridge PutEvents event entry size in the EventBridge User Guide."]
 module PutPartnerEventsRequest =
   struct
     type nonrec t =
@@ -8752,13 +9769,14 @@ module PutPartnerEventsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Entries") in
       make ~entries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entries =
-        field_map_exn json "Entries" PutPartnerEventsRequestEntryList.of_json in
+        field_map_exn json__ "Entries"
+          PutPartnerEventsRequestEntryList.of_json in
       make ~entries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This is used by SaaS partners to write events to a customer's partner event bus. Amazon Web Services customers do not use this operation."]
+       "This is used by SaaS partners to write events to a customer's partner event bus. Amazon Web Services customers do not use this operation. For information on calculating event batch size, see Calculating EventBridge PutEvents event entry size in the EventBridge User Guide."]
 module PutEventsResponse =
   struct
     type nonrec t =
@@ -8767,7 +9785,7 @@ module PutEventsResponse =
         [@ocaml.doc "The number of failed entries."];
       entries: PutEventsResultEntryList.t option
         [@ocaml.doc
-          "The successfully and unsuccessfully ingested events results. If the ingestion was successful, the entry has the event ID in it. Otherwise, you can use the error code and error message to identify the problem with the entry."]}
+          "The successfully and unsuccessfully ingested events results. If the ingestion was successful, the entry has the event ID in it. Otherwise, you can use the error code and error message to identify the problem with the entry. For each record, the index of the response element is the same as the index in the request array."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -8813,14 +9831,15 @@ module PutEventsResponse =
           (Xml.child xml_arg0 "FailedEntryCount") in
       make ?entries ?failedEntryCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let entries = field_map json "Entries" PutEventsResultEntryList.of_json in
+    let of_json json__ =
+      let entries =
+        field_map json__ "Entries" PutEventsResultEntryList.of_json in
       let failedEntryCount =
-        field_map json "FailedEntryCount" Integer.of_json in
+        field_map json__ "FailedEntryCount" Integer.of_json in
       make ?entries ?failedEntryCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sends custom events to Amazon EventBridge so that they can be matched to rules. PutEvents will only process nested JSON up to 1100 levels deep."]
+       "Sends custom events to Amazon EventBridge so that they can be matched to rules. You can batch multiple event entries into one request for efficiency. However, the total entry size must be less than 256KB. You can calculate the entry size before you send the events. For more information, see Calculating PutEvents event entry size in the Amazon EventBridge User Guide . PutEvents accepts the data in JSON format. For the JSON number (integer) data type, the constraints are: a minimum value of -9,223,372,036,854,775,808 and a maximum value of 9,223,372,036,854,775,807. PutEvents will only process nested JSON up to 1000 levels deep."]
 module PutEventsRequest =
   struct
     type nonrec t =
@@ -8830,7 +9849,7 @@ module PutEventsRequest =
           "The entry that defines an event in your system. You can specify several parameters for the entry such as the source and type of the event, resources associated with the event, and so on."];
       endpointId: EndpointId.t option
         [@ocaml.doc
-          "The URL subdomain of the endpoint. For example, if the URL for Endpoint is abcde.veo.endpoints.event.amazonaws.com, then the EndpointId is abcde.veo. When using Java, you must include auth-crt on the class path."]}
+          "The URL subdomain of the endpoint. For example, if the URL for Endpoint is https://abcde.veo.endpoints.event.amazonaws.com, then the EndpointId is abcde.veo. When using Java, you must include auth-crt on the class path."]}
     let context_ = "PutEventsRequest"
     let make ?endpointId = fun ~entries -> fun () -> { endpointId; entries }
     let to_value x =
@@ -8846,14 +9865,14 @@ module PutEventsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Entries") in
       make ?endpointId ~entries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpointId = field_map json "EndpointId" EndpointId.of_json in
+    let of_json json__ =
+      let endpointId = field_map json__ "EndpointId" EndpointId.of_json in
       let entries =
-        field_map_exn json "Entries" PutEventsRequestEntryList.of_json in
+        field_map_exn json__ "Entries" PutEventsRequestEntryList.of_json in
       make ?endpointId ~entries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sends custom events to Amazon EventBridge so that they can be matched to rules. PutEvents will only process nested JSON up to 1100 levels deep."]
+       "Sends custom events to Amazon EventBridge so that they can be matched to rules. You can batch multiple event entries into one request for efficiency. However, the total entry size must be less than 256KB. You can calculate the entry size before you send the events. For more information, see Calculating PutEvents event entry size in the Amazon EventBridge User Guide . PutEvents accepts the data in JSON format. For the JSON number (integer) data type, the constraints are: a minimum value of -9,223,372,036,854,775,808 and a maximum value of 9,223,372,036,854,775,807. PutEvents will only process nested JSON up to 1000 levels deep."]
 module PolicyLengthExceededException =
   struct
     type nonrec t = unit
@@ -8875,7 +9894,7 @@ module ListTargetsByRuleResponse =
         [@ocaml.doc "The targets assigned to the rule."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "Indicates whether there are additional results to retrieve. If there are no more results, the value is null."]}
+          "A token indicating there are more results available. If there are no more results, no token is included in the response. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -8925,12 +9944,13 @@ module ListTargetsByRuleResponse =
         (Option.map ~f:TargetList.of_xml) (Xml.child xml_arg0 "Targets") in
       make ?nextToken ?targets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let targets = field_map json "Targets" TargetList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let targets = field_map json__ "Targets" TargetList.of_json in
       make ?nextToken ?targets ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the targets assigned to the specified rule."]
+  end[@@ocaml.doc
+       "Lists the targets assigned to the specified rule. The maximum number of results per page for requests is 100."]
 module ListTargetsByRuleRequest =
   struct
     type nonrec t =
@@ -8941,7 +9961,7 @@ module ListTargetsByRuleRequest =
           "The name or ARN of the event bus associated with the rule. If you omit this, the default event bus is used."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token returned by a previous call to retrieve the next set of results."];
+          "The token returned by a previous call, which you can use to retrieve the next set of results. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."];
       limit: LimitMax100.t option
         [@ocaml.doc "The maximum number of results to return."]}
     let context_ = "ListTargetsByRuleRequest"
@@ -8969,15 +9989,16 @@ module ListTargetsByRuleRequest =
         RuleName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Rule") in
       make ?limit ?nextToken ?eventBusName ~rule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" LimitMax100.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" LimitMax100.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let eventBusName =
-        field_map json "EventBusName" EventBusNameOrArn.of_json in
-      let rule = field_map_exn json "Rule" RuleName.of_json in
+        field_map json__ "EventBusName" EventBusNameOrArn.of_json in
+      let rule = field_map_exn json__ "Rule" RuleName.of_json in
       make ?limit ?nextToken ?eventBusName ~rule ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the targets assigned to the specified rule."]
+  end[@@ocaml.doc
+       "Lists the targets assigned to the specified rule. The maximum number of results per page for requests is 100."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -9029,8 +10050,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Displays the tags associated with an EventBridge resource. In EventBridge, rules and event buses can be tagged."]
@@ -9052,8 +10073,8 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceARN = field_map_exn json "ResourceARN" Arn.of_json in
+    let of_json json__ =
+      let resourceARN = field_map_exn json__ "ResourceARN" Arn.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9066,7 +10087,7 @@ module ListRulesResponse =
         [@ocaml.doc "The rules that match the specified criteria."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "Indicates whether there are additional results to retrieve. If there are no more results, the value is null."]}
+          "A token indicating there are more results available. If there are no more results, no token is included in the response. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -9116,13 +10137,13 @@ module ListRulesResponse =
         (Option.map ~f:RuleResponseList.of_xml) (Xml.child xml_arg0 "Rules") in
       make ?nextToken ?rules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let rules = field_map json "Rules" RuleResponseList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let rules = field_map json__ "Rules" RuleResponseList.of_json in
       make ?nextToken ?rules ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists your Amazon EventBridge rules. You can either list all the rules or you can provide a prefix to match to the rule names. ListRules does not list the targets of a rule. To see the targets associated with a rule, use ListTargetsByRule."]
+       "Lists your Amazon EventBridge rules. You can either list all the rules or you can provide a prefix to match to the rule names. The maximum number of results per page for requests is 100. ListRules does not list the targets of a rule. To see the targets associated with a rule, use ListTargetsByRule."]
 module ListRulesRequest =
   struct
     type nonrec t =
@@ -9134,7 +10155,7 @@ module ListRulesRequest =
           "The name or ARN of the event bus to list the rules for. If you omit this, the default event bus is used."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token returned by a previous call to retrieve the next set of results."];
+          "The token returned by a previous call, which you can use to retrieve the next set of results. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."];
       limit: LimitMax100.t option
         [@ocaml.doc "The maximum number of results to return."]}
     let make ?namePrefix =
@@ -9162,16 +10183,16 @@ module ListRulesRequest =
         (Option.map ~f:RuleName.of_xml) (Xml.child xml_arg0 "NamePrefix") in
       make ?limit ?nextToken ?eventBusName ?namePrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" LimitMax100.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" LimitMax100.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let eventBusName =
-        field_map json "EventBusName" EventBusNameOrArn.of_json in
-      let namePrefix = field_map json "NamePrefix" RuleName.of_json in
+        field_map json__ "EventBusName" EventBusNameOrArn.of_json in
+      let namePrefix = field_map json__ "NamePrefix" RuleName.of_json in
       make ?limit ?nextToken ?eventBusName ?namePrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists your Amazon EventBridge rules. You can either list all the rules or you can provide a prefix to match to the rule names. ListRules does not list the targets of a rule. To see the targets associated with a rule, use ListTargetsByRule."]
+       "Lists your Amazon EventBridge rules. You can either list all the rules or you can provide a prefix to match to the rule names. The maximum number of results per page for requests is 100. ListRules does not list the targets of a rule. To see the targets associated with a rule, use ListTargetsByRule."]
 module ListRuleNamesByTargetResponse =
   struct
     type nonrec t =
@@ -9181,7 +10202,7 @@ module ListRuleNamesByTargetResponse =
           "The names of the rules that can invoke the given target."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "Indicates whether there are additional results to retrieve. If there are no more results, the value is null."]}
+          "A token indicating there are more results available. If there are no more results, no token is included in the response. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -9232,13 +10253,13 @@ module ListRuleNamesByTargetResponse =
         (Option.map ~f:RuleNameList.of_xml) (Xml.child xml_arg0 "RuleNames") in
       make ?nextToken ?ruleNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let ruleNames = field_map json "RuleNames" RuleNameList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let ruleNames = field_map json__ "RuleNames" RuleNameList.of_json in
       make ?nextToken ?ruleNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the rules for the specified target. You can see which of the rules in Amazon EventBridge can invoke a specific target in your account."]
+       "Lists the rules for the specified target. You can see which of the rules in Amazon EventBridge can invoke a specific target in your account. The maximum number of results per page for requests is 100."]
 module ListRuleNamesByTargetRequest =
   struct
     type nonrec t =
@@ -9250,7 +10271,7 @@ module ListRuleNamesByTargetRequest =
           "The name or ARN of the event bus to list rules for. If you omit this, the default event bus is used."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token returned by a previous call to retrieve the next set of results."];
+          "The token returned by a previous call, which you can use to retrieve the next set of results. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."];
       limit: LimitMax100.t option
         [@ocaml.doc "The maximum number of results to return."]}
     let context_ = "ListRuleNamesByTargetRequest"
@@ -9280,16 +10301,16 @@ module ListRuleNamesByTargetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TargetArn") in
       make ?limit ?nextToken ?eventBusName ~targetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" LimitMax100.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" LimitMax100.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let eventBusName =
-        field_map json "EventBusName" EventBusNameOrArn.of_json in
-      let targetArn = field_map_exn json "TargetArn" TargetArn.of_json in
+        field_map json__ "EventBusName" EventBusNameOrArn.of_json in
+      let targetArn = field_map_exn json__ "TargetArn" TargetArn.of_json in
       make ?limit ?nextToken ?eventBusName ~targetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the rules for the specified target. You can see which of the rules in Amazon EventBridge can invoke a specific target in your account."]
+       "Lists the rules for the specified target. You can see which of the rules in Amazon EventBridge can invoke a specific target in your account. The maximum number of results per page for requests is 100."]
 module ListReplaysResponse =
   struct
     type nonrec t =
@@ -9299,7 +10320,7 @@ module ListReplaysResponse =
           "An array of Replay objects that contain information about the replay."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token returned by a previous call to retrieve the next set of results."]}
+          "A token indicating there are more results available. If there are no more results, no token is included in the response. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -9340,9 +10361,9 @@ module ListReplaysResponse =
         (Option.map ~f:ReplayList.of_xml) (Xml.child xml_arg0 "Replays") in
       make ?nextToken ?replays ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let replays = field_map json "Replays" ReplayList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let replays = field_map json__ "Replays" ReplayList.of_json in
       make ?nextToken ?replays ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9355,12 +10376,12 @@ module ListReplaysRequest =
         [@ocaml.doc
           "A name prefix to filter the replays returned. Only replays with name that match the prefix are returned."];
       state: ReplayState.t option [@ocaml.doc "The state of the replay."];
-      eventSourceArn: Arn.t option
+      eventSourceArn: ArchiveArn.t option
         [@ocaml.doc
           "The ARN of the archive from which the events are replayed."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token returned by a previous call to retrieve the next set of results."];
+          "The token returned by a previous call, which you can use to retrieve the next set of results. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."];
       limit: LimitMax100.t option
         [@ocaml.doc "The maximum number of replays to retrieve."]}
     let make ?namePrefix =
@@ -9374,7 +10395,8 @@ module ListReplaysRequest =
       structure_to_value
         [("NamePrefix", (Option.map x.namePrefix ~f:ReplayName.to_value));
         ("State", (Option.map x.state ~f:ReplayState.to_value));
-        ("EventSourceArn", (Option.map x.eventSourceArn ~f:Arn.to_value));
+        ("EventSourceArn",
+          (Option.map x.eventSourceArn ~f:ArchiveArn.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("Limit", (Option.map x.limit ~f:LimitMax100.to_value))]
     let to_query v = to_query to_value v
@@ -9384,19 +10406,21 @@ module ListReplaysRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let eventSourceArn =
-        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "EventSourceArn") in
+        (Option.map ~f:ArchiveArn.of_xml)
+          (Xml.child xml_arg0 "EventSourceArn") in
       let state =
         (Option.map ~f:ReplayState.of_xml) (Xml.child xml_arg0 "State") in
       let namePrefix =
         (Option.map ~f:ReplayName.of_xml) (Xml.child xml_arg0 "NamePrefix") in
       make ?limit ?nextToken ?eventSourceArn ?state ?namePrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" LimitMax100.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let eventSourceArn = field_map json "EventSourceArn" Arn.of_json in
-      let state = field_map json "State" ReplayState.of_json in
-      let namePrefix = field_map json "NamePrefix" ReplayName.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" LimitMax100.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let eventSourceArn =
+        field_map json__ "EventSourceArn" ArchiveArn.of_json in
+      let state = field_map json__ "State" ReplayState.of_json in
+      let namePrefix = field_map json__ "NamePrefix" ReplayName.of_json in
       make ?limit ?nextToken ?eventSourceArn ?state ?namePrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9410,7 +10434,7 @@ module ListPartnerEventSourcesResponse =
           "The list of partner event sources returned by the operation."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "A token you can use in a subsequent operation to retrieve the next set of results."]}
+          "A token indicating there are more results available. If there are no more results, no token is included in the response. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `OperationDisabledException of OperationDisabledException.t 
@@ -9465,10 +10489,10 @@ module ListPartnerEventSourcesResponse =
           (Xml.child xml_arg0 "PartnerEventSources") in
       make ?nextToken ?partnerEventSources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let partnerEventSources =
-        field_map json "PartnerEventSources" PartnerEventSourceList.of_json in
+        field_map json__ "PartnerEventSources" PartnerEventSourceList.of_json in
       make ?nextToken ?partnerEventSources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9482,7 +10506,7 @@ module ListPartnerEventSourcesRequest =
           "If you specify this, the results are limited to only those partner event sources that start with the string you specify."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token returned by a previous call to this operation. Specifying this retrieves the next set of results."];
+          "The token returned by a previous call, which you can use to retrieve the next set of results. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."];
       limit: LimitMax100.t option
         [@ocaml.doc
           "pecifying this limits the number of results returned by this operation. The operation also returns a NextToken which you can use in a subsequent operation to retrieve the next set of results."]}
@@ -9507,11 +10531,12 @@ module ListPartnerEventSourcesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "NamePrefix") in
       make ?limit ?nextToken ~namePrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" LimitMax100.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" LimitMax100.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let namePrefix =
-        field_map_exn json "NamePrefix" PartnerEventSourceNamePrefix.of_json in
+        field_map_exn json__ "NamePrefix"
+          PartnerEventSourceNamePrefix.of_json in
       make ?limit ?nextToken ~namePrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9525,7 +10550,7 @@ module ListPartnerEventSourceAccountsResponse =
           "The list of partner event sources returned by the operation."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "A token you can use in a subsequent operation to retrieve the next set of results."]}
+          "A token indicating there are more results available. If there are no more results, no token is included in the response. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `OperationDisabledException of OperationDisabledException.t 
@@ -9589,10 +10614,10 @@ module ListPartnerEventSourceAccountsResponse =
           (Xml.child xml_arg0 "PartnerEventSourceAccounts") in
       make ?nextToken ?partnerEventSourceAccounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let partnerEventSourceAccounts =
-        field_map json "PartnerEventSourceAccounts"
+        field_map json__ "PartnerEventSourceAccounts"
           PartnerEventSourceAccountList.of_json in
       make ?nextToken ?partnerEventSourceAccounts ()
     let to_json v = composed_to_json to_value v
@@ -9607,7 +10632,7 @@ module ListPartnerEventSourceAccountsRequest =
           "The name of the partner event source to display account information about."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token returned by a previous call to this operation. Specifying this retrieves the next set of results."];
+          "The token returned by a previous call, which you can use to retrieve the next set of results. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."];
       limit: LimitMax100.t option
         [@ocaml.doc
           "Specifying this limits the number of results returned by this operation. The operation also returns a NextToken which you can use in a subsequent operation to retrieve the next set of results."]}
@@ -9633,11 +10658,11 @@ module ListPartnerEventSourceAccountsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EventSourceName") in
       make ?limit ?nextToken ~eventSourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" LimitMax100.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" LimitMax100.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let eventSourceName =
-        field_map_exn json "EventSourceName" EventSourceName.of_json in
+        field_map_exn json__ "EventSourceName" EventSourceName.of_json in
       make ?limit ?nextToken ~eventSourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9650,7 +10675,7 @@ module ListEventSourcesResponse =
         [@ocaml.doc "The list of event sources."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "A token you can use in a subsequent operation to retrieve the next set of results."]}
+          "A token indicating there are more results available. If there are no more results, no token is included in the response. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `OperationDisabledException of OperationDisabledException.t 
@@ -9704,10 +10729,10 @@ module ListEventSourcesResponse =
           (Xml.child xml_arg0 "EventSources") in
       make ?nextToken ?eventSources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let eventSources =
-        field_map json "EventSources" EventSourceList.of_json in
+        field_map json__ "EventSources" EventSourceList.of_json in
       make ?nextToken ?eventSources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9721,7 +10746,7 @@ module ListEventSourcesRequest =
           "Specifying this limits the results to only those partner event sources with names that start with the specified prefix."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token returned by a previous call to retrieve the next set of results."];
+          "The token returned by a previous call, which you can use to retrieve the next set of results. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."];
       limit: LimitMax100.t option
         [@ocaml.doc
           "Specifying this limits the number of results returned by this operation. The operation also returns a NextToken which you can use in a subsequent operation to retrieve the next set of results."]}
@@ -9745,11 +10770,11 @@ module ListEventSourcesRequest =
           (Xml.child xml_arg0 "NamePrefix") in
       make ?limit ?nextToken ?namePrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" LimitMax100.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" LimitMax100.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let namePrefix =
-        field_map json "NamePrefix" EventSourceNamePrefix.of_json in
+        field_map json__ "NamePrefix" EventSourceNamePrefix.of_json in
       make ?limit ?nextToken ?namePrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9762,7 +10787,7 @@ module ListEventBusesResponse =
         [@ocaml.doc "This list of event buses."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "A token you can use in a subsequent operation to retrieve the next set of results."]}
+          "A token indicating there are more results available. If there are no more results, no token is included in the response. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -9804,9 +10829,9 @@ module ListEventBusesResponse =
         (Option.map ~f:EventBusList.of_xml) (Xml.child xml_arg0 "EventBuses") in
       make ?nextToken ?eventBuses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let eventBuses = field_map json "EventBuses" EventBusList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let eventBuses = field_map json__ "EventBuses" EventBusList.of_json in
       make ?nextToken ?eventBuses ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9820,7 +10845,7 @@ module ListEventBusesRequest =
           "Specifying this limits the results to only those event buses with names that start with the specified prefix."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token returned by a previous call to retrieve the next set of results."];
+          "The token returned by a previous call, which you can use to retrieve the next set of results. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."];
       limit: LimitMax100.t option
         [@ocaml.doc
           "Specifying this limits the number of results returned by this operation. The operation also returns a NextToken which you can use in a subsequent operation to retrieve the next set of results."]}
@@ -9842,10 +10867,10 @@ module ListEventBusesRequest =
         (Option.map ~f:EventBusName.of_xml) (Xml.child xml_arg0 "NamePrefix") in
       make ?limit ?nextToken ?namePrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" LimitMax100.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let namePrefix = field_map json "NamePrefix" EventBusName.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" LimitMax100.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let namePrefix = field_map json__ "NamePrefix" EventBusName.of_json in
       make ?limit ?nextToken ?namePrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9858,7 +10883,7 @@ module ListEndpointsResponse =
         [@ocaml.doc "The endpoints returned by the call."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."]}
+          "A token indicating there are more results available. If there are no more results, no token is included in the response. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -9900,13 +10925,13 @@ module ListEndpointsResponse =
         (Option.map ~f:EndpointList.of_xml) (Xml.child xml_arg0 "Endpoints") in
       make ?nextToken ?endpoints ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let endpoints = field_map json "Endpoints" EndpointList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let endpoints = field_map json__ "Endpoints" EndpointList.of_json in
       make ?nextToken ?endpoints ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List the global endpoints associated with this account. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide.."]
+       "List the global endpoints associated with this account. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide ."]
 module ListEndpointsRequest =
   struct
     type nonrec t =
@@ -9919,7 +10944,7 @@ module ListEndpointsRequest =
           "The primary Region of the endpoints associated with this account. For example \"HomeRegion\": \"us-east-1\"."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "If nextToken is returned, there are more results available. The value of nextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."];
+          "The token returned by a previous call, which you can use to retrieve the next set of results. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."];
       maxResults: LimitMax100.t option
         [@ocaml.doc "The maximum number of results returned by the call."]}
     let make ?namePrefix =
@@ -9945,15 +10970,15 @@ module ListEndpointsRequest =
         (Option.map ~f:EndpointName.of_xml) (Xml.child xml_arg0 "NamePrefix") in
       make ?maxResults ?nextToken ?homeRegion ?namePrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" LimitMax100.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let homeRegion = field_map json "HomeRegion" HomeRegion.of_json in
-      let namePrefix = field_map json "NamePrefix" EndpointName.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" LimitMax100.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let homeRegion = field_map json__ "HomeRegion" HomeRegion.of_json in
+      let namePrefix = field_map json__ "NamePrefix" EndpointName.of_json in
       make ?maxResults ?nextToken ?homeRegion ?namePrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List the global endpoints associated with this account. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide.."]
+       "List the global endpoints associated with this account. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide ."]
 module ListConnectionsResponse =
   struct
     type nonrec t =
@@ -9963,7 +10988,7 @@ module ListConnectionsResponse =
           "An array of connections objects that include details about the connections."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "A token you can use in a subsequent request to retrieve the next set of results."]}
+          "A token indicating there are more results available. If there are no more results, no token is included in the response. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -10007,10 +11032,10 @@ module ListConnectionsResponse =
           (Xml.child xml_arg0 "Connections") in
       make ?nextToken ?connections ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let connections =
-        field_map json "Connections" ConnectionResponseList.of_json in
+        field_map json__ "Connections" ConnectionResponseList.of_json in
       make ?nextToken ?connections ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of connections from the account."]
@@ -10025,7 +11050,7 @@ module ListConnectionsRequest =
         [@ocaml.doc "The state of the connection."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token returned by a previous call to retrieve the next set of results."];
+          "The token returned by a previous call, which you can use to retrieve the next set of results. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."];
       limit: LimitMax100.t option
         [@ocaml.doc "The maximum number of connections to return."]}
     let make ?namePrefix =
@@ -10054,12 +11079,12 @@ module ListConnectionsRequest =
           (Xml.child xml_arg0 "NamePrefix") in
       make ?limit ?nextToken ?connectionState ?namePrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" LimitMax100.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" LimitMax100.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let connectionState =
-        field_map json "ConnectionState" ConnectionState.of_json in
-      let namePrefix = field_map json "NamePrefix" ConnectionName.of_json in
+        field_map json__ "ConnectionState" ConnectionState.of_json in
+      let namePrefix = field_map json__ "NamePrefix" ConnectionName.of_json in
       make ?limit ?nextToken ?connectionState ?namePrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of connections from the account."]
@@ -10072,7 +11097,7 @@ module ListArchivesResponse =
           "An array of Archive objects that include details about an archive."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token returned by a previous call to retrieve the next set of results."]}
+          "A token indicating there are more results available. If there are no more results, no token is included in the response. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -10124,9 +11149,9 @@ module ListArchivesResponse =
           (Xml.child xml_arg0 "Archives") in
       make ?nextToken ?archives ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let archives = field_map json "Archives" ArchiveResponseList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let archives = field_map json__ "Archives" ArchiveResponseList.of_json in
       make ?nextToken ?archives ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10138,13 +11163,13 @@ module ListArchivesRequest =
       namePrefix: ArchiveName.t option
         [@ocaml.doc
           "A name prefix to filter the archives returned. Only archives with name that match the prefix are returned."];
-      eventSourceArn: Arn.t option
+      eventSourceArn: EventBusArn.t option
         [@ocaml.doc
           "The ARN of the event source associated with the archive."];
       state: ArchiveState.t option [@ocaml.doc "The state of the archive."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token returned by a previous call to retrieve the next set of results."];
+          "The token returned by a previous call, which you can use to retrieve the next set of results. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."];
       limit: LimitMax100.t option
         [@ocaml.doc "The maximum number of results to return."]}
     let make ?namePrefix =
@@ -10157,7 +11182,8 @@ module ListArchivesRequest =
     let to_value x =
       structure_to_value
         [("NamePrefix", (Option.map x.namePrefix ~f:ArchiveName.to_value));
-        ("EventSourceArn", (Option.map x.eventSourceArn ~f:Arn.to_value));
+        ("EventSourceArn",
+          (Option.map x.eventSourceArn ~f:EventBusArn.to_value));
         ("State", (Option.map x.state ~f:ArchiveState.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("Limit", (Option.map x.limit ~f:LimitMax100.to_value))]
@@ -10170,17 +11196,19 @@ module ListArchivesRequest =
       let state =
         (Option.map ~f:ArchiveState.of_xml) (Xml.child xml_arg0 "State") in
       let eventSourceArn =
-        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "EventSourceArn") in
+        (Option.map ~f:EventBusArn.of_xml)
+          (Xml.child xml_arg0 "EventSourceArn") in
       let namePrefix =
         (Option.map ~f:ArchiveName.of_xml) (Xml.child xml_arg0 "NamePrefix") in
       make ?limit ?nextToken ?state ?eventSourceArn ?namePrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" LimitMax100.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let state = field_map json "State" ArchiveState.of_json in
-      let eventSourceArn = field_map json "EventSourceArn" Arn.of_json in
-      let namePrefix = field_map json "NamePrefix" ArchiveName.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" LimitMax100.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let state = field_map json__ "State" ArchiveState.of_json in
+      let eventSourceArn =
+        field_map json__ "EventSourceArn" EventBusArn.of_json in
+      let namePrefix = field_map json__ "NamePrefix" ArchiveName.of_json in
       make ?limit ?nextToken ?state ?eventSourceArn ?namePrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10191,10 +11219,10 @@ module ListApiDestinationsResponse =
       {
       apiDestinations: ApiDestinationResponseList.t option
         [@ocaml.doc
-          "An array of ApiDestination objects that include information about an API destination."];
+          "An array that includes information about each API destination."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "A token you can use in a subsequent request to retrieve the next set of results."]}
+          "A token indicating there are more results available. If there are no more results, no token is included in the response. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -10239,10 +11267,10 @@ module ListApiDestinationsResponse =
           (Xml.child xml_arg0 "ApiDestinations") in
       make ?nextToken ?apiDestinations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let apiDestinations =
-        field_map json "ApiDestinations" ApiDestinationResponseList.of_json in
+        field_map json__ "ApiDestinations" ApiDestinationResponseList.of_json in
       make ?nextToken ?apiDestinations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10259,7 +11287,7 @@ module ListApiDestinationsRequest =
           "The ARN of the connection specified for the API destination."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token returned by a previous call to retrieve the next set of results."];
+          "The token returned by a previous call, which you can use to retrieve the next set of results. The value of nextToken is a unique pagination token for each page. To retrieve the next page of results, make the call again using the returned token. Keep all other arguments unchanged. Using an expired pagination token results in an HTTP 400 InvalidToken error."];
       limit: LimitMax100.t option
         [@ocaml.doc
           "The maximum number of API destinations to include in the response."]}
@@ -10290,12 +11318,13 @@ module ListApiDestinationsRequest =
           (Xml.child xml_arg0 "NamePrefix") in
       make ?limit ?nextToken ?connectionArn ?namePrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" LimitMax100.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" LimitMax100.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let connectionArn =
-        field_map json "ConnectionArn" ConnectionArn.of_json in
-      let namePrefix = field_map json "NamePrefix" ApiDestinationName.of_json in
+        field_map json__ "ConnectionArn" ConnectionArn.of_json in
+      let namePrefix =
+        field_map json__ "NamePrefix" ApiDestinationName.of_json in
       make ?limit ?nextToken ?connectionArn ?namePrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10324,10 +11353,10 @@ module EnableRuleRequest =
         RuleName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?eventBusName ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventBusName =
-        field_map json "EventBusName" EventBusNameOrArn.of_json in
-      let name = field_map_exn json "Name" RuleName.of_json in
+        field_map json__ "EventBusName" EventBusNameOrArn.of_json in
+      let name = field_map_exn json__ "Name" RuleName.of_json in
       make ?eventBusName ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10356,10 +11385,10 @@ module DisableRuleRequest =
         RuleName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?eventBusName ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventBusName =
-        field_map json "EventBusName" EventBusNameOrArn.of_json in
-      let name = field_map_exn json "Name" RuleName.of_json in
+        field_map json__ "EventBusName" EventBusNameOrArn.of_json in
+      let name = field_map_exn json__ "Name" RuleName.of_json in
       make ?eventBusName ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10373,7 +11402,7 @@ module DescribeRuleResponse =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the rule."];
       eventPattern: EventPattern.t option
         [@ocaml.doc
-          "The event pattern. For more information, see Events and Event Patterns in the Amazon EventBridge User Guide."];
+          "The event pattern. For more information, see Events and Event Patterns in the Amazon EventBridge User Guide ."];
       scheduleExpression: ScheduleExpression.t option
         [@ocaml.doc
           "The scheduling expression. For example, \"cron(0 20 * * ? *)\", \"rate(5 minutes)\"."];
@@ -10494,18 +11523,19 @@ module DescribeRuleResponse =
       make ?createdBy ?eventBusName ?managedBy ?roleArn ?description ?state
         ?scheduleExpression ?eventPattern ?arn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdBy = field_map json "CreatedBy" CreatedBy.of_json in
-      let eventBusName = field_map json "EventBusName" EventBusName.of_json in
-      let managedBy = field_map json "ManagedBy" ManagedBy.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let description = field_map json "Description" RuleDescription.of_json in
-      let state = field_map json "State" RuleState.of_json in
+    let of_json json__ =
+      let createdBy = field_map json__ "CreatedBy" CreatedBy.of_json in
+      let eventBusName = field_map json__ "EventBusName" EventBusName.of_json in
+      let managedBy = field_map json__ "ManagedBy" ManagedBy.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let description =
+        field_map json__ "Description" RuleDescription.of_json in
+      let state = field_map json__ "State" RuleState.of_json in
       let scheduleExpression =
-        field_map json "ScheduleExpression" ScheduleExpression.of_json in
-      let eventPattern = field_map json "EventPattern" EventPattern.of_json in
-      let arn = field_map json "Arn" RuleArn.of_json in
-      let name = field_map json "Name" RuleName.of_json in
+        field_map json__ "ScheduleExpression" ScheduleExpression.of_json in
+      let eventPattern = field_map json__ "EventPattern" EventPattern.of_json in
+      let arn = field_map json__ "Arn" RuleArn.of_json in
+      let name = field_map json__ "Name" RuleName.of_json in
       make ?createdBy ?eventBusName ?managedBy ?roleArn ?description ?state
         ?scheduleExpression ?eventPattern ?arn ?name ()
     let to_json v = composed_to_json to_value v
@@ -10535,10 +11565,10 @@ module DescribeRuleRequest =
         RuleName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?eventBusName ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventBusName =
-        field_map json "EventBusName" EventBusNameOrArn.of_json in
-      let name = field_map_exn json "Name" RuleName.of_json in
+        field_map json__ "EventBusName" EventBusNameOrArn.of_json in
+      let name = field_map_exn json__ "Name" RuleName.of_json in
       make ?eventBusName ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10555,7 +11585,7 @@ module DescribeReplayResponse =
         [@ocaml.doc "The current state of the replay."];
       stateReason: ReplayStateReason.t option
         [@ocaml.doc "The reason that the replay is in the current state."];
-      eventSourceArn: Arn.t option
+      eventSourceArn: ArchiveArn.t option
         [@ocaml.doc "The ARN of the archive events were replayed from."];
       destination: ReplayDestination.t option
         [@ocaml.doc
@@ -10644,7 +11674,8 @@ module DescribeReplayResponse =
         ("State", (Option.map x.state ~f:ReplayState.to_value));
         ("StateReason",
           (Option.map x.stateReason ~f:ReplayStateReason.to_value));
-        ("EventSourceArn", (Option.map x.eventSourceArn ~f:Arn.to_value));
+        ("EventSourceArn",
+          (Option.map x.eventSourceArn ~f:ArchiveArn.to_value));
         ("Destination",
           (Option.map x.destination ~f:ReplayDestination.to_value));
         ("EventStartTime",
@@ -10674,7 +11705,8 @@ module DescribeReplayResponse =
         (Option.map ~f:ReplayDestination.of_xml)
           (Xml.child xml_arg0 "Destination") in
       let eventSourceArn =
-        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "EventSourceArn") in
+        (Option.map ~f:ArchiveArn.of_xml)
+          (Xml.child xml_arg0 "EventSourceArn") in
       let stateReason =
         (Option.map ~f:ReplayStateReason.of_xml)
           (Xml.child xml_arg0 "StateReason") in
@@ -10691,24 +11723,26 @@ module DescribeReplayResponse =
         ?eventEndTime ?eventStartTime ?destination ?eventSourceArn
         ?stateReason ?state ?description ?replayArn ?replayName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let replayEndTime = field_map json "ReplayEndTime" Timestamp.of_json in
+    let of_json json__ =
+      let replayEndTime = field_map json__ "ReplayEndTime" Timestamp.of_json in
       let replayStartTime =
-        field_map json "ReplayStartTime" Timestamp.of_json in
+        field_map json__ "ReplayStartTime" Timestamp.of_json in
       let eventLastReplayedTime =
-        field_map json "EventLastReplayedTime" Timestamp.of_json in
-      let eventEndTime = field_map json "EventEndTime" Timestamp.of_json in
-      let eventStartTime = field_map json "EventStartTime" Timestamp.of_json in
+        field_map json__ "EventLastReplayedTime" Timestamp.of_json in
+      let eventEndTime = field_map json__ "EventEndTime" Timestamp.of_json in
+      let eventStartTime =
+        field_map json__ "EventStartTime" Timestamp.of_json in
       let destination =
-        field_map json "Destination" ReplayDestination.of_json in
-      let eventSourceArn = field_map json "EventSourceArn" Arn.of_json in
+        field_map json__ "Destination" ReplayDestination.of_json in
+      let eventSourceArn =
+        field_map json__ "EventSourceArn" ArchiveArn.of_json in
       let stateReason =
-        field_map json "StateReason" ReplayStateReason.of_json in
-      let state = field_map json "State" ReplayState.of_json in
+        field_map json__ "StateReason" ReplayStateReason.of_json in
+      let state = field_map json__ "State" ReplayState.of_json in
       let description =
-        field_map json "Description" ReplayDescription.of_json in
-      let replayArn = field_map json "ReplayArn" ReplayArn.of_json in
-      let replayName = field_map json "ReplayName" ReplayName.of_json in
+        field_map json__ "Description" ReplayDescription.of_json in
+      let replayArn = field_map json__ "ReplayArn" ReplayArn.of_json in
+      let replayName = field_map json__ "ReplayName" ReplayName.of_json in
       make ?replayEndTime ?replayStartTime ?eventLastReplayedTime
         ?eventEndTime ?eventStartTime ?destination ?eventSourceArn
         ?stateReason ?state ?description ?replayArn ?replayName ()
@@ -10733,8 +11767,8 @@ module DescribeReplayRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ReplayName") in
       make ~replayName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let replayName = field_map_exn json "ReplayName" ReplayName.of_json in
+    let of_json json__ =
+      let replayName = field_map_exn json__ "ReplayName" ReplayName.of_json in
       make ~replayName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10802,9 +11836,9 @@ module DescribePartnerEventSourceResponse =
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" String_.of_json in
-      let arn = field_map json "Arn" String_.of_json in make ?name ?arn ()
+    let of_json json__ =
+      let name = field_map json__ "Name" String_.of_json in
+      let arn = field_map json__ "Arn" String_.of_json in make ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An SaaS partner can use this operation to list details about a partner event source that they have created. Amazon Web Services customers do not use this operation. Instead, Amazon Web Services customers can use DescribeEventSource to see details about a partner event source that is shared with them."]
@@ -10825,8 +11859,8 @@ module DescribePartnerEventSourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" EventSourceName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" EventSourceName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10929,13 +11963,14 @@ module DescribeEventSourceResponse =
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?state ?name ?expirationTime ?creationTime ?createdBy ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" EventSourceState.of_json in
-      let name = field_map json "Name" String_.of_json in
-      let expirationTime = field_map json "ExpirationTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let createdBy = field_map json "CreatedBy" String_.of_json in
-      let arn = field_map json "Arn" String_.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" EventSourceState.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let expirationTime =
+        field_map json__ "ExpirationTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let createdBy = field_map json__ "CreatedBy" String_.of_json in
+      let arn = field_map json__ "Arn" String_.of_json in
       make ?state ?name ?expirationTime ?creationTime ?createdBy ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10958,8 +11993,8 @@ module DescribeEventSourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" EventSourceName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" EventSourceName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10974,15 +12009,47 @@ module DescribeEventBusResponse =
       arn: String_.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the account permitted to write events to the current account."];
+      description: EventBusDescription.t option
+        [@ocaml.doc "The event bus description."];
+      kmsKeyIdentifier: KmsKeyIdentifier.t option
+        [@ocaml.doc
+          "The identifier of the KMS customer managed key for EventBridge to use to encrypt events on this event bus, if one has been specified. For more information, see Data encryption in EventBridge in the Amazon EventBridge User Guide."];
+      deadLetterConfig: DeadLetterConfig.t option ;
       policy: String_.t option
         [@ocaml.doc
-          "The policy that enables the external account to send events to your account."]}
+          "The policy that enables the external account to send events to your account."];
+      logConfig: LogConfig.t option
+        [@ocaml.doc
+          "The logging configuration settings for the event bus. For more information, see Configuring logs for event buses in the EventBridge User Guide."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc "The time the event bus was created."];
+      lastModifiedTime: Timestamp.t option
+        [@ocaml.doc "The time the event bus was last modified."]}
     type nonrec error =
       [ `InternalException of InternalException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?name =
-      fun ?arn -> fun ?policy -> fun () -> { name; arn; policy }
+      fun ?arn ->
+        fun ?description ->
+          fun ?kmsKeyIdentifier ->
+            fun ?deadLetterConfig ->
+              fun ?policy ->
+                fun ?logConfig ->
+                  fun ?creationTime ->
+                    fun ?lastModifiedTime ->
+                      fun () ->
+                        {
+                          name;
+                          arn;
+                          description;
+                          kmsKeyIdentifier;
+                          deadLetterConfig;
+                          policy;
+                          logConfig;
+                          creationTime;
+                          lastModifiedTime
+                        }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -11019,20 +12086,58 @@ module DescribeEventBusResponse =
       structure_to_value
         [("Name", (Option.map x.name ~f:String_.to_value));
         ("Arn", (Option.map x.arn ~f:String_.to_value));
-        ("Policy", (Option.map x.policy ~f:String_.to_value))]
+        ("Description",
+          (Option.map x.description ~f:EventBusDescription.to_value));
+        ("KmsKeyIdentifier",
+          (Option.map x.kmsKeyIdentifier ~f:KmsKeyIdentifier.to_value));
+        ("DeadLetterConfig",
+          (Option.map x.deadLetterConfig ~f:DeadLetterConfig.to_value));
+        ("Policy", (Option.map x.policy ~f:String_.to_value));
+        ("LogConfig", (Option.map x.logConfig ~f:LogConfig.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("LastModifiedTime",
+          (Option.map x.lastModifiedTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let lastModifiedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModifiedTime") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let logConfig =
+        (Option.map ~f:LogConfig.of_xml) (Xml.child xml_arg0 "LogConfig") in
       let policy =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Policy") in
+      let deadLetterConfig =
+        (Option.map ~f:DeadLetterConfig.of_xml)
+          (Xml.child xml_arg0 "DeadLetterConfig") in
+      let kmsKeyIdentifier =
+        (Option.map ~f:KmsKeyIdentifier.of_xml)
+          (Xml.child xml_arg0 "KmsKeyIdentifier") in
+      let description =
+        (Option.map ~f:EventBusDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Arn") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?policy ?arn ?name ()
+      make ?lastModifiedTime ?creationTime ?logConfig ?policy
+        ?deadLetterConfig ?kmsKeyIdentifier ?description ?arn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" String_.of_json in
-      let arn = field_map json "Arn" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
-      make ?policy ?arn ?name ()
+    let of_json json__ =
+      let lastModifiedTime =
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let logConfig = field_map json__ "LogConfig" LogConfig.of_json in
+      let policy = field_map json__ "Policy" String_.of_json in
+      let deadLetterConfig =
+        field_map json__ "DeadLetterConfig" DeadLetterConfig.of_json in
+      let kmsKeyIdentifier =
+        field_map json__ "KmsKeyIdentifier" KmsKeyIdentifier.of_json in
+      let description =
+        field_map json__ "Description" EventBusDescription.of_json in
+      let arn = field_map json__ "Arn" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?lastModifiedTime ?creationTime ?logConfig ?policy
+        ?deadLetterConfig ?kmsKeyIdentifier ?description ?arn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Displays details about an event bus in your account. This can include the external Amazon Web Services accounts that are permitted to write events to your default event bus, and the associated policy. For custom event buses and partner event buses, it displays the name, ARN, policy, state, and creation time. To enable your account to receive events from other accounts on its default event bus, use PutPermission. For more information about partner event buses, see CreateEventBus."]
@@ -11053,8 +12158,8 @@ module DescribeEventBusRequest =
         (Option.map ~f:EventBusNameOrArn.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" EventBusNameOrArn.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" EventBusNameOrArn.of_json in
       make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11225,32 +12330,32 @@ module DescribeEndpointResponse =
         ?endpointId ?roleArn ?eventBuses ?replicationConfig ?routingConfig
         ?arn ?description ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let stateReason =
-        field_map json "StateReason" EndpointStateReason.of_json in
-      let state = field_map json "State" EndpointState.of_json in
-      let endpointUrl = field_map json "EndpointUrl" EndpointUrl.of_json in
-      let endpointId = field_map json "EndpointId" EndpointId.of_json in
-      let roleArn = field_map json "RoleArn" IamRoleArn.of_json in
+        field_map json__ "StateReason" EndpointStateReason.of_json in
+      let state = field_map json__ "State" EndpointState.of_json in
+      let endpointUrl = field_map json__ "EndpointUrl" EndpointUrl.of_json in
+      let endpointId = field_map json__ "EndpointId" EndpointId.of_json in
+      let roleArn = field_map json__ "RoleArn" IamRoleArn.of_json in
       let eventBuses =
-        field_map json "EventBuses" EndpointEventBusList.of_json in
+        field_map json__ "EventBuses" EndpointEventBusList.of_json in
       let replicationConfig =
-        field_map json "ReplicationConfig" ReplicationConfig.of_json in
+        field_map json__ "ReplicationConfig" ReplicationConfig.of_json in
       let routingConfig =
-        field_map json "RoutingConfig" RoutingConfig.of_json in
-      let arn = field_map json "Arn" EndpointArn.of_json in
+        field_map json__ "RoutingConfig" RoutingConfig.of_json in
+      let arn = field_map json__ "Arn" EndpointArn.of_json in
       let description =
-        field_map json "Description" EndpointDescription.of_json in
-      let name = field_map json "Name" EndpointName.of_json in
+        field_map json__ "Description" EndpointDescription.of_json in
+      let name = field_map json__ "Name" EndpointName.of_json in
       make ?lastModifiedTime ?creationTime ?stateReason ?state ?endpointUrl
         ?endpointId ?roleArn ?eventBuses ?replicationConfig ?routingConfig
         ?arn ?description ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Get the information about an existing global endpoint. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide.."]
+       "Get the information about an existing global endpoint. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide ."]
 module DescribeEndpointRequest =
   struct
     type nonrec t =
@@ -11275,13 +12380,13 @@ module DescribeEndpointRequest =
         EndpointName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?homeRegion ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let homeRegion = field_map json "HomeRegion" HomeRegion.of_json in
-      let name = field_map_exn json "Name" EndpointName.of_json in
+    let of_json json__ =
+      let homeRegion = field_map json__ "HomeRegion" HomeRegion.of_json in
+      let name = field_map_exn json__ "Name" EndpointName.of_json in
       make ?homeRegion ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Get the information about an existing global endpoint. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide.."]
+       "Get the information about an existing global endpoint. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide ."]
 module DescribeConnectionResponse =
   struct
     type nonrec t =
@@ -11292,6 +12397,10 @@ module DescribeConnectionResponse =
         [@ocaml.doc "The name of the connection retrieved."];
       description: ConnectionDescription.t option
         [@ocaml.doc "The description for the connection retrieved."];
+      invocationConnectivityParameters:
+        DescribeConnectionConnectivityParameters.t option
+        [@ocaml.doc
+          "For connections to private APIs The parameters EventBridge uses to invoke the resource endpoint. For more information, see Connecting to private APIs in the Amazon EventBridge User Guide ."];
       connectionState: ConnectionState.t option
         [@ocaml.doc "The state of the connection retrieved."];
       stateReason: ConnectionStateReason.t option
@@ -11303,6 +12412,9 @@ module DescribeConnectionResponse =
       secretArn: SecretsManagerSecretArn.t option
         [@ocaml.doc
           "The ARN of the secret created from the authorization parameters specified for the connection."];
+      kmsKeyIdentifier: KmsKeyIdentifier.t option
+        [@ocaml.doc
+          "The identifier of the KMS customer managed key for EventBridge to use to encrypt the connection, if one has been specified. For more information, see Encrypting connections in the Amazon EventBridge User Guide."];
       authParameters: ConnectionAuthResponseParameters.t option
         [@ocaml.doc
           "The parameters to use for authorization for the connection."];
@@ -11322,28 +12434,32 @@ module DescribeConnectionResponse =
     let make ?connectionArn =
       fun ?name ->
         fun ?description ->
-          fun ?connectionState ->
-            fun ?stateReason ->
-              fun ?authorizationType ->
-                fun ?secretArn ->
-                  fun ?authParameters ->
-                    fun ?creationTime ->
-                      fun ?lastModifiedTime ->
-                        fun ?lastAuthorizedTime ->
-                          fun () ->
-                            {
-                              connectionArn;
-                              name;
-                              description;
-                              connectionState;
-                              stateReason;
-                              authorizationType;
-                              secretArn;
-                              authParameters;
-                              creationTime;
-                              lastModifiedTime;
-                              lastAuthorizedTime
-                            }
+          fun ?invocationConnectivityParameters ->
+            fun ?connectionState ->
+              fun ?stateReason ->
+                fun ?authorizationType ->
+                  fun ?secretArn ->
+                    fun ?kmsKeyIdentifier ->
+                      fun ?authParameters ->
+                        fun ?creationTime ->
+                          fun ?lastModifiedTime ->
+                            fun ?lastAuthorizedTime ->
+                              fun () ->
+                                {
+                                  connectionArn;
+                                  name;
+                                  description;
+                                  invocationConnectivityParameters;
+                                  connectionState;
+                                  stateReason;
+                                  authorizationType;
+                                  secretArn;
+                                  kmsKeyIdentifier;
+                                  authParameters;
+                                  creationTime;
+                                  lastModifiedTime;
+                                  lastAuthorizedTime
+                                }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -11383,6 +12499,9 @@ module DescribeConnectionResponse =
         ("Name", (Option.map x.name ~f:ConnectionName.to_value));
         ("Description",
           (Option.map x.description ~f:ConnectionDescription.to_value));
+        ("InvocationConnectivityParameters",
+          (Option.map x.invocationConnectivityParameters
+             ~f:DescribeConnectionConnectivityParameters.to_value));
         ("ConnectionState",
           (Option.map x.connectionState ~f:ConnectionState.to_value));
         ("StateReason",
@@ -11392,6 +12511,8 @@ module DescribeConnectionResponse =
              ~f:ConnectionAuthorizationType.to_value));
         ("SecretArn",
           (Option.map x.secretArn ~f:SecretsManagerSecretArn.to_value));
+        ("KmsKeyIdentifier",
+          (Option.map x.kmsKeyIdentifier ~f:KmsKeyIdentifier.to_value));
         ("AuthParameters",
           (Option.map x.authParameters
              ~f:ConnectionAuthResponseParameters.to_value));
@@ -11413,6 +12534,9 @@ module DescribeConnectionResponse =
       let authParameters =
         (Option.map ~f:ConnectionAuthResponseParameters.of_xml)
           (Xml.child xml_arg0 "AuthParameters") in
+      let kmsKeyIdentifier =
+        (Option.map ~f:KmsKeyIdentifier.of_xml)
+          (Xml.child xml_arg0 "KmsKeyIdentifier") in
       let secretArn =
         (Option.map ~f:SecretsManagerSecretArn.of_xml)
           (Xml.child xml_arg0 "SecretArn") in
@@ -11425,6 +12549,9 @@ module DescribeConnectionResponse =
       let connectionState =
         (Option.map ~f:ConnectionState.of_xml)
           (Xml.child xml_arg0 "ConnectionState") in
+      let invocationConnectivityParameters =
+        (Option.map ~f:DescribeConnectionConnectivityParameters.of_xml)
+          (Xml.child xml_arg0 "InvocationConnectivityParameters") in
       let description =
         (Option.map ~f:ConnectionDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
@@ -11434,35 +12561,42 @@ module DescribeConnectionResponse =
         (Option.map ~f:ConnectionArn.of_xml)
           (Xml.child xml_arg0 "ConnectionArn") in
       make ?lastAuthorizedTime ?lastModifiedTime ?creationTime
-        ?authParameters ?secretArn ?authorizationType ?stateReason
-        ?connectionState ?description ?name ?connectionArn ()
+        ?authParameters ?kmsKeyIdentifier ?secretArn ?authorizationType
+        ?stateReason ?connectionState ?invocationConnectivityParameters
+        ?description ?name ?connectionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastAuthorizedTime =
-        field_map json "LastAuthorizedTime" Timestamp.of_json in
+        field_map json__ "LastAuthorizedTime" Timestamp.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let authParameters =
-        field_map json "AuthParameters"
+        field_map json__ "AuthParameters"
           ConnectionAuthResponseParameters.of_json in
+      let kmsKeyIdentifier =
+        field_map json__ "KmsKeyIdentifier" KmsKeyIdentifier.of_json in
       let secretArn =
-        field_map json "SecretArn" SecretsManagerSecretArn.of_json in
+        field_map json__ "SecretArn" SecretsManagerSecretArn.of_json in
       let authorizationType =
-        field_map json "AuthorizationType"
+        field_map json__ "AuthorizationType"
           ConnectionAuthorizationType.of_json in
       let stateReason =
-        field_map json "StateReason" ConnectionStateReason.of_json in
+        field_map json__ "StateReason" ConnectionStateReason.of_json in
       let connectionState =
-        field_map json "ConnectionState" ConnectionState.of_json in
+        field_map json__ "ConnectionState" ConnectionState.of_json in
+      let invocationConnectivityParameters =
+        field_map json__ "InvocationConnectivityParameters"
+          DescribeConnectionConnectivityParameters.of_json in
       let description =
-        field_map json "Description" ConnectionDescription.of_json in
-      let name = field_map json "Name" ConnectionName.of_json in
+        field_map json__ "Description" ConnectionDescription.of_json in
+      let name = field_map json__ "Name" ConnectionName.of_json in
       let connectionArn =
-        field_map json "ConnectionArn" ConnectionArn.of_json in
+        field_map json__ "ConnectionArn" ConnectionArn.of_json in
       make ?lastAuthorizedTime ?lastModifiedTime ?creationTime
-        ?authParameters ?secretArn ?authorizationType ?stateReason
-        ?connectionState ?description ?name ?connectionArn ()
+        ?authParameters ?kmsKeyIdentifier ?secretArn ?authorizationType
+        ?stateReason ?connectionState ?invocationConnectivityParameters
+        ?description ?name ?connectionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves details about a connection."]
 module DescribeConnectionRequest =
@@ -11482,8 +12616,8 @@ module DescribeConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ConnectionName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" ConnectionName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves details about a connection."]
@@ -11494,7 +12628,7 @@ module DescribeArchiveResponse =
       archiveArn: ArchiveArn.t option [@ocaml.doc "The ARN of the archive."];
       archiveName: ArchiveName.t option
         [@ocaml.doc "The name of the archive."];
-      eventSourceArn: Arn.t option
+      eventSourceArn: EventBusArn.t option
         [@ocaml.doc
           "The ARN of the event source associated with the archive."];
       description: ArchiveDescription.t option
@@ -11505,6 +12639,9 @@ module DescribeArchiveResponse =
       state: ArchiveState.t option [@ocaml.doc "The state of the archive."];
       stateReason: ArchiveStateReason.t option
         [@ocaml.doc "The reason that the archive is in the state."];
+      kmsKeyIdentifier: KmsKeyIdentifier.t option
+        [@ocaml.doc
+          "The identifier of the KMS customer managed key for EventBridge to use to encrypt this archive, if one has been specified. For more information, see Encrypting archives in the Amazon EventBridge User Guide."];
       retentionDays: RetentionDays.t option
         [@ocaml.doc
           "The number of days to retain events for in the archive."];
@@ -11526,24 +12663,26 @@ module DescribeArchiveResponse =
             fun ?eventPattern ->
               fun ?state ->
                 fun ?stateReason ->
-                  fun ?retentionDays ->
-                    fun ?sizeBytes ->
-                      fun ?eventCount ->
-                        fun ?creationTime ->
-                          fun () ->
-                            {
-                              archiveArn;
-                              archiveName;
-                              eventSourceArn;
-                              description;
-                              eventPattern;
-                              state;
-                              stateReason;
-                              retentionDays;
-                              sizeBytes;
-                              eventCount;
-                              creationTime
-                            }
+                  fun ?kmsKeyIdentifier ->
+                    fun ?retentionDays ->
+                      fun ?sizeBytes ->
+                        fun ?eventCount ->
+                          fun ?creationTime ->
+                            fun () ->
+                              {
+                                archiveArn;
+                                archiveName;
+                                eventSourceArn;
+                                description;
+                                eventPattern;
+                                state;
+                                stateReason;
+                                kmsKeyIdentifier;
+                                retentionDays;
+                                sizeBytes;
+                                eventCount;
+                                creationTime
+                              }
     let error_of_json name json =
       match name with
       | "InternalException" ->
@@ -11590,7 +12729,8 @@ module DescribeArchiveResponse =
       structure_to_value
         [("ArchiveArn", (Option.map x.archiveArn ~f:ArchiveArn.to_value));
         ("ArchiveName", (Option.map x.archiveName ~f:ArchiveName.to_value));
-        ("EventSourceArn", (Option.map x.eventSourceArn ~f:Arn.to_value));
+        ("EventSourceArn",
+          (Option.map x.eventSourceArn ~f:EventBusArn.to_value));
         ("Description",
           (Option.map x.description ~f:ArchiveDescription.to_value));
         ("EventPattern",
@@ -11598,6 +12738,8 @@ module DescribeArchiveResponse =
         ("State", (Option.map x.state ~f:ArchiveState.to_value));
         ("StateReason",
           (Option.map x.stateReason ~f:ArchiveStateReason.to_value));
+        ("KmsKeyIdentifier",
+          (Option.map x.kmsKeyIdentifier ~f:KmsKeyIdentifier.to_value));
         ("RetentionDays",
           (Option.map x.retentionDays ~f:RetentionDays.to_value));
         ("SizeBytes", (Option.map x.sizeBytes ~f:Long.to_value));
@@ -11614,6 +12756,9 @@ module DescribeArchiveResponse =
       let retentionDays =
         (Option.map ~f:RetentionDays.of_xml)
           (Xml.child xml_arg0 "RetentionDays") in
+      let kmsKeyIdentifier =
+        (Option.map ~f:KmsKeyIdentifier.of_xml)
+          (Xml.child xml_arg0 "KmsKeyIdentifier") in
       let stateReason =
         (Option.map ~f:ArchiveStateReason.of_xml)
           (Xml.child xml_arg0 "StateReason") in
@@ -11626,33 +12771,37 @@ module DescribeArchiveResponse =
         (Option.map ~f:ArchiveDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
       let eventSourceArn =
-        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "EventSourceArn") in
+        (Option.map ~f:EventBusArn.of_xml)
+          (Xml.child xml_arg0 "EventSourceArn") in
       let archiveName =
         (Option.map ~f:ArchiveName.of_xml) (Xml.child xml_arg0 "ArchiveName") in
       let archiveArn =
         (Option.map ~f:ArchiveArn.of_xml) (Xml.child xml_arg0 "ArchiveArn") in
-      make ?creationTime ?eventCount ?sizeBytes ?retentionDays ?stateReason
-        ?state ?eventPattern ?description ?eventSourceArn ?archiveName
-        ?archiveArn ()
+      make ?creationTime ?eventCount ?sizeBytes ?retentionDays
+        ?kmsKeyIdentifier ?stateReason ?state ?eventPattern ?description
+        ?eventSourceArn ?archiveName ?archiveArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let eventCount = field_map json "EventCount" Long.of_json in
-      let sizeBytes = field_map json "SizeBytes" Long.of_json in
+    let of_json json__ =
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let eventCount = field_map json__ "EventCount" Long.of_json in
+      let sizeBytes = field_map json__ "SizeBytes" Long.of_json in
       let retentionDays =
-        field_map json "RetentionDays" RetentionDays.of_json in
+        field_map json__ "RetentionDays" RetentionDays.of_json in
+      let kmsKeyIdentifier =
+        field_map json__ "KmsKeyIdentifier" KmsKeyIdentifier.of_json in
       let stateReason =
-        field_map json "StateReason" ArchiveStateReason.of_json in
-      let state = field_map json "State" ArchiveState.of_json in
-      let eventPattern = field_map json "EventPattern" EventPattern.of_json in
+        field_map json__ "StateReason" ArchiveStateReason.of_json in
+      let state = field_map json__ "State" ArchiveState.of_json in
+      let eventPattern = field_map json__ "EventPattern" EventPattern.of_json in
       let description =
-        field_map json "Description" ArchiveDescription.of_json in
-      let eventSourceArn = field_map json "EventSourceArn" Arn.of_json in
-      let archiveName = field_map json "ArchiveName" ArchiveName.of_json in
-      let archiveArn = field_map json "ArchiveArn" ArchiveArn.of_json in
-      make ?creationTime ?eventCount ?sizeBytes ?retentionDays ?stateReason
-        ?state ?eventPattern ?description ?eventSourceArn ?archiveName
-        ?archiveArn ()
+        field_map json__ "Description" ArchiveDescription.of_json in
+      let eventSourceArn =
+        field_map json__ "EventSourceArn" EventBusArn.of_json in
+      let archiveName = field_map json__ "ArchiveName" ArchiveName.of_json in
+      let archiveArn = field_map json__ "ArchiveArn" ArchiveArn.of_json in
+      make ?creationTime ?eventCount ?sizeBytes ?retentionDays
+        ?kmsKeyIdentifier ?stateReason ?state ?eventPattern ?description
+        ?eventSourceArn ?archiveName ?archiveArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves details about an archive."]
 module DescribeArchiveRequest =
@@ -11673,8 +12822,9 @@ module DescribeArchiveRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ArchiveName") in
       make ~archiveName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let archiveName = field_map_exn json "ArchiveName" ArchiveName.of_json in
+    let of_json json__ =
+      let archiveName =
+        field_map_exn json__ "ArchiveName" ArchiveName.of_json in
       make ~archiveName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves details about an archive."]
@@ -11821,26 +12971,26 @@ module DescribeApiDestinationResponse =
         ?httpMethod ?invocationEndpoint ?connectionArn ?apiDestinationState
         ?description ?name ?apiDestinationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let invocationRateLimitPerSecond =
-        field_map json "InvocationRateLimitPerSecond"
+        field_map json__ "InvocationRateLimitPerSecond"
           ApiDestinationInvocationRateLimitPerSecond.of_json in
       let httpMethod =
-        field_map json "HttpMethod" ApiDestinationHttpMethod.of_json in
+        field_map json__ "HttpMethod" ApiDestinationHttpMethod.of_json in
       let invocationEndpoint =
-        field_map json "InvocationEndpoint" HttpsEndpoint.of_json in
+        field_map json__ "InvocationEndpoint" HttpsEndpoint.of_json in
       let connectionArn =
-        field_map json "ConnectionArn" ConnectionArn.of_json in
+        field_map json__ "ConnectionArn" ConnectionArn.of_json in
       let apiDestinationState =
-        field_map json "ApiDestinationState" ApiDestinationState.of_json in
+        field_map json__ "ApiDestinationState" ApiDestinationState.of_json in
       let description =
-        field_map json "Description" ApiDestinationDescription.of_json in
-      let name = field_map json "Name" ApiDestinationName.of_json in
+        field_map json__ "Description" ApiDestinationDescription.of_json in
+      let name = field_map json__ "Name" ApiDestinationName.of_json in
       let apiDestinationArn =
-        field_map json "ApiDestinationArn" ApiDestinationArn.of_json in
+        field_map json__ "ApiDestinationArn" ApiDestinationArn.of_json in
       make ?lastModifiedTime ?creationTime ?invocationRateLimitPerSecond
         ?httpMethod ?invocationEndpoint ?connectionArn ?apiDestinationState
         ?description ?name ?apiDestinationArn ()
@@ -11864,8 +13014,8 @@ module DescribeApiDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ApiDestinationName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" ApiDestinationName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves details about an API destination."]
@@ -11899,11 +13049,11 @@ module DeleteRuleRequest =
         RuleName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?force ?eventBusName ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let force = field_map json "Force" Boolean.of_json in
+    let of_json json__ =
+      let force = field_map json__ "Force" Boolean.of_json in
       let eventBusName =
-        field_map json "EventBusName" EventBusNameOrArn.of_json in
-      let name = field_map_exn json "Name" RuleName.of_json in
+        field_map json__ "EventBusName" EventBusNameOrArn.of_json in
+      let name = field_map_exn json__ "Name" RuleName.of_json in
       make ?force ?eventBusName ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11932,9 +13082,9 @@ module DeletePartnerEventSourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~account ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let account = field_map_exn json "Account" AccountId.of_json in
-      let name = field_map_exn json "Name" EventSourceName.of_json in
+    let of_json json__ =
+      let account = field_map_exn json__ "Account" AccountId.of_json in
+      let name = field_map_exn json__ "Name" EventSourceName.of_json in
       make ~account ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11955,8 +13105,8 @@ module DeleteEventBusRequest =
         EventBusName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" EventBusName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" EventBusName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12021,7 +13171,7 @@ module DeleteEndpointResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Delete an existing global endpoint. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide."]
+       "Delete an existing global endpoint. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide ."]
 module DeleteEndpointRequest =
   struct
     type nonrec t =
@@ -12039,12 +13189,12 @@ module DeleteEndpointRequest =
         EndpointName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" EndpointName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" EndpointName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Delete an existing global endpoint. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide."]
+       "Delete an existing global endpoint. For more information about global endpoints, see Making applications Regional-fault tolerant with global endpoints and event replication in the Amazon EventBridge User Guide ."]
 module DeleteConnectionResponse =
   struct
     type nonrec t =
@@ -12153,16 +13303,16 @@ module DeleteConnectionResponse =
       make ?lastAuthorizedTime ?lastModifiedTime ?creationTime
         ?connectionState ?connectionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastAuthorizedTime =
-        field_map json "LastAuthorizedTime" Timestamp.of_json in
+        field_map json__ "LastAuthorizedTime" Timestamp.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let connectionState =
-        field_map json "ConnectionState" ConnectionState.of_json in
+        field_map json__ "ConnectionState" ConnectionState.of_json in
       let connectionArn =
-        field_map json "ConnectionArn" ConnectionArn.of_json in
+        field_map json__ "ConnectionArn" ConnectionArn.of_json in
       make ?lastAuthorizedTime ?lastModifiedTime ?creationTime
         ?connectionState ?connectionArn ()
     let to_json v = composed_to_json to_value v
@@ -12184,8 +13334,8 @@ module DeleteConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ConnectionName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" ConnectionName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a connection."]
@@ -12267,8 +13417,9 @@ module DeleteArchiveRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ArchiveName") in
       make ~archiveName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let archiveName = field_map_exn json "ArchiveName" ArchiveName.of_json in
+    let of_json json__ =
+      let archiveName =
+        field_map_exn json__ "ArchiveName" ArchiveName.of_json in
       make ~archiveName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified archive."]
@@ -12350,8 +13501,8 @@ module DeleteApiDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ApiDestinationName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" ApiDestinationName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified API destination."]
@@ -12464,16 +13615,16 @@ module DeauthorizeConnectionResponse =
       make ?lastAuthorizedTime ?lastModifiedTime ?creationTime
         ?connectionState ?connectionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastAuthorizedTime =
-        field_map json "LastAuthorizedTime" Timestamp.of_json in
+        field_map json__ "LastAuthorizedTime" Timestamp.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let connectionState =
-        field_map json "ConnectionState" ConnectionState.of_json in
+        field_map json__ "ConnectionState" ConnectionState.of_json in
       let connectionArn =
-        field_map json "ConnectionArn" ConnectionArn.of_json in
+        field_map json__ "ConnectionArn" ConnectionArn.of_json in
       make ?lastAuthorizedTime ?lastModifiedTime ?creationTime
         ?connectionState ?connectionArn ()
     let to_json v = composed_to_json to_value v
@@ -12497,8 +13648,8 @@ module DeauthorizeConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ConnectionName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" ConnectionName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12520,8 +13671,8 @@ module DeactivateEventSourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" EventSourceName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" EventSourceName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12612,12 +13763,12 @@ module CreatePartnerEventSourceResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EventSourceArn") in
       make ?eventSourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let eventSourceArn = field_map json "EventSourceArn" String_.of_json in
+    let of_json json__ =
+      let eventSourceArn = field_map json__ "EventSourceArn" String_.of_json in
       make ?eventSourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Called by an SaaS partner to create a partner event source. This operation is not used by Amazon Web Services customers. Each partner event source can be used by one Amazon Web Services account to create a matching partner event bus in that Amazon Web Services account. A SaaS partner must create one partner event source for each Amazon Web Services account that wants to receive those event types. A partner event source creates events based on resources within the SaaS partner's service or application. An Amazon Web Services account that creates a partner event bus that matches the partner event source can use that event bus to receive events from the partner, and then process them using Amazon Web Services Events rules and targets. Partner event source names follow this format: partner_name/event_namespace/event_name partner_name is determined during partner registration and identifies the partner to Amazon Web Services customers. event_namespace is determined by the partner and is a way for the partner to categorize their events. event_name is determined by the partner, and should uniquely identify an event-generating resource within the partner system. The combination of event_namespace and event_name should help Amazon Web Services customers decide whether to create an event bus to receive these events."]
+       "Called by an SaaS partner to create a partner event source. This operation is not used by Amazon Web Services customers. Each partner event source can be used by one Amazon Web Services account to create a matching partner event bus in that Amazon Web Services account. A SaaS partner must create one partner event source for each Amazon Web Services account that wants to receive those event types. A partner event source creates events based on resources within the SaaS partner's service or application. An Amazon Web Services account that creates a partner event bus that matches the partner event source can use that event bus to receive events from the partner, and then process them using Amazon Web Services Events rules and targets. Partner event source names follow this format: partner_name/event_namespace/event_name partner_name is determined during partner registration, and identifies the partner to Amazon Web Services customers. event_namespace is determined by the partner, and is a way for the partner to categorize their events. event_name is determined by the partner, and should uniquely identify an event-generating resource within the partner system. The event_name must be unique across all Amazon Web Services customers. This is because the event source is a shared resource between the partner and customer accounts, and each partner event source unique in the partner account. The combination of event_namespace and event_name should help Amazon Web Services customers decide whether to create an event bus to receive these events."]
 module CreatePartnerEventSourceRequest =
   struct
     type nonrec t =
@@ -12643,19 +13794,28 @@ module CreatePartnerEventSourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~account ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let account = field_map_exn json "Account" AccountId.of_json in
-      let name = field_map_exn json "Name" EventSourceName.of_json in
+    let of_json json__ =
+      let account = field_map_exn json__ "Account" AccountId.of_json in
+      let name = field_map_exn json__ "Name" EventSourceName.of_json in
       make ~account ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Called by an SaaS partner to create a partner event source. This operation is not used by Amazon Web Services customers. Each partner event source can be used by one Amazon Web Services account to create a matching partner event bus in that Amazon Web Services account. A SaaS partner must create one partner event source for each Amazon Web Services account that wants to receive those event types. A partner event source creates events based on resources within the SaaS partner's service or application. An Amazon Web Services account that creates a partner event bus that matches the partner event source can use that event bus to receive events from the partner, and then process them using Amazon Web Services Events rules and targets. Partner event source names follow this format: partner_name/event_namespace/event_name partner_name is determined during partner registration and identifies the partner to Amazon Web Services customers. event_namespace is determined by the partner and is a way for the partner to categorize their events. event_name is determined by the partner, and should uniquely identify an event-generating resource within the partner system. The combination of event_namespace and event_name should help Amazon Web Services customers decide whether to create an event bus to receive these events."]
+       "Called by an SaaS partner to create a partner event source. This operation is not used by Amazon Web Services customers. Each partner event source can be used by one Amazon Web Services account to create a matching partner event bus in that Amazon Web Services account. A SaaS partner must create one partner event source for each Amazon Web Services account that wants to receive those event types. A partner event source creates events based on resources within the SaaS partner's service or application. An Amazon Web Services account that creates a partner event bus that matches the partner event source can use that event bus to receive events from the partner, and then process them using Amazon Web Services Events rules and targets. Partner event source names follow this format: partner_name/event_namespace/event_name partner_name is determined during partner registration, and identifies the partner to Amazon Web Services customers. event_namespace is determined by the partner, and is a way for the partner to categorize their events. event_name is determined by the partner, and should uniquely identify an event-generating resource within the partner system. The event_name must be unique across all Amazon Web Services customers. This is because the event source is a shared resource between the partner and customer accounts, and each partner event source unique in the partner account. The combination of event_namespace and event_name should help Amazon Web Services customers decide whether to create an event bus to receive these events."]
 module CreateEventBusResponse =
   struct
     type nonrec t =
       {
       eventBusArn: String_.t option
-        [@ocaml.doc "The ARN of the new event bus."]}
+        [@ocaml.doc "The ARN of the new event bus."];
+      description: EventBusDescription.t option
+        [@ocaml.doc "The event bus description."];
+      kmsKeyIdentifier: KmsKeyIdentifier.t option
+        [@ocaml.doc
+          "The identifier of the KMS customer managed key for EventBridge to use to encrypt events on this event bus, if one has been specified. For more information, see Data encryption in EventBridge in the Amazon EventBridge User Guide."];
+      deadLetterConfig: DeadLetterConfig.t option ;
+      logConfig: LogConfig.t option
+        [@ocaml.doc
+          "The logging configuration settings for the event bus. For more information, see Configuring logs for event buses in the EventBridge User Guide."]}
     type nonrec error =
       [
         `ConcurrentModificationException of ConcurrentModificationException.t 
@@ -12666,7 +13826,19 @@ module CreateEventBusResponse =
       | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?eventBusArn = fun () -> { eventBusArn }
+    let make ?eventBusArn =
+      fun ?description ->
+        fun ?kmsKeyIdentifier ->
+          fun ?deadLetterConfig ->
+            fun ?logConfig ->
+              fun () ->
+                {
+                  eventBusArn;
+                  description;
+                  kmsKeyIdentifier;
+                  deadLetterConfig;
+                  logConfig
+                }
     let error_of_json name json =
       match name with
       | "ConcurrentModificationException" ->
@@ -12746,16 +13918,43 @@ module CreateEventBusResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("EventBusArn", (Option.map x.eventBusArn ~f:String_.to_value))]
+        [("EventBusArn", (Option.map x.eventBusArn ~f:String_.to_value));
+        ("Description",
+          (Option.map x.description ~f:EventBusDescription.to_value));
+        ("KmsKeyIdentifier",
+          (Option.map x.kmsKeyIdentifier ~f:KmsKeyIdentifier.to_value));
+        ("DeadLetterConfig",
+          (Option.map x.deadLetterConfig ~f:DeadLetterConfig.to_value));
+        ("LogConfig", (Option.map x.logConfig ~f:LogConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let logConfig =
+        (Option.map ~f:LogConfig.of_xml) (Xml.child xml_arg0 "LogConfig") in
+      let deadLetterConfig =
+        (Option.map ~f:DeadLetterConfig.of_xml)
+          (Xml.child xml_arg0 "DeadLetterConfig") in
+      let kmsKeyIdentifier =
+        (Option.map ~f:KmsKeyIdentifier.of_xml)
+          (Xml.child xml_arg0 "KmsKeyIdentifier") in
+      let description =
+        (Option.map ~f:EventBusDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let eventBusArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EventBusArn") in
-      make ?eventBusArn ()
+      make ?logConfig ?deadLetterConfig ?kmsKeyIdentifier ?description
+        ?eventBusArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let eventBusArn = field_map json "EventBusArn" String_.of_json in
-      make ?eventBusArn ()
+    let of_json json__ =
+      let logConfig = field_map json__ "LogConfig" LogConfig.of_json in
+      let deadLetterConfig =
+        field_map json__ "DeadLetterConfig" DeadLetterConfig.of_json in
+      let kmsKeyIdentifier =
+        field_map json__ "KmsKeyIdentifier" KmsKeyIdentifier.of_json in
+      let description =
+        field_map json__ "Description" EventBusDescription.of_json in
+      let eventBusArn = field_map json__ "EventBusArn" String_.of_json in
+      make ?logConfig ?deadLetterConfig ?kmsKeyIdentifier ?description
+        ?eventBusArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new event bus within your account. This can be a custom event bus which you can use to receive events from your custom applications and services, or it can be a partner event bus which can be matched to a partner event source."]
@@ -12765,37 +13964,88 @@ module CreateEventBusRequest =
       {
       name: EventBusName.t
         [@ocaml.doc
-          "The name of the new event bus. Event bus names cannot contain the / character. You can't use the name default for a custom event bus, as this name is already used for your account's default event bus. If this is a partner event bus, the name must exactly match the name of the partner event source that this event bus is matched to."];
+          "The name of the new event bus. Custom event bus names can't contain the / character, but you can use the / character in partner event bus names. In addition, for partner event buses, the name must exactly match the name of the partner event source that this event bus is matched to. You can't use the name default for a custom event bus, as this name is already used for your account's default event bus."];
       eventSourceName: EventSourceName.t option
         [@ocaml.doc
           "If you are creating a partner event bus, this specifies the partner event source that the new event bus will be matched with."];
+      description: EventBusDescription.t option
+        [@ocaml.doc "The event bus description."];
+      kmsKeyIdentifier: KmsKeyIdentifier.t option
+        [@ocaml.doc
+          "The identifier of the KMS customer managed key for EventBridge to use, if you choose to use a customer managed key to encrypt events on this event bus. The identifier can be the key Amazon Resource Name (ARN), KeyId, key alias, or key alias ARN. If you do not specify a customer managed key identifier, EventBridge uses an Amazon Web Services owned key to encrypt events on the event bus. For more information, see Identify and view keys in the Key Management Service Developer Guide. Schema discovery is not supported for event buses encrypted using a customer managed key. EventBridge returns an error if: You call CreateDiscoverer on an event bus set to use a customer managed key for encryption. You call UpdatedEventBus to set a customer managed key on an event bus with schema discovery enabled. To enable schema discovery on an event bus, choose to use an Amazon Web Services owned key. For more information, see Encrypting events in the Amazon EventBridge User Guide. If you have specified that EventBridge use a customer managed key for encrypting the source event bus, we strongly recommend you also specify a customer managed key for any archives for the event bus as well. For more information, see Encrypting archives in the Amazon EventBridge User Guide."];
+      deadLetterConfig: DeadLetterConfig.t option ;
+      logConfig: LogConfig.t option
+        [@ocaml.doc
+          "The logging configuration settings for the event bus. For more information, see Configuring logs for event buses in the EventBridge User Guide."];
       tags: TagList.t option
         [@ocaml.doc "Tags to associate with the event bus."]}
     let context_ = "CreateEventBusRequest"
     let make ?eventSourceName =
-      fun ?tags -> fun ~name -> fun () -> { eventSourceName; tags; name }
+      fun ?description ->
+        fun ?kmsKeyIdentifier ->
+          fun ?deadLetterConfig ->
+            fun ?logConfig ->
+              fun ?tags ->
+                fun ~name ->
+                  fun () ->
+                    {
+                      eventSourceName;
+                      description;
+                      kmsKeyIdentifier;
+                      deadLetterConfig;
+                      logConfig;
+                      tags;
+                      name
+                    }
     let to_value x =
       structure_to_value
         [("Name", (Some (EventBusName.to_value x.name)));
         ("EventSourceName",
           (Option.map x.eventSourceName ~f:EventSourceName.to_value));
+        ("Description",
+          (Option.map x.description ~f:EventBusDescription.to_value));
+        ("KmsKeyIdentifier",
+          (Option.map x.kmsKeyIdentifier ~f:KmsKeyIdentifier.to_value));
+        ("DeadLetterConfig",
+          (Option.map x.deadLetterConfig ~f:DeadLetterConfig.to_value));
+        ("LogConfig", (Option.map x.logConfig ~f:LogConfig.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let logConfig =
+        (Option.map ~f:LogConfig.of_xml) (Xml.child xml_arg0 "LogConfig") in
+      let deadLetterConfig =
+        (Option.map ~f:DeadLetterConfig.of_xml)
+          (Xml.child xml_arg0 "DeadLetterConfig") in
+      let kmsKeyIdentifier =
+        (Option.map ~f:KmsKeyIdentifier.of_xml)
+          (Xml.child xml_arg0 "KmsKeyIdentifier") in
+      let description =
+        (Option.map ~f:EventBusDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let eventSourceName =
         (Option.map ~f:EventSourceName.of_xml)
           (Xml.child xml_arg0 "EventSourceName") in
       let name =
         EventBusName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?tags ?eventSourceName ~name ()
+      make ?tags ?logConfig ?deadLetterConfig ?kmsKeyIdentifier ?description
+        ?eventSourceName ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let logConfig = field_map json__ "LogConfig" LogConfig.of_json in
+      let deadLetterConfig =
+        field_map json__ "DeadLetterConfig" DeadLetterConfig.of_json in
+      let kmsKeyIdentifier =
+        field_map json__ "KmsKeyIdentifier" KmsKeyIdentifier.of_json in
+      let description =
+        field_map json__ "Description" EventBusDescription.of_json in
       let eventSourceName =
-        field_map json "EventSourceName" EventSourceName.of_json in
-      let name = field_map_exn json "Name" EventBusName.of_json in
-      make ?tags ?eventSourceName ~name ()
+        field_map json__ "EventSourceName" EventSourceName.of_json in
+      let name = field_map_exn json__ "Name" EventBusName.of_json in
+      make ?tags ?logConfig ?deadLetterConfig ?kmsKeyIdentifier ?description
+        ?eventSourceName ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new event bus within your account. This can be a custom event bus which you can use to receive events from your custom applications and services, or it can be a partner event bus which can be matched to a partner event source."]
@@ -12919,17 +14169,17 @@ module CreateEndpointResponse =
       make ?state ?roleArn ?eventBuses ?replicationConfig ?routingConfig ?arn
         ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" EndpointState.of_json in
-      let roleArn = field_map json "RoleArn" IamRoleArn.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" EndpointState.of_json in
+      let roleArn = field_map json__ "RoleArn" IamRoleArn.of_json in
       let eventBuses =
-        field_map json "EventBuses" EndpointEventBusList.of_json in
+        field_map json__ "EventBuses" EndpointEventBusList.of_json in
       let replicationConfig =
-        field_map json "ReplicationConfig" ReplicationConfig.of_json in
+        field_map json__ "ReplicationConfig" ReplicationConfig.of_json in
       let routingConfig =
-        field_map json "RoutingConfig" RoutingConfig.of_json in
-      let arn = field_map json "Arn" EndpointArn.of_json in
-      let name = field_map json "Name" EndpointName.of_json in
+        field_map json__ "RoutingConfig" RoutingConfig.of_json in
+      let arn = field_map json__ "Arn" EndpointArn.of_json in
+      let name = field_map json__ "Name" EndpointName.of_json in
       make ?state ?roleArn ?eventBuses ?replicationConfig ?routingConfig ?arn
         ?name ()
     let to_json v = composed_to_json to_value v
@@ -12948,7 +14198,8 @@ module CreateEndpointRequest =
         [@ocaml.doc
           "Configure the routing policy, including the health check and secondary Region.."];
       replicationConfig: ReplicationConfig.t option
-        [@ocaml.doc "Enable or disable event replication."];
+        [@ocaml.doc
+          "Enable or disable event replication. The default state is ENABLED which means you must supply a RoleArn. If you don't have a RoleArn or you don't want event replication enabled, set the state to DISABLED."];
       eventBuses: EndpointEventBusList.t
         [@ocaml.doc
           "Define the event buses used. The names of the event buses must be identical in each Region."];
@@ -13001,17 +14252,17 @@ module CreateEndpointRequest =
       make ?roleArn ~eventBuses ?replicationConfig ~routingConfig
         ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "RoleArn" IamRoleArn.of_json in
+    let of_json json__ =
+      let roleArn = field_map json__ "RoleArn" IamRoleArn.of_json in
       let eventBuses =
-        field_map_exn json "EventBuses" EndpointEventBusList.of_json in
+        field_map_exn json__ "EventBuses" EndpointEventBusList.of_json in
       let replicationConfig =
-        field_map json "ReplicationConfig" ReplicationConfig.of_json in
+        field_map json__ "ReplicationConfig" ReplicationConfig.of_json in
       let routingConfig =
-        field_map_exn json "RoutingConfig" RoutingConfig.of_json in
+        field_map_exn json__ "RoutingConfig" RoutingConfig.of_json in
       let description =
-        field_map json "Description" EndpointDescription.of_json in
-      let name = field_map_exn json "Name" EndpointName.of_json in
+        field_map json__ "Description" EndpointDescription.of_json in
+      let name = field_map_exn json__ "Name" EndpointName.of_json in
       make ?roleArn ~eventBuses ?replicationConfig ~routingConfig
         ?description ~name ()
     let to_json v = composed_to_json to_value v
@@ -13034,9 +14285,12 @@ module CreateConnectionResponse =
         [@ocaml.doc
           "A time stamp for the time that the connection was last updated."]}
     type nonrec error =
-      [ `InternalException of InternalException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalException of InternalException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?connectionArn =
       fun ?connectionState ->
@@ -13051,6 +14305,8 @@ module CreateConnectionResponse =
               }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalException" ->
           `InternalException (InternalException.of_json json)
       | "LimitExceededException" ->
@@ -13058,11 +14314,17 @@ module CreateConnectionResponse =
       | "ResourceAlreadyExistsException" ->
           `ResourceAlreadyExistsException
             (ResourceAlreadyExistsException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalException" ->
           `InternalException (InternalException.of_xml xml)
       | "LimitExceededException" ->
@@ -13070,10 +14332,18 @@ module CreateConnectionResponse =
       | "ResourceAlreadyExistsException" ->
           `ResourceAlreadyExistsException
             (ResourceAlreadyExistsException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalException e ->
           `Assoc
             [("error", (`String "InternalException"));
@@ -13086,6 +14356,14 @@ module CreateConnectionResponse =
           `Assoc
             [("error", (`String "ResourceAlreadyExistsException"));
             ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -13115,18 +14393,18 @@ module CreateConnectionResponse =
           (Xml.child xml_arg0 "ConnectionArn") in
       make ?lastModifiedTime ?creationTime ?connectionState ?connectionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let connectionState =
-        field_map json "ConnectionState" ConnectionState.of_json in
+        field_map json__ "ConnectionState" ConnectionState.of_json in
       let connectionArn =
-        field_map json "ConnectionArn" ConnectionArn.of_json in
+        field_map json__ "ConnectionArn" ConnectionArn.of_json in
       make ?lastModifiedTime ?creationTime ?connectionState ?connectionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a connection. A connection defines the authorization type and credentials to use for authorization with an API destination HTTP endpoint."]
+       "Creates a connection. A connection defines the authorization type and credentials to use for authorization with an API destination HTTP endpoint. For more information, see Connections for endpoint targets in the Amazon EventBridge User Guide."]
 module CreateConnectionRequest =
   struct
     type nonrec t =
@@ -13136,17 +14414,34 @@ module CreateConnectionRequest =
       description: ConnectionDescription.t option
         [@ocaml.doc "A description for the connection to create."];
       authorizationType: ConnectionAuthorizationType.t
-        [@ocaml.doc "The type of authorization to use for the connection."];
+        [@ocaml.doc
+          "The type of authorization to use for the connection. OAUTH tokens are refreshed when a 401 or 407 response is returned."];
       authParameters: CreateConnectionAuthRequestParameters.t
         [@ocaml.doc
-          "A CreateConnectionAuthRequestParameters object that contains the authorization parameters to use to authorize with the endpoint."]}
+          "The authorization parameters to use to authorize with the endpoint. You must include only authorization parameters for the AuthorizationType you specify."];
+      invocationConnectivityParameters:
+        ConnectivityResourceParameters.t option
+        [@ocaml.doc
+          "For connections to private APIs, the parameters to use for invoking the API. For more information, see Connecting to private APIs in the Amazon EventBridge User Guide ."];
+      kmsKeyIdentifier: KmsKeyIdentifier.t option
+        [@ocaml.doc
+          "The identifier of the KMS customer managed key for EventBridge to use, if you choose to use a customer managed key to encrypt this connection. The identifier can be the key Amazon Resource Name (ARN), KeyId, key alias, or key alias ARN. If you do not specify a customer managed key identifier, EventBridge uses an Amazon Web Services owned key to encrypt the connection. For more information, see Identify and view keys in the Key Management Service Developer Guide."]}
     let context_ = "CreateConnectionRequest"
     let make ?description =
-      fun ~name ->
-        fun ~authorizationType ->
-          fun ~authParameters ->
-            fun () ->
-              { description; name; authorizationType; authParameters }
+      fun ?invocationConnectivityParameters ->
+        fun ?kmsKeyIdentifier ->
+          fun ~name ->
+            fun ~authorizationType ->
+              fun ~authParameters ->
+                fun () ->
+                  {
+                    description;
+                    invocationConnectivityParameters;
+                    kmsKeyIdentifier;
+                    name;
+                    authorizationType;
+                    authParameters
+                  }
     let to_value x =
       structure_to_value
         [("Name", (Some (ConnectionName.to_value x.name)));
@@ -13156,9 +14451,20 @@ module CreateConnectionRequest =
           (Some (ConnectionAuthorizationType.to_value x.authorizationType)));
         ("AuthParameters",
           (Some
-             (CreateConnectionAuthRequestParameters.to_value x.authParameters)))]
+             (CreateConnectionAuthRequestParameters.to_value x.authParameters)));
+        ("InvocationConnectivityParameters",
+          (Option.map x.invocationConnectivityParameters
+             ~f:ConnectivityResourceParameters.to_value));
+        ("KmsKeyIdentifier",
+          (Option.map x.kmsKeyIdentifier ~f:KmsKeyIdentifier.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let kmsKeyIdentifier =
+        (Option.map ~f:KmsKeyIdentifier.of_xml)
+          (Xml.child xml_arg0 "KmsKeyIdentifier") in
+      let invocationConnectivityParameters =
+        (Option.map ~f:ConnectivityResourceParameters.of_xml)
+          (Xml.child xml_arg0 "InvocationConnectivityParameters") in
       let authParameters =
         CreateConnectionAuthRequestParameters.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AuthParameters") in
@@ -13171,22 +14477,29 @@ module CreateConnectionRequest =
       let name =
         ConnectionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~authParameters ~authorizationType ?description ~name ()
+      make ?kmsKeyIdentifier ?invocationConnectivityParameters
+        ~authParameters ~authorizationType ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let kmsKeyIdentifier =
+        field_map json__ "KmsKeyIdentifier" KmsKeyIdentifier.of_json in
+      let invocationConnectivityParameters =
+        field_map json__ "InvocationConnectivityParameters"
+          ConnectivityResourceParameters.of_json in
       let authParameters =
-        field_map_exn json "AuthParameters"
+        field_map_exn json__ "AuthParameters"
           CreateConnectionAuthRequestParameters.of_json in
       let authorizationType =
-        field_map_exn json "AuthorizationType"
+        field_map_exn json__ "AuthorizationType"
           ConnectionAuthorizationType.of_json in
       let description =
-        field_map json "Description" ConnectionDescription.of_json in
-      let name = field_map_exn json "Name" ConnectionName.of_json in
-      make ~authParameters ~authorizationType ?description ~name ()
+        field_map json__ "Description" ConnectionDescription.of_json in
+      let name = field_map_exn json__ "Name" ConnectionName.of_json in
+      make ?kmsKeyIdentifier ?invocationConnectivityParameters
+        ~authParameters ~authorizationType ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a connection. A connection defines the authorization type and credentials to use for authorization with an API destination HTTP endpoint."]
+       "Creates a connection. A connection defines the authorization type and credentials to use for authorization with an API destination HTTP endpoint. For more information, see Connections for endpoint targets in the Amazon EventBridge User Guide."]
 module CreateArchiveResponse =
   struct
     type nonrec t =
@@ -13303,23 +14616,23 @@ module CreateArchiveResponse =
         (Option.map ~f:ArchiveArn.of_xml) (Xml.child xml_arg0 "ArchiveArn") in
       make ?creationTime ?stateReason ?state ?archiveArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
+    let of_json json__ =
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let stateReason =
-        field_map json "StateReason" ArchiveStateReason.of_json in
-      let state = field_map json "State" ArchiveState.of_json in
-      let archiveArn = field_map json "ArchiveArn" ArchiveArn.of_json in
+        field_map json__ "StateReason" ArchiveStateReason.of_json in
+      let state = field_map json__ "State" ArchiveState.of_json in
+      let archiveArn = field_map json__ "ArchiveArn" ArchiveArn.of_json in
       make ?creationTime ?stateReason ?state ?archiveArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an archive of events with the specified settings. When you create an archive, incoming events might not immediately start being sent to the archive. Allow a short period of time for changes to take effect. If you do not specify a pattern to filter events sent to the archive, all events are sent to the archive except replayed events. Replayed events are not sent to an archive."]
+       "Creates an archive of events with the specified settings. When you create an archive, incoming events might not immediately start being sent to the archive. Allow a short period of time for changes to take effect. If you do not specify a pattern to filter events sent to the archive, all events are sent to the archive except replayed events. Replayed events are not sent to an archive. If you have specified that EventBridge use a customer managed key for encrypting the source event bus, we strongly recommend you also specify a customer managed key for any archives for the event bus as well. For more information, see Encrypting archives in the Amazon EventBridge User Guide."]
 module CreateArchiveRequest =
   struct
     type nonrec t =
       {
       archiveName: ArchiveName.t
         [@ocaml.doc "The name for the archive to create."];
-      eventSourceArn: Arn.t
+      eventSourceArn: EventBusArn.t
         [@ocaml.doc
           "The ARN of the event bus that sends events to the archive."];
       description: ArchiveDescription.t option
@@ -13329,33 +14642,43 @@ module CreateArchiveRequest =
           "An event pattern to use to filter events sent to the archive."];
       retentionDays: RetentionDays.t option
         [@ocaml.doc
-          "The number of days to retain events for. Default value is 0. If set to 0, events are retained indefinitely"]}
+          "The number of days to retain events for. Default value is 0. If set to 0, events are retained indefinitely"];
+      kmsKeyIdentifier: KmsKeyIdentifier.t option
+        [@ocaml.doc
+          "The identifier of the KMS customer managed key for EventBridge to use, if you choose to use a customer managed key to encrypt this archive. The identifier can be the key Amazon Resource Name (ARN), KeyId, key alias, or key alias ARN. If you do not specify a customer managed key identifier, EventBridge uses an Amazon Web Services owned key to encrypt the archive. For more information, see Identify and view keys in the Key Management Service Developer Guide. If you have specified that EventBridge use a customer managed key for encrypting the source event bus, we strongly recommend you also specify a customer managed key for any archives for the event bus as well. For more information, see Encrypting archives in the Amazon EventBridge User Guide."]}
     let context_ = "CreateArchiveRequest"
     let make ?description =
       fun ?eventPattern ->
         fun ?retentionDays ->
-          fun ~archiveName ->
-            fun ~eventSourceArn ->
-              fun () ->
-                {
-                  description;
-                  eventPattern;
-                  retentionDays;
-                  archiveName;
-                  eventSourceArn
-                }
+          fun ?kmsKeyIdentifier ->
+            fun ~archiveName ->
+              fun ~eventSourceArn ->
+                fun () ->
+                  {
+                    description;
+                    eventPattern;
+                    retentionDays;
+                    kmsKeyIdentifier;
+                    archiveName;
+                    eventSourceArn
+                  }
     let to_value x =
       structure_to_value
         [("ArchiveName", (Some (ArchiveName.to_value x.archiveName)));
-        ("EventSourceArn", (Some (Arn.to_value x.eventSourceArn)));
+        ("EventSourceArn", (Some (EventBusArn.to_value x.eventSourceArn)));
         ("Description",
           (Option.map x.description ~f:ArchiveDescription.to_value));
         ("EventPattern",
           (Option.map x.eventPattern ~f:EventPattern.to_value));
         ("RetentionDays",
-          (Option.map x.retentionDays ~f:RetentionDays.to_value))]
+          (Option.map x.retentionDays ~f:RetentionDays.to_value));
+        ("KmsKeyIdentifier",
+          (Option.map x.kmsKeyIdentifier ~f:KmsKeyIdentifier.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let kmsKeyIdentifier =
+        (Option.map ~f:KmsKeyIdentifier.of_xml)
+          (Xml.child xml_arg0 "KmsKeyIdentifier") in
       let retentionDays =
         (Option.map ~f:RetentionDays.of_xml)
           (Xml.child xml_arg0 "RetentionDays") in
@@ -13366,27 +14689,31 @@ module CreateArchiveRequest =
         (Option.map ~f:ArchiveDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
       let eventSourceArn =
-        Arn.of_xml
+        EventBusArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EventSourceArn") in
       let archiveName =
         ArchiveName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ArchiveName") in
-      make ?retentionDays ?eventPattern ?description ~eventSourceArn
-        ~archiveName ()
+      make ?kmsKeyIdentifier ?retentionDays ?eventPattern ?description
+        ~eventSourceArn ~archiveName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let kmsKeyIdentifier =
+        field_map json__ "KmsKeyIdentifier" KmsKeyIdentifier.of_json in
       let retentionDays =
-        field_map json "RetentionDays" RetentionDays.of_json in
-      let eventPattern = field_map json "EventPattern" EventPattern.of_json in
+        field_map json__ "RetentionDays" RetentionDays.of_json in
+      let eventPattern = field_map json__ "EventPattern" EventPattern.of_json in
       let description =
-        field_map json "Description" ArchiveDescription.of_json in
-      let eventSourceArn = field_map_exn json "EventSourceArn" Arn.of_json in
-      let archiveName = field_map_exn json "ArchiveName" ArchiveName.of_json in
-      make ?retentionDays ?eventPattern ?description ~eventSourceArn
-        ~archiveName ()
+        field_map json__ "Description" ArchiveDescription.of_json in
+      let eventSourceArn =
+        field_map_exn json__ "EventSourceArn" EventBusArn.of_json in
+      let archiveName =
+        field_map_exn json__ "ArchiveName" ArchiveName.of_json in
+      make ?kmsKeyIdentifier ?retentionDays ?eventPattern ?description
+        ~eventSourceArn ~archiveName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an archive of events with the specified settings. When you create an archive, incoming events might not immediately start being sent to the archive. Allow a short period of time for changes to take effect. If you do not specify a pattern to filter events sent to the archive, all events are sent to the archive except replayed events. Replayed events are not sent to an archive."]
+       "Creates an archive of events with the specified settings. When you create an archive, incoming events might not immediately start being sent to the archive. Allow a short period of time for changes to take effect. If you do not specify a pattern to filter events sent to the archive, all events are sent to the archive except replayed events. Replayed events are not sent to an archive. If you have specified that EventBridge use a customer managed key for encrypting the source event bus, we strongly recommend you also specify a customer managed key for any archives for the event bus as well. For more information, see Encrypting archives in the Amazon EventBridge User Guide."]
 module CreateApiDestinationResponse =
   struct
     type nonrec t =
@@ -13495,19 +14822,19 @@ module CreateApiDestinationResponse =
       make ?lastModifiedTime ?creationTime ?apiDestinationState
         ?apiDestinationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Timestamp.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let apiDestinationState =
-        field_map json "ApiDestinationState" ApiDestinationState.of_json in
+        field_map json__ "ApiDestinationState" ApiDestinationState.of_json in
       let apiDestinationArn =
-        field_map json "ApiDestinationArn" ApiDestinationArn.of_json in
+        field_map json__ "ApiDestinationArn" ApiDestinationArn.of_json in
       make ?lastModifiedTime ?creationTime ?apiDestinationState
         ?apiDestinationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an API destination, which is an HTTP invocation endpoint configured as a target for events."]
+       "Creates an API destination, which is an HTTP invocation endpoint configured as a target for events. API destinations do not support private destinations, such as interface VPC endpoints. For more information, see API destinations in the EventBridge User Guide."]
 module CreateApiDestinationRequest =
   struct
     type nonrec t =
@@ -13581,24 +14908,24 @@ module CreateApiDestinationRequest =
       make ?invocationRateLimitPerSecond ~httpMethod ~invocationEndpoint
         ~connectionArn ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let invocationRateLimitPerSecond =
-        field_map json "InvocationRateLimitPerSecond"
+        field_map json__ "InvocationRateLimitPerSecond"
           ApiDestinationInvocationRateLimitPerSecond.of_json in
       let httpMethod =
-        field_map_exn json "HttpMethod" ApiDestinationHttpMethod.of_json in
+        field_map_exn json__ "HttpMethod" ApiDestinationHttpMethod.of_json in
       let invocationEndpoint =
-        field_map_exn json "InvocationEndpoint" HttpsEndpoint.of_json in
+        field_map_exn json__ "InvocationEndpoint" HttpsEndpoint.of_json in
       let connectionArn =
-        field_map_exn json "ConnectionArn" ConnectionArn.of_json in
+        field_map_exn json__ "ConnectionArn" ConnectionArn.of_json in
       let description =
-        field_map json "Description" ApiDestinationDescription.of_json in
-      let name = field_map_exn json "Name" ApiDestinationName.of_json in
+        field_map json__ "Description" ApiDestinationDescription.of_json in
+      let name = field_map_exn json__ "Name" ApiDestinationName.of_json in
       make ?invocationRateLimitPerSecond ~httpMethod ~invocationEndpoint
         ~connectionArn ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an API destination, which is an HTTP invocation endpoint configured as a target for events."]
+       "Creates an API destination, which is an HTTP invocation endpoint configured as a target for events. API destinations do not support private destinations, such as interface VPC endpoints. For more information, see API destinations in the EventBridge User Guide."]
 module CancelReplayResponse =
   struct
     type nonrec t =
@@ -13686,11 +15013,11 @@ module CancelReplayResponse =
         (Option.map ~f:ReplayArn.of_xml) (Xml.child xml_arg0 "ReplayArn") in
       make ?stateReason ?state ?replayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stateReason =
-        field_map json "StateReason" ReplayStateReason.of_json in
-      let state = field_map json "State" ReplayState.of_json in
-      let replayArn = field_map json "ReplayArn" ReplayArn.of_json in
+        field_map json__ "StateReason" ReplayStateReason.of_json in
+      let state = field_map json__ "State" ReplayState.of_json in
+      let replayArn = field_map json__ "ReplayArn" ReplayArn.of_json in
       make ?stateReason ?state ?replayArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Cancels the specified replay."]
@@ -13712,8 +15039,8 @@ module CancelReplayRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ReplayName") in
       make ~replayName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let replayName = field_map_exn json "ReplayName" ReplayName.of_json in
+    let of_json json__ =
+      let replayName = field_map_exn json__ "ReplayName" ReplayName.of_json in
       make ~replayName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Cancels the specified replay."]
@@ -13734,8 +15061,8 @@ module ActivateEventSourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" EventSourceName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" EventSourceName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

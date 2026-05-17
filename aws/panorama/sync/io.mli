@@ -169,6 +169,12 @@ val remove_application_instance :
       RemoveApplicationInstanceRequest.t ->
         (RemoveApplicationInstanceResponse.t,
           RemoveApplicationInstanceResponse.error) Result.t
+val signal_application_instance_node_instances :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SignalApplicationInstanceNodeInstancesRequest.t ->
+        (SignalApplicationInstanceNodeInstancesResponse.t,
+          SignalApplicationInstanceNodeInstancesResponse.error) Result.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

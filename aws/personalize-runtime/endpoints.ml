@@ -2,15 +2,23 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | GetActionRecommendations: (GetActionRecommendationsRequest.t,
+  GetActionRecommendationsResponse.t, GetActionRecommendationsResponse.error)
+  t 
   | GetPersonalizedRanking: (GetPersonalizedRankingRequest.t,
   GetPersonalizedRankingResponse.t, GetPersonalizedRankingResponse.error) t 
   | GetRecommendations: (GetRecommendationsRequest.t,
   GetRecommendationsResponse.t, GetRecommendationsResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
-  function | GetPersonalizedRanking -> `POST | GetRecommendations -> `POST
+  function
+  | GetActionRecommendations -> `POST
+  | GetPersonalizedRanking -> `POST
+  | GetRecommendations -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | GetActionRecommendations ->
+          (Format.kasprintf Uri.of_string) "/action-recommendations"
       | GetPersonalizedRanking ->
           (Format.kasprintf Uri.of_string) "/personalize-ranking"
       | GetRecommendations ->
@@ -19,6 +27,37 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | GetActionRecommendations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.GetActionRecommendationsRequest.campaignArn
+                         ~f:(fun x -> ("campaignArn", (Arn.to_value x)));
+                      Option.map req.GetActionRecommendationsRequest.userId
+                        ~f:(fun x -> ("userId", (UserID.to_value x)));
+                      Option.map
+                        req.GetActionRecommendationsRequest.numResults
+                        ~f:(fun x -> ("numResults", (NumResults.to_value x)));
+                      Option.map
+                        req.GetActionRecommendationsRequest.filterArn
+                        ~f:(fun x -> ("filterArn", (Arn.to_value x)));
+                      Option.map
+                        req.GetActionRecommendationsRequest.filterValues
+                        ~f:(fun x ->
+                              ("filterValues", (FilterValues.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetPersonalizedRanking ->
       let (headers, body) =
         let headers =
@@ -47,7 +86,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map
                         req.GetPersonalizedRankingRequest.filterValues
                         ~f:(fun x ->
-                              ("filterValues", (FilterValues.to_value x)))])
+                              ("filterValues", (FilterValues.to_value x)));
+                      Option.map
+                        req.GetPersonalizedRankingRequest.metadataColumns
+                        ~f:(fun x ->
+                              ("metadataColumns",
+                                (MetadataColumns.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -80,7 +124,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("filterValues", (FilterValues.to_value x)));
                       Option.map req.GetRecommendationsRequest.recommenderArn
-                        ~f:(fun x -> ("recommenderArn", (Arn.to_value x)))])
+                        ~f:(fun x -> ("recommenderArn", (Arn.to_value x)));
+                      Option.map req.GetRecommendationsRequest.promotions
+                        ~f:(fun x ->
+                              ("promotions", (PromotionList.to_value x)));
+                      Option.map
+                        req.GetRecommendationsRequest.metadataColumns
+                        ~f:(fun x ->
+                              ("metadataColumns",
+                                (MetadataColumns.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -136,6 +188,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | GetActionRecommendations ->
+      if is_success
+      then
+        Ok (GetActionRecommendationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetActionRecommendationsResponse.error_of_json))
   | GetPersonalizedRanking ->
       if is_success
       then

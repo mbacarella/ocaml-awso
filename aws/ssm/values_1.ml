@@ -2,506 +2,6 @@
 open Awso
 open! Import
 open Values_0[@@warning "-33"]
-module S3OutputUrl =
-  struct
-    type nonrec t =
-      {
-      outputUrl: Url.t option
-        [@ocaml.doc
-          "A URL for an S3 bucket where you want to store the results of this request."]}
-    let make ?outputUrl = fun () -> { outputUrl }
-    let to_value x =
-      structure_to_value
-        [("OutputUrl", (Option.map x.outputUrl ~f:Url.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let outputUrl =
-        (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "OutputUrl") in
-      make ?outputUrl ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outputUrl = field_map json "OutputUrl" Url.of_json in
-      make ?outputUrl ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A URL for the Amazon Web Services Systems Manager (Systems Manager) bucket where you want to store the results of this request."]
-module InstanceAssociationOutputUrl =
-  struct
-    type nonrec t =
-      {
-      s3OutputUrl: S3OutputUrl.t option
-        [@ocaml.doc
-          "The URL of S3 bucket where you want to store the results of this request."]}
-    let make ?s3OutputUrl = fun () -> { s3OutputUrl }
-    let to_value x =
-      structure_to_value
-        [("S3OutputUrl", (Option.map x.s3OutputUrl ~f:S3OutputUrl.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let s3OutputUrl =
-        (Option.map ~f:S3OutputUrl.of_xml) (Xml.child xml_arg0 "S3OutputUrl") in
-      make ?s3OutputUrl ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3OutputUrl = field_map json "S3OutputUrl" S3OutputUrl.of_json in
-      make ?s3OutputUrl ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The URL of S3 bucket where you want to store the results of this request."]
-module InstanceAssociationExecutionSummary =
-  struct
-    type nonrec t = string
-    let context_ = "InstanceAssociationExecutionSummary"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:512) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j =
-      string_of_json ~kind:"InstanceAssociationExecutionSummary" j
-    let to_json = simple_to_json to_value
-  end
-module InstanceAssociationStatusInfo =
-  struct
-    type nonrec t =
-      {
-      associationId: AssociationId.t option
-        [@ocaml.doc "The association ID."];
-      name: DocumentARN.t option [@ocaml.doc "The name of the association."];
-      documentVersion: DocumentVersion.t option
-        [@ocaml.doc "The association document versions."];
-      associationVersion: AssociationVersion.t option
-        [@ocaml.doc
-          "The version of the association applied to the managed node."];
-      instanceId: InstanceId.t option
-        [@ocaml.doc "The managed node ID where the association was created."];
-      executionDate: DateTime.t option
-        [@ocaml.doc "The date the association ran."];
-      status: StatusName.t option
-        [@ocaml.doc "Status information about the association."];
-      detailedStatus: StatusName.t option
-        [@ocaml.doc "Detailed status information about the association."];
-      executionSummary: InstanceAssociationExecutionSummary.t option
-        [@ocaml.doc "Summary information about association execution."];
-      errorCode: AgentErrorCode.t option
-        [@ocaml.doc
-          "An error code returned by the request to create the association."];
-      outputUrl: InstanceAssociationOutputUrl.t option
-        [@ocaml.doc
-          "A URL for an S3 bucket where you want to store the results of this request."];
-      associationName: AssociationName.t option
-        [@ocaml.doc
-          "The name of the association applied to the managed node."]}
-    let make ?associationId =
-      fun ?name ->
-        fun ?documentVersion ->
-          fun ?associationVersion ->
-            fun ?instanceId ->
-              fun ?executionDate ->
-                fun ?status ->
-                  fun ?detailedStatus ->
-                    fun ?executionSummary ->
-                      fun ?errorCode ->
-                        fun ?outputUrl ->
-                          fun ?associationName ->
-                            fun () ->
-                              {
-                                associationId;
-                                name;
-                                documentVersion;
-                                associationVersion;
-                                instanceId;
-                                executionDate;
-                                status;
-                                detailedStatus;
-                                executionSummary;
-                                errorCode;
-                                outputUrl;
-                                associationName
-                              }
-    let to_value x =
-      structure_to_value
-        [("AssociationId",
-           (Option.map x.associationId ~f:AssociationId.to_value));
-        ("Name", (Option.map x.name ~f:DocumentARN.to_value));
-        ("DocumentVersion",
-          (Option.map x.documentVersion ~f:DocumentVersion.to_value));
-        ("AssociationVersion",
-          (Option.map x.associationVersion ~f:AssociationVersion.to_value));
-        ("InstanceId", (Option.map x.instanceId ~f:InstanceId.to_value));
-        ("ExecutionDate", (Option.map x.executionDate ~f:DateTime.to_value));
-        ("Status", (Option.map x.status ~f:StatusName.to_value));
-        ("DetailedStatus",
-          (Option.map x.detailedStatus ~f:StatusName.to_value));
-        ("ExecutionSummary",
-          (Option.map x.executionSummary
-             ~f:InstanceAssociationExecutionSummary.to_value));
-        ("ErrorCode", (Option.map x.errorCode ~f:AgentErrorCode.to_value));
-        ("OutputUrl",
-          (Option.map x.outputUrl ~f:InstanceAssociationOutputUrl.to_value));
-        ("AssociationName",
-          (Option.map x.associationName ~f:AssociationName.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let associationName =
-        (Option.map ~f:AssociationName.of_xml)
-          (Xml.child xml_arg0 "AssociationName") in
-      let outputUrl =
-        (Option.map ~f:InstanceAssociationOutputUrl.of_xml)
-          (Xml.child xml_arg0 "OutputUrl") in
-      let errorCode =
-        (Option.map ~f:AgentErrorCode.of_xml)
-          (Xml.child xml_arg0 "ErrorCode") in
-      let executionSummary =
-        (Option.map ~f:InstanceAssociationExecutionSummary.of_xml)
-          (Xml.child xml_arg0 "ExecutionSummary") in
-      let detailedStatus =
-        (Option.map ~f:StatusName.of_xml)
-          (Xml.child xml_arg0 "DetailedStatus") in
-      let status =
-        (Option.map ~f:StatusName.of_xml) (Xml.child xml_arg0 "Status") in
-      let executionDate =
-        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "ExecutionDate") in
-      let instanceId =
-        (Option.map ~f:InstanceId.of_xml) (Xml.child xml_arg0 "InstanceId") in
-      let associationVersion =
-        (Option.map ~f:AssociationVersion.of_xml)
-          (Xml.child xml_arg0 "AssociationVersion") in
-      let documentVersion =
-        (Option.map ~f:DocumentVersion.of_xml)
-          (Xml.child xml_arg0 "DocumentVersion") in
-      let name =
-        (Option.map ~f:DocumentARN.of_xml) (Xml.child xml_arg0 "Name") in
-      let associationId =
-        (Option.map ~f:AssociationId.of_xml)
-          (Xml.child xml_arg0 "AssociationId") in
-      make ?associationName ?outputUrl ?errorCode ?executionSummary
-        ?detailedStatus ?status ?executionDate ?instanceId
-        ?associationVersion ?documentVersion ?name ?associationId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let associationName =
-        field_map json "AssociationName" AssociationName.of_json in
-      let outputUrl =
-        field_map json "OutputUrl" InstanceAssociationOutputUrl.of_json in
-      let errorCode = field_map json "ErrorCode" AgentErrorCode.of_json in
-      let executionSummary =
-        field_map json "ExecutionSummary"
-          InstanceAssociationExecutionSummary.of_json in
-      let detailedStatus = field_map json "DetailedStatus" StatusName.of_json in
-      let status = field_map json "Status" StatusName.of_json in
-      let executionDate = field_map json "ExecutionDate" DateTime.of_json in
-      let instanceId = field_map json "InstanceId" InstanceId.of_json in
-      let associationVersion =
-        field_map json "AssociationVersion" AssociationVersion.of_json in
-      let documentVersion =
-        field_map json "DocumentVersion" DocumentVersion.of_json in
-      let name = field_map json "Name" DocumentARN.of_json in
-      let associationId =
-        field_map json "AssociationId" AssociationId.of_json in
-      make ?associationName ?outputUrl ?errorCode ?executionSummary
-        ?detailedStatus ?status ?executionDate ?instanceId
-        ?associationVersion ?documentVersion ?name ?associationId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Status information about the association."]
-module InstanceAssociationStatusInfos =
-  struct
-    type nonrec t = InstanceAssociationStatusInfo.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:InstanceAssociationStatusInfo.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:InstanceAssociationStatusInfo.of_xml)
-    let of_json j =
-      list_of_json ~kind:"InstanceAssociationStatusInfos"
-        ~of_json:InstanceAssociationStatusInfo.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module DescribeInstanceAssociationsStatusResult =
-  struct
-    type nonrec t =
-      {
-      instanceAssociationStatusInfos: InstanceAssociationStatusInfos.t option
-        [@ocaml.doc "Status information about the association."];
-      nextToken: NextToken.t option
-        [@ocaml.doc
-          "The token to use when requesting the next set of items. If there are no additional items to return, the string is empty."]}
-    type nonrec error =
-      [ `InternalServerError of InternalServerError.t 
-      | `InvalidInstanceId of InvalidInstanceId.t 
-      | `InvalidNextToken of InvalidNextToken.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?instanceAssociationStatusInfos =
-      fun ?nextToken ->
-        fun () -> { instanceAssociationStatusInfos; nextToken }
-    let error_of_json name json =
-      match name with
-      | "InternalServerError" ->
-          `InternalServerError (InternalServerError.of_json json)
-      | "InvalidInstanceId" ->
-          `InvalidInstanceId (InvalidInstanceId.of_json json)
-      | "InvalidNextToken" ->
-          `InvalidNextToken (InvalidNextToken.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServerError" ->
-          `InternalServerError (InternalServerError.of_xml xml)
-      | "InvalidInstanceId" ->
-          `InvalidInstanceId (InvalidInstanceId.of_xml xml)
-      | "InvalidNextToken" -> `InvalidNextToken (InvalidNextToken.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServerError e ->
-          `Assoc
-            [("error", (`String "InternalServerError"));
-            ("details", (InternalServerError.to_json e))]
-      | `InvalidInstanceId e ->
-          `Assoc
-            [("error", (`String "InvalidInstanceId"));
-            ("details", (InvalidInstanceId.to_json e))]
-      | `InvalidNextToken e ->
-          `Assoc
-            [("error", (`String "InvalidNextToken"));
-            ("details", (InvalidNextToken.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("InstanceAssociationStatusInfos",
-           (Option.map x.instanceAssociationStatusInfos
-              ~f:InstanceAssociationStatusInfos.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let instanceAssociationStatusInfos =
-        (Option.map ~f:InstanceAssociationStatusInfos.of_xml)
-          (Xml.child xml_arg0 "InstanceAssociationStatusInfos") in
-      make ?nextToken ?instanceAssociationStatusInfos ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let instanceAssociationStatusInfos =
-        field_map json "InstanceAssociationStatusInfos"
-          InstanceAssociationStatusInfos.of_json in
-      make ?nextToken ?instanceAssociationStatusInfos ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The status of the associations for the managed node(s)."]
-module MaxResultsEC2Compatible =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:5));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxResultsEC2Compatible"
-           xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module InstanceInformationStringFilterKey =
-  struct
-    type nonrec t = string
-    let context_ = "InstanceInformationStringFilterKey"
-    let make i =
-      let open Result in ok_or_failwith (check_string_min i ~min:1); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j =
-      string_of_json ~kind:"InstanceInformationStringFilterKey" j
-    let to_json = simple_to_json to_value
-  end
-module InstanceInformationFilterValue =
-  struct
-    type nonrec t = string
-    let context_ = "InstanceInformationFilterValue"
-    let make i =
-      let open Result in ok_or_failwith (check_string_min i ~min:1); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"InstanceInformationFilterValue" j
-    let to_json = simple_to_json to_value
-  end
-module InstanceInformationFilterValueSet =
-  struct
-    type nonrec t = InstanceInformationFilterValue.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:100) >>=
-             (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:InstanceInformationFilterValue.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:InstanceInformationFilterValue.of_xml)
-    let of_json j =
-      list_of_json ~kind:"InstanceInformationFilterValueSet"
-        ~of_json:InstanceInformationFilterValue.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module InstanceInformationStringFilter =
-  struct
-    type nonrec t =
-      {
-      key: InstanceInformationStringFilterKey.t
-        [@ocaml.doc
-          "The filter key name to describe your managed nodes. For example: \"InstanceIds\"|\"AgentVersion\"|\"PingStatus\"|\"PlatformTypes\"|\"ActivationIds\"|\"IamRole\"|\"ResourceType\"|\"AssociationStatus\"|\"Tag Key\" Tag key isn't a valid filter. You must specify either tag-key or tag:keyname and a string. Here are some valid examples: tag-key, tag:123, tag:al!, tag:Windows. Here are some invalid examples: tag-keys, Tag Key, tag:, tagKey, abc:keyname."];
-      values: InstanceInformationFilterValueSet.t
-        [@ocaml.doc "The filter values."]}
-    let context_ = "InstanceInformationStringFilter"
-    let make ~key = fun ~values -> fun () -> { key; values }
-    let to_value x =
-      structure_to_value
-        [("Key", (Some (InstanceInformationStringFilterKey.to_value x.key)));
-        ("Values",
-          (Some (InstanceInformationFilterValueSet.to_value x.values)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let values =
-        InstanceInformationFilterValueSet.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Values") in
-      let key =
-        InstanceInformationStringFilterKey.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Key") in
-      make ~values ~key ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values =
-        field_map_exn json "Values" InstanceInformationFilterValueSet.of_json in
-      let key =
-        field_map_exn json "Key" InstanceInformationStringFilterKey.of_json in
-      make ~values ~key ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The filters to describe or get information about your managed nodes."]
-module InstanceInformationStringFilterList =
-  struct
-    type nonrec t = InstanceInformationStringFilter.t list
-    let make i =
-      let open Result in ok_or_failwith (check_list_min i ~min:0); i
-    let to_value xs =
-      (xs |> (List.map ~f:InstanceInformationStringFilter.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:InstanceInformationStringFilter.of_xml)
-    let of_json j =
-      list_of_json ~kind:"InstanceInformationStringFilterList"
-        ~of_json:InstanceInformationStringFilter.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module InstanceInformationFilterKey =
-  struct
-    type nonrec t =
-      | InstanceIds 
-      | AgentVersion 
-      | PingStatus 
-      | PlatformTypes 
-      | ActivationIds 
-      | IamRole 
-      | ResourceType 
-      | AssociationStatus 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | InstanceIds -> "InstanceIds"
-      | AgentVersion -> "AgentVersion"
-      | PingStatus -> "PingStatus"
-      | PlatformTypes -> "PlatformTypes"
-      | ActivationIds -> "ActivationIds"
-      | IamRole -> "IamRole"
-      | ResourceType -> "ResourceType"
-      | AssociationStatus -> "AssociationStatus"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "InstanceIds" -> InstanceIds
-      | "AgentVersion" -> AgentVersion
-      | "PingStatus" -> PingStatus
-      | "PlatformTypes" -> PlatformTypes
-      | "ActivationIds" -> ActivationIds
-      | "IamRole" -> IamRole
-      | "ResourceType" -> ResourceType
-      | "AssociationStatus" -> AssociationStatus
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration InstanceInformationFilterKey"
-           xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"InstanceInformationFilterKey" j)
-    let to_json = simple_to_json to_value
-  end
 module InstanceInformationFilter =
   struct
     type nonrec t =
@@ -527,11 +27,12 @@ module InstanceInformationFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~valueSet ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let valueSet =
-        field_map_exn json "valueSet"
+        field_map_exn json__ "valueSet"
           InstanceInformationFilterValueSet.of_json in
-      let key = field_map_exn json "key" InstanceInformationFilterKey.of_json in
+      let key =
+        field_map_exn json__ "key" InstanceInformationFilterKey.of_json in
       make ~valueSet ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -541,6 +42,9 @@ module InstanceInformationFilterList =
     type nonrec t = InstanceInformationFilter.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:0); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceInformationFilter.to_value)) |>
         (fun x -> `List x)
@@ -572,10 +76,10 @@ module DescribeInstanceInformationRequest =
           "This is a legacy method. We recommend that you don't use this method. Instead, use the Filters data type. Filters enables you to return node information by filtering based on tags applied to managed nodes. Attempting to use InstanceInformationFilterList and Filters leads to an exception error."];
       filters: InstanceInformationStringFilterList.t option
         [@ocaml.doc
-          "One or more filters. Use a filter to return a more specific list of managed nodes. You can filter based on tags applied to EC2 instances. Use this Filters data type instead of InstanceInformationFilterList, which is deprecated."];
+          "One or more filters. Use a filter to return a more specific list of managed nodes. You can filter based on tags applied to your managed nodes. Tag filters can't be combined with other filter types. Use this Filters data type instead of InstanceInformationFilterList, which is deprecated."];
       maxResults: MaxResultsEC2Compatible.t option
         [@ocaml.doc
-          "The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results."];
+          "The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results. The default value is 10 items."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The token for the next set of items to return. (You received this token from a previous call.)"]}
@@ -612,19 +116,20 @@ module DescribeInstanceInformationRequest =
           (Xml.child xml_arg0 "InstanceInformationFilterList") in
       make ?nextToken ?maxResults ?filters ?instanceInformationFilterList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" MaxResultsEC2Compatible.of_json in
+        field_map json__ "MaxResults" MaxResultsEC2Compatible.of_json in
       let filters =
-        field_map json "Filters" InstanceInformationStringFilterList.of_json in
+        field_map json__ "Filters"
+          InstanceInformationStringFilterList.of_json in
       let instanceInformationFilterList =
-        field_map json "InstanceInformationFilterList"
+        field_map json__ "InstanceInformationFilterList"
           InstanceInformationFilterList.of_json in
       make ?nextToken ?maxResults ?filters ?instanceInformationFilterList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes one or more of your managed nodes, including information about the operating system platform, the version of SSM Agent installed on the managed node, node status, and so on. If you specify one or more managed node IDs, it returns information for those managed nodes. If you don't specify node IDs, it returns information for all your managed nodes. If you specify a node ID that isn't valid or a node that you don't own, you receive an error. The IamRole field for this API operation is the Identity and Access Management (IAM) role assigned to on-premises managed nodes. This call doesn't return the IAM role for EC2 instances."]
+       "Provides information about one or more of your managed nodes, including the operating system platform, SSM Agent version, association status, and IP address. This operation does not return information for nodes that are either Stopped or Terminated. If you specify one or more node IDs, the operation returns information for those managed nodes. If you don't specify node IDs, it returns information for all your managed nodes. If you specify a node ID that isn't valid or a node that you don't own, you receive an error. The IamRole field returned for this API operation is the role assigned to an Amazon EC2 instance configured with a Systems Manager Quick Setup host management configuration or the role assigned to an on-premises managed node."]
 module InvalidInstanceInformationFilterValue =
   struct
     type nonrec t = {
@@ -639,8 +144,8 @@ module InvalidInstanceInformationFilterValue =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified filter value isn't valid."]
@@ -713,20 +218,17 @@ module ResourceType =
   struct
     type nonrec t =
       | ManagedInstance 
-      | Document 
       | EC2Instance 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | ManagedInstance -> "ManagedInstance"
-      | Document -> "Document"
       | EC2Instance -> "EC2Instance"
       | Non_static_id s -> s
     let of_string =
       function
       | "ManagedInstance" -> ManagedInstance
-      | "Document" -> Document
       | "EC2Instance" -> EC2Instance
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
@@ -786,6 +288,8 @@ module InstanceAssociationStatusAggregatedCount =
                     (fun x -> (InstanceCount.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -802,7 +306,7 @@ module InstanceAggregatedAssociationOverview =
           "Detailed status information about the aggregated associations."];
       instanceAssociationStatusAggregatedCount:
         InstanceAssociationStatusAggregatedCount.t option
-        [@ocaml.doc "The number of associations for the managed node(s)."]}
+        [@ocaml.doc "The number of associations for the managed nodes."]}
     let make ?detailedStatus =
       fun ?instanceAssociationStatusAggregatedCount ->
         fun () ->
@@ -824,11 +328,12 @@ module InstanceAggregatedAssociationOverview =
           (Xml.child xml_arg0 "DetailedStatus") in
       make ?instanceAssociationStatusAggregatedCount ?detailedStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceAssociationStatusAggregatedCount =
-        field_map json "InstanceAssociationStatusAggregatedCount"
+        field_map json__ "InstanceAssociationStatusAggregatedCount"
           InstanceAssociationStatusAggregatedCount.of_json in
-      let detailedStatus = field_map json "DetailedStatus" StatusName.of_json in
+      let detailedStatus =
+        field_map json__ "DetailedStatus" StatusName.of_json in
       make ?instanceAssociationStatusAggregatedCount ?detailedStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Status information about the aggregated associations."]
@@ -880,7 +385,7 @@ module InstanceInformation =
           "The activation ID created by Amazon Web Services Systems Manager when the server or virtual machine (VM) was registered."];
       iamRole: IamRole.t option
         [@ocaml.doc
-          "The Identity and Access Management (IAM) role assigned to the on-premises Systems Manager managed node. This call doesn't return the IAM role for Amazon Elastic Compute Cloud (Amazon EC2) instances. To retrieve the IAM role for an EC2 instance, use the Amazon EC2 DescribeInstances operation. For information, see DescribeInstances in the Amazon EC2 API Reference or describe-instances in the Amazon Web Services CLI Command Reference."];
+          "The role assigned to an Amazon EC2 instance configured with a Systems Manager Quick Setup host management configuration or the role assigned to an on-premises managed node. This call doesn't return the IAM role for unmanaged Amazon EC2 instances (instances not configured for Systems Manager). To retrieve the role for an unmanaged instance, use the Amazon EC2 DescribeInstances operation. For information, see DescribeInstances in the Amazon EC2 API Reference or describe-instances in the Amazon Web Services CLI Command Reference."];
       registrationDate: DateTime.t option
         [@ocaml.doc
           "The date the server or VM was registered with Amazon Web Services as a managed node."];
@@ -889,7 +394,7 @@ module InstanceInformation =
           "The type of instance. Instances are either EC2 instances or managed instances."];
       name: String_.t option
         [@ocaml.doc
-          "The name assigned to an on-premises server, edge device, or virtual machine (VM) when it is activated as a Systems Manager managed node. The name is specified as the DefaultInstanceName property using the CreateActivation command. It is applied to the managed node by specifying the Activation Code and Activation ID when you install SSM Agent on the node, as explained in Install SSM Agent for a hybrid environment (Linux) and Install SSM Agent for a hybrid environment (Windows). To retrieve the Name tag of an EC2 instance, use the Amazon EC2 DescribeInstances operation. For information, see DescribeInstances in the Amazon EC2 API Reference or describe-instances in the Amazon Web Services CLI Command Reference."];
+          "The name assigned to an on-premises server, edge device, or virtual machine (VM) when it is activated as a Systems Manager managed node. The name is specified as the DefaultInstanceName property using the CreateActivation command. It is applied to the managed node by specifying the Activation Code and Activation ID when you install SSM Agent on the node, as explained in How to install SSM Agent on hybrid Linux nodes and How to install SSM Agent on hybrid Windows Server nodes. To retrieve the Name tag of an EC2 instance, use the Amazon EC2 DescribeInstances operation. For information, see DescribeInstances in the Amazon EC2 API Reference or describe-instances in the Amazon Web Services CLI Command Reference."];
       iPAddress: IPAddress.t option
         [@ocaml.doc "The IP address of the managed node."];
       computerName: ComputerName.t option
@@ -1052,36 +557,38 @@ module InstanceInformation =
         ?platformName ?platformType ?isLatestVersion ?agentVersion
         ?lastPingDateTime ?pingStatus ?instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceType = field_map json "SourceType" SourceType.of_json in
-      let sourceId = field_map json "SourceId" SourceId.of_json in
+    let of_json json__ =
+      let sourceType = field_map json__ "SourceType" SourceType.of_json in
+      let sourceId = field_map json__ "SourceId" SourceId.of_json in
       let associationOverview =
-        field_map json "AssociationOverview"
+        field_map json__ "AssociationOverview"
           InstanceAggregatedAssociationOverview.of_json in
       let lastSuccessfulAssociationExecutionDate =
-        field_map json "LastSuccessfulAssociationExecutionDate"
+        field_map json__ "LastSuccessfulAssociationExecutionDate"
           DateTime.of_json in
       let lastAssociationExecutionDate =
-        field_map json "LastAssociationExecutionDate" DateTime.of_json in
+        field_map json__ "LastAssociationExecutionDate" DateTime.of_json in
       let associationStatus =
-        field_map json "AssociationStatus" StatusName.of_json in
-      let computerName = field_map json "ComputerName" ComputerName.of_json in
-      let iPAddress = field_map json "IPAddress" IPAddress.of_json in
-      let name = field_map json "Name" String_.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
+        field_map json__ "AssociationStatus" StatusName.of_json in
+      let computerName = field_map json__ "ComputerName" ComputerName.of_json in
+      let iPAddress = field_map json__ "IPAddress" IPAddress.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
       let registrationDate =
-        field_map json "RegistrationDate" DateTime.of_json in
-      let iamRole = field_map json "IamRole" IamRole.of_json in
-      let activationId = field_map json "ActivationId" ActivationId.of_json in
-      let platformVersion = field_map json "PlatformVersion" String_.of_json in
-      let platformName = field_map json "PlatformName" String_.of_json in
-      let platformType = field_map json "PlatformType" PlatformType.of_json in
-      let isLatestVersion = field_map json "IsLatestVersion" Boolean.of_json in
-      let agentVersion = field_map json "AgentVersion" Version.of_json in
+        field_map json__ "RegistrationDate" DateTime.of_json in
+      let iamRole = field_map json__ "IamRole" IamRole.of_json in
+      let activationId = field_map json__ "ActivationId" ActivationId.of_json in
+      let platformVersion =
+        field_map json__ "PlatformVersion" String_.of_json in
+      let platformName = field_map json__ "PlatformName" String_.of_json in
+      let platformType = field_map json__ "PlatformType" PlatformType.of_json in
+      let isLatestVersion =
+        field_map json__ "IsLatestVersion" Boolean.of_json in
+      let agentVersion = field_map json__ "AgentVersion" Version.of_json in
       let lastPingDateTime =
-        field_map json "LastPingDateTime" DateTime.of_json in
-      let pingStatus = field_map json "PingStatus" PingStatus.of_json in
-      let instanceId = field_map json "InstanceId" InstanceId.of_json in
+        field_map json__ "LastPingDateTime" DateTime.of_json in
+      let pingStatus = field_map json__ "PingStatus" PingStatus.of_json in
+      let instanceId = field_map json__ "InstanceId" InstanceId.of_json in
       make ?sourceType ?sourceId ?associationOverview
         ?lastSuccessfulAssociationExecutionDate ?lastAssociationExecutionDate
         ?associationStatus ?computerName ?iPAddress ?name ?resourceType
@@ -1094,6 +601,9 @@ module InstanceInformationList =
   struct
     type nonrec t = InstanceInformation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceInformation.to_value)) |>
         (fun x -> `List x)
@@ -1206,15 +716,15 @@ module DescribeInstanceInformationResult =
           (Xml.child xml_arg0 "InstanceInformationList") in
       make ?nextToken ?instanceInformationList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let instanceInformationList =
-        field_map json "InstanceInformationList"
+        field_map json__ "InstanceInformationList"
           InstanceInformationList.of_json in
       make ?nextToken ?instanceInformationList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes one or more of your managed nodes, including information about the operating system platform, the version of SSM Agent installed on the managed node, node status, and so on. If you specify one or more managed node IDs, it returns information for those managed nodes. If you don't specify node IDs, it returns information for all your managed nodes. If you specify a node ID that isn't valid or a node that you don't own, you receive an error. The IamRole field for this API operation is the Identity and Access Management (IAM) role assigned to on-premises managed nodes. This call doesn't return the IAM role for EC2 instances."]
+       "Provides information about one or more of your managed nodes, including the operating system platform, SSM Agent version, association status, and IP address. This operation does not return information for nodes that are either Stopped or Terminated. If you specify one or more node IDs, the operation returns information for those managed nodes. If you don't specify node IDs, it returns information for all your managed nodes. If you specify a node ID that isn't valid or a node that you don't own, you receive an error. The IamRole field returned for this API operation is the role assigned to an Amazon EC2 instance configured with a Systems Manager Quick Setup host management configuration or the role assigned to an on-premises managed node."]
 module PatchComplianceMaxResults =
   struct
     type nonrec t = int
@@ -1289,6 +799,9 @@ module InstancePatchStateFilterValues =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstancePatchStateFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -1363,12 +876,13 @@ module InstancePatchStateFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~type_ ~values ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let type_ =
-        field_map_exn json "Type" InstancePatchStateOperatorType.of_json in
+        field_map_exn json__ "Type" InstancePatchStateOperatorType.of_json in
       let values =
-        field_map_exn json "Values" InstancePatchStateFilterValues.of_json in
-      let key = field_map_exn json "Key" InstancePatchStateFilterKey.of_json in
+        field_map_exn json__ "Values" InstancePatchStateFilterValues.of_json in
+      let key =
+        field_map_exn json__ "Key" InstancePatchStateFilterKey.of_json in
       make ~type_ ~values ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1381,6 +895,9 @@ module InstancePatchStateFilterList =
         ok_or_failwith
           ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstancePatchStateFilter.to_value)) |>
         (fun x -> `List x)
@@ -1447,13 +964,13 @@ module DescribeInstancePatchStatesForPatchGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PatchGroup") in
       make ?maxResults ?nextToken ?filters ~patchGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" PatchComplianceMaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "MaxResults" PatchComplianceMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let filters =
-        field_map json "Filters" InstancePatchStateFilterList.of_json in
-      let patchGroup = field_map_exn json "PatchGroup" PatchGroup.of_json in
+        field_map json__ "Filters" InstancePatchStateFilterList.of_json in
+      let patchGroup = field_map_exn json__ "PatchGroup" PatchGroup.of_json in
       make ?maxResults ?nextToken ?filters ~patchGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1687,6 +1204,21 @@ module PatchCriticalNonCompliantCount =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module PatchAvailableSecurityUpdateCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for PatchAvailableSecurityUpdateCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module OwnerInformation =
   struct
     type nonrec t = string
@@ -1731,13 +1263,13 @@ module InstancePatchState =
   struct
     type nonrec t =
       {
-      instanceId: InstanceId.t
+      instanceId: InstanceId.t option
         [@ocaml.doc
           "The ID of the managed node the high-level patch compliance information was collected for."];
-      patchGroup: PatchGroup.t
+      patchGroup: PatchGroup.t option
         [@ocaml.doc
           "The name of the patch group the managed node belongs to."];
-      baselineId: BaselineId.t
+      baselineId: BaselineId.t option
         [@ocaml.doc
           "The ID of the patch baseline used to patch the managed node."];
       snapshotId: SnapshotId.t option
@@ -1745,7 +1277,7 @@ module InstancePatchState =
           "The ID of the patch baseline snapshot used during the patching operation when this compliance data was collected."];
       installOverrideList: InstallOverrideList.t option
         [@ocaml.doc
-          "An https URL or an Amazon Simple Storage Service (Amazon S3) path-style URL to a list of patches to be installed. This patch installation list, which you maintain in an S3 bucket in YAML format and specify in the SSM document AWS-RunPatchBaseline, overrides the patches specified by the default patch baseline. For more information about the InstallOverrideList parameter, see About the AWS-RunPatchBaseline SSM document in the Amazon Web Services Systems Manager User Guide."];
+          "An https URL or an Amazon Simple Storage Service (Amazon S3) path-style URL to a list of patches to be installed. This patch installation list, which you maintain in an S3 bucket in YAML format and specify in the SSM document AWS-RunPatchBaseline, overrides the patches specified by the default patch baseline. For more information about the InstallOverrideList parameter, see SSM Command document for patching: AWS-RunPatchBaseline in the Amazon Web Services Systems Manager User Guide."];
       ownerInformation: OwnerInformation.t option
         [@ocaml.doc
           "Placeholder information. This field will always be empty in the current release of the service."];
@@ -1770,17 +1302,21 @@ module InstancePatchState =
       unreportedNotApplicableCount:
         PatchUnreportedNotApplicableCount.t option
         [@ocaml.doc
-          "The number of patches beyond the supported limit of NotApplicableCount that aren't reported by name to Inventory. Inventory is a capability of Amazon Web Services Systems Manager."];
+          "The number of patches beyond the supported limit of NotApplicableCount that aren't reported by name to Inventory. Inventory is a tool in Amazon Web Services Systems Manager."];
       notApplicableCount: PatchNotApplicableCount.t option
         [@ocaml.doc
           "The number of patches from the patch baseline that aren't applicable for the managed node and therefore aren't installed on the node. This number may be truncated if the list of patch names is very large. The number of patches beyond this limit are reported in UnreportedNotApplicableCount."];
-      operationStartTime: DateTime.t
+      availableSecurityUpdateCount:
+        PatchAvailableSecurityUpdateCount.t option
+        [@ocaml.doc
+          "The number of security-related patches that are available but not approved because they didn't meet the patch baseline requirements. For example, an updated version of a patch might have been released before the specified auto-approval period was over. Applies to Windows Server managed nodes only."];
+      operationStartTime: DateTime.t option
         [@ocaml.doc
           "The time the most recent patching operation was started on the managed node."];
-      operationEndTime: DateTime.t
+      operationEndTime: DateTime.t option
         [@ocaml.doc
           "The time the most recent patching operation completed on the managed node."];
-      operation: PatchOperationType.t
+      operation: PatchOperationType.t option
         [@ocaml.doc
           "The type of patching operation that was performed: or SCAN assesses the patch compliance state. INSTALL installs missing patches."];
       lastNoRebootInstallOperationTime: DateTime.t option
@@ -1791,66 +1327,70 @@ module InstancePatchState =
           "Indicates the reboot option specified in the patch baseline. Reboot options apply to Install operations only. Reboots aren't attempted for Patch Manager Scan operations. RebootIfNeeded: Patch Manager tries to reboot the managed node if it installed any patches, or if any patches are detected with a status of InstalledPendingReboot. NoReboot: Patch Manager attempts to install missing packages without trying to reboot the system. Patches installed with this option are assigned a status of InstalledPendingReboot. These patches might not be in effect until a reboot is performed."];
       criticalNonCompliantCount: PatchCriticalNonCompliantCount.t option
         [@ocaml.doc
-          "The number of managed nodes where patches that are specified as Critical for compliance reporting in the patch baseline aren't installed. These patches might be missing, have failed installation, were rejected, or were installed but awaiting a required managed node reboot. The status of these managed nodes is NON_COMPLIANT."];
+          "The number of patches per node that are specified as Critical for compliance reporting in the patch baseline aren't installed. These patches might be missing, have failed installation, were rejected, or were installed but awaiting a required managed node reboot. The status of these managed nodes is NON_COMPLIANT."];
       securityNonCompliantCount: PatchSecurityNonCompliantCount.t option
         [@ocaml.doc
-          "The number of managed nodes where patches that are specified as Security in a patch advisory aren't installed. These patches might be missing, have failed installation, were rejected, or were installed but awaiting a required managed node reboot. The status of these managed nodes is NON_COMPLIANT."];
+          "The number of patches per node that are specified as Security in a patch advisory aren't installed. These patches might be missing, have failed installation, were rejected, or were installed but awaiting a required managed node reboot. The status of these managed nodes is NON_COMPLIANT."];
       otherNonCompliantCount: PatchOtherNonCompliantCount.t option
         [@ocaml.doc
-          "The number of managed nodes with patches installed that are specified as other than Critical or Security but aren't compliant with the patch baseline. The status of these managed nodes is NON_COMPLIANT."]}
-    let context_ = "InstancePatchState"
-    let make ?snapshotId =
-      fun ?installOverrideList ->
-        fun ?ownerInformation ->
-          fun ?installedCount ->
-            fun ?installedOtherCount ->
-              fun ?installedPendingRebootCount ->
-                fun ?installedRejectedCount ->
-                  fun ?missingCount ->
-                    fun ?failedCount ->
-                      fun ?unreportedNotApplicableCount ->
-                        fun ?notApplicableCount ->
-                          fun ?lastNoRebootInstallOperationTime ->
-                            fun ?rebootOption ->
-                              fun ?criticalNonCompliantCount ->
-                                fun ?securityNonCompliantCount ->
-                                  fun ?otherNonCompliantCount ->
-                                    fun ~instanceId ->
-                                      fun ~patchGroup ->
-                                        fun ~baselineId ->
-                                          fun ~operationStartTime ->
-                                            fun ~operationEndTime ->
-                                              fun ~operation ->
-                                                fun () ->
-                                                  {
-                                                    snapshotId;
-                                                    installOverrideList;
-                                                    ownerInformation;
-                                                    installedCount;
-                                                    installedOtherCount;
-                                                    installedPendingRebootCount;
-                                                    installedRejectedCount;
-                                                    missingCount;
-                                                    failedCount;
-                                                    unreportedNotApplicableCount;
-                                                    notApplicableCount;
-                                                    lastNoRebootInstallOperationTime;
-                                                    rebootOption;
-                                                    criticalNonCompliantCount;
-                                                    securityNonCompliantCount;
-                                                    otherNonCompliantCount;
-                                                    instanceId;
-                                                    patchGroup;
-                                                    baselineId;
-                                                    operationStartTime;
-                                                    operationEndTime;
-                                                    operation
-                                                  }
+          "The number of patches per node that are specified as other than Critical or Security but aren't compliant with the patch baseline. The status of these managed nodes is NON_COMPLIANT."]}
+    let make ?instanceId =
+      fun ?patchGroup ->
+        fun ?baselineId ->
+          fun ?snapshotId ->
+            fun ?installOverrideList ->
+              fun ?ownerInformation ->
+                fun ?installedCount ->
+                  fun ?installedOtherCount ->
+                    fun ?installedPendingRebootCount ->
+                      fun ?installedRejectedCount ->
+                        fun ?missingCount ->
+                          fun ?failedCount ->
+                            fun ?unreportedNotApplicableCount ->
+                              fun ?notApplicableCount ->
+                                fun ?availableSecurityUpdateCount ->
+                                  fun ?operationStartTime ->
+                                    fun ?operationEndTime ->
+                                      fun ?operation ->
+                                        fun ?lastNoRebootInstallOperationTime
+                                          ->
+                                          fun ?rebootOption ->
+                                            fun ?criticalNonCompliantCount ->
+                                              fun ?securityNonCompliantCount
+                                                ->
+                                                fun ?otherNonCompliantCount
+                                                  ->
+                                                  fun () ->
+                                                    {
+                                                      instanceId;
+                                                      patchGroup;
+                                                      baselineId;
+                                                      snapshotId;
+                                                      installOverrideList;
+                                                      ownerInformation;
+                                                      installedCount;
+                                                      installedOtherCount;
+                                                      installedPendingRebootCount;
+                                                      installedRejectedCount;
+                                                      missingCount;
+                                                      failedCount;
+                                                      unreportedNotApplicableCount;
+                                                      notApplicableCount;
+                                                      availableSecurityUpdateCount;
+                                                      operationStartTime;
+                                                      operationEndTime;
+                                                      operation;
+                                                      lastNoRebootInstallOperationTime;
+                                                      rebootOption;
+                                                      criticalNonCompliantCount;
+                                                      securityNonCompliantCount;
+                                                      otherNonCompliantCount
+                                                    }
     let to_value x =
       structure_to_value
-        [("InstanceId", (Some (InstanceId.to_value x.instanceId)));
-        ("PatchGroup", (Some (PatchGroup.to_value x.patchGroup)));
-        ("BaselineId", (Some (BaselineId.to_value x.baselineId)));
+        [("InstanceId", (Option.map x.instanceId ~f:InstanceId.to_value));
+        ("PatchGroup", (Option.map x.patchGroup ~f:PatchGroup.to_value));
+        ("BaselineId", (Option.map x.baselineId ~f:BaselineId.to_value));
         ("SnapshotId", (Option.map x.snapshotId ~f:SnapshotId.to_value));
         ("InstallOverrideList",
           (Option.map x.installOverrideList ~f:InstallOverrideList.to_value));
@@ -1877,10 +1417,15 @@ module InstancePatchState =
         ("NotApplicableCount",
           (Option.map x.notApplicableCount
              ~f:PatchNotApplicableCount.to_value));
+        ("AvailableSecurityUpdateCount",
+          (Option.map x.availableSecurityUpdateCount
+             ~f:PatchAvailableSecurityUpdateCount.to_value));
         ("OperationStartTime",
-          (Some (DateTime.to_value x.operationStartTime)));
-        ("OperationEndTime", (Some (DateTime.to_value x.operationEndTime)));
-        ("Operation", (Some (PatchOperationType.to_value x.operation)));
+          (Option.map x.operationStartTime ~f:DateTime.to_value));
+        ("OperationEndTime",
+          (Option.map x.operationEndTime ~f:DateTime.to_value));
+        ("Operation",
+          (Option.map x.operation ~f:PatchOperationType.to_value));
         ("LastNoRebootInstallOperationTime",
           (Option.map x.lastNoRebootInstallOperationTime ~f:DateTime.to_value));
         ("RebootOption",
@@ -1912,14 +1457,17 @@ module InstancePatchState =
         (Option.map ~f:DateTime.of_xml)
           (Xml.child xml_arg0 "LastNoRebootInstallOperationTime") in
       let operation =
-        PatchOperationType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Operation") in
+        (Option.map ~f:PatchOperationType.of_xml)
+          (Xml.child xml_arg0 "Operation") in
       let operationEndTime =
-        DateTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OperationEndTime") in
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "OperationEndTime") in
       let operationStartTime =
-        DateTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OperationStartTime") in
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "OperationStartTime") in
+      let availableSecurityUpdateCount =
+        (Option.map ~f:PatchAvailableSecurityUpdateCount.of_xml)
+          (Xml.child xml_arg0 "AvailableSecurityUpdateCount") in
       let notApplicableCount =
         (Option.map ~f:PatchNotApplicableCount.of_xml)
           (Xml.child xml_arg0 "NotApplicableCount") in
@@ -1953,76 +1501,79 @@ module InstancePatchState =
       let snapshotId =
         (Option.map ~f:SnapshotId.of_xml) (Xml.child xml_arg0 "SnapshotId") in
       let baselineId =
-        BaselineId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BaselineId") in
+        (Option.map ~f:BaselineId.of_xml) (Xml.child xml_arg0 "BaselineId") in
       let patchGroup =
-        PatchGroup.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PatchGroup") in
+        (Option.map ~f:PatchGroup.of_xml) (Xml.child xml_arg0 "PatchGroup") in
       let instanceId =
-        InstanceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
+        (Option.map ~f:InstanceId.of_xml) (Xml.child xml_arg0 "InstanceId") in
       make ?otherNonCompliantCount ?securityNonCompliantCount
         ?criticalNonCompliantCount ?rebootOption
-        ?lastNoRebootInstallOperationTime ~operation ~operationEndTime
-        ~operationStartTime ?notApplicableCount ?unreportedNotApplicableCount
-        ?failedCount ?missingCount ?installedRejectedCount
-        ?installedPendingRebootCount ?installedOtherCount ?installedCount
-        ?ownerInformation ?installOverrideList ?snapshotId ~baselineId
-        ~patchGroup ~instanceId ()
+        ?lastNoRebootInstallOperationTime ?operation ?operationEndTime
+        ?operationStartTime ?availableSecurityUpdateCount ?notApplicableCount
+        ?unreportedNotApplicableCount ?failedCount ?missingCount
+        ?installedRejectedCount ?installedPendingRebootCount
+        ?installedOtherCount ?installedCount ?ownerInformation
+        ?installOverrideList ?snapshotId ?baselineId ?patchGroup ?instanceId
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let otherNonCompliantCount =
-        field_map json "OtherNonCompliantCount"
+        field_map json__ "OtherNonCompliantCount"
           PatchOtherNonCompliantCount.of_json in
       let securityNonCompliantCount =
-        field_map json "SecurityNonCompliantCount"
+        field_map json__ "SecurityNonCompliantCount"
           PatchSecurityNonCompliantCount.of_json in
       let criticalNonCompliantCount =
-        field_map json "CriticalNonCompliantCount"
+        field_map json__ "CriticalNonCompliantCount"
           PatchCriticalNonCompliantCount.of_json in
-      let rebootOption = field_map json "RebootOption" RebootOption.of_json in
+      let rebootOption = field_map json__ "RebootOption" RebootOption.of_json in
       let lastNoRebootInstallOperationTime =
-        field_map json "LastNoRebootInstallOperationTime" DateTime.of_json in
-      let operation =
-        field_map_exn json "Operation" PatchOperationType.of_json in
+        field_map json__ "LastNoRebootInstallOperationTime" DateTime.of_json in
+      let operation = field_map json__ "Operation" PatchOperationType.of_json in
       let operationEndTime =
-        field_map_exn json "OperationEndTime" DateTime.of_json in
+        field_map json__ "OperationEndTime" DateTime.of_json in
       let operationStartTime =
-        field_map_exn json "OperationStartTime" DateTime.of_json in
+        field_map json__ "OperationStartTime" DateTime.of_json in
+      let availableSecurityUpdateCount =
+        field_map json__ "AvailableSecurityUpdateCount"
+          PatchAvailableSecurityUpdateCount.of_json in
       let notApplicableCount =
-        field_map json "NotApplicableCount" PatchNotApplicableCount.of_json in
+        field_map json__ "NotApplicableCount" PatchNotApplicableCount.of_json in
       let unreportedNotApplicableCount =
-        field_map json "UnreportedNotApplicableCount"
+        field_map json__ "UnreportedNotApplicableCount"
           PatchUnreportedNotApplicableCount.of_json in
-      let failedCount = field_map json "FailedCount" PatchFailedCount.of_json in
+      let failedCount =
+        field_map json__ "FailedCount" PatchFailedCount.of_json in
       let missingCount =
-        field_map json "MissingCount" PatchMissingCount.of_json in
+        field_map json__ "MissingCount" PatchMissingCount.of_json in
       let installedRejectedCount =
-        field_map json "InstalledRejectedCount"
+        field_map json__ "InstalledRejectedCount"
           PatchInstalledRejectedCount.of_json in
       let installedPendingRebootCount =
-        field_map json "InstalledPendingRebootCount"
+        field_map json__ "InstalledPendingRebootCount"
           PatchInstalledPendingRebootCount.of_json in
       let installedOtherCount =
-        field_map json "InstalledOtherCount" PatchInstalledOtherCount.of_json in
+        field_map json__ "InstalledOtherCount"
+          PatchInstalledOtherCount.of_json in
       let installedCount =
-        field_map json "InstalledCount" PatchInstalledCount.of_json in
+        field_map json__ "InstalledCount" PatchInstalledCount.of_json in
       let ownerInformation =
-        field_map json "OwnerInformation" OwnerInformation.of_json in
+        field_map json__ "OwnerInformation" OwnerInformation.of_json in
       let installOverrideList =
-        field_map json "InstallOverrideList" InstallOverrideList.of_json in
-      let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
-      let baselineId = field_map_exn json "BaselineId" BaselineId.of_json in
-      let patchGroup = field_map_exn json "PatchGroup" PatchGroup.of_json in
-      let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
+        field_map json__ "InstallOverrideList" InstallOverrideList.of_json in
+      let snapshotId = field_map json__ "SnapshotId" SnapshotId.of_json in
+      let baselineId = field_map json__ "BaselineId" BaselineId.of_json in
+      let patchGroup = field_map json__ "PatchGroup" PatchGroup.of_json in
+      let instanceId = field_map json__ "InstanceId" InstanceId.of_json in
       make ?otherNonCompliantCount ?securityNonCompliantCount
         ?criticalNonCompliantCount ?rebootOption
-        ?lastNoRebootInstallOperationTime ~operation ~operationEndTime
-        ~operationStartTime ?notApplicableCount ?unreportedNotApplicableCount
-        ?failedCount ?missingCount ?installedRejectedCount
-        ?installedPendingRebootCount ?installedOtherCount ?installedCount
-        ?ownerInformation ?installOverrideList ?snapshotId ~baselineId
-        ~patchGroup ~instanceId ()
+        ?lastNoRebootInstallOperationTime ?operation ?operationEndTime
+        ?operationStartTime ?availableSecurityUpdateCount ?notApplicableCount
+        ?unreportedNotApplicableCount ?failedCount ?missingCount
+        ?installedRejectedCount ?installedPendingRebootCount
+        ?installedOtherCount ?installedCount ?ownerInformation
+        ?installOverrideList ?snapshotId ?baselineId ?patchGroup ?instanceId
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Defines the high-level patch compliance state for a managed node, providing information about the number of installed, missing, not applicable, and failed patches along with metadata about the operation when this information was gathered for the managed node."]
@@ -2034,6 +1585,9 @@ module InstancePatchStatesList =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstancePatchState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2124,10 +1678,11 @@ module DescribeInstancePatchStatesForPatchGroupResult =
           (Xml.child xml_arg0 "InstancePatchStates") in
       make ?nextToken ?instancePatchStates ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let instancePatchStates =
-        field_map json "InstancePatchStates" InstancePatchStatesList.of_json in
+        field_map json__ "InstancePatchStates"
+          InstancePatchStatesList.of_json in
       make ?nextToken ?instancePatchStates ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2167,12 +1722,12 @@ module DescribeInstancePatchStatesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceIds") in
       make ?maxResults ?nextToken ~instanceIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" PatchComplianceMaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "MaxResults" PatchComplianceMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let instanceIds =
-        field_map_exn json "InstanceIds" InstanceIdList.of_json in
+        field_map_exn json__ "InstanceIds" InstanceIdList.of_json in
       make ?maxResults ?nextToken ~instanceIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2181,6 +1736,9 @@ module InstancePatchStateList =
   struct
     type nonrec t = InstancePatchState.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstancePatchState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2264,10 +1822,10 @@ module DescribeInstancePatchStatesResult =
           (Xml.child xml_arg0 "InstancePatchStates") in
       make ?nextToken ?instancePatchStates ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let instancePatchStates =
-        field_map json "InstancePatchStates" InstancePatchStateList.of_json in
+        field_map json__ "InstancePatchStates" InstancePatchStateList.of_json in
       make ?nextToken ?instancePatchStates ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2281,7 +1839,7 @@ module DescribeInstancePatchesRequest =
           "The ID of the managed node whose patch state information should be retrieved."];
       filters: PatchOrchestratorFilterList.t option
         [@ocaml.doc
-          "Each element in the array is a structure containing a key-value pair. Supported keys for DescribeInstancePatchesinclude the following: Classification Sample values: Security | SecurityUpdates KBId Sample values: KB4480056 | java-1.7.0-openjdk.x86_64 Severity Sample values: Important | Medium | Low State Sample values: Installed | InstalledOther | InstalledPendingReboot"];
+          "Each element in the array is a structure containing a key-value pair. Supported keys for DescribeInstancePatchesinclude the following: Classification Sample values: Security | SecurityUpdates KBId Sample values: KB4480056 | java-1.7.0-openjdk.x86_64 Severity Sample values: Important | Medium | Low State Sample values: Installed | InstalledOther | InstalledPendingReboot For lists of all State values, see Patch compliance state values in the Amazon Web Services Systems Manager User Guide."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The token for the next set of items to return. (You received this token from a previous call.)"];
@@ -2316,13 +1874,13 @@ module DescribeInstancePatchesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ?filters ~instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" PatchComplianceMaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "MaxResults" PatchComplianceMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let filters =
-        field_map json "Filters" PatchOrchestratorFilterList.of_json in
-      let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
+        field_map json__ "Filters" PatchOrchestratorFilterList.of_json in
+      let instanceId = field_map_exn json__ "InstanceId" InstanceId.of_json in
       make ?maxResults ?nextToken ?filters ~instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2337,6 +1895,7 @@ module PatchComplianceDataState =
       | MISSING 
       | NOT_APPLICABLE 
       | FAILED 
+      | AVAILABLE_SECURITY_UPDATE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2348,6 +1907,7 @@ module PatchComplianceDataState =
       | MISSING -> "MISSING"
       | NOT_APPLICABLE -> "NOT_APPLICABLE"
       | FAILED -> "FAILED"
+      | AVAILABLE_SECURITY_UPDATE -> "AVAILABLE_SECURITY_UPDATE"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2358,6 +1918,7 @@ module PatchComplianceDataState =
       | "MISSING" -> MISSING
       | "NOT_APPLICABLE" -> NOT_APPLICABLE
       | "FAILED" -> FAILED
+      | "AVAILABLE_SECURITY_UPDATE" -> AVAILABLE_SECURITY_UPDATE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2386,87 +1947,83 @@ module PatchComplianceData =
   struct
     type nonrec t =
       {
-      title: PatchTitle.t [@ocaml.doc "The title of the patch."];
-      kBId: PatchKbNumber.t
+      title: PatchTitle.t option [@ocaml.doc "The title of the patch."];
+      kBId: PatchKbNumber.t option
         [@ocaml.doc "The operating system-specific ID of the patch."];
-      classification: PatchClassification.t
+      classification: PatchClassification.t option
         [@ocaml.doc
           "The classification of the patch, such as SecurityUpdates, Updates, and CriticalUpdates."];
-      severity: PatchSeverity.t
+      severity: PatchSeverity.t option
         [@ocaml.doc
           "The severity of the patch such as Critical, Important, and Moderate."];
-      state: PatchComplianceDataState.t
+      state: PatchComplianceDataState.t option
         [@ocaml.doc
           "The state of the patch on the managed node, such as INSTALLED or FAILED. For descriptions of each patch state, see About patch compliance in the Amazon Web Services Systems Manager User Guide."];
-      installedTime: DateTime.t
+      installedTime: DateTime.t option
         [@ocaml.doc
           "The date/time the patch was installed on the managed node. Not all operating systems provide this level of information."];
       cVEIds: PatchCVEIds.t option
         [@ocaml.doc
-          "The IDs of one or more Common Vulnerabilities and Exposure (CVE) issues that are resolved by the patch."]}
-    let context_ = "PatchComplianceData"
-    let make ?cVEIds =
-      fun ~title ->
-        fun ~kBId ->
-          fun ~classification ->
-            fun ~severity ->
-              fun ~state ->
-                fun ~installedTime ->
+          "The IDs of one or more Common Vulnerabilities and Exposure (CVE) issues that are resolved by the patch. Currently, CVE ID values are reported only for patches with a status of Missing or Failed."]}
+    let make ?title =
+      fun ?kBId ->
+        fun ?classification ->
+          fun ?severity ->
+            fun ?state ->
+              fun ?installedTime ->
+                fun ?cVEIds ->
                   fun () ->
                     {
-                      cVEIds;
                       title;
                       kBId;
                       classification;
                       severity;
                       state;
-                      installedTime
+                      installedTime;
+                      cVEIds
                     }
     let to_value x =
       structure_to_value
-        [("Title", (Some (PatchTitle.to_value x.title)));
-        ("KBId", (Some (PatchKbNumber.to_value x.kBId)));
+        [("Title", (Option.map x.title ~f:PatchTitle.to_value));
+        ("KBId", (Option.map x.kBId ~f:PatchKbNumber.to_value));
         ("Classification",
-          (Some (PatchClassification.to_value x.classification)));
-        ("Severity", (Some (PatchSeverity.to_value x.severity)));
-        ("State", (Some (PatchComplianceDataState.to_value x.state)));
-        ("InstalledTime", (Some (DateTime.to_value x.installedTime)));
+          (Option.map x.classification ~f:PatchClassification.to_value));
+        ("Severity", (Option.map x.severity ~f:PatchSeverity.to_value));
+        ("State", (Option.map x.state ~f:PatchComplianceDataState.to_value));
+        ("InstalledTime", (Option.map x.installedTime ~f:DateTime.to_value));
         ("CVEIds", (Option.map x.cVEIds ~f:PatchCVEIds.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let cVEIds =
         (Option.map ~f:PatchCVEIds.of_xml) (Xml.child xml_arg0 "CVEIds") in
       let installedTime =
-        DateTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InstalledTime") in
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "InstalledTime") in
       let state =
-        PatchComplianceDataState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "State") in
+        (Option.map ~f:PatchComplianceDataState.of_xml)
+          (Xml.child xml_arg0 "State") in
       let severity =
-        PatchSeverity.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Severity") in
+        (Option.map ~f:PatchSeverity.of_xml) (Xml.child xml_arg0 "Severity") in
       let classification =
-        PatchClassification.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Classification") in
+        (Option.map ~f:PatchClassification.of_xml)
+          (Xml.child xml_arg0 "Classification") in
       let kBId =
-        PatchKbNumber.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "KBId") in
+        (Option.map ~f:PatchKbNumber.of_xml) (Xml.child xml_arg0 "KBId") in
       let title =
-        PatchTitle.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Title") in
-      make ?cVEIds ~installedTime ~state ~severity ~classification ~kBId
-        ~title ()
+        (Option.map ~f:PatchTitle.of_xml) (Xml.child xml_arg0 "Title") in
+      make ?cVEIds ?installedTime ?state ?severity ?classification ?kBId
+        ?title ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cVEIds = field_map json "CVEIds" PatchCVEIds.of_json in
-      let installedTime = field_map_exn json "InstalledTime" DateTime.of_json in
-      let state = field_map_exn json "State" PatchComplianceDataState.of_json in
-      let severity = field_map_exn json "Severity" PatchSeverity.of_json in
+    let of_json json__ =
+      let cVEIds = field_map json__ "CVEIds" PatchCVEIds.of_json in
+      let installedTime = field_map json__ "InstalledTime" DateTime.of_json in
+      let state = field_map json__ "State" PatchComplianceDataState.of_json in
+      let severity = field_map json__ "Severity" PatchSeverity.of_json in
       let classification =
-        field_map_exn json "Classification" PatchClassification.of_json in
-      let kBId = field_map_exn json "KBId" PatchKbNumber.of_json in
-      let title = field_map_exn json "Title" PatchTitle.of_json in
-      make ?cVEIds ~installedTime ~state ~severity ~classification ~kBId
-        ~title ()
+        field_map json__ "Classification" PatchClassification.of_json in
+      let kBId = field_map json__ "KBId" PatchKbNumber.of_json in
+      let title = field_map json__ "Title" PatchTitle.of_json in
+      make ?cVEIds ?installedTime ?state ?severity ?classification ?kBId
+        ?title ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the state of a patch on a particular managed node as it relates to the patch baseline used to patch the node."]
@@ -2474,6 +2031,9 @@ module PatchComplianceDataList =
   struct
     type nonrec t = PatchComplianceData.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PatchComplianceData.to_value)) |>
         (fun x -> `List x)
@@ -2572,13 +2132,956 @@ module DescribeInstancePatchesResult =
           (Xml.child xml_arg0 "Patches") in
       make ?nextToken ?patches ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let patches = field_map json "Patches" PatchComplianceDataList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let patches =
+        field_map json__ "Patches" PatchComplianceDataList.of_json in
       make ?nextToken ?patches ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves information about the patches on the specified managed node and their state relative to the patch baseline being used for the node."]
+module DescribeInstancePropertiesMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeInstancePropertiesMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module InstancePropertyStringFilterKey =
+  struct
+    type nonrec t = string
+    let context_ = "InstancePropertyStringFilterKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100000) >>=
+                  (fun () -> check_pattern i ~pattern:"^.{1,100000}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstancePropertyStringFilterKey" j
+    let to_json = simple_to_json to_value
+  end
+module InstancePropertyFilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "InstancePropertyFilterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100000) >>=
+                  (fun () -> check_pattern i ~pattern:"^.{1,100000}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstancePropertyFilterValue" j
+    let to_json = simple_to_json to_value
+  end
+module InstancePropertyFilterValueSet =
+  struct
+    type nonrec t = InstancePropertyFilterValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:40) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstancePropertyFilterValue.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstancePropertyFilterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstancePropertyFilterValueSet"
+        ~of_json:InstancePropertyFilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InstancePropertyFilterOperator =
+  struct
+    type nonrec t =
+      | Equal 
+      | NotEqual 
+      | BeginWith 
+      | LessThan 
+      | GreaterThan 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Equal -> "Equal"
+      | NotEqual -> "NotEqual"
+      | BeginWith -> "BeginWith"
+      | LessThan -> "LessThan"
+      | GreaterThan -> "GreaterThan"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Equal" -> Equal
+      | "NotEqual" -> NotEqual
+      | "BeginWith" -> BeginWith
+      | "LessThan" -> LessThan
+      | "GreaterThan" -> GreaterThan
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InstancePropertyFilterOperator"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"InstancePropertyFilterOperator" j)
+    let to_json = simple_to_json to_value
+  end
+module InstancePropertyStringFilter =
+  struct
+    type nonrec t =
+      {
+      key: InstancePropertyStringFilterKey.t
+        [@ocaml.doc "The filter key name to describe your managed nodes."];
+      values: InstancePropertyFilterValueSet.t
+        [@ocaml.doc "The filter key name to describe your managed nodes."];
+      operator: InstancePropertyFilterOperator.t option
+        [@ocaml.doc "The operator used by the filter call."]}
+    let context_ = "InstancePropertyStringFilter"
+    let make ?operator =
+      fun ~key -> fun ~values -> fun () -> { operator; key; values }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (InstancePropertyStringFilterKey.to_value x.key)));
+        ("Values", (Some (InstancePropertyFilterValueSet.to_value x.values)));
+        ("Operator",
+          (Option.map x.operator ~f:InstancePropertyFilterOperator.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let operator =
+        (Option.map ~f:InstancePropertyFilterOperator.of_xml)
+          (Xml.child xml_arg0 "Operator") in
+      let values =
+        InstancePropertyFilterValueSet.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Values") in
+      let key =
+        InstancePropertyStringFilterKey.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ?operator ~values ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let operator =
+        field_map json__ "Operator" InstancePropertyFilterOperator.of_json in
+      let values =
+        field_map_exn json__ "Values" InstancePropertyFilterValueSet.of_json in
+      let key =
+        field_map_exn json__ "Key" InstancePropertyStringFilterKey.of_json in
+      make ?operator ~values ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The filters to describe or get information about your managed nodes."]
+module InstancePropertyStringFilterList =
+  struct
+    type nonrec t = InstancePropertyStringFilter.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:40) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstancePropertyStringFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstancePropertyStringFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstancePropertyStringFilterList"
+        ~of_json:InstancePropertyStringFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InstancePropertyFilterKey =
+  struct
+    type nonrec t =
+      | InstanceIds 
+      | AgentVersion 
+      | PingStatus 
+      | PlatformTypes 
+      | DocumentName 
+      | ActivationIds 
+      | IamRole 
+      | ResourceType 
+      | AssociationStatus 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | InstanceIds -> "InstanceIds"
+      | AgentVersion -> "AgentVersion"
+      | PingStatus -> "PingStatus"
+      | PlatformTypes -> "PlatformTypes"
+      | DocumentName -> "DocumentName"
+      | ActivationIds -> "ActivationIds"
+      | IamRole -> "IamRole"
+      | ResourceType -> "ResourceType"
+      | AssociationStatus -> "AssociationStatus"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "InstanceIds" -> InstanceIds
+      | "AgentVersion" -> AgentVersion
+      | "PingStatus" -> PingStatus
+      | "PlatformTypes" -> PlatformTypes
+      | "DocumentName" -> DocumentName
+      | "ActivationIds" -> ActivationIds
+      | "IamRole" -> IamRole
+      | "ResourceType" -> ResourceType
+      | "AssociationStatus" -> AssociationStatus
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InstancePropertyFilterKey" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"InstancePropertyFilterKey" j)
+    let to_json = simple_to_json to_value
+  end
+module InstancePropertyFilter =
+  struct
+    type nonrec t =
+      {
+      key: InstancePropertyFilterKey.t [@ocaml.doc "The name of the filter."];
+      valueSet: InstancePropertyFilterValueSet.t
+        [@ocaml.doc "The filter values."]}
+    let context_ = "InstancePropertyFilter"
+    let make ~key = fun ~valueSet -> fun () -> { key; valueSet }
+    let to_value x =
+      structure_to_value
+        [("key", (Some (InstancePropertyFilterKey.to_value x.key)));
+        ("valueSet",
+          (Some (InstancePropertyFilterValueSet.to_value x.valueSet)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueSet =
+        InstancePropertyFilterValueSet.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "valueSet") in
+      let key =
+        InstancePropertyFilterKey.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "key") in
+      make ~valueSet ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueSet =
+        field_map_exn json__ "valueSet"
+          InstancePropertyFilterValueSet.of_json in
+      let key = field_map_exn json__ "key" InstancePropertyFilterKey.of_json in
+      make ~valueSet ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a filter for a specific list of managed nodes. You can filter node information by using tags. You specify tags by using a key-value mapping."]
+module InstancePropertyFilterList =
+  struct
+    type nonrec t = InstancePropertyFilter.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:40) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstancePropertyFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstancePropertyFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstancePropertyFilterList"
+        ~of_json:InstancePropertyFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeInstancePropertiesRequest =
+  struct
+    type nonrec t =
+      {
+      instancePropertyFilterList: InstancePropertyFilterList.t option
+        [@ocaml.doc "An array of instance property filters."];
+      filtersWithOperator: InstancePropertyStringFilterList.t option
+        [@ocaml.doc "The request filters to use with the operator."];
+      maxResults: DescribeInstancePropertiesMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return for the call. The call also returns a token that you can specify in a subsequent call to get the next set of results."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token provided by a previous request to use to return the next set of properties."]}
+    let make ?instancePropertyFilterList =
+      fun ?filtersWithOperator ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun () ->
+              {
+                instancePropertyFilterList;
+                filtersWithOperator;
+                maxResults;
+                nextToken
+              }
+    let to_value x =
+      structure_to_value
+        [("InstancePropertyFilterList",
+           (Option.map x.instancePropertyFilterList
+              ~f:InstancePropertyFilterList.to_value));
+        ("FiltersWithOperator",
+          (Option.map x.filtersWithOperator
+             ~f:InstancePropertyStringFilterList.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:DescribeInstancePropertiesMaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:DescribeInstancePropertiesMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let filtersWithOperator =
+        (Option.map ~f:InstancePropertyStringFilterList.of_xml)
+          (Xml.child xml_arg0 "FiltersWithOperator") in
+      let instancePropertyFilterList =
+        (Option.map ~f:InstancePropertyFilterList.of_xml)
+          (Xml.child xml_arg0 "InstancePropertyFilterList") in
+      make ?nextToken ?maxResults ?filtersWithOperator
+        ?instancePropertyFilterList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults"
+          DescribeInstancePropertiesMaxResults.of_json in
+      let filtersWithOperator =
+        field_map json__ "FiltersWithOperator"
+          InstancePropertyStringFilterList.of_json in
+      let instancePropertyFilterList =
+        field_map json__ "InstancePropertyFilterList"
+          InstancePropertyFilterList.of_json in
+      make ?nextToken ?maxResults ?filtersWithOperator
+        ?instancePropertyFilterList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An API operation used by the Systems Manager console to display information about Systems Manager managed nodes."]
+module InvalidInstancePropertyFilterValue =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified filter value isn't valid."]
+module PlatformVersion =
+  struct
+    type nonrec t = string
+    let context_ = "PlatformVersion"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:120); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PlatformVersion" j
+    let to_json = simple_to_json to_value
+  end
+module PlatformName =
+  struct
+    type nonrec t = string
+    let context_ = "PlatformName"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:120); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PlatformName" j
+    let to_json = simple_to_json to_value
+  end
+module KeyName =
+  struct
+    type nonrec t = string
+    let context_ = "KeyName"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:255); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KeyName" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceType =
+  struct
+    type nonrec t = string
+    let context_ = "InstanceType"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:120); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstanceType" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceState =
+  struct
+    type nonrec t = string
+    let context_ = "InstanceState"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:120); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstanceState" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceRole =
+  struct
+    type nonrec t = string
+    let context_ = "InstanceRole"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:120); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstanceRole" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceName =
+  struct
+    type nonrec t = string
+    let context_ = "InstanceName"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:255); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstanceName" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceProperty =
+  struct
+    type nonrec t =
+      {
+      name: InstanceName.t option
+        [@ocaml.doc
+          "The value of the EC2 Name tag associated with the node. If a Name tag hasn't been applied to the node, this value is blank."];
+      instanceId: InstanceId.t option
+        [@ocaml.doc "The ID of the managed node."];
+      instanceType: InstanceType.t option
+        [@ocaml.doc
+          "The instance type of the managed node. For example, t3.large."];
+      instanceRole: InstanceRole.t option
+        [@ocaml.doc
+          "The instance profile attached to the node. If an instance profile isn't attached to the node, this value is blank."];
+      keyName: KeyName.t option
+        [@ocaml.doc
+          "The name of the key pair associated with the node. If a key pair isnt't associated with the node, this value is blank."];
+      instanceState: InstanceState.t option
+        [@ocaml.doc "The current state of the node."];
+      architecture: Architecture.t option
+        [@ocaml.doc "The CPU architecture of the node. For example, x86_64."];
+      iPAddress: IPAddress.t option
+        [@ocaml.doc
+          "The public IPv4 address assigned to the node. If a public IPv4 address isn't assigned to the node, this value is blank."];
+      launchTime: DateTime.t option
+        [@ocaml.doc "The timestamp for when the node was launched."];
+      pingStatus: PingStatus.t option
+        [@ocaml.doc
+          "Connection status of the SSM Agent on the managed node."];
+      lastPingDateTime: DateTime.t option
+        [@ocaml.doc
+          "The date and time when the SSM Agent last pinged the Systems Manager service."];
+      agentVersion: Version.t option
+        [@ocaml.doc "The version of SSM Agent running on your managed node."];
+      platformType: PlatformType.t option
+        [@ocaml.doc
+          "The operating system platform type of the managed node. For example, Windows Server or Amazon Linux 2."];
+      platformName: PlatformName.t option
+        [@ocaml.doc
+          "The name of the operating system platform running on your managed node."];
+      platformVersion: PlatformVersion.t option
+        [@ocaml.doc
+          "The version of the OS platform running on your managed node."];
+      activationId: ActivationId.t option
+        [@ocaml.doc
+          "The activation ID created by Systems Manager when the server or virtual machine (VM) was registered"];
+      iamRole: IamRole.t option
+        [@ocaml.doc
+          "The IAM role used in the hybrid activation to register the node with Systems Manager."];
+      registrationDate: DateTime.t option
+        [@ocaml.doc "The date the node was registered with Systems Manager."];
+      resourceType: String_.t option [@ocaml.doc "The type of managed node."];
+      computerName: ComputerName.t option
+        [@ocaml.doc "The fully qualified host name of the managed node."];
+      associationStatus: StatusName.t option
+        [@ocaml.doc
+          "The status of the State Manager association applied to the managed node."];
+      lastAssociationExecutionDate: DateTime.t option
+        [@ocaml.doc "The date the association was last run."];
+      lastSuccessfulAssociationExecutionDate: DateTime.t option
+        [@ocaml.doc "The last date the association was successfully run."];
+      associationOverview: InstanceAggregatedAssociationOverview.t option ;
+      sourceId: SourceId.t option
+        [@ocaml.doc "The ID of the source resource."];
+      sourceType: SourceType.t option
+        [@ocaml.doc "The type of the source resource."]}
+    let make ?name =
+      fun ?instanceId ->
+        fun ?instanceType ->
+          fun ?instanceRole ->
+            fun ?keyName ->
+              fun ?instanceState ->
+                fun ?architecture ->
+                  fun ?iPAddress ->
+                    fun ?launchTime ->
+                      fun ?pingStatus ->
+                        fun ?lastPingDateTime ->
+                          fun ?agentVersion ->
+                            fun ?platformType ->
+                              fun ?platformName ->
+                                fun ?platformVersion ->
+                                  fun ?activationId ->
+                                    fun ?iamRole ->
+                                      fun ?registrationDate ->
+                                        fun ?resourceType ->
+                                          fun ?computerName ->
+                                            fun ?associationStatus ->
+                                              fun
+                                                ?lastAssociationExecutionDate
+                                                ->
+                                                fun
+                                                  ?lastSuccessfulAssociationExecutionDate
+                                                  ->
+                                                  fun ?associationOverview ->
+                                                    fun ?sourceId ->
+                                                      fun ?sourceType ->
+                                                        fun () ->
+                                                          {
+                                                            name;
+                                                            instanceId;
+                                                            instanceType;
+                                                            instanceRole;
+                                                            keyName;
+                                                            instanceState;
+                                                            architecture;
+                                                            iPAddress;
+                                                            launchTime;
+                                                            pingStatus;
+                                                            lastPingDateTime;
+                                                            agentVersion;
+                                                            platformType;
+                                                            platformName;
+                                                            platformVersion;
+                                                            activationId;
+                                                            iamRole;
+                                                            registrationDate;
+                                                            resourceType;
+                                                            computerName;
+                                                            associationStatus;
+                                                            lastAssociationExecutionDate;
+                                                            lastSuccessfulAssociationExecutionDate;
+                                                            associationOverview;
+                                                            sourceId;
+                                                            sourceType
+                                                          }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:InstanceName.to_value));
+        ("InstanceId", (Option.map x.instanceId ~f:InstanceId.to_value));
+        ("InstanceType",
+          (Option.map x.instanceType ~f:InstanceType.to_value));
+        ("InstanceRole",
+          (Option.map x.instanceRole ~f:InstanceRole.to_value));
+        ("KeyName", (Option.map x.keyName ~f:KeyName.to_value));
+        ("InstanceState",
+          (Option.map x.instanceState ~f:InstanceState.to_value));
+        ("Architecture",
+          (Option.map x.architecture ~f:Architecture.to_value));
+        ("IPAddress", (Option.map x.iPAddress ~f:IPAddress.to_value));
+        ("LaunchTime", (Option.map x.launchTime ~f:DateTime.to_value));
+        ("PingStatus", (Option.map x.pingStatus ~f:PingStatus.to_value));
+        ("LastPingDateTime",
+          (Option.map x.lastPingDateTime ~f:DateTime.to_value));
+        ("AgentVersion", (Option.map x.agentVersion ~f:Version.to_value));
+        ("PlatformType",
+          (Option.map x.platformType ~f:PlatformType.to_value));
+        ("PlatformName",
+          (Option.map x.platformName ~f:PlatformName.to_value));
+        ("PlatformVersion",
+          (Option.map x.platformVersion ~f:PlatformVersion.to_value));
+        ("ActivationId",
+          (Option.map x.activationId ~f:ActivationId.to_value));
+        ("IamRole", (Option.map x.iamRole ~f:IamRole.to_value));
+        ("RegistrationDate",
+          (Option.map x.registrationDate ~f:DateTime.to_value));
+        ("ResourceType", (Option.map x.resourceType ~f:String_.to_value));
+        ("ComputerName",
+          (Option.map x.computerName ~f:ComputerName.to_value));
+        ("AssociationStatus",
+          (Option.map x.associationStatus ~f:StatusName.to_value));
+        ("LastAssociationExecutionDate",
+          (Option.map x.lastAssociationExecutionDate ~f:DateTime.to_value));
+        ("LastSuccessfulAssociationExecutionDate",
+          (Option.map x.lastSuccessfulAssociationExecutionDate
+             ~f:DateTime.to_value));
+        ("AssociationOverview",
+          (Option.map x.associationOverview
+             ~f:InstanceAggregatedAssociationOverview.to_value));
+        ("SourceId", (Option.map x.sourceId ~f:SourceId.to_value));
+        ("SourceType", (Option.map x.sourceType ~f:SourceType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceType =
+        (Option.map ~f:SourceType.of_xml) (Xml.child xml_arg0 "SourceType") in
+      let sourceId =
+        (Option.map ~f:SourceId.of_xml) (Xml.child xml_arg0 "SourceId") in
+      let associationOverview =
+        (Option.map ~f:InstanceAggregatedAssociationOverview.of_xml)
+          (Xml.child xml_arg0 "AssociationOverview") in
+      let lastSuccessfulAssociationExecutionDate =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "LastSuccessfulAssociationExecutionDate") in
+      let lastAssociationExecutionDate =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "LastAssociationExecutionDate") in
+      let associationStatus =
+        (Option.map ~f:StatusName.of_xml)
+          (Xml.child xml_arg0 "AssociationStatus") in
+      let computerName =
+        (Option.map ~f:ComputerName.of_xml)
+          (Xml.child xml_arg0 "ComputerName") in
+      let resourceType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceType") in
+      let registrationDate =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "RegistrationDate") in
+      let iamRole =
+        (Option.map ~f:IamRole.of_xml) (Xml.child xml_arg0 "IamRole") in
+      let activationId =
+        (Option.map ~f:ActivationId.of_xml)
+          (Xml.child xml_arg0 "ActivationId") in
+      let platformVersion =
+        (Option.map ~f:PlatformVersion.of_xml)
+          (Xml.child xml_arg0 "PlatformVersion") in
+      let platformName =
+        (Option.map ~f:PlatformName.of_xml)
+          (Xml.child xml_arg0 "PlatformName") in
+      let platformType =
+        (Option.map ~f:PlatformType.of_xml)
+          (Xml.child xml_arg0 "PlatformType") in
+      let agentVersion =
+        (Option.map ~f:Version.of_xml) (Xml.child xml_arg0 "AgentVersion") in
+      let lastPingDateTime =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "LastPingDateTime") in
+      let pingStatus =
+        (Option.map ~f:PingStatus.of_xml) (Xml.child xml_arg0 "PingStatus") in
+      let launchTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "LaunchTime") in
+      let iPAddress =
+        (Option.map ~f:IPAddress.of_xml) (Xml.child xml_arg0 "IPAddress") in
+      let architecture =
+        (Option.map ~f:Architecture.of_xml)
+          (Xml.child xml_arg0 "Architecture") in
+      let instanceState =
+        (Option.map ~f:InstanceState.of_xml)
+          (Xml.child xml_arg0 "InstanceState") in
+      let keyName =
+        (Option.map ~f:KeyName.of_xml) (Xml.child xml_arg0 "KeyName") in
+      let instanceRole =
+        (Option.map ~f:InstanceRole.of_xml)
+          (Xml.child xml_arg0 "InstanceRole") in
+      let instanceType =
+        (Option.map ~f:InstanceType.of_xml)
+          (Xml.child xml_arg0 "InstanceType") in
+      let instanceId =
+        (Option.map ~f:InstanceId.of_xml) (Xml.child xml_arg0 "InstanceId") in
+      let name =
+        (Option.map ~f:InstanceName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?sourceType ?sourceId ?associationOverview
+        ?lastSuccessfulAssociationExecutionDate ?lastAssociationExecutionDate
+        ?associationStatus ?computerName ?resourceType ?registrationDate
+        ?iamRole ?activationId ?platformVersion ?platformName ?platformType
+        ?agentVersion ?lastPingDateTime ?pingStatus ?launchTime ?iPAddress
+        ?architecture ?instanceState ?keyName ?instanceRole ?instanceType
+        ?instanceId ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceType = field_map json__ "SourceType" SourceType.of_json in
+      let sourceId = field_map json__ "SourceId" SourceId.of_json in
+      let associationOverview =
+        field_map json__ "AssociationOverview"
+          InstanceAggregatedAssociationOverview.of_json in
+      let lastSuccessfulAssociationExecutionDate =
+        field_map json__ "LastSuccessfulAssociationExecutionDate"
+          DateTime.of_json in
+      let lastAssociationExecutionDate =
+        field_map json__ "LastAssociationExecutionDate" DateTime.of_json in
+      let associationStatus =
+        field_map json__ "AssociationStatus" StatusName.of_json in
+      let computerName = field_map json__ "ComputerName" ComputerName.of_json in
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let registrationDate =
+        field_map json__ "RegistrationDate" DateTime.of_json in
+      let iamRole = field_map json__ "IamRole" IamRole.of_json in
+      let activationId = field_map json__ "ActivationId" ActivationId.of_json in
+      let platformVersion =
+        field_map json__ "PlatformVersion" PlatformVersion.of_json in
+      let platformName = field_map json__ "PlatformName" PlatformName.of_json in
+      let platformType = field_map json__ "PlatformType" PlatformType.of_json in
+      let agentVersion = field_map json__ "AgentVersion" Version.of_json in
+      let lastPingDateTime =
+        field_map json__ "LastPingDateTime" DateTime.of_json in
+      let pingStatus = field_map json__ "PingStatus" PingStatus.of_json in
+      let launchTime = field_map json__ "LaunchTime" DateTime.of_json in
+      let iPAddress = field_map json__ "IPAddress" IPAddress.of_json in
+      let architecture = field_map json__ "Architecture" Architecture.of_json in
+      let instanceState =
+        field_map json__ "InstanceState" InstanceState.of_json in
+      let keyName = field_map json__ "KeyName" KeyName.of_json in
+      let instanceRole = field_map json__ "InstanceRole" InstanceRole.of_json in
+      let instanceType = field_map json__ "InstanceType" InstanceType.of_json in
+      let instanceId = field_map json__ "InstanceId" InstanceId.of_json in
+      let name = field_map json__ "Name" InstanceName.of_json in
+      make ?sourceType ?sourceId ?associationOverview
+        ?lastSuccessfulAssociationExecutionDate ?lastAssociationExecutionDate
+        ?associationStatus ?computerName ?resourceType ?registrationDate
+        ?iamRole ?activationId ?platformVersion ?platformName ?platformType
+        ?agentVersion ?lastPingDateTime ?pingStatus ?launchTime ?iPAddress
+        ?architecture ?instanceState ?keyName ?instanceRole ?instanceType
+        ?instanceId ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object containing various properties of a managed node."]
+module InstanceProperties =
+  struct
+    type nonrec t = InstanceProperty.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstanceProperty.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstanceProperty.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstanceProperties"
+        ~of_json:InstanceProperty.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeInstancePropertiesResult =
+  struct
+    type nonrec t =
+      {
+      instanceProperties: InstanceProperties.t option
+        [@ocaml.doc "Properties for the managed instances."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of properties to return. Use this token to get the next set of results."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `InvalidActivationId of InvalidActivationId.t 
+      | `InvalidDocument of InvalidDocument.t 
+      | `InvalidFilterKey of InvalidFilterKey.t 
+      | `InvalidInstanceId of InvalidInstanceId.t 
+      | `InvalidInstancePropertyFilterValue of
+          InvalidInstancePropertyFilterValue.t 
+      | `InvalidNextToken of InvalidNextToken.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?instanceProperties =
+      fun ?nextToken -> fun () -> { instanceProperties; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidActivationId" ->
+          `InvalidActivationId (InvalidActivationId.of_json json)
+      | "InvalidDocument" -> `InvalidDocument (InvalidDocument.of_json json)
+      | "InvalidFilterKey" ->
+          `InvalidFilterKey (InvalidFilterKey.of_json json)
+      | "InvalidInstanceId" ->
+          `InvalidInstanceId (InvalidInstanceId.of_json json)
+      | "InvalidInstancePropertyFilterValue" ->
+          `InvalidInstancePropertyFilterValue
+            (InvalidInstancePropertyFilterValue.of_json json)
+      | "InvalidNextToken" ->
+          `InvalidNextToken (InvalidNextToken.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidActivationId" ->
+          `InvalidActivationId (InvalidActivationId.of_xml xml)
+      | "InvalidDocument" -> `InvalidDocument (InvalidDocument.of_xml xml)
+      | "InvalidFilterKey" -> `InvalidFilterKey (InvalidFilterKey.of_xml xml)
+      | "InvalidInstanceId" ->
+          `InvalidInstanceId (InvalidInstanceId.of_xml xml)
+      | "InvalidInstancePropertyFilterValue" ->
+          `InvalidInstancePropertyFilterValue
+            (InvalidInstancePropertyFilterValue.of_xml xml)
+      | "InvalidNextToken" -> `InvalidNextToken (InvalidNextToken.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidActivationId e ->
+          `Assoc
+            [("error", (`String "InvalidActivationId"));
+            ("details", (InvalidActivationId.to_json e))]
+      | `InvalidDocument e ->
+          `Assoc
+            [("error", (`String "InvalidDocument"));
+            ("details", (InvalidDocument.to_json e))]
+      | `InvalidFilterKey e ->
+          `Assoc
+            [("error", (`String "InvalidFilterKey"));
+            ("details", (InvalidFilterKey.to_json e))]
+      | `InvalidInstanceId e ->
+          `Assoc
+            [("error", (`String "InvalidInstanceId"));
+            ("details", (InvalidInstanceId.to_json e))]
+      | `InvalidInstancePropertyFilterValue e ->
+          `Assoc
+            [("error", (`String "InvalidInstancePropertyFilterValue"));
+            ("details", (InvalidInstancePropertyFilterValue.to_json e))]
+      | `InvalidNextToken e ->
+          `Assoc
+            [("error", (`String "InvalidNextToken"));
+            ("details", (InvalidNextToken.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("InstanceProperties",
+           (Option.map x.instanceProperties ~f:InstanceProperties.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let instanceProperties =
+        (Option.map ~f:InstanceProperties.of_xml)
+          (Xml.child xml_arg0 "InstanceProperties") in
+      make ?nextToken ?instanceProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let instanceProperties =
+        field_map json__ "InstanceProperties" InstanceProperties.of_json in
+      make ?nextToken ?instanceProperties ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An API operation used by the Systems Manager console to display information about Systems Manager managed nodes."]
 module DescribeInventoryDeletionsRequest =
   struct
     type nonrec t =
@@ -2610,10 +3113,10 @@ module DescribeInventoryDeletionsRequest =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "DeletionId") in
       make ?maxResults ?nextToken ?deletionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let deletionId = field_map json "DeletionId" UUID.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let deletionId = field_map json__ "DeletionId" UUID.of_json in
       make ?maxResults ?nextToken ?deletionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a specific delete inventory operation."]
@@ -2763,21 +3266,23 @@ module InventoryDeletionStatusItem =
       make ?lastStatusUpdateTime ?deletionSummary ?lastStatusMessage
         ?lastStatus ?deletionStartTime ?typeName ?deletionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastStatusUpdateTime =
-        field_map json "LastStatusUpdateTime"
+        field_map json__ "LastStatusUpdateTime"
           InventoryDeletionLastStatusUpdateTime.of_json in
       let deletionSummary =
-        field_map json "DeletionSummary" InventoryDeletionSummary.of_json in
+        field_map json__ "DeletionSummary" InventoryDeletionSummary.of_json in
       let lastStatusMessage =
-        field_map json "LastStatusMessage"
+        field_map json__ "LastStatusMessage"
           InventoryDeletionLastStatusMessage.of_json in
       let lastStatus =
-        field_map json "LastStatus" InventoryDeletionStatus.of_json in
+        field_map json__ "LastStatus" InventoryDeletionStatus.of_json in
       let deletionStartTime =
-        field_map json "DeletionStartTime" InventoryDeletionStartTime.of_json in
-      let typeName = field_map json "TypeName" InventoryItemTypeName.of_json in
-      let deletionId = field_map json "DeletionId" UUID.of_json in
+        field_map json__ "DeletionStartTime"
+          InventoryDeletionStartTime.of_json in
+      let typeName =
+        field_map json__ "TypeName" InventoryItemTypeName.of_json in
+      let deletionId = field_map json__ "DeletionId" UUID.of_json in
       make ?lastStatusUpdateTime ?deletionSummary ?lastStatusMessage
         ?lastStatus ?deletionStartTime ?typeName ?deletionId ()
     let to_json v = composed_to_json to_value v
@@ -2787,6 +3292,9 @@ module InventoryDeletionsList =
   struct
     type nonrec t = InventoryDeletionStatusItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InventoryDeletionStatusItem.to_value)) |>
         (fun x -> `List x)
@@ -2823,8 +3331,8 @@ module InvalidDeletionIdException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2900,10 +3408,10 @@ module DescribeInventoryDeletionsResult =
           (Xml.child xml_arg0 "InventoryDeletions") in
       make ?nextToken ?inventoryDeletions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let inventoryDeletions =
-        field_map json "InventoryDeletions" InventoryDeletionsList.of_json in
+        field_map json__ "InventoryDeletions" InventoryDeletionsList.of_json in
       make ?nextToken ?inventoryDeletions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a specific delete inventory operation."]
@@ -2948,6 +3456,9 @@ module MaintenanceWindowFilterValues =
   struct
     type nonrec t = MaintenanceWindowFilterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MaintenanceWindowFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -3012,10 +3523,10 @@ module MaintenanceWindowFilter =
           (Xml.child xml_arg0 "Key") in
       make ?values ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let values =
-        field_map json "Values" MaintenanceWindowFilterValues.of_json in
-      let key = field_map json "Key" MaintenanceWindowFilterKey.of_json in
+        field_map json__ "Values" MaintenanceWindowFilterValues.of_json in
+      let key = field_map json__ "Key" MaintenanceWindowFilterKey.of_json in
       make ?values ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3028,6 +3539,9 @@ module MaintenanceWindowFilterList =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MaintenanceWindowFilter.to_value)) |>
         (fun x -> `List x)
@@ -3128,16 +3642,17 @@ module DescribeMaintenanceWindowExecutionTaskInvocationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WindowExecutionId") in
       make ?nextToken ?maxResults ?filters ~taskId ~windowExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" MaintenanceWindowMaxResults.of_json in
+        field_map json__ "MaxResults" MaintenanceWindowMaxResults.of_json in
       let filters =
-        field_map json "Filters" MaintenanceWindowFilterList.of_json in
+        field_map json__ "Filters" MaintenanceWindowFilterList.of_json in
       let taskId =
-        field_map_exn json "TaskId" MaintenanceWindowExecutionTaskId.of_json in
+        field_map_exn json__ "TaskId"
+          MaintenanceWindowExecutionTaskId.of_json in
       let windowExecutionId =
-        field_map_exn json "WindowExecutionId"
+        field_map_exn json__ "WindowExecutionId"
           MaintenanceWindowExecutionId.of_json in
       make ?nextToken ?maxResults ?filters ~taskId ~windowExecutionId ()
     let to_json v = composed_to_json to_value v
@@ -3441,34 +3956,35 @@ module MaintenanceWindowExecutionTaskInvocationIdentity =
         ?statusDetails ?status ?parameters ?taskType ?executionId
         ?invocationId ?taskExecutionId ?windowExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let windowTargetId =
-        field_map json "WindowTargetId" MaintenanceWindowTaskTargetId.of_json in
+        field_map json__ "WindowTargetId"
+          MaintenanceWindowTaskTargetId.of_json in
       let ownerInformation =
-        field_map json "OwnerInformation" OwnerInformation.of_json in
-      let endTime = field_map json "EndTime" DateTime.of_json in
-      let startTime = field_map json "StartTime" DateTime.of_json in
+        field_map json__ "OwnerInformation" OwnerInformation.of_json in
+      let endTime = field_map json__ "EndTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
       let statusDetails =
-        field_map json "StatusDetails"
+        field_map json__ "StatusDetails"
           MaintenanceWindowExecutionStatusDetails.of_json in
       let status =
-        field_map json "Status" MaintenanceWindowExecutionStatus.of_json in
+        field_map json__ "Status" MaintenanceWindowExecutionStatus.of_json in
       let parameters =
-        field_map json "Parameters"
+        field_map json__ "Parameters"
           MaintenanceWindowExecutionTaskInvocationParameters.of_json in
       let taskType =
-        field_map json "TaskType" MaintenanceWindowTaskType.of_json in
+        field_map json__ "TaskType" MaintenanceWindowTaskType.of_json in
       let executionId =
-        field_map json "ExecutionId"
+        field_map json__ "ExecutionId"
           MaintenanceWindowExecutionTaskExecutionId.of_json in
       let invocationId =
-        field_map json "InvocationId"
+        field_map json__ "InvocationId"
           MaintenanceWindowExecutionTaskInvocationId.of_json in
       let taskExecutionId =
-        field_map json "TaskExecutionId"
+        field_map json__ "TaskExecutionId"
           MaintenanceWindowExecutionTaskId.of_json in
       let windowExecutionId =
-        field_map json "WindowExecutionId"
+        field_map json__ "WindowExecutionId"
           MaintenanceWindowExecutionId.of_json in
       make ?windowTargetId ?ownerInformation ?endTime ?startTime
         ?statusDetails ?status ?parameters ?taskType ?executionId
@@ -3480,6 +3996,9 @@ module MaintenanceWindowExecutionTaskInvocationIdentityList =
   struct
     type nonrec t = MaintenanceWindowExecutionTaskInvocationIdentity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map
@@ -3572,10 +4091,10 @@ module DescribeMaintenanceWindowExecutionTaskInvocationsResult =
           (Xml.child xml_arg0 "WindowExecutionTaskInvocationIdentities") in
       make ?nextToken ?windowExecutionTaskInvocationIdentities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let windowExecutionTaskInvocationIdentities =
-        field_map json "WindowExecutionTaskInvocationIdentities"
+        field_map json__ "WindowExecutionTaskInvocationIdentities"
           MaintenanceWindowExecutionTaskInvocationIdentityList.of_json in
       make ?nextToken ?windowExecutionTaskInvocationIdentities ()
     let to_json v = composed_to_json to_value v
@@ -3627,14 +4146,14 @@ module DescribeMaintenanceWindowExecutionTasksRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WindowExecutionId") in
       make ?nextToken ?maxResults ?filters ~windowExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" MaintenanceWindowMaxResults.of_json in
+        field_map json__ "MaxResults" MaintenanceWindowMaxResults.of_json in
       let filters =
-        field_map json "Filters" MaintenanceWindowFilterList.of_json in
+        field_map json__ "Filters" MaintenanceWindowFilterList.of_json in
       let windowExecutionId =
-        field_map_exn json "WindowExecutionId"
+        field_map_exn json__ "WindowExecutionId"
           MaintenanceWindowExecutionId.of_json in
       make ?nextToken ?maxResults ?filters ~windowExecutionId ()
     let to_json v = composed_to_json to_value v
@@ -3680,7 +4199,13 @@ module MaintenanceWindowExecutionTaskIdentity =
       taskArn: MaintenanceWindowTaskArn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the task that ran."];
       taskType: MaintenanceWindowTaskType.t option
-        [@ocaml.doc "The type of task that ran."]}
+        [@ocaml.doc "The type of task that ran."];
+      alarmConfiguration: AlarmConfiguration.t option
+        [@ocaml.doc
+          "The details for the CloudWatch alarm applied to your maintenance window task."];
+      triggeredAlarms: AlarmStateInformationList.t option
+        [@ocaml.doc
+          "The CloudWatch alarm that was invoked by the maintenance window task."]}
     let make ?windowExecutionId =
       fun ?taskExecutionId ->
         fun ?status ->
@@ -3689,17 +4214,21 @@ module MaintenanceWindowExecutionTaskIdentity =
               fun ?endTime ->
                 fun ?taskArn ->
                   fun ?taskType ->
-                    fun () ->
-                      {
-                        windowExecutionId;
-                        taskExecutionId;
-                        status;
-                        statusDetails;
-                        startTime;
-                        endTime;
-                        taskArn;
-                        taskType
-                      }
+                    fun ?alarmConfiguration ->
+                      fun ?triggeredAlarms ->
+                        fun () ->
+                          {
+                            windowExecutionId;
+                            taskExecutionId;
+                            status;
+                            statusDetails;
+                            startTime;
+                            endTime;
+                            taskArn;
+                            taskType;
+                            alarmConfiguration;
+                            triggeredAlarms
+                          }
     let to_value x =
       structure_to_value
         [("WindowExecutionId",
@@ -3718,9 +4247,19 @@ module MaintenanceWindowExecutionTaskIdentity =
         ("TaskArn",
           (Option.map x.taskArn ~f:MaintenanceWindowTaskArn.to_value));
         ("TaskType",
-          (Option.map x.taskType ~f:MaintenanceWindowTaskType.to_value))]
+          (Option.map x.taskType ~f:MaintenanceWindowTaskType.to_value));
+        ("AlarmConfiguration",
+          (Option.map x.alarmConfiguration ~f:AlarmConfiguration.to_value));
+        ("TriggeredAlarms",
+          (Option.map x.triggeredAlarms ~f:AlarmStateInformationList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let triggeredAlarms =
+        (Option.map ~f:AlarmStateInformationList.of_xml)
+          (Xml.child xml_arg0 "TriggeredAlarms") in
+      let alarmConfiguration =
+        (Option.map ~f:AlarmConfiguration.of_xml)
+          (Xml.child xml_arg0 "AlarmConfiguration") in
       let taskType =
         (Option.map ~f:MaintenanceWindowTaskType.of_xml)
           (Xml.child xml_arg0 "TaskType") in
@@ -3743,28 +4282,35 @@ module MaintenanceWindowExecutionTaskIdentity =
       let windowExecutionId =
         (Option.map ~f:MaintenanceWindowExecutionId.of_xml)
           (Xml.child xml_arg0 "WindowExecutionId") in
-      make ?taskType ?taskArn ?endTime ?startTime ?statusDetails ?status
-        ?taskExecutionId ?windowExecutionId ()
+      make ?triggeredAlarms ?alarmConfiguration ?taskType ?taskArn ?endTime
+        ?startTime ?statusDetails ?status ?taskExecutionId ?windowExecutionId
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let triggeredAlarms =
+        field_map json__ "TriggeredAlarms" AlarmStateInformationList.of_json in
+      let alarmConfiguration =
+        field_map json__ "AlarmConfiguration" AlarmConfiguration.of_json in
       let taskType =
-        field_map json "TaskType" MaintenanceWindowTaskType.of_json in
-      let taskArn = field_map json "TaskArn" MaintenanceWindowTaskArn.of_json in
-      let endTime = field_map json "EndTime" DateTime.of_json in
-      let startTime = field_map json "StartTime" DateTime.of_json in
+        field_map json__ "TaskType" MaintenanceWindowTaskType.of_json in
+      let taskArn =
+        field_map json__ "TaskArn" MaintenanceWindowTaskArn.of_json in
+      let endTime = field_map json__ "EndTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
       let statusDetails =
-        field_map json "StatusDetails"
+        field_map json__ "StatusDetails"
           MaintenanceWindowExecutionStatusDetails.of_json in
       let status =
-        field_map json "Status" MaintenanceWindowExecutionStatus.of_json in
+        field_map json__ "Status" MaintenanceWindowExecutionStatus.of_json in
       let taskExecutionId =
-        field_map json "TaskExecutionId"
+        field_map json__ "TaskExecutionId"
           MaintenanceWindowExecutionTaskId.of_json in
       let windowExecutionId =
-        field_map json "WindowExecutionId"
+        field_map json__ "WindowExecutionId"
           MaintenanceWindowExecutionId.of_json in
-      make ?taskType ?taskArn ?endTime ?startTime ?statusDetails ?status
-        ?taskExecutionId ?windowExecutionId ()
+      make ?triggeredAlarms ?alarmConfiguration ?taskType ?taskArn ?endTime
+        ?startTime ?statusDetails ?status ?taskExecutionId ?windowExecutionId
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a task execution performed as part of a maintenance window execution."]
@@ -3772,6 +4318,9 @@ module MaintenanceWindowExecutionTaskIdentityList =
   struct
     type nonrec t = MaintenanceWindowExecutionTaskIdentity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MaintenanceWindowExecutionTaskIdentity.to_value))
         |> (fun x -> `List x)
@@ -3859,10 +4408,10 @@ module DescribeMaintenanceWindowExecutionTasksResult =
           (Xml.child xml_arg0 "WindowExecutionTaskIdentities") in
       make ?nextToken ?windowExecutionTaskIdentities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let windowExecutionTaskIdentities =
-        field_map json "WindowExecutionTaskIdentities"
+        field_map json__ "WindowExecutionTaskIdentities"
           MaintenanceWindowExecutionTaskIdentityList.of_json in
       make ?nextToken ?windowExecutionTaskIdentities ()
     let to_json v = composed_to_json to_value v
@@ -3877,7 +4426,7 @@ module DescribeMaintenanceWindowExecutionsRequest =
           "The ID of the maintenance window whose executions should be retrieved."];
       filters: MaintenanceWindowFilterList.t option
         [@ocaml.doc
-          "Each entry in the array is a structure containing: Key. A string between 1 and 128 characters. Supported keys include ExecutedBefore and ExecutedAfter. Values. An array of strings, each between 1 and 256 characters. Supported values are date/time strings in a valid ISO 8601 date/time format, such as 2021-11-04T05:00:00Z."];
+          "Each entry in the array is a structure containing: Key. A string between 1 and 128 characters. Supported keys include ExecutedBefore and ExecutedAfter. Values. An array of strings, each between 1 and 256 characters. Supported values are date/time strings in a valid ISO 8601 date/time format, such as 2024-11-04T05:00:00Z."];
       maxResults: MaintenanceWindowMaxResults.t option
         [@ocaml.doc
           "The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results."];
@@ -3913,14 +4462,14 @@ module DescribeMaintenanceWindowExecutionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WindowId") in
       make ?nextToken ?maxResults ?filters ~windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" MaintenanceWindowMaxResults.of_json in
+        field_map json__ "MaxResults" MaintenanceWindowMaxResults.of_json in
       let filters =
-        field_map json "Filters" MaintenanceWindowFilterList.of_json in
+        field_map json__ "Filters" MaintenanceWindowFilterList.of_json in
       let windowId =
-        field_map_exn json "WindowId" MaintenanceWindowId.of_json in
+        field_map_exn json__ "WindowId" MaintenanceWindowId.of_json in
       make ?nextToken ?maxResults ?filters ~windowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3992,18 +4541,18 @@ module MaintenanceWindowExecution =
       make ?endTime ?startTime ?statusDetails ?status ?windowExecutionId
         ?windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "EndTime" DateTime.of_json in
-      let startTime = field_map json "StartTime" DateTime.of_json in
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
       let statusDetails =
-        field_map json "StatusDetails"
+        field_map json__ "StatusDetails"
           MaintenanceWindowExecutionStatusDetails.of_json in
       let status =
-        field_map json "Status" MaintenanceWindowExecutionStatus.of_json in
+        field_map json__ "Status" MaintenanceWindowExecutionStatus.of_json in
       let windowExecutionId =
-        field_map json "WindowExecutionId"
+        field_map json__ "WindowExecutionId"
           MaintenanceWindowExecutionId.of_json in
-      let windowId = field_map json "WindowId" MaintenanceWindowId.of_json in
+      let windowId = field_map json__ "WindowId" MaintenanceWindowId.of_json in
       make ?endTime ?startTime ?statusDetails ?status ?windowExecutionId
         ?windowId ()
     let to_json v = composed_to_json to_value v
@@ -4013,6 +4562,9 @@ module MaintenanceWindowExecutionList =
   struct
     type nonrec t = MaintenanceWindowExecution.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MaintenanceWindowExecution.to_value)) |>
         (fun x -> `List x)
@@ -4088,10 +4640,10 @@ module DescribeMaintenanceWindowExecutionsResult =
           (Xml.child xml_arg0 "WindowExecutions") in
       make ?nextToken ?windowExecutions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let windowExecutions =
-        field_map json "WindowExecutions"
+        field_map json__ "WindowExecutions"
           MaintenanceWindowExecutionList.of_json in
       make ?nextToken ?windowExecutions ()
     let to_json v = composed_to_json to_value v
@@ -4213,16 +4765,17 @@ module DescribeMaintenanceWindowScheduleRequest =
       make ?nextToken ?maxResults ?filters ?resourceType ?targets ?windowId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" MaintenanceWindowSearchMaxResults.of_json in
+        field_map json__ "MaxResults"
+          MaintenanceWindowSearchMaxResults.of_json in
       let filters =
-        field_map json "Filters" PatchOrchestratorFilterList.of_json in
+        field_map json__ "Filters" PatchOrchestratorFilterList.of_json in
       let resourceType =
-        field_map json "ResourceType" MaintenanceWindowResourceType.of_json in
-      let targets = field_map json "Targets" Targets.of_json in
-      let windowId = field_map json "WindowId" MaintenanceWindowId.of_json in
+        field_map json__ "ResourceType" MaintenanceWindowResourceType.of_json in
+      let targets = field_map json__ "Targets" Targets.of_json in
+      let windowId = field_map json__ "WindowId" MaintenanceWindowId.of_json in
       make ?nextToken ?maxResults ?filters ?resourceType ?targets ?windowId
         ()
     let to_json v = composed_to_json to_value v
@@ -4263,12 +4816,12 @@ module ScheduledWindowExecution =
           (Xml.child xml_arg0 "WindowId") in
       make ?executionTime ?name ?windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let executionTime =
-        field_map json "ExecutionTime"
+        field_map json__ "ExecutionTime"
           MaintenanceWindowStringDateTime.of_json in
-      let name = field_map json "Name" MaintenanceWindowName.of_json in
-      let windowId = field_map json "WindowId" MaintenanceWindowId.of_json in
+      let name = field_map json__ "Name" MaintenanceWindowName.of_json in
+      let windowId = field_map json__ "WindowId" MaintenanceWindowId.of_json in
       make ?executionTime ?name ?windowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4277,6 +4830,9 @@ module ScheduledWindowExecutionList =
   struct
     type nonrec t = ScheduledWindowExecution.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScheduledWindowExecution.to_value)) |>
         (fun x -> `List x)
@@ -4362,10 +4918,10 @@ module DescribeMaintenanceWindowScheduleResult =
           (Xml.child xml_arg0 "ScheduledWindowExecutions") in
       make ?nextToken ?scheduledWindowExecutions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let scheduledWindowExecutions =
-        field_map json "ScheduledWindowExecutions"
+        field_map json__ "ScheduledWindowExecutions"
           ScheduledWindowExecutionList.of_json in
       make ?nextToken ?scheduledWindowExecutions ()
     let to_json v = composed_to_json to_value v
@@ -4416,14 +4972,14 @@ module DescribeMaintenanceWindowTargetsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WindowId") in
       make ?nextToken ?maxResults ?filters ~windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" MaintenanceWindowMaxResults.of_json in
+        field_map json__ "MaxResults" MaintenanceWindowMaxResults.of_json in
       let filters =
-        field_map json "Filters" MaintenanceWindowFilterList.of_json in
+        field_map json__ "Filters" MaintenanceWindowFilterList.of_json in
       let windowId =
-        field_map_exn json "WindowId" MaintenanceWindowId.of_json in
+        field_map_exn json__ "WindowId" MaintenanceWindowId.of_json in
       make ?nextToken ?maxResults ?filters ~windowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4507,18 +5063,18 @@ module MaintenanceWindowTarget =
       make ?description ?name ?ownerInformation ?targets ?resourceType
         ?windowTargetId ?windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" MaintenanceWindowDescription.of_json in
-      let name = field_map json "Name" MaintenanceWindowName.of_json in
+        field_map json__ "Description" MaintenanceWindowDescription.of_json in
+      let name = field_map json__ "Name" MaintenanceWindowName.of_json in
       let ownerInformation =
-        field_map json "OwnerInformation" OwnerInformation.of_json in
-      let targets = field_map json "Targets" Targets.of_json in
+        field_map json__ "OwnerInformation" OwnerInformation.of_json in
+      let targets = field_map json__ "Targets" Targets.of_json in
       let resourceType =
-        field_map json "ResourceType" MaintenanceWindowResourceType.of_json in
+        field_map json__ "ResourceType" MaintenanceWindowResourceType.of_json in
       let windowTargetId =
-        field_map json "WindowTargetId" MaintenanceWindowTargetId.of_json in
-      let windowId = field_map json "WindowId" MaintenanceWindowId.of_json in
+        field_map json__ "WindowTargetId" MaintenanceWindowTargetId.of_json in
+      let windowId = field_map json__ "WindowId" MaintenanceWindowId.of_json in
       make ?description ?name ?ownerInformation ?targets ?resourceType
         ?windowTargetId ?windowId ()
     let to_json v = composed_to_json to_value v
@@ -4527,6 +5083,9 @@ module MaintenanceWindowTargetList =
   struct
     type nonrec t = MaintenanceWindowTarget.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MaintenanceWindowTarget.to_value)) |>
         (fun x -> `List x)
@@ -4610,10 +5169,10 @@ module DescribeMaintenanceWindowTargetsResult =
           (Xml.child xml_arg0 "Targets") in
       make ?nextToken ?targets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let targets =
-        field_map json "Targets" MaintenanceWindowTargetList.of_json in
+        field_map json__ "Targets" MaintenanceWindowTargetList.of_json in
       make ?nextToken ?targets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4663,14 +5222,14 @@ module DescribeMaintenanceWindowTasksRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WindowId") in
       make ?nextToken ?maxResults ?filters ~windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" MaintenanceWindowMaxResults.of_json in
+        field_map json__ "MaxResults" MaintenanceWindowMaxResults.of_json in
       let filters =
-        field_map json "Filters" MaintenanceWindowFilterList.of_json in
+        field_map json__ "Filters" MaintenanceWindowFilterList.of_json in
       let windowId =
-        field_map_exn json "WindowId" MaintenanceWindowId.of_json in
+        field_map_exn json__ "WindowId" MaintenanceWindowId.of_json in
       make ?nextToken ?maxResults ?filters ~windowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4714,6 +5273,9 @@ module MaintenanceWindowTaskParameterValueList =
   struct
     type nonrec t = MaintenanceWindowTaskParameterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MaintenanceWindowTaskParameterValue.to_value)) |>
         (fun x -> `List x)
@@ -4757,9 +5319,9 @@ module MaintenanceWindowTaskParameterValueExpression =
           (Xml.child xml_arg0 "Values") in
       make ?values ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let values =
-        field_map json "Values"
+        field_map json__ "Values"
           MaintenanceWindowTaskParameterValueList.of_json in
       make ?values ()
     let to_json v = composed_to_json to_value v
@@ -4811,6 +5373,8 @@ module MaintenanceWindowTaskParameters =
                          |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -4854,7 +5418,7 @@ module LoggingInfo =
       {
       s3BucketName: S3BucketName.t
         [@ocaml.doc
-          "The name of an S3 bucket where execution logs are stored ."];
+          "The name of an S3 bucket where execution logs are stored."];
       s3KeyPrefix: S3KeyPrefix.t option
         [@ocaml.doc "(Optional) The S3 bucket subfolder."];
       s3Region: S3Region.t
@@ -4880,11 +5444,11 @@ module LoggingInfo =
           (Xml.child_exn ~context:context_ xml_arg0 "S3BucketName") in
       make ~s3Region ?s3KeyPrefix ~s3BucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Region = field_map_exn json "S3Region" S3Region.of_json in
-      let s3KeyPrefix = field_map json "S3KeyPrefix" S3KeyPrefix.of_json in
+    let of_json json__ =
+      let s3Region = field_map_exn json__ "S3Region" S3Region.of_json in
+      let s3KeyPrefix = field_map json__ "S3KeyPrefix" S3KeyPrefix.of_json in
       let s3BucketName =
-        field_map_exn json "S3BucketName" S3BucketName.of_json in
+        field_map_exn json__ "S3BucketName" S3BucketName.of_json in
       make ~s3Region ?s3KeyPrefix ~s3BucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4917,7 +5481,7 @@ module MaintenanceWindowTask =
           "Information about an S3 bucket to write task-level logs to. LoggingInfo has been deprecated. To specify an Amazon Simple Storage Service (Amazon S3) bucket to contain logs, instead use the OutputS3BucketName and OutputS3KeyPrefix options in the TaskInvocationParameters structure. For information about how Amazon Web Services Systems Manager handles these options for the supported maintenance window task types, see MaintenanceWindowTaskInvocationParameters."];
       serviceRoleArn: ServiceRole.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) service role to use to publish Amazon Simple Notification Service (Amazon SNS) notifications for maintenance window Run Command tasks."];
+          "The Amazon Resource Name (ARN) of the IAM service role for Amazon Web Services Systems Manager to assume when running a maintenance window task. If you do not specify a service role ARN, Systems Manager uses a service-linked role in your account. If no appropriate service-linked role for Systems Manager exists in your account, it is created when you run RegisterTaskWithMaintenanceWindow. However, for an improved security posture, we strongly recommend creating a custom policy and custom service role for running your maintenance window tasks. The policy can be crafted to provide only the permissions needed for your particular maintenance window tasks. For more information, see Setting up Maintenance Windows in the in the Amazon Web Services Systems Manager User Guide."];
       maxConcurrency: MaxConcurrency.t option
         [@ocaml.doc
           "The maximum number of targets this task can be run for, in parallel. Although this element is listed as \"Required: No\", a value can be omitted only when you are registering or updating a targetless task You must provide a value in all other cases. For maintenance window tasks without a target specified, you can't supply a value for this option. Instead, the system inserts a placeholder value of 1. This value doesn't affect the running of your task."];
@@ -4929,7 +5493,10 @@ module MaintenanceWindowTask =
         [@ocaml.doc "A description of the task."];
       cutoffBehavior: MaintenanceWindowTaskCutoffBehavior.t option
         [@ocaml.doc
-          "The specification for whether tasks should continue to run after the cutoff time specified in the maintenance windows is reached."]}
+          "The specification for whether tasks should continue to run after the cutoff time specified in the maintenance windows is reached."];
+      alarmConfiguration: AlarmConfiguration.t option
+        [@ocaml.doc
+          "The details for the CloudWatch alarm applied to your maintenance window task."]}
     let make ?windowId =
       fun ?windowTaskId ->
         fun ?taskArn ->
@@ -4944,23 +5511,25 @@ module MaintenanceWindowTask =
                           fun ?name ->
                             fun ?description ->
                               fun ?cutoffBehavior ->
-                                fun () ->
-                                  {
-                                    windowId;
-                                    windowTaskId;
-                                    taskArn;
-                                    type_;
-                                    targets;
-                                    taskParameters;
-                                    priority;
-                                    loggingInfo;
-                                    serviceRoleArn;
-                                    maxConcurrency;
-                                    maxErrors;
-                                    name;
-                                    description;
-                                    cutoffBehavior
-                                  }
+                                fun ?alarmConfiguration ->
+                                  fun () ->
+                                    {
+                                      windowId;
+                                      windowTaskId;
+                                      taskArn;
+                                      type_;
+                                      targets;
+                                      taskParameters;
+                                      priority;
+                                      loggingInfo;
+                                      serviceRoleArn;
+                                      maxConcurrency;
+                                      maxErrors;
+                                      name;
+                                      description;
+                                      cutoffBehavior;
+                                      alarmConfiguration
+                                    }
     let to_value x =
       structure_to_value
         [("WindowId",
@@ -4987,9 +5556,14 @@ module MaintenanceWindowTask =
           (Option.map x.description ~f:MaintenanceWindowDescription.to_value));
         ("CutoffBehavior",
           (Option.map x.cutoffBehavior
-             ~f:MaintenanceWindowTaskCutoffBehavior.to_value))]
+             ~f:MaintenanceWindowTaskCutoffBehavior.to_value));
+        ("AlarmConfiguration",
+          (Option.map x.alarmConfiguration ~f:AlarmConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let alarmConfiguration =
+        (Option.map ~f:AlarmConfiguration.of_xml)
+          (Xml.child xml_arg0 "AlarmConfiguration") in
       let cutoffBehavior =
         (Option.map ~f:MaintenanceWindowTaskCutoffBehavior.of_xml)
           (Xml.child xml_arg0 "CutoffBehavior") in
@@ -5029,37 +5603,40 @@ module MaintenanceWindowTask =
       let windowId =
         (Option.map ~f:MaintenanceWindowId.of_xml)
           (Xml.child xml_arg0 "WindowId") in
-      make ?cutoffBehavior ?description ?name ?maxErrors ?maxConcurrency
-        ?serviceRoleArn ?loggingInfo ?priority ?taskParameters ?targets
-        ?type_ ?taskArn ?windowTaskId ?windowId ()
+      make ?alarmConfiguration ?cutoffBehavior ?description ?name ?maxErrors
+        ?maxConcurrency ?serviceRoleArn ?loggingInfo ?priority
+        ?taskParameters ?targets ?type_ ?taskArn ?windowTaskId ?windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let alarmConfiguration =
+        field_map json__ "AlarmConfiguration" AlarmConfiguration.of_json in
       let cutoffBehavior =
-        field_map json "CutoffBehavior"
+        field_map json__ "CutoffBehavior"
           MaintenanceWindowTaskCutoffBehavior.of_json in
       let description =
-        field_map json "Description" MaintenanceWindowDescription.of_json in
-      let name = field_map json "Name" MaintenanceWindowName.of_json in
-      let maxErrors = field_map json "MaxErrors" MaxErrors.of_json in
+        field_map json__ "Description" MaintenanceWindowDescription.of_json in
+      let name = field_map json__ "Name" MaintenanceWindowName.of_json in
+      let maxErrors = field_map json__ "MaxErrors" MaxErrors.of_json in
       let maxConcurrency =
-        field_map json "MaxConcurrency" MaxConcurrency.of_json in
+        field_map json__ "MaxConcurrency" MaxConcurrency.of_json in
       let serviceRoleArn =
-        field_map json "ServiceRoleArn" ServiceRole.of_json in
-      let loggingInfo = field_map json "LoggingInfo" LoggingInfo.of_json in
+        field_map json__ "ServiceRoleArn" ServiceRole.of_json in
+      let loggingInfo = field_map json__ "LoggingInfo" LoggingInfo.of_json in
       let priority =
-        field_map json "Priority" MaintenanceWindowTaskPriority.of_json in
+        field_map json__ "Priority" MaintenanceWindowTaskPriority.of_json in
       let taskParameters =
-        field_map json "TaskParameters"
+        field_map json__ "TaskParameters"
           MaintenanceWindowTaskParameters.of_json in
-      let targets = field_map json "Targets" Targets.of_json in
-      let type_ = field_map json "Type" MaintenanceWindowTaskType.of_json in
-      let taskArn = field_map json "TaskArn" MaintenanceWindowTaskArn.of_json in
+      let targets = field_map json__ "Targets" Targets.of_json in
+      let type_ = field_map json__ "Type" MaintenanceWindowTaskType.of_json in
+      let taskArn =
+        field_map json__ "TaskArn" MaintenanceWindowTaskArn.of_json in
       let windowTaskId =
-        field_map json "WindowTaskId" MaintenanceWindowTaskId.of_json in
-      let windowId = field_map json "WindowId" MaintenanceWindowId.of_json in
-      make ?cutoffBehavior ?description ?name ?maxErrors ?maxConcurrency
-        ?serviceRoleArn ?loggingInfo ?priority ?taskParameters ?targets
-        ?type_ ?taskArn ?windowTaskId ?windowId ()
+        field_map json__ "WindowTaskId" MaintenanceWindowTaskId.of_json in
+      let windowId = field_map json__ "WindowId" MaintenanceWindowId.of_json in
+      make ?alarmConfiguration ?cutoffBehavior ?description ?name ?maxErrors
+        ?maxConcurrency ?serviceRoleArn ?loggingInfo ?priority
+        ?taskParameters ?targets ?type_ ?taskArn ?windowTaskId ?windowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a task defined for a maintenance window."]
@@ -5067,6 +5644,9 @@ module MaintenanceWindowTaskList =
   struct
     type nonrec t = MaintenanceWindowTask.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MaintenanceWindowTask.to_value)) |>
         (fun x -> `List x)
@@ -5149,9 +5729,9 @@ module DescribeMaintenanceWindowTasksResult =
           (Xml.child xml_arg0 "Tasks") in
       make ?nextToken ?tasks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let tasks = field_map json "Tasks" MaintenanceWindowTaskList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let tasks = field_map json__ "Tasks" MaintenanceWindowTaskList.of_json in
       make ?nextToken ?tasks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5201,14 +5781,15 @@ module DescribeMaintenanceWindowsForTargetRequest =
         Targets.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Targets") in
       make ?nextToken ?maxResults ~resourceType ~targets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" MaintenanceWindowSearchMaxResults.of_json in
+        field_map json__ "MaxResults"
+          MaintenanceWindowSearchMaxResults.of_json in
       let resourceType =
-        field_map_exn json "ResourceType"
+        field_map_exn json__ "ResourceType"
           MaintenanceWindowResourceType.of_json in
-      let targets = field_map_exn json "Targets" Targets.of_json in
+      let targets = field_map_exn json__ "Targets" Targets.of_json in
       make ?nextToken ?maxResults ~resourceType ~targets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5237,9 +5818,9 @@ module MaintenanceWindowIdentityForTarget =
           (Xml.child xml_arg0 "WindowId") in
       make ?name ?windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" MaintenanceWindowName.of_json in
-      let windowId = field_map json "WindowId" MaintenanceWindowId.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" MaintenanceWindowName.of_json in
+      let windowId = field_map json__ "WindowId" MaintenanceWindowId.of_json in
       make ?name ?windowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5248,6 +5829,9 @@ module MaintenanceWindowsForTargetList =
   struct
     type nonrec t = MaintenanceWindowIdentityForTarget.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MaintenanceWindowIdentityForTarget.to_value)) |>
         (fun x -> `List x)
@@ -5325,10 +5909,10 @@ module DescribeMaintenanceWindowsForTargetResult =
           (Xml.child xml_arg0 "WindowIdentities") in
       make ?nextToken ?windowIdentities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let windowIdentities =
-        field_map json "WindowIdentities"
+        field_map json__ "WindowIdentities"
           MaintenanceWindowsForTargetList.of_json in
       make ?nextToken ?windowIdentities ()
     let to_json v = composed_to_json to_value v
@@ -5369,12 +5953,12 @@ module DescribeMaintenanceWindowsRequest =
           (Xml.child xml_arg0 "Filters") in
       make ?nextToken ?maxResults ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" MaintenanceWindowMaxResults.of_json in
+        field_map json__ "MaxResults" MaintenanceWindowMaxResults.of_json in
       let filters =
-        field_map json "Filters" MaintenanceWindowFilterList.of_json in
+        field_map json__ "Filters" MaintenanceWindowFilterList.of_json in
       make ?nextToken ?maxResults ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5522,28 +6106,29 @@ module MaintenanceWindowIdentity =
         ?scheduleTimezone ?schedule ?cutoff ?duration ?enabled ?description
         ?name ?windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextExecutionTime =
-        field_map json "NextExecutionTime"
+        field_map json__ "NextExecutionTime"
           MaintenanceWindowStringDateTime.of_json in
       let startDate =
-        field_map json "StartDate" MaintenanceWindowStringDateTime.of_json in
+        field_map json__ "StartDate" MaintenanceWindowStringDateTime.of_json in
       let endDate =
-        field_map json "EndDate" MaintenanceWindowStringDateTime.of_json in
+        field_map json__ "EndDate" MaintenanceWindowStringDateTime.of_json in
       let scheduleOffset =
-        field_map json "ScheduleOffset" MaintenanceWindowOffset.of_json in
+        field_map json__ "ScheduleOffset" MaintenanceWindowOffset.of_json in
       let scheduleTimezone =
-        field_map json "ScheduleTimezone" MaintenanceWindowTimezone.of_json in
+        field_map json__ "ScheduleTimezone" MaintenanceWindowTimezone.of_json in
       let schedule =
-        field_map json "Schedule" MaintenanceWindowSchedule.of_json in
-      let cutoff = field_map json "Cutoff" MaintenanceWindowCutoff.of_json in
+        field_map json__ "Schedule" MaintenanceWindowSchedule.of_json in
+      let cutoff = field_map json__ "Cutoff" MaintenanceWindowCutoff.of_json in
       let duration =
-        field_map json "Duration" MaintenanceWindowDurationHours.of_json in
-      let enabled = field_map json "Enabled" MaintenanceWindowEnabled.of_json in
+        field_map json__ "Duration" MaintenanceWindowDurationHours.of_json in
+      let enabled =
+        field_map json__ "Enabled" MaintenanceWindowEnabled.of_json in
       let description =
-        field_map json "Description" MaintenanceWindowDescription.of_json in
-      let name = field_map json "Name" MaintenanceWindowName.of_json in
-      let windowId = field_map json "WindowId" MaintenanceWindowId.of_json in
+        field_map json__ "Description" MaintenanceWindowDescription.of_json in
+      let name = field_map json__ "Name" MaintenanceWindowName.of_json in
+      let windowId = field_map json__ "WindowId" MaintenanceWindowId.of_json in
       make ?nextExecutionTime ?startDate ?endDate ?scheduleOffset
         ?scheduleTimezone ?schedule ?cutoff ?duration ?enabled ?description
         ?name ?windowId ()
@@ -5553,6 +6138,9 @@ module MaintenanceWindowIdentityList =
   struct
     type nonrec t = MaintenanceWindowIdentity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MaintenanceWindowIdentity.to_value)) |>
         (fun x -> `List x)
@@ -5628,10 +6216,10 @@ module DescribeMaintenanceWindowsResult =
           (Xml.child xml_arg0 "WindowIdentities") in
       make ?nextToken ?windowIdentities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let windowIdentities =
-        field_map json "WindowIdentities"
+        field_map json__ "WindowIdentities"
           MaintenanceWindowIdentityList.of_json in
       make ?nextToken ?windowIdentities ()
     let to_json v = composed_to_json to_value v
@@ -5672,6 +6260,9 @@ module OpsItemFilterValues =
   struct
     type nonrec t = OpsItemFilterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpsItemFilterValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5749,6 +6340,15 @@ module OpsItemFilterKey =
       | Category 
       | Severity 
       | OpsItemType 
+      | AccessRequestByRequesterArn 
+      | AccessRequestByRequesterId 
+      | AccessRequestByApproverArn 
+      | AccessRequestByApproverId 
+      | AccessRequestBySourceAccountId 
+      | AccessRequestBySourceOpsItemId 
+      | AccessRequestBySourceRegion 
+      | AccessRequestByIsReplica 
+      | AccessRequestByTargetResourceId 
       | ChangeRequestByRequesterArn 
       | ChangeRequestByRequesterName 
       | ChangeRequestByApproverArn 
@@ -5756,6 +6356,7 @@ module OpsItemFilterKey =
       | ChangeRequestByTemplate 
       | ChangeRequestByTargetsResourceGroup 
       | InsightByType 
+      | AccountId 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -5780,6 +6381,15 @@ module OpsItemFilterKey =
       | Category -> "Category"
       | Severity -> "Severity"
       | OpsItemType -> "OpsItemType"
+      | AccessRequestByRequesterArn -> "AccessRequestByRequesterArn"
+      | AccessRequestByRequesterId -> "AccessRequestByRequesterId"
+      | AccessRequestByApproverArn -> "AccessRequestByApproverArn"
+      | AccessRequestByApproverId -> "AccessRequestByApproverId"
+      | AccessRequestBySourceAccountId -> "AccessRequestBySourceAccountId"
+      | AccessRequestBySourceOpsItemId -> "AccessRequestBySourceOpsItemId"
+      | AccessRequestBySourceRegion -> "AccessRequestBySourceRegion"
+      | AccessRequestByIsReplica -> "AccessRequestByIsReplica"
+      | AccessRequestByTargetResourceId -> "AccessRequestByTargetResourceId"
       | ChangeRequestByRequesterArn -> "ChangeRequestByRequesterArn"
       | ChangeRequestByRequesterName -> "ChangeRequestByRequesterName"
       | ChangeRequestByApproverArn -> "ChangeRequestByApproverArn"
@@ -5788,6 +6398,7 @@ module OpsItemFilterKey =
       | ChangeRequestByTargetsResourceGroup ->
           "ChangeRequestByTargetsResourceGroup"
       | InsightByType -> "InsightByType"
+      | AccountId -> "AccountId"
       | Non_static_id s -> s
     let of_string =
       function
@@ -5811,6 +6422,15 @@ module OpsItemFilterKey =
       | "Category" -> Category
       | "Severity" -> Severity
       | "OpsItemType" -> OpsItemType
+      | "AccessRequestByRequesterArn" -> AccessRequestByRequesterArn
+      | "AccessRequestByRequesterId" -> AccessRequestByRequesterId
+      | "AccessRequestByApproverArn" -> AccessRequestByApproverArn
+      | "AccessRequestByApproverId" -> AccessRequestByApproverId
+      | "AccessRequestBySourceAccountId" -> AccessRequestBySourceAccountId
+      | "AccessRequestBySourceOpsItemId" -> AccessRequestBySourceOpsItemId
+      | "AccessRequestBySourceRegion" -> AccessRequestBySourceRegion
+      | "AccessRequestByIsReplica" -> AccessRequestByIsReplica
+      | "AccessRequestByTargetResourceId" -> AccessRequestByTargetResourceId
       | "ChangeRequestByRequesterArn" -> ChangeRequestByRequesterArn
       | "ChangeRequestByRequesterName" -> ChangeRequestByRequesterName
       | "ChangeRequestByApproverArn" -> ChangeRequestByApproverArn
@@ -5819,6 +6439,7 @@ module OpsItemFilterKey =
       | "ChangeRequestByTargetsResourceGroup" ->
           ChangeRequestByTargetsResourceGroup
       | "InsightByType" -> InsightByType
+      | "AccountId" -> AccountId
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -5857,11 +6478,11 @@ module OpsItemFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~operator ~values ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let operator =
-        field_map_exn json "Operator" OpsItemFilterOperator.of_json in
-      let values = field_map_exn json "Values" OpsItemFilterValues.of_json in
-      let key = field_map_exn json "Key" OpsItemFilterKey.of_json in
+        field_map_exn json__ "Operator" OpsItemFilterOperator.of_json in
+      let values = field_map_exn json__ "Values" OpsItemFilterValues.of_json in
+      let key = field_map_exn json__ "Key" OpsItemFilterKey.of_json in
       make ~operator ~values ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an OpsItem filter."]
@@ -5869,6 +6490,9 @@ module OpsItemFilters =
   struct
     type nonrec t = OpsItemFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpsItemFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5895,7 +6519,7 @@ module DescribeOpsItemsRequest =
       {
       opsItemFilters: OpsItemFilters.t option
         [@ocaml.doc
-          "One or more filters to limit the response. Key: CreatedTime Operations: GreaterThan, LessThan Key: LastModifiedBy Operations: Contains, Equals Key: LastModifiedTime Operations: GreaterThan, LessThan Key: Priority Operations: Equals Key: Source Operations: Contains, Equals Key: Status Operations: Equals Key: Title* Operations: Equals,Contains Key: OperationalData** Operations: Equals Key: OperationalDataKey Operations: Equals Key: OperationalDataValue Operations: Equals, Contains Key: OpsItemId Operations: Equals Key: ResourceId Operations: Contains Key: AutomationId Operations: Equals *The Equals operator for Title matches the first 100 characters. If you specify more than 100 characters, they system returns an error that the filter value exceeds the length limit. **If you filter the response by using the OperationalData operator, specify a key-value pair by using the following JSON format: \\{\"key\":\"key_name\",\"value\":\"a_value\"\\}"];
+          "One or more filters to limit the response. Key: CreatedTime Operations: GreaterThan, LessThan Key: LastModifiedBy Operations: Contains, Equals Key: LastModifiedTime Operations: GreaterThan, LessThan Key: Priority Operations: Equals Key: Source Operations: Contains, Equals Key: Status Operations: Equals Key: Title* Operations: Equals,Contains Key: OperationalData** Operations: Equals Key: OperationalDataKey Operations: Equals Key: OperationalDataValue Operations: Equals, Contains Key: OpsItemId Operations: Equals Key: ResourceId Operations: Contains Key: AutomationId Operations: Equals Key: AccountId Operations: Equals *The Equals operator for Title matches the first 100 characters. If you specify more than 100 characters, they system returns an error that the filter value exceeds the length limit. **If you filter the response by using the OperationalData operator, specify a key-value pair by using the following JSON format: \\{\"key\":\"key_name\",\"value\":\"a_value\"\\}"];
       maxResults: OpsItemMaxResults.t option
         [@ocaml.doc
           "The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results."];
@@ -5924,15 +6548,16 @@ module DescribeOpsItemsRequest =
           (Xml.child xml_arg0 "OpsItemFilters") in
       make ?nextToken ?maxResults ?opsItemFilters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" OpsItemMaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" OpsItemMaxResults.of_json in
       let opsItemFilters =
-        field_map json "OpsItemFilters" OpsItemFilters.of_json in
+        field_map json__ "OpsItemFilters" OpsItemFilters.of_json in
       make ?nextToken ?maxResults ?opsItemFilters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Query a set of OpsItems. You must have permission in Identity and Access Management (IAM) to query a list of OpsItems. For more information, see Getting started with OpsCenter in the Amazon Web Services Systems Manager User Guide. Operations engineers and IT professionals use Amazon Web Services Systems Manager OpsCenter to view, investigate, and remediate operational issues impacting the performance and health of their Amazon Web Services resources. For more information, see OpsCenter in the Amazon Web Services Systems Manager User Guide."]
+       "Query a set of OpsItems. You must have permission in Identity and Access Management (IAM) to query a list of OpsItems. For more information, see Set up OpsCenter in the Amazon Web Services Systems Manager User Guide. Operations engineers and IT professionals use Amazon Web Services Systems Manager OpsCenter to view, investigate, and remediate operational issues impacting the performance and health of their Amazon Web Services resources. For more information, see Amazon Web Services Systems Manager OpsCenter in the Amazon Web Services Systems Manager User Guide."]
 module OpsItemStatus =
   struct
     type nonrec t =
@@ -5953,6 +6578,7 @@ module OpsItemStatus =
       | ChangeCalendarOverrideRejected 
       | PendingApproval 
       | Approved 
+      | Revoked 
       | Rejected 
       | Closed 
       | Non_static_id of string 
@@ -5976,6 +6602,7 @@ module OpsItemStatus =
       | ChangeCalendarOverrideRejected -> "ChangeCalendarOverrideRejected"
       | PendingApproval -> "PendingApproval"
       | Approved -> "Approved"
+      | Revoked -> "Revoked"
       | Rejected -> "Rejected"
       | Closed -> "Closed"
       | Non_static_id s -> s
@@ -5998,6 +6625,7 @@ module OpsItemStatus =
       | "ChangeCalendarOverrideRejected" -> ChangeCalendarOverrideRejected
       | "PendingApproval" -> PendingApproval
       | "Approved" -> Approved
+      | "Revoked" -> Revoked
       | "Rejected" -> Rejected
       | "Closed" -> Closed
       | x -> Non_static_id x
@@ -6028,9 +6656,7 @@ module OpsItemSummary =
           "The importance of this OpsItem in relation to other OpsItems in the system."];
       source: OpsItemSource.t option
         [@ocaml.doc "The impacted Amazon Web Services resource."];
-      status: OpsItemStatus.t option
-        [@ocaml.doc
-          "The OpsItem status. Status can be Open, In Progress, or Resolved."];
+      status: OpsItemStatus.t option [@ocaml.doc "The OpsItem status."];
       opsItemId: OpsItemId.t option [@ocaml.doc "The ID of the OpsItem."];
       title: OpsItemTitle.t option
         [@ocaml.doc
@@ -6044,7 +6670,7 @@ module OpsItemSummary =
         [@ocaml.doc "A list of OpsItems by severity."];
       opsItemType: OpsItemType.t option
         [@ocaml.doc
-          "The type of OpsItem. Currently, the only valid values are /aws/changerequest and /aws/issue."];
+          "The type of OpsItem. Systems Manager supports the following types of OpsItems: /aws/issue This type of OpsItem is used for default OpsItems created by OpsCenter. /aws/changerequest This type of OpsItem is used by Change Manager for reviewing and approving or rejecting change requests. /aws/insight This type of OpsItem is used by OpsCenter for aggregating and reporting on duplicate OpsItems."];
       actualStartTime: DateTime.t option
         [@ocaml.doc
           "The time a runbook workflow started. Currently reported only for the OpsItem type /aws/changerequest."];
@@ -6166,27 +6792,28 @@ module OpsItemSummary =
         ?status ?source ?priority ?lastModifiedTime ?lastModifiedBy
         ?createdTime ?createdBy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let plannedEndTime = field_map json "PlannedEndTime" DateTime.of_json in
+    let of_json json__ =
+      let plannedEndTime = field_map json__ "PlannedEndTime" DateTime.of_json in
       let plannedStartTime =
-        field_map json "PlannedStartTime" DateTime.of_json in
-      let actualEndTime = field_map json "ActualEndTime" DateTime.of_json in
-      let actualStartTime = field_map json "ActualStartTime" DateTime.of_json in
-      let opsItemType = field_map json "OpsItemType" OpsItemType.of_json in
-      let severity = field_map json "Severity" OpsItemSeverity.of_json in
-      let category = field_map json "Category" OpsItemCategory.of_json in
+        field_map json__ "PlannedStartTime" DateTime.of_json in
+      let actualEndTime = field_map json__ "ActualEndTime" DateTime.of_json in
+      let actualStartTime =
+        field_map json__ "ActualStartTime" DateTime.of_json in
+      let opsItemType = field_map json__ "OpsItemType" OpsItemType.of_json in
+      let severity = field_map json__ "Severity" OpsItemSeverity.of_json in
+      let category = field_map json__ "Category" OpsItemCategory.of_json in
       let operationalData =
-        field_map json "OperationalData" OpsItemOperationalData.of_json in
-      let title = field_map json "Title" OpsItemTitle.of_json in
-      let opsItemId = field_map json "OpsItemId" OpsItemId.of_json in
-      let status = field_map json "Status" OpsItemStatus.of_json in
-      let source = field_map json "Source" OpsItemSource.of_json in
-      let priority = field_map json "Priority" OpsItemPriority.of_json in
+        field_map json__ "OperationalData" OpsItemOperationalData.of_json in
+      let title = field_map json__ "Title" OpsItemTitle.of_json in
+      let opsItemId = field_map json__ "OpsItemId" OpsItemId.of_json in
+      let status = field_map json__ "Status" OpsItemStatus.of_json in
+      let source = field_map json__ "Source" OpsItemSource.of_json in
+      let priority = field_map json__ "Priority" OpsItemPriority.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" DateTime.of_json in
-      let lastModifiedBy = field_map json "LastModifiedBy" String_.of_json in
-      let createdTime = field_map json "CreatedTime" DateTime.of_json in
-      let createdBy = field_map json "CreatedBy" String_.of_json in
+        field_map json__ "LastModifiedTime" DateTime.of_json in
+      let lastModifiedBy = field_map json__ "LastModifiedBy" String_.of_json in
+      let createdTime = field_map json__ "CreatedTime" DateTime.of_json in
+      let createdBy = field_map json__ "CreatedBy" String_.of_json in
       make ?plannedEndTime ?plannedStartTime ?actualEndTime ?actualStartTime
         ?opsItemType ?severity ?category ?operationalData ?title ?opsItemId
         ?status ?source ?priority ?lastModifiedTime ?lastModifiedBy
@@ -6197,6 +6824,9 @@ module OpsItemSummaries =
   struct
     type nonrec t = OpsItemSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpsItemSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6269,14 +6899,14 @@ module DescribeOpsItemsResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?opsItemSummaries ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let opsItemSummaries =
-        field_map json "OpsItemSummaries" OpsItemSummaries.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+        field_map json__ "OpsItemSummaries" OpsItemSummaries.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?opsItemSummaries ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Query a set of OpsItems. You must have permission in Identity and Access Management (IAM) to query a list of OpsItems. For more information, see Getting started with OpsCenter in the Amazon Web Services Systems Manager User Guide. Operations engineers and IT professionals use Amazon Web Services Systems Manager OpsCenter to view, investigate, and remediate operational issues impacting the performance and health of their Amazon Web Services resources. For more information, see OpsCenter in the Amazon Web Services Systems Manager User Guide."]
+       "Query a set of OpsItems. You must have permission in Identity and Access Management (IAM) to query a list of OpsItems. For more information, see Set up OpsCenter in the Amazon Web Services Systems Manager User Guide. Operations engineers and IT professionals use Amazon Web Services Systems Manager OpsCenter to view, investigate, and remediate operational issues impacting the performance and health of their Amazon Web Services resources. For more information, see Amazon Web Services Systems Manager OpsCenter in the Amazon Web Services Systems Manager User Guide."]
 module ParametersFilterValue =
   struct
     type nonrec t = string
@@ -6303,6 +6933,9 @@ module ParametersFilterValueList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParametersFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -6376,10 +7009,10 @@ module ParametersFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~values ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let values =
-        field_map_exn json "Values" ParametersFilterValueList.of_json in
-      let key = field_map_exn json "Key" ParametersFilterKey.of_json in
+        field_map_exn json__ "Values" ParametersFilterValueList.of_json in
+      let key = field_map_exn json__ "Key" ParametersFilterKey.of_json in
       make ~values ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6388,6 +7021,9 @@ module ParametersFilterList =
   struct
     type nonrec t = ParametersFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParametersFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6453,6 +7089,9 @@ module ParameterStringFilterValueList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterStringFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -6532,11 +7171,12 @@ module ParameterStringFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?values ?option ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let values =
-        field_map json "Values" ParameterStringFilterValueList.of_json in
-      let option = field_map json "Option" ParameterStringQueryOption.of_json in
-      let key = field_map_exn json "Key" ParameterStringFilterKey.of_json in
+        field_map json__ "Values" ParameterStringFilterValueList.of_json in
+      let option =
+        field_map json__ "Option" ParameterStringQueryOption.of_json in
+      let key = field_map_exn json__ "Key" ParameterStringFilterKey.of_json in
       make ?values ?option ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6545,6 +7185,9 @@ module ParameterStringFilterList =
   struct
     type nonrec t = ParameterStringFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterStringFilter.to_value)) |>
         (fun x -> `List x)
@@ -6581,12 +7224,17 @@ module DescribeParametersRequest =
           "The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token for the next set of items to return. (You received this token from a previous call.)"]}
+          "The token for the next set of items to return. (You received this token from a previous call.)"];
+      shared: Boolean.t option
+        [@ocaml.doc
+          "Lists parameters that are shared with you. By default when using this option, the command returns parameters that have been shared using a standard Resource Access Manager Resource Share. In order for a parameter that was shared using the PutResourcePolicy command to be returned, the associated RAM Resource Share Created From Policy must have been promoted to a standard Resource Share using the RAM PromoteResourceShareCreatedFromPolicy API operation. For more information about sharing parameters, see Working with shared parameters in the Amazon Web Services Systems Manager User Guide."]}
     let make ?filters =
       fun ?parameterFilters ->
         fun ?maxResults ->
           fun ?nextToken ->
-            fun () -> { filters; parameterFilters; maxResults; nextToken }
+            fun ?shared ->
+              fun () ->
+                { filters; parameterFilters; maxResults; nextToken; shared }
     let to_value x =
       structure_to_value
         [("Filters", (Option.map x.filters ~f:ParametersFilterList.to_value));
@@ -6594,9 +7242,12 @@ module DescribeParametersRequest =
           (Option.map x.parameterFilters
              ~f:ParameterStringFilterList.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("Shared", (Option.map x.shared ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let shared =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Shared") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let maxResults =
@@ -6607,18 +7258,19 @@ module DescribeParametersRequest =
       let filters =
         (Option.map ~f:ParametersFilterList.of_xml)
           (Xml.child xml_arg0 "Filters") in
-      make ?nextToken ?maxResults ?parameterFilters ?filters ()
+      make ?shared ?nextToken ?maxResults ?parameterFilters ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let shared = field_map json__ "Shared" Boolean.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let parameterFilters =
-        field_map json "ParameterFilters" ParameterStringFilterList.of_json in
-      let filters = field_map json "Filters" ParametersFilterList.of_json in
-      make ?nextToken ?maxResults ?parameterFilters ?filters ()
+        field_map json__ "ParameterFilters" ParameterStringFilterList.of_json in
+      let filters = field_map json__ "Filters" ParametersFilterList.of_json in
+      make ?shared ?nextToken ?maxResults ?parameterFilters ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Get information about a parameter. Request results are returned on a best-effort basis. If you specify MaxResults in the request, the response includes information up to the limit specified. The number of items returned, however, can be between zero and the value of MaxResults. If the service reaches an internal limit while processing the results, it stops the operation and returns the matching values up to that point and a NextToken. You can specify the NextToken in a subsequent call to get the next set of results. If you change the KMS key alias for the KMS key used to encrypt a parameter, then you must also update the key alias the parameter uses to reference KMS. Otherwise, DescribeParameters retrieves whatever the original key alias was referencing."]
+       "Lists the parameters in your Amazon Web Services account or the parameters shared with you when you enable the Shared option. Request results are returned on a best-effort basis. If you specify MaxResults in the request, the response includes information up to the limit specified. The number of items returned, however, can be between zero and the value of MaxResults. If the service reaches an internal limit while processing the results, it stops the operation and returns the matching values up to that point and a NextToken. You can specify the NextToken in a subsequent call to get the next set of results. Parameter names can't contain spaces. The service removes any spaces specified for the beginning or end of a parameter name. If the specified name for a parameter contains spaces between characters, the request fails with a ValidationException error. If you change the KMS key alias for the KMS key used to encrypt a parameter, then you must also update the key alias the parameter uses to reference KMS. Otherwise, DescribeParameters retrieves whatever the original key alias was referencing."]
 module ParameterType =
   struct
     type nonrec t =
@@ -6683,7 +7335,7 @@ module ParameterInlinePolicy =
         [@ocaml.doc "The JSON text of the policy."];
       policyType: String_.t option
         [@ocaml.doc
-          "The type of policy. Parameter Store, a capability of Amazon Web Services Systems Manager, supports the following policy types: Expiration, ExpirationNotification, and NoChangeNotification."];
+          "The type of policy. Parameter Store, a tool in Amazon Web Services Systems Manager, supports the following policy types: Expiration, ExpirationNotification, and NoChangeNotification."];
       policyStatus: String_.t option
         [@ocaml.doc
           "The status of the policy. Policies report the following statuses: Pending (the policy hasn't been enforced or applied yet), Finished (the policy was applied), Failed (the policy wasn't applied), or InProgress (the policy is being applied now)."]}
@@ -6706,10 +7358,10 @@ module ParameterInlinePolicy =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PolicyText") in
       make ?policyStatus ?policyType ?policyText ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyStatus = field_map json "PolicyStatus" String_.of_json in
-      let policyType = field_map json "PolicyType" String_.of_json in
-      let policyText = field_map json "PolicyText" String_.of_json in
+    let of_json json__ =
+      let policyStatus = field_map json__ "PolicyStatus" String_.of_json in
+      let policyType = field_map json__ "PolicyType" String_.of_json in
+      let policyText = field_map json__ "PolicyText" String_.of_json in
       make ?policyStatus ?policyType ?policyText ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One or more policies assigned to a parameter."]
@@ -6717,6 +7369,9 @@ module ParameterPolicyList =
   struct
     type nonrec t = ParameterInlinePolicy.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterInlinePolicy.to_value)) |>
         (fun x -> `List x)
@@ -6813,11 +7468,14 @@ module ParameterMetadata =
     type nonrec t =
       {
       name: PSParameterName.t option [@ocaml.doc "The parameter name."];
+      aRN: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the parameter."];
       type_: ParameterType.t option
         [@ocaml.doc
           "The type of parameter. Valid parameter types include the following: String, StringList, and SecureString."];
       keyId: ParameterKeyId.t option
-        [@ocaml.doc "The ID of the query key used for this parameter."];
+        [@ocaml.doc
+          "The alias of the Key Management Service (KMS) key used to encrypt the parameter. Applies to SecureString parameters only."];
       lastModifiedDate: DateTime.t option
         [@ocaml.doc "Date the parameter was last changed or updated."];
       lastModifiedUser: String_.t option
@@ -6837,33 +7495,36 @@ module ParameterMetadata =
         [@ocaml.doc
           "The data type of the parameter, such as text or aws:ec2:image. The default is text."]}
     let make ?name =
-      fun ?type_ ->
-        fun ?keyId ->
-          fun ?lastModifiedDate ->
-            fun ?lastModifiedUser ->
-              fun ?description ->
-                fun ?allowedPattern ->
-                  fun ?version ->
-                    fun ?tier ->
-                      fun ?policies ->
-                        fun ?dataType ->
-                          fun () ->
-                            {
-                              name;
-                              type_;
-                              keyId;
-                              lastModifiedDate;
-                              lastModifiedUser;
-                              description;
-                              allowedPattern;
-                              version;
-                              tier;
-                              policies;
-                              dataType
-                            }
+      fun ?aRN ->
+        fun ?type_ ->
+          fun ?keyId ->
+            fun ?lastModifiedDate ->
+              fun ?lastModifiedUser ->
+                fun ?description ->
+                  fun ?allowedPattern ->
+                    fun ?version ->
+                      fun ?tier ->
+                        fun ?policies ->
+                          fun ?dataType ->
+                            fun () ->
+                              {
+                                name;
+                                aRN;
+                                type_;
+                                keyId;
+                                lastModifiedDate;
+                                lastModifiedUser;
+                                description;
+                                allowedPattern;
+                                version;
+                                tier;
+                                policies;
+                                dataType
+                              }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:PSParameterName.to_value));
+        ("ARN", (Option.map x.aRN ~f:String_.to_value));
         ("Type", (Option.map x.type_ ~f:ParameterType.to_value));
         ("KeyId", (Option.map x.keyId ~f:ParameterKeyId.to_value));
         ("LastModifiedDate",
@@ -6907,36 +7568,41 @@ module ParameterMetadata =
         (Option.map ~f:ParameterKeyId.of_xml) (Xml.child xml_arg0 "KeyId") in
       let type_ =
         (Option.map ~f:ParameterType.of_xml) (Xml.child xml_arg0 "Type") in
+      let aRN = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ARN") in
       let name =
         (Option.map ~f:PSParameterName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?dataType ?policies ?tier ?version ?allowedPattern ?description
-        ?lastModifiedUser ?lastModifiedDate ?keyId ?type_ ?name ()
+        ?lastModifiedUser ?lastModifiedDate ?keyId ?type_ ?aRN ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataType = field_map json "DataType" ParameterDataType.of_json in
-      let policies = field_map json "Policies" ParameterPolicyList.of_json in
-      let tier = field_map json "Tier" ParameterTier.of_json in
-      let version = field_map json "Version" PSParameterVersion.of_json in
+    let of_json json__ =
+      let dataType = field_map json__ "DataType" ParameterDataType.of_json in
+      let policies = field_map json__ "Policies" ParameterPolicyList.of_json in
+      let tier = field_map json__ "Tier" ParameterTier.of_json in
+      let version = field_map json__ "Version" PSParameterVersion.of_json in
       let allowedPattern =
-        field_map json "AllowedPattern" AllowedPattern.of_json in
+        field_map json__ "AllowedPattern" AllowedPattern.of_json in
       let description =
-        field_map json "Description" ParameterDescription.of_json in
+        field_map json__ "Description" ParameterDescription.of_json in
       let lastModifiedUser =
-        field_map json "LastModifiedUser" String_.of_json in
+        field_map json__ "LastModifiedUser" String_.of_json in
       let lastModifiedDate =
-        field_map json "LastModifiedDate" DateTime.of_json in
-      let keyId = field_map json "KeyId" ParameterKeyId.of_json in
-      let type_ = field_map json "Type" ParameterType.of_json in
-      let name = field_map json "Name" PSParameterName.of_json in
+        field_map json__ "LastModifiedDate" DateTime.of_json in
+      let keyId = field_map json__ "KeyId" ParameterKeyId.of_json in
+      let type_ = field_map json__ "Type" ParameterType.of_json in
+      let aRN = field_map json__ "ARN" String_.of_json in
+      let name = field_map json__ "Name" PSParameterName.of_json in
       make ?dataType ?policies ?tier ?version ?allowedPattern ?description
-        ?lastModifiedUser ?lastModifiedDate ?keyId ?type_ ?name ()
+        ?lastModifiedUser ?lastModifiedDate ?keyId ?type_ ?aRN ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Metadata includes information like the ARN of the last user and the date/time the parameter was last used."]
+       "Metadata includes information like the Amazon Resource Name (ARN) of the last user to update the parameter and the date and time the parameter was last used."]
 module ParameterMetadataList =
   struct
     type nonrec t = ParameterMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6975,8 +7641,8 @@ module InvalidFilterOption =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7067,14 +7733,14 @@ module DescribeParametersResult =
           (Xml.child xml_arg0 "Parameters") in
       make ?nextToken ?parameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let parameters =
-        field_map json "Parameters" ParameterMetadataList.of_json in
+        field_map json__ "Parameters" ParameterMetadataList.of_json in
       make ?nextToken ?parameters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Get information about a parameter. Request results are returned on a best-effort basis. If you specify MaxResults in the request, the response includes information up to the limit specified. The number of items returned, however, can be between zero and the value of MaxResults. If the service reaches an internal limit while processing the results, it stops the operation and returns the matching values up to that point and a NextToken. You can specify the NextToken in a subsequent call to get the next set of results. If you change the KMS key alias for the KMS key used to encrypt a parameter, then you must also update the key alias the parameter uses to reference KMS. Otherwise, DescribeParameters retrieves whatever the original key alias was referencing."]
+       "Lists the parameters in your Amazon Web Services account or the parameters shared with you when you enable the Shared option. Request results are returned on a best-effort basis. If you specify MaxResults in the request, the response includes information up to the limit specified. The number of items returned, however, can be between zero and the value of MaxResults. If the service reaches an internal limit while processing the results, it stops the operation and returns the matching values up to that point and a NextToken. You can specify the NextToken in a subsequent call to get the next set of results. Parameter names can't contain spaces. The service removes any spaces specified for the beginning or end of a parameter name. If the specified name for a parameter contains spaces between characters, the request fails with a ValidationException error. If you change the KMS key alias for the KMS key used to encrypt a parameter, then you must also update the key alias the parameter uses to reference KMS. Otherwise, DescribeParameters retrieves whatever the original key alias was referencing."]
 module DescribePatchBaselinesRequest =
   struct
     type nonrec t =
@@ -7110,12 +7776,12 @@ module DescribePatchBaselinesRequest =
           (Xml.child xml_arg0 "Filters") in
       make ?nextToken ?maxResults ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" PatchBaselineMaxResults.of_json in
+        field_map json__ "MaxResults" PatchBaselineMaxResults.of_json in
       let filters =
-        field_map json "Filters" PatchOrchestratorFilterList.of_json in
+        field_map json__ "Filters" PatchOrchestratorFilterList.of_json in
       make ?nextToken ?maxResults ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7135,7 +7801,7 @@ module PatchBaselineIdentity =
         [@ocaml.doc "The description of the patch baseline."];
       defaultBaseline: DefaultBaseline.t option
         [@ocaml.doc
-          "Whether this is the default baseline. Amazon Web Services Systems Manager supports creating multiple default patch baselines. For example, you can create a default patch baseline for each operating system."]}
+          "Indicates whether this is the default baseline. Amazon Web Services Systems Manager supports creating multiple default patch baselines. For example, you can create a default patch baseline for each operating system."]}
     let make ?baselineId =
       fun ?baselineName ->
         fun ?operatingSystem ->
@@ -7179,15 +7845,15 @@ module PatchBaselineIdentity =
       make ?defaultBaseline ?baselineDescription ?operatingSystem
         ?baselineName ?baselineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultBaseline =
-        field_map json "DefaultBaseline" DefaultBaseline.of_json in
+        field_map json__ "DefaultBaseline" DefaultBaseline.of_json in
       let baselineDescription =
-        field_map json "BaselineDescription" BaselineDescription.of_json in
+        field_map json__ "BaselineDescription" BaselineDescription.of_json in
       let operatingSystem =
-        field_map json "OperatingSystem" OperatingSystem.of_json in
-      let baselineName = field_map json "BaselineName" BaselineName.of_json in
-      let baselineId = field_map json "BaselineId" BaselineId.of_json in
+        field_map json__ "OperatingSystem" OperatingSystem.of_json in
+      let baselineName = field_map json__ "BaselineName" BaselineName.of_json in
+      let baselineId = field_map json__ "BaselineId" BaselineId.of_json in
       make ?defaultBaseline ?baselineDescription ?operatingSystem
         ?baselineName ?baselineId ()
     let to_json v = composed_to_json to_value v
@@ -7196,6 +7862,9 @@ module PatchBaselineIdentityList =
   struct
     type nonrec t = PatchBaselineIdentity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PatchBaselineIdentity.to_value)) |>
         (fun x -> `List x)
@@ -7271,10 +7940,11 @@ module DescribePatchBaselinesResult =
           (Xml.child xml_arg0 "BaselineIdentities") in
       make ?nextToken ?baselineIdentities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let baselineIdentities =
-        field_map json "BaselineIdentities" PatchBaselineIdentityList.of_json in
+        field_map json__ "BaselineIdentities"
+          PatchBaselineIdentityList.of_json in
       make ?nextToken ?baselineIdentities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7298,8 +7968,8 @@ module DescribePatchGroupStateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PatchGroup") in
       make ~patchGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let patchGroup = field_map_exn json "PatchGroup" PatchGroup.of_json in
+    let of_json json__ =
+      let patchGroup = field_map_exn json__ "PatchGroup" PatchGroup.of_json in
       make ~patchGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7346,7 +8016,7 @@ module DescribePatchGroupStateResult =
           "The number of managed nodes with patches that aren't applicable."];
       instancesWithUnreportedNotApplicablePatches: Integer.t option
         [@ocaml.doc
-          "The number of managed nodes with NotApplicable patches beyond the supported limit, which aren't reported by name to Inventory. Inventory is a capability of Amazon Web Services Systems Manager."];
+          "The number of managed nodes with NotApplicable patches beyond the supported limit, which aren't reported by name to Inventory. Inventory is a tool in Amazon Web Services Systems Manager."];
       instancesWithCriticalNonCompliantPatches: InstancesCount.t option
         [@ocaml.doc
           "The number of managed nodes where patches that are specified as Critical for compliance reporting in the patch baseline aren't installed. These patches might be missing, have failed installation, were rejected, or were installed but awaiting a required managed node reboot. The status of these managed nodes is NON_COMPLIANT."];
@@ -7355,7 +8025,10 @@ module DescribePatchGroupStateResult =
           "The number of managed nodes where patches that are specified as Security in a patch advisory aren't installed. These patches might be missing, have failed installation, were rejected, or were installed but awaiting a required managed node reboot. The status of these managed nodes is NON_COMPLIANT."];
       instancesWithOtherNonCompliantPatches: InstancesCount.t option
         [@ocaml.doc
-          "The number of managed nodes with patches installed that are specified as other than Critical or Security but aren't compliant with the patch baseline. The status of these managed nodes is NON_COMPLIANT."]}
+          "The number of managed nodes with patches installed that are specified as other than Critical or Security but aren't compliant with the patch baseline. The status of these managed nodes is NON_COMPLIANT."];
+      instancesWithAvailableSecurityUpdates: Integer.t option
+        [@ocaml.doc
+          "The number of managed nodes for which security-related patches are available but not approved because because they didn't meet the patch baseline requirements. For example, an updated version of a patch might have been released before the specified auto-approval period was over. Applies to Windows Server managed nodes only."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
       | `InvalidNextToken of InvalidNextToken.t 
@@ -7372,21 +8045,23 @@ module DescribePatchGroupStateResult =
                       fun ?instancesWithCriticalNonCompliantPatches ->
                         fun ?instancesWithSecurityNonCompliantPatches ->
                           fun ?instancesWithOtherNonCompliantPatches ->
-                            fun () ->
-                              {
-                                instances;
-                                instancesWithInstalledPatches;
-                                instancesWithInstalledOtherPatches;
-                                instancesWithInstalledPendingRebootPatches;
-                                instancesWithInstalledRejectedPatches;
-                                instancesWithMissingPatches;
-                                instancesWithFailedPatches;
-                                instancesWithNotApplicablePatches;
-                                instancesWithUnreportedNotApplicablePatches;
-                                instancesWithCriticalNonCompliantPatches;
-                                instancesWithSecurityNonCompliantPatches;
-                                instancesWithOtherNonCompliantPatches
-                              }
+                            fun ?instancesWithAvailableSecurityUpdates ->
+                              fun () ->
+                                {
+                                  instances;
+                                  instancesWithInstalledPatches;
+                                  instancesWithInstalledOtherPatches;
+                                  instancesWithInstalledPendingRebootPatches;
+                                  instancesWithInstalledRejectedPatches;
+                                  instancesWithMissingPatches;
+                                  instancesWithFailedPatches;
+                                  instancesWithNotApplicablePatches;
+                                  instancesWithUnreportedNotApplicablePatches;
+                                  instancesWithCriticalNonCompliantPatches;
+                                  instancesWithSecurityNonCompliantPatches;
+                                  instancesWithOtherNonCompliantPatches;
+                                  instancesWithAvailableSecurityUpdates
+                                }
     let error_of_json name json =
       match name with
       | "InternalServerError" ->
@@ -7449,9 +8124,15 @@ module DescribePatchGroupStateResult =
              ~f:InstancesCount.to_value));
         ("InstancesWithOtherNonCompliantPatches",
           (Option.map x.instancesWithOtherNonCompliantPatches
-             ~f:InstancesCount.to_value))]
+             ~f:InstancesCount.to_value));
+        ("InstancesWithAvailableSecurityUpdates",
+          (Option.map x.instancesWithAvailableSecurityUpdates
+             ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let instancesWithAvailableSecurityUpdates =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "InstancesWithAvailableSecurityUpdates") in
       let instancesWithOtherNonCompliantPatches =
         (Option.map ~f:InstancesCount.of_xml)
           (Xml.child xml_arg0 "InstancesWithOtherNonCompliantPatches") in
@@ -7487,7 +8168,8 @@ module DescribePatchGroupStateResult =
           (Xml.child xml_arg0 "InstancesWithInstalledPatches") in
       let instances =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Instances") in
-      make ?instancesWithOtherNonCompliantPatches
+      make ?instancesWithAvailableSecurityUpdates
+        ?instancesWithOtherNonCompliantPatches
         ?instancesWithSecurityNonCompliantPatches
         ?instancesWithCriticalNonCompliantPatches
         ?instancesWithUnreportedNotApplicablePatches
@@ -7497,37 +8179,41 @@ module DescribePatchGroupStateResult =
         ?instancesWithInstalledOtherPatches ?instancesWithInstalledPatches
         ?instances ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let instancesWithAvailableSecurityUpdates =
+        field_map json__ "InstancesWithAvailableSecurityUpdates"
+          Integer.of_json in
       let instancesWithOtherNonCompliantPatches =
-        field_map json "InstancesWithOtherNonCompliantPatches"
+        field_map json__ "InstancesWithOtherNonCompliantPatches"
           InstancesCount.of_json in
       let instancesWithSecurityNonCompliantPatches =
-        field_map json "InstancesWithSecurityNonCompliantPatches"
+        field_map json__ "InstancesWithSecurityNonCompliantPatches"
           InstancesCount.of_json in
       let instancesWithCriticalNonCompliantPatches =
-        field_map json "InstancesWithCriticalNonCompliantPatches"
+        field_map json__ "InstancesWithCriticalNonCompliantPatches"
           InstancesCount.of_json in
       let instancesWithUnreportedNotApplicablePatches =
-        field_map json "InstancesWithUnreportedNotApplicablePatches"
+        field_map json__ "InstancesWithUnreportedNotApplicablePatches"
           Integer.of_json in
       let instancesWithNotApplicablePatches =
-        field_map json "InstancesWithNotApplicablePatches" Integer.of_json in
+        field_map json__ "InstancesWithNotApplicablePatches" Integer.of_json in
       let instancesWithFailedPatches =
-        field_map json "InstancesWithFailedPatches" Integer.of_json in
+        field_map json__ "InstancesWithFailedPatches" Integer.of_json in
       let instancesWithMissingPatches =
-        field_map json "InstancesWithMissingPatches" Integer.of_json in
+        field_map json__ "InstancesWithMissingPatches" Integer.of_json in
       let instancesWithInstalledRejectedPatches =
-        field_map json "InstancesWithInstalledRejectedPatches"
+        field_map json__ "InstancesWithInstalledRejectedPatches"
           InstancesCount.of_json in
       let instancesWithInstalledPendingRebootPatches =
-        field_map json "InstancesWithInstalledPendingRebootPatches"
+        field_map json__ "InstancesWithInstalledPendingRebootPatches"
           InstancesCount.of_json in
       let instancesWithInstalledOtherPatches =
-        field_map json "InstancesWithInstalledOtherPatches" Integer.of_json in
+        field_map json__ "InstancesWithInstalledOtherPatches" Integer.of_json in
       let instancesWithInstalledPatches =
-        field_map json "InstancesWithInstalledPatches" Integer.of_json in
-      let instances = field_map json "Instances" Integer.of_json in
-      make ?instancesWithOtherNonCompliantPatches
+        field_map json__ "InstancesWithInstalledPatches" Integer.of_json in
+      let instances = field_map json__ "Instances" Integer.of_json in
+      make ?instancesWithAvailableSecurityUpdates
+        ?instancesWithOtherNonCompliantPatches
         ?instancesWithSecurityNonCompliantPatches
         ?instancesWithCriticalNonCompliantPatches
         ?instancesWithUnreportedNotApplicablePatches
@@ -7574,12 +8260,12 @@ module DescribePatchGroupsRequest =
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?filters ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let filters =
-        field_map json "Filters" PatchOrchestratorFilterList.of_json in
+        field_map json__ "Filters" PatchOrchestratorFilterList.of_json in
       let maxResults =
-        field_map json "MaxResults" PatchBaselineMaxResults.of_json in
+        field_map json__ "MaxResults" PatchBaselineMaxResults.of_json in
       make ?nextToken ?filters ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7609,10 +8295,10 @@ module PatchGroupPatchBaselineMapping =
         (Option.map ~f:PatchGroup.of_xml) (Xml.child xml_arg0 "PatchGroup") in
       make ?baselineIdentity ?patchGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let baselineIdentity =
-        field_map json "BaselineIdentity" PatchBaselineIdentity.of_json in
-      let patchGroup = field_map json "PatchGroup" PatchGroup.of_json in
+        field_map json__ "BaselineIdentity" PatchBaselineIdentity.of_json in
+      let patchGroup = field_map json__ "PatchGroup" PatchGroup.of_json in
       make ?baselineIdentity ?patchGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7621,6 +8307,9 @@ module PatchGroupPatchBaselineMappingList =
   struct
     type nonrec t = PatchGroupPatchBaselineMapping.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PatchGroupPatchBaselineMapping.to_value)) |>
         (fun x -> `List x)
@@ -7696,10 +8385,11 @@ module DescribePatchGroupsResult =
           (Xml.child xml_arg0 "Mappings") in
       make ?nextToken ?mappings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let mappings =
-        field_map json "Mappings" PatchGroupPatchBaselineMappingList.of_json in
+        field_map json__ "Mappings"
+          PatchGroupPatchBaselineMappingList.of_json in
       make ?nextToken ?mappings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7817,17 +8507,17 @@ module DescribePatchPropertiesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OperatingSystem") in
       make ?nextToken ?maxResults ?patchSet ~property ~operatingSystem ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let patchSet = field_map json "PatchSet" PatchSet.of_json in
-      let property = field_map_exn json "Property" PatchProperty.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let patchSet = field_map json__ "PatchSet" PatchSet.of_json in
+      let property = field_map_exn json__ "Property" PatchProperty.of_json in
       let operatingSystem =
-        field_map_exn json "OperatingSystem" OperatingSystem.of_json in
+        field_map_exn json__ "OperatingSystem" OperatingSystem.of_json in
       make ?nextToken ?maxResults ?patchSet ~property ~operatingSystem ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the properties of available patches organized by product, product family, classification, severity, and other properties of available patches. You can use the reported properties in the filters you specify in requests for operations such as CreatePatchBaseline, UpdatePatchBaseline, DescribeAvailablePatches, and DescribePatchBaselines. The following section lists the properties that can be used in filters for each major operating system type: AMAZON_LINUX Valid properties: PRODUCT | CLASSIFICATION | SEVERITY AMAZON_LINUX_2 Valid properties: PRODUCT | CLASSIFICATION | SEVERITY CENTOS Valid properties: PRODUCT | CLASSIFICATION | SEVERITY DEBIAN Valid properties: PRODUCT | PRIORITY MACOS Valid properties: PRODUCT | CLASSIFICATION ORACLE_LINUX Valid properties: PRODUCT | CLASSIFICATION | SEVERITY REDHAT_ENTERPRISE_LINUX Valid properties: PRODUCT | CLASSIFICATION | SEVERITY SUSE Valid properties: PRODUCT | CLASSIFICATION | SEVERITY UBUNTU Valid properties: PRODUCT | PRIORITY WINDOWS Valid properties: PRODUCT | PRODUCT_FAMILY | CLASSIFICATION | MSRC_SEVERITY"]
+       "Lists the properties of available patches organized by product, product family, classification, severity, and other properties of available patches. You can use the reported properties in the filters you specify in requests for operations such as CreatePatchBaseline, UpdatePatchBaseline, DescribeAvailablePatches, and DescribePatchBaselines. The following section lists the properties that can be used in filters for each major operating system type: AMAZON_LINUX Valid properties: PRODUCT | CLASSIFICATION | SEVERITY AMAZON_LINUX_2 Valid properties: PRODUCT | CLASSIFICATION | SEVERITY AMAZON_LINUX_2023 Valid properties: PRODUCT | CLASSIFICATION | SEVERITY CENTOS Valid properties: PRODUCT | CLASSIFICATION | SEVERITY DEBIAN Valid properties: PRODUCT | PRIORITY MACOS Valid properties: PRODUCT | CLASSIFICATION ORACLE_LINUX Valid properties: PRODUCT | CLASSIFICATION | SEVERITY REDHAT_ENTERPRISE_LINUX Valid properties: PRODUCT | CLASSIFICATION | SEVERITY SUSE Valid properties: PRODUCT | CLASSIFICATION | SEVERITY UBUNTU Valid properties: PRODUCT | PRIORITY WINDOWS Valid properties: PRODUCT | PRODUCT_FAMILY | CLASSIFICATION | MSRC_SEVERITY"]
 module PatchPropertyEntry =
   struct
     type nonrec t = (AttributeName.t * AttributeValue.t) list
@@ -7850,6 +8540,8 @@ module PatchPropertyEntry =
                        (AttributeValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -7861,6 +8553,9 @@ module PatchPropertiesList =
   struct
     type nonrec t = PatchPropertyEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PatchPropertyEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7935,14 +8630,14 @@ module DescribePatchPropertiesResult =
           (Xml.child xml_arg0 "Properties") in
       make ?nextToken ?properties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let properties =
-        field_map json "Properties" PatchPropertiesList.of_json in
+        field_map json__ "Properties" PatchPropertiesList.of_json in
       make ?nextToken ?properties ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the properties of available patches organized by product, product family, classification, severity, and other properties of available patches. You can use the reported properties in the filters you specify in requests for operations such as CreatePatchBaseline, UpdatePatchBaseline, DescribeAvailablePatches, and DescribePatchBaselines. The following section lists the properties that can be used in filters for each major operating system type: AMAZON_LINUX Valid properties: PRODUCT | CLASSIFICATION | SEVERITY AMAZON_LINUX_2 Valid properties: PRODUCT | CLASSIFICATION | SEVERITY CENTOS Valid properties: PRODUCT | CLASSIFICATION | SEVERITY DEBIAN Valid properties: PRODUCT | PRIORITY MACOS Valid properties: PRODUCT | CLASSIFICATION ORACLE_LINUX Valid properties: PRODUCT | CLASSIFICATION | SEVERITY REDHAT_ENTERPRISE_LINUX Valid properties: PRODUCT | CLASSIFICATION | SEVERITY SUSE Valid properties: PRODUCT | CLASSIFICATION | SEVERITY UBUNTU Valid properties: PRODUCT | PRIORITY WINDOWS Valid properties: PRODUCT | PRODUCT_FAMILY | CLASSIFICATION | MSRC_SEVERITY"]
+       "Lists the properties of available patches organized by product, product family, classification, severity, and other properties of available patches. You can use the reported properties in the filters you specify in requests for operations such as CreatePatchBaseline, UpdatePatchBaseline, DescribeAvailablePatches, and DescribePatchBaselines. The following section lists the properties that can be used in filters for each major operating system type: AMAZON_LINUX Valid properties: PRODUCT | CLASSIFICATION | SEVERITY AMAZON_LINUX_2 Valid properties: PRODUCT | CLASSIFICATION | SEVERITY AMAZON_LINUX_2023 Valid properties: PRODUCT | CLASSIFICATION | SEVERITY CENTOS Valid properties: PRODUCT | CLASSIFICATION | SEVERITY DEBIAN Valid properties: PRODUCT | PRIORITY MACOS Valid properties: PRODUCT | CLASSIFICATION ORACLE_LINUX Valid properties: PRODUCT | CLASSIFICATION | SEVERITY REDHAT_ENTERPRISE_LINUX Valid properties: PRODUCT | CLASSIFICATION | SEVERITY SUSE Valid properties: PRODUCT | CLASSIFICATION | SEVERITY UBUNTU Valid properties: PRODUCT | PRIORITY WINDOWS Valid properties: PRODUCT | PRODUCT_FAMILY | CLASSIFICATION | MSRC_SEVERITY"]
 module SessionState =
   struct
     type nonrec t =
@@ -8013,6 +8708,7 @@ module SessionFilterKey =
       | Owner 
       | Status 
       | SessionId 
+      | AccessType 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -8023,6 +8719,7 @@ module SessionFilterKey =
       | Owner -> "Owner"
       | Status -> "Status"
       | SessionId -> "SessionId"
+      | AccessType -> "AccessType"
       | Non_static_id s -> s
     let of_string =
       function
@@ -8032,6 +8729,7 @@ module SessionFilterKey =
       | "Owner" -> Owner
       | "Status" -> Status
       | "SessionId" -> SessionId
+      | "AccessType" -> AccessType
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -8048,7 +8746,7 @@ module SessionFilter =
       key: SessionFilterKey.t [@ocaml.doc "The name of the filter."];
       value: SessionFilterValue.t
         [@ocaml.doc
-          "The filter value. Valid values for each filter key are as follows: InvokedAfter: Specify a timestamp to limit your results. For example, specify 2018-08-29T00:00:00Z to see sessions that started August 29, 2018, and later. InvokedBefore: Specify a timestamp to limit your results. For example, specify 2018-08-29T00:00:00Z to see sessions that started before August 29, 2018. Target: Specify a managed node to which session connections have been made. Owner: Specify an Amazon Web Services user account to see a list of sessions started by that user. Status: Specify a valid session status to see a list of all sessions with that status. Status values you can specify include: Connected Connecting Disconnected Terminated Terminating Failed SessionId: Specify a session ID to return details about the session."]}
+          "The filter value. Valid values for each filter key are as follows: InvokedAfter: Specify a timestamp to limit your results. For example, specify 2024-08-29T00:00:00Z to see sessions that started August 29, 2024, and later. InvokedBefore: Specify a timestamp to limit your results. For example, specify 2024-08-29T00:00:00Z to see sessions that started before August 29, 2024. Target: Specify a managed node to which session connections have been made. Owner: Specify an Amazon Web Services user to see a list of sessions started by that user. Status: Specify a valid session status to see a list of all sessions with that status. Status values you can specify include: Connected Connecting Disconnected Terminated Terminating Failed SessionId: Specify a session ID to return details about the session."]}
     let context_ = "SessionFilter"
     let make ~key = fun ~value -> fun () -> { key; value }
     let to_value x =
@@ -8065,9 +8763,9 @@ module SessionFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "value" SessionFilterValue.of_json in
-      let key = field_map_exn json "key" SessionFilterKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "value" SessionFilterValue.of_json in
+      let key = field_map_exn json__ "key" SessionFilterKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a filter for Session Manager information."]
@@ -8079,6 +8777,9 @@ module SessionFilterList =
         ok_or_failwith
           ((check_list_max i ~max:6) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SessionFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8142,11 +8843,12 @@ module DescribeSessionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "State") in
       make ?filters ?nextToken ?maxResults ~state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" SessionFilterList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" SessionMaxResults.of_json in
-      let state = field_map_exn json "State" SessionState.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" SessionFilterList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" SessionMaxResults.of_json in
+      let state = field_map_exn json__ "State" SessionState.of_json in
       make ?filters ?nextToken ?maxResults ~state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8309,12 +9011,12 @@ module SessionManagerOutputUrl =
           (Xml.child xml_arg0 "S3OutputUrl") in
       make ?cloudWatchOutputUrl ?s3OutputUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cloudWatchOutputUrl =
-        field_map json "CloudWatchOutputUrl"
+        field_map json__ "CloudWatchOutputUrl"
           SessionManagerCloudWatchOutputUrl.of_json in
       let s3OutputUrl =
-        field_map json "S3OutputUrl" SessionManagerS3OutputUrl.of_json in
+        field_map json__ "S3OutputUrl" SessionManagerS3OutputUrl.of_json in
       make ?cloudWatchOutputUrl ?s3OutputUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Reserved for future use."]
@@ -8398,7 +9100,7 @@ module Session =
           "The name of the Session Manager SSM document used to define the parameters and plugin settings for the session. For example, SSM-SessionManagerRunShell."];
       owner: SessionOwner.t option
         [@ocaml.doc
-          "The ID of the Amazon Web Services user account that started the session."];
+          "The ID of the Amazon Web Services user that started the session."];
       reason: SessionReason.t option
         [@ocaml.doc "The reason for connecting to the instance."];
       details: SessionDetails.t option
@@ -8407,7 +9109,10 @@ module Session =
         [@ocaml.doc "Reserved for future use."];
       maxSessionDuration: MaxSessionDuration.t option
         [@ocaml.doc
-          "The maximum duration of a session before it terminates."]}
+          "The maximum duration of a session before it terminates."];
+      accessType: AccessType.t option
+        [@ocaml.doc
+          "Standard access type is the default for Session Manager sessions. JustInTime is the access type for Just-in-time node access."]}
     let make ?sessionId =
       fun ?target ->
         fun ?status ->
@@ -8419,20 +9124,22 @@ module Session =
                     fun ?details ->
                       fun ?outputUrl ->
                         fun ?maxSessionDuration ->
-                          fun () ->
-                            {
-                              sessionId;
-                              target;
-                              status;
-                              startDate;
-                              endDate;
-                              documentName;
-                              owner;
-                              reason;
-                              details;
-                              outputUrl;
-                              maxSessionDuration
-                            }
+                          fun ?accessType ->
+                            fun () ->
+                              {
+                                sessionId;
+                                target;
+                                status;
+                                startDate;
+                                endDate;
+                                documentName;
+                                owner;
+                                reason;
+                                details;
+                                outputUrl;
+                                maxSessionDuration;
+                                accessType
+                              }
     let to_value x =
       structure_to_value
         [("SessionId", (Option.map x.sessionId ~f:SessionId.to_value));
@@ -8448,9 +9155,12 @@ module Session =
         ("OutputUrl",
           (Option.map x.outputUrl ~f:SessionManagerOutputUrl.to_value));
         ("MaxSessionDuration",
-          (Option.map x.maxSessionDuration ~f:MaxSessionDuration.to_value))]
+          (Option.map x.maxSessionDuration ~f:MaxSessionDuration.to_value));
+        ("AccessType", (Option.map x.accessType ~f:AccessType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accessType =
+        (Option.map ~f:AccessType.of_xml) (Xml.child xml_arg0 "AccessType") in
       let maxSessionDuration =
         (Option.map ~f:MaxSessionDuration.of_xml)
           (Xml.child xml_arg0 "MaxSessionDuration") in
@@ -8476,24 +9186,25 @@ module Session =
         (Option.map ~f:SessionTarget.of_xml) (Xml.child xml_arg0 "Target") in
       let sessionId =
         (Option.map ~f:SessionId.of_xml) (Xml.child xml_arg0 "SessionId") in
-      make ?maxSessionDuration ?outputUrl ?details ?reason ?owner
+      make ?accessType ?maxSessionDuration ?outputUrl ?details ?reason ?owner
         ?documentName ?endDate ?startDate ?status ?target ?sessionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let accessType = field_map json__ "AccessType" AccessType.of_json in
       let maxSessionDuration =
-        field_map json "MaxSessionDuration" MaxSessionDuration.of_json in
+        field_map json__ "MaxSessionDuration" MaxSessionDuration.of_json in
       let outputUrl =
-        field_map json "OutputUrl" SessionManagerOutputUrl.of_json in
-      let details = field_map json "Details" SessionDetails.of_json in
-      let reason = field_map json "Reason" SessionReason.of_json in
-      let owner = field_map json "Owner" SessionOwner.of_json in
-      let documentName = field_map json "DocumentName" DocumentName.of_json in
-      let endDate = field_map json "EndDate" DateTime.of_json in
-      let startDate = field_map json "StartDate" DateTime.of_json in
-      let status = field_map json "Status" SessionStatus.of_json in
-      let target = field_map json "Target" SessionTarget.of_json in
-      let sessionId = field_map json "SessionId" SessionId.of_json in
-      make ?maxSessionDuration ?outputUrl ?details ?reason ?owner
+        field_map json__ "OutputUrl" SessionManagerOutputUrl.of_json in
+      let details = field_map json__ "Details" SessionDetails.of_json in
+      let reason = field_map json__ "Reason" SessionReason.of_json in
+      let owner = field_map json__ "Owner" SessionOwner.of_json in
+      let documentName = field_map json__ "DocumentName" DocumentName.of_json in
+      let endDate = field_map json__ "EndDate" DateTime.of_json in
+      let startDate = field_map json__ "StartDate" DateTime.of_json in
+      let status = field_map json__ "Status" SessionStatus.of_json in
+      let target = field_map json__ "Target" SessionTarget.of_json in
+      let sessionId = field_map json__ "SessionId" SessionId.of_json in
+      make ?accessType ?maxSessionDuration ?outputUrl ?details ?reason ?owner
         ?documentName ?endDate ?startDate ?status ?target ?sessionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8502,6 +9213,9 @@ module SessionList =
   struct
     type nonrec t = Session.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Session.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8587,9 +9301,9 @@ module DescribeSessionsResponse =
         (Option.map ~f:SessionList.of_xml) (Xml.child xml_arg0 "Sessions") in
       make ?nextToken ?sessions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let sessions = field_map json "Sessions" SessionList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let sessions = field_map json__ "Sessions" SessionList.of_json in
       make ?nextToken ?sessions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8622,15 +9336,15 @@ module DisassociateOpsItemRelatedItemRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OpsItemId") in
       make ~associationId ~opsItemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let associationId =
-        field_map_exn json "AssociationId"
+        field_map_exn json__ "AssociationId"
           OpsItemRelatedItemAssociationId.of_json in
-      let opsItemId = field_map_exn json "OpsItemId" OpsItemId.of_json in
+      let opsItemId = field_map_exn json__ "OpsItemId" OpsItemId.of_json in
       make ~associationId ~opsItemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the association between an OpsItem and a related item. For example, this API operation can delete an Incident Manager incident from an OpsItem. Incident Manager is a capability of Amazon Web Services Systems Manager."]
+       "Deletes the association between an OpsItem and a related item. For example, this API operation can delete an Incident Manager incident from an OpsItem. Incident Manager is a tool in Amazon Web Services Systems Manager."]
 module OpsItemRelatedItemAssociationNotFoundException =
   struct
     type nonrec t = {
@@ -8645,8 +9359,8 @@ module OpsItemRelatedItemAssociationNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8656,6 +9370,7 @@ module DisassociateOpsItemRelatedItemResponse =
     type nonrec t = unit
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
+      | `OpsItemConflictException of OpsItemConflictException.t 
       | `OpsItemInvalidParameterException of
           OpsItemInvalidParameterException.t 
       | `OpsItemNotFoundException of OpsItemNotFoundException.t 
@@ -8667,6 +9382,8 @@ module DisassociateOpsItemRelatedItemResponse =
       match name with
       | "InternalServerError" ->
           `InternalServerError (InternalServerError.of_json json)
+      | "OpsItemConflictException" ->
+          `OpsItemConflictException (OpsItemConflictException.of_json json)
       | "OpsItemInvalidParameterException" ->
           `OpsItemInvalidParameterException
             (OpsItemInvalidParameterException.of_json json)
@@ -8682,6 +9399,8 @@ module DisassociateOpsItemRelatedItemResponse =
       match name with
       | "InternalServerError" ->
           `InternalServerError (InternalServerError.of_xml xml)
+      | "OpsItemConflictException" ->
+          `OpsItemConflictException (OpsItemConflictException.of_xml xml)
       | "OpsItemInvalidParameterException" ->
           `OpsItemInvalidParameterException
             (OpsItemInvalidParameterException.of_xml xml)
@@ -8698,6 +9417,10 @@ module DisassociateOpsItemRelatedItemResponse =
           `Assoc
             [("error", (`String "InternalServerError"));
             ("details", (InternalServerError.to_json e))]
+      | `OpsItemConflictException e ->
+          `Assoc
+            [("error", (`String "OpsItemConflictException"));
+            ("details", (OpsItemConflictException.to_json e))]
       | `OpsItemInvalidParameterException e ->
           `Assoc
             [("error", (`String "OpsItemInvalidParameterException"));
@@ -8725,7 +9448,7 @@ module DisassociateOpsItemRelatedItemResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the association between an OpsItem and a related item. For example, this API operation can delete an Incident Manager incident from an OpsItem. Incident Manager is a capability of Amazon Web Services Systems Manager."]
+       "Deletes the association between an OpsItem and a related item. For example, this API operation can delete an Incident Manager incident from an OpsItem. Incident Manager is a tool in Amazon Web Services Systems Manager."]
 module DocumentDefaultVersionDescription =
   struct
     type nonrec t =
@@ -8759,12 +9482,12 @@ module DocumentDefaultVersionDescription =
         (Option.map ~f:DocumentName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?defaultVersionName ?defaultVersion ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultVersionName =
-        field_map json "DefaultVersionName" DocumentVersionName.of_json in
+        field_map json__ "DefaultVersionName" DocumentVersionName.of_json in
       let defaultVersion =
-        field_map json "DefaultVersion" DocumentVersion.of_json in
-      let name = field_map json "Name" DocumentName.of_json in
+        field_map json__ "DefaultVersion" DocumentVersion.of_json in
+      let name = field_map json__ "Name" DocumentName.of_json in
       make ?defaultVersionName ?defaultVersion ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A default version of a document."]
@@ -8836,9 +9559,9 @@ module DocumentFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "value" DocumentFilterValue.of_json in
-      let key = field_map_exn json "key" DocumentFilterKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "value" DocumentFilterValue.of_json in
+      let key = field_map_exn json__ "key" DocumentFilterKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8848,6 +9571,9 @@ module DocumentFilterList =
     type nonrec t = DocumentFilter.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8881,10 +9607,10 @@ module DocumentIdentifier =
           "An optional field where you can specify a friendly name for the SSM document. This value can differ for each version of the document. If you want to update this value, see UpdateDocument."];
       owner: DocumentOwner.t option
         [@ocaml.doc
-          "The Amazon Web Services user account that created the document."];
+          "The Amazon Web Services user that created the document."];
       versionName: DocumentVersionName.t option
         [@ocaml.doc
-          "An optional field specifying the version of the artifact associated with the document. For example, \"Release 12, Update 6\". This value is unique across all versions of a document, and can't be changed."];
+          "An optional field specifying the version of the artifact associated with the document. For example, 12.6. This value is unique across all versions of a document, and can't be changed."];
       platformTypes: PlatformTypeList.t option
         [@ocaml.doc "The operating system platform."];
       documentVersion: DocumentVersion.t option
@@ -9011,28 +9737,28 @@ module DocumentIdentifier =
         ?schemaVersion ?documentType ?documentVersion ?platformTypes
         ?versionName ?owner ?displayName ?createdDate ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let author = field_map json "Author" DocumentAuthor.of_json in
-      let reviewStatus = field_map json "ReviewStatus" ReviewStatus.of_json in
-      let requires = field_map json "Requires" DocumentRequiresList.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let targetType = field_map json "TargetType" TargetType.of_json in
+    let of_json json__ =
+      let author = field_map json__ "Author" DocumentAuthor.of_json in
+      let reviewStatus = field_map json__ "ReviewStatus" ReviewStatus.of_json in
+      let requires = field_map json__ "Requires" DocumentRequiresList.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let targetType = field_map json__ "TargetType" TargetType.of_json in
       let documentFormat =
-        field_map json "DocumentFormat" DocumentFormat.of_json in
+        field_map json__ "DocumentFormat" DocumentFormat.of_json in
       let schemaVersion =
-        field_map json "SchemaVersion" DocumentSchemaVersion.of_json in
-      let documentType = field_map json "DocumentType" DocumentType.of_json in
+        field_map json__ "SchemaVersion" DocumentSchemaVersion.of_json in
+      let documentType = field_map json__ "DocumentType" DocumentType.of_json in
       let documentVersion =
-        field_map json "DocumentVersion" DocumentVersion.of_json in
+        field_map json__ "DocumentVersion" DocumentVersion.of_json in
       let platformTypes =
-        field_map json "PlatformTypes" PlatformTypeList.of_json in
+        field_map json__ "PlatformTypes" PlatformTypeList.of_json in
       let versionName =
-        field_map json "VersionName" DocumentVersionName.of_json in
-      let owner = field_map json "Owner" DocumentOwner.of_json in
+        field_map json__ "VersionName" DocumentVersionName.of_json in
+      let owner = field_map json__ "Owner" DocumentOwner.of_json in
       let displayName =
-        field_map json "DisplayName" DocumentDisplayName.of_json in
-      let createdDate = field_map json "CreatedDate" DateTime.of_json in
-      let name = field_map json "Name" DocumentARN.of_json in
+        field_map json__ "DisplayName" DocumentDisplayName.of_json in
+      let createdDate = field_map json__ "CreatedDate" DateTime.of_json in
+      let name = field_map json__ "Name" DocumentARN.of_json in
       make ?author ?reviewStatus ?requires ?tags ?targetType ?documentFormat
         ?schemaVersion ?documentType ?documentVersion ?platformTypes
         ?versionName ?owner ?displayName ?createdDate ?name ()
@@ -9042,6 +9768,9 @@ module DocumentIdentifierList =
   struct
     type nonrec t = DocumentIdentifier.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentIdentifier.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9085,6 +9814,9 @@ module DocumentKeyValuesFilterValues =
   struct
     type nonrec t = DocumentKeyValuesFilterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentKeyValuesFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -9149,10 +9881,10 @@ module DocumentKeyValuesFilter =
           (Xml.child xml_arg0 "Key") in
       make ?values ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let values =
-        field_map json "Values" DocumentKeyValuesFilterValues.of_json in
-      let key = field_map json "Key" DocumentKeyValuesFilterKey.of_json in
+        field_map json__ "Values" DocumentKeyValuesFilterValues.of_json in
+      let key = field_map json__ "Key" DocumentKeyValuesFilterKey.of_json in
       make ?values ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9165,6 +9897,9 @@ module DocumentKeyValuesFilterList =
         ok_or_failwith
           ((check_list_max i ~max:6) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentKeyValuesFilter.to_value)) |>
         (fun x -> `List x)
@@ -9269,9 +10004,9 @@ module DocumentReviewCommentSource =
           (Xml.child xml_arg0 "Type") in
       make ?content ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let content = field_map json "Content" DocumentReviewComment.of_json in
-      let type_ = field_map json "Type" DocumentReviewCommentType.of_json in
+    let of_json json__ =
+      let content = field_map json__ "Content" DocumentReviewComment.of_json in
+      let type_ = field_map json__ "Type" DocumentReviewCommentType.of_json in
       make ?content ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9284,6 +10019,9 @@ module DocumentReviewCommentList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentReviewCommentSource.to_value)) |>
         (fun x -> `List x)
@@ -9357,13 +10095,13 @@ module DocumentReviewerResponseSource =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "CreateTime") in
       make ?reviewer ?comment ?reviewStatus ?updatedTime ?createTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reviewer = field_map json "Reviewer" Reviewer.of_json in
+    let of_json json__ =
+      let reviewer = field_map json__ "Reviewer" Reviewer.of_json in
       let comment =
-        field_map json "Comment" DocumentReviewCommentList.of_json in
-      let reviewStatus = field_map json "ReviewStatus" ReviewStatus.of_json in
-      let updatedTime = field_map json "UpdatedTime" DateTime.of_json in
-      let createTime = field_map json "CreateTime" DateTime.of_json in
+        field_map json__ "Comment" DocumentReviewCommentList.of_json in
+      let reviewStatus = field_map json__ "ReviewStatus" ReviewStatus.of_json in
+      let updatedTime = field_map json__ "UpdatedTime" DateTime.of_json in
+      let createTime = field_map json__ "CreateTime" DateTime.of_json in
       make ?reviewer ?comment ?reviewStatus ?updatedTime ?createTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9372,6 +10110,9 @@ module DocumentReviewerResponseList =
   struct
     type nonrec t = DocumentReviewerResponseSource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentReviewerResponseSource.to_value)) |>
         (fun x -> `List x)
@@ -9414,9 +10155,9 @@ module DocumentMetadataResponseInfo =
           (Xml.child xml_arg0 "ReviewerResponse") in
       make ?reviewerResponse ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reviewerResponse =
-        field_map json "ReviewerResponse"
+        field_map json__ "ReviewerResponse"
           DocumentReviewerResponseList.of_json in
       make ?reviewerResponse ()
     let to_json v = composed_to_json to_value v
@@ -9435,12 +10176,12 @@ module DocumentPermissionLimit =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The document can't be shared with more Amazon Web Services user accounts. You can share a document with a maximum of 20 accounts. You can publicly share up to five documents. If you need to increase this limit, contact Amazon Web Services Support."]
+       "The document can't be shared with more Amazon Web Services accounts. You can specify a maximum of 20 accounts per API operation to share a private document. By default, you can share a private document with a maximum of 1,000 accounts and publicly share up to five documents. If you need to increase the quota for privately or publicly shared Systems Manager documents, contact Amazon Web Services Support."]
 module DocumentReviewAction =
   struct
     type nonrec t =
@@ -9500,10 +10241,10 @@ module DocumentReviews =
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ?comment ~action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let comment =
-        field_map json "Comment" DocumentReviewCommentList.of_json in
-      let action = field_map_exn json "Action" DocumentReviewAction.of_json in
+        field_map json__ "Comment" DocumentReviewCommentList.of_json in
+      let action = field_map_exn json__ "Action" DocumentReviewAction.of_json in
       make ?comment ~action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a document approval review."]
@@ -9519,7 +10260,7 @@ module DocumentVersionInfo =
         [@ocaml.doc "The document version."];
       versionName: DocumentVersionName.t option
         [@ocaml.doc
-          "The version of the artifact associated with the document. For example, \"Release 12, Update 6\". This value is unique across all versions of a document, and can't be changed."];
+          "The version of the artifact associated with the document. For example, 12.6. This value is unique across all versions of a document, and can't be changed."];
       createdDate: DateTime.t option
         [@ocaml.doc "The date the document was created."];
       isDefaultVersion: Boolean.t option
@@ -9611,23 +10352,24 @@ module DocumentVersionInfo =
         ?isDefaultVersion ?createdDate ?versionName ?documentVersion
         ?displayName ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reviewStatus = field_map json "ReviewStatus" ReviewStatus.of_json in
+    let of_json json__ =
+      let reviewStatus = field_map json__ "ReviewStatus" ReviewStatus.of_json in
       let statusInformation =
-        field_map json "StatusInformation" DocumentStatusInformation.of_json in
-      let status = field_map json "Status" DocumentStatus.of_json in
+        field_map json__ "StatusInformation"
+          DocumentStatusInformation.of_json in
+      let status = field_map json__ "Status" DocumentStatus.of_json in
       let documentFormat =
-        field_map json "DocumentFormat" DocumentFormat.of_json in
+        field_map json__ "DocumentFormat" DocumentFormat.of_json in
       let isDefaultVersion =
-        field_map json "IsDefaultVersion" Boolean.of_json in
-      let createdDate = field_map json "CreatedDate" DateTime.of_json in
+        field_map json__ "IsDefaultVersion" Boolean.of_json in
+      let createdDate = field_map json__ "CreatedDate" DateTime.of_json in
       let versionName =
-        field_map json "VersionName" DocumentVersionName.of_json in
+        field_map json__ "VersionName" DocumentVersionName.of_json in
       let documentVersion =
-        field_map json "DocumentVersion" DocumentVersion.of_json in
+        field_map json__ "DocumentVersion" DocumentVersion.of_json in
       let displayName =
-        field_map json "DisplayName" DocumentDisplayName.of_json in
-      let name = field_map json "Name" DocumentName.of_json in
+        field_map json__ "DisplayName" DocumentDisplayName.of_json in
+      let name = field_map json__ "Name" DocumentName.of_json in
       make ?reviewStatus ?statusInformation ?status ?documentFormat
         ?isDefaultVersion ?createdDate ?versionName ?documentVersion
         ?displayName ?name ()
@@ -9647,8 +10389,8 @@ module DocumentVersionLimitExceeded =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9658,6 +10400,9 @@ module DocumentVersionList =
     type nonrec t = DocumentVersionInfo.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DocumentVersionInfo.to_value)) |>
         (fun x -> `List x)
@@ -9709,8 +10454,8 @@ module DuplicateDocumentContent =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9729,12 +10474,118 @@ module DuplicateDocumentVersionName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The version name has already been used in this document. Specify a different version name, and then try again."]
+module ExecutionInputs =
+  struct
+    type nonrec t =
+      {
+      automation: AutomationExecutionInputs.t option
+        [@ocaml.doc
+          "Information about the optional inputs that can be specified for an automation execution preview."]}
+    let make ?automation = fun () -> { automation }
+    let to_value x =
+      structure_to_value
+        [("Automation",
+           (Option.map x.automation ~f:AutomationExecutionInputs.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let automation =
+        (Option.map ~f:AutomationExecutionInputs.of_xml)
+          (Xml.child xml_arg0 "Automation") in
+      make ?automation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let automation =
+        field_map json__ "Automation" AutomationExecutionInputs.of_json in
+      make ?automation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about the inputs for an execution preview."]
+module ExecutionPreview =
+  struct
+    type nonrec t =
+      {
+      automation: AutomationExecutionPreview.t option
+        [@ocaml.doc
+          "Information about the changes that would be made if an Automation workflow were run."]}
+    let make ?automation = fun () -> { automation }
+    let to_value x =
+      structure_to_value
+        [("Automation",
+           (Option.map x.automation ~f:AutomationExecutionPreview.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let automation =
+        (Option.map ~f:AutomationExecutionPreview.of_xml)
+          (Xml.child xml_arg0 "Automation") in
+      make ?automation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let automation =
+        field_map json__ "Automation" AutomationExecutionPreview.of_json in
+      make ?automation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the changes that would be made if an execution were run."]
+module ExecutionPreviewId =
+  struct
+    type nonrec t = string
+    let context_ = "ExecutionPreviewId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExecutionPreviewId" j
+    let to_json = simple_to_json to_value
+  end
+module ExecutionPreviewStatus =
+  struct
+    type nonrec t =
+      | Pending 
+      | InProgress 
+      | Success 
+      | Failed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "Pending"
+      | InProgress -> "InProgress"
+      | Success -> "Success"
+      | Failed -> "Failed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Pending" -> Pending
+      | "InProgress" -> InProgress
+      | "Success" -> Success
+      | "Failed" -> Failed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ExecutionPreviewStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ExecutionPreviewStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module FeatureNotAvailableException =
   struct
     type nonrec t = {
@@ -9749,12 +10600,199 @@ module FeatureNotAvailableException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You attempted to register a LAMBDA or STEP_FUNCTIONS task in a region where the corresponding service isn't available."]
+module GetAccessTokenRequest =
+  struct
+    type nonrec t =
+      {
+      accessRequestId: AccessRequestId.t
+        [@ocaml.doc "The ID of a just-in-time node access request."]}
+    let context_ = "GetAccessTokenRequest"
+    let make ~accessRequestId = fun () -> { accessRequestId }
+    let to_value x =
+      structure_to_value
+        [("AccessRequestId",
+           (Some (AccessRequestId.to_value x.accessRequestId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accessRequestId =
+        AccessRequestId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccessRequestId") in
+      make ~accessRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accessRequestId =
+        field_map_exn json__ "AccessRequestId" AccessRequestId.of_json in
+      make ~accessRequestId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a credentials set to be used with just-in-time node access."]
+module ValidationException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option ;
+      reasonCode: String_.t option
+        [@ocaml.doc "The reason code for the invalid request."]}
+    let make ?message = fun ?reasonCode -> fun () -> { message; reasonCode }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value));
+        ("ReasonCode", (Option.map x.reasonCode ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reasonCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ReasonCode") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?reasonCode ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reasonCode = field_map json__ "ReasonCode" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?reasonCode ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request isn't valid. Verify that you entered valid contents for the command and try again."]
+module ThrottlingException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option ;
+      quotaCode: String_.t option
+        [@ocaml.doc
+          "The quota code recognized by the Amazon Web Services Service Quotas service."];
+      serviceCode: String_.t option
+        [@ocaml.doc
+          "The code for the Amazon Web Services service that owns the quota."]}
+    let make ?message =
+      fun ?quotaCode ->
+        fun ?serviceCode -> fun () -> { message; quotaCode; serviceCode }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value));
+        ("QuotaCode", (Option.map x.quotaCode ~f:String_.to_value));
+        ("ServiceCode", (Option.map x.serviceCode ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ServiceCode") in
+      let quotaCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "QuotaCode") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?serviceCode ?quotaCode ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceCode = field_map json__ "ServiceCode" String_.of_json in
+      let quotaCode = field_map json__ "QuotaCode" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?serviceCode ?quotaCode ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request or operation couldn't be performed because the service is throttling requests."]
+module GetAccessTokenResponse =
+  struct
+    type nonrec t =
+      {
+      credentials: Credentials.t option
+        [@ocaml.doc
+          "The temporary security credentials which can be used to start just-in-time node access sessions."];
+      accessRequestStatus: AccessRequestStatus.t option
+        [@ocaml.doc "The status of the access request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?credentials =
+      fun ?accessRequestStatus ->
+        fun () -> { credentials; accessRequestStatus }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Credentials", (Option.map x.credentials ~f:Credentials.to_value));
+        ("AccessRequestStatus",
+          (Option.map x.accessRequestStatus ~f:AccessRequestStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accessRequestStatus =
+        (Option.map ~f:AccessRequestStatus.of_xml)
+          (Xml.child xml_arg0 "AccessRequestStatus") in
+      let credentials =
+        (Option.map ~f:Credentials.of_xml) (Xml.child xml_arg0 "Credentials") in
+      make ?accessRequestStatus ?credentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accessRequestStatus =
+        field_map json__ "AccessRequestStatus" AccessRequestStatus.of_json in
+      let credentials = field_map json__ "Credentials" Credentials.of_json in
+      make ?accessRequestStatus ?credentials ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a credentials set to be used with just-in-time node access."]
 module GetAutomationExecutionRequest =
   struct
     type nonrec t =
@@ -9775,9 +10813,9 @@ module GetAutomationExecutionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AutomationExecutionId") in
       make ~automationExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let automationExecutionId =
-        field_map_exn json "AutomationExecutionId"
+        field_map_exn json__ "AutomationExecutionId"
           AutomationExecutionId.of_json in
       make ~automationExecutionId ()
     let to_json v = composed_to_json to_value v
@@ -9842,9 +10880,9 @@ module GetAutomationExecutionResult =
           (Xml.child xml_arg0 "AutomationExecution") in
       make ?automationExecution ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let automationExecution =
-        field_map json "AutomationExecution" AutomationExecution.of_json in
+        field_map json__ "AutomationExecution" AutomationExecution.of_json in
       make ?automationExecution ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9868,7 +10906,7 @@ module GetCalendarStateRequest =
       {
       calendarNames: CalendarNameOrARNList.t
         [@ocaml.doc
-          "The names or Amazon Resource Names (ARNs) of the Systems Manager documents (SSM documents) that represent the calendar entries for which you want to get the state."];
+          "The names of Amazon Resource Names (ARNs) of the Systems Manager documents (SSM documents) that represent the calendar entries for which you want to get the state."];
       atTime: ISO8601String.t option
         [@ocaml.doc
           "(Optional) The specific time for which you want to get calendar state information, in ISO 8601 format. If you don't specify a value or AtTime, the current time is used."]}
@@ -9889,14 +10927,14 @@ module GetCalendarStateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CalendarNames") in
       make ?atTime ~calendarNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let atTime = field_map json "AtTime" ISO8601String.of_json in
+    let of_json json__ =
+      let atTime = field_map json__ "AtTime" ISO8601String.of_json in
       let calendarNames =
-        field_map_exn json "CalendarNames" CalendarNameOrARNList.of_json in
+        field_map_exn json__ "CalendarNames" CalendarNameOrARNList.of_json in
       make ?atTime ~calendarNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the state of a Amazon Web Services Systems Manager change calendar at the current time or a specified time. If you specify a time, GetCalendarState returns the state of the calendar at that specific time, and returns the next time that the change calendar state will transition. If you don't specify a time, GetCalendarState uses the current time. Change Calendar entries have two possible states: OPEN or CLOSED. If you specify more than one calendar in a request, the command returns the status of OPEN only if all calendars in the request are open. If one or more calendars in the request are closed, the status returned is CLOSED. For more information about Change Calendar, a capability of Amazon Web Services Systems Manager, see Amazon Web Services Systems Manager Change Calendar in the Amazon Web Services Systems Manager User Guide."]
+       "Gets the state of a Amazon Web Services Systems Manager change calendar at the current time or a specified time. If you specify a time, GetCalendarState returns the state of the calendar at that specific time, and returns the next time that the change calendar state will transition. If you don't specify a time, GetCalendarState uses the current time. Change Calendar entries have two possible states: OPEN or CLOSED. If you specify more than one calendar in a request, the command returns the status of OPEN only if all calendars in the request are open. If one or more calendars in the request are closed, the status returned is CLOSED. For more information about Change Calendar, a tool in Amazon Web Services Systems Manager, see Amazon Web Services Systems Manager Change Calendar in the Amazon Web Services Systems Manager User Guide."]
 module UnsupportedCalendarException =
   struct
     type nonrec t = {
@@ -9911,8 +10949,8 @@ module UnsupportedCalendarException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9931,8 +10969,8 @@ module InvalidDocumentType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10025,15 +11063,15 @@ module GetCalendarStateResponse =
         (Option.map ~f:CalendarState.of_xml) (Xml.child xml_arg0 "State") in
       make ?nextTransitionTime ?atTime ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextTransitionTime =
-        field_map json "NextTransitionTime" ISO8601String.of_json in
-      let atTime = field_map json "AtTime" ISO8601String.of_json in
-      let state = field_map json "State" CalendarState.of_json in
+        field_map json__ "NextTransitionTime" ISO8601String.of_json in
+      let atTime = field_map json__ "AtTime" ISO8601String.of_json in
+      let state = field_map json__ "State" CalendarState.of_json in
       make ?nextTransitionTime ?atTime ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the state of a Amazon Web Services Systems Manager change calendar at the current time or a specified time. If you specify a time, GetCalendarState returns the state of the calendar at that specific time, and returns the next time that the change calendar state will transition. If you don't specify a time, GetCalendarState uses the current time. Change Calendar entries have two possible states: OPEN or CLOSED. If you specify more than one calendar in a request, the command returns the status of OPEN only if all calendars in the request are open. If one or more calendars in the request are closed, the status returned is CLOSED. For more information about Change Calendar, a capability of Amazon Web Services Systems Manager, see Amazon Web Services Systems Manager Change Calendar in the Amazon Web Services Systems Manager User Guide."]
+       "Gets the state of a Amazon Web Services Systems Manager change calendar at the current time or a specified time. If you specify a time, GetCalendarState returns the state of the calendar at that specific time, and returns the next time that the change calendar state will transition. If you don't specify a time, GetCalendarState uses the current time. Change Calendar entries have two possible states: OPEN or CLOSED. If you specify more than one calendar in a request, the command returns the status of OPEN only if all calendars in the request are open. If one or more calendars in the request are closed, the status returned is CLOSED. For more information about Change Calendar, a tool in Amazon Web Services Systems Manager, see Amazon Web Services Systems Manager Change Calendar in the Amazon Web Services Systems Manager User Guide."]
 module GetCommandInvocationRequest =
   struct
     type nonrec t =
@@ -10046,7 +11084,7 @@ module GetCommandInvocationRequest =
           "(Required) The ID of the managed node targeted by the command. A managed node can be an Amazon Elastic Compute Cloud (Amazon EC2) instance, edge device, and on-premises server or VM in your hybrid environment that is configured for Amazon Web Services Systems Manager."];
       pluginName: CommandPluginName.t option
         [@ocaml.doc
-          "The name of the plugin for which you want detailed results. If the document contains only one plugin, you can omit the name and details for that plugin. If the document contains more than one plugin, you must specify the name of the plugin for which you want to view details. Plugin names are also referred to as step names in Systems Manager documents (SSM documents). For example, aws:RunShellScript is a plugin. To find the PluginName, check the document content and find the name of the plugin. Alternatively, use ListCommandInvocations with the CommandId and Details parameters. The PluginName is the Name attribute of the CommandPlugin object in the CommandPlugins list."]}
+          "The name of the step for which you want detailed results. If the document contains only one step, you can omit the name and details for that step. If the document contains more than one step, you must specify the name of the step for which you want to view details. Be sure to specify the name of the step, not the name of a plugin like aws:RunShellScript. To find the PluginName, check the document content and find the name of the step you want details for. Alternatively, use ListCommandInvocations with the CommandId and Details parameters. The PluginName is the Name attribute of the CommandPlugin object in the CommandPlugins list."]}
     let context_ = "GetCommandInvocationRequest"
     let make ?pluginName =
       fun ~commandId ->
@@ -10070,14 +11108,15 @@ module GetCommandInvocationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CommandId") in
       make ?pluginName ~instanceId ~commandId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pluginName = field_map json "PluginName" CommandPluginName.of_json in
-      let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
-      let commandId = field_map_exn json "CommandId" CommandId.of_json in
+    let of_json json__ =
+      let pluginName =
+        field_map json__ "PluginName" CommandPluginName.of_json in
+      let instanceId = field_map_exn json__ "InstanceId" InstanceId.of_json in
+      let commandId = field_map_exn json__ "CommandId" CommandId.of_json in
       make ?pluginName ~instanceId ~commandId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns detailed information about command execution for an invocation or plugin. GetCommandInvocation only gives the execution status of a plugin in a document. To get the command execution status on a specific managed node, use ListCommandInvocations. To get the command execution status across managed nodes, use ListCommands."]
+       "Returns detailed information about command execution for an invocation or plugin. The Run Command API follows an eventual consistency model, due to the distributed nature of the system supporting the API. This means that the result of an API command you run that affects your resources might not be immediately visible to all subsequent commands you run. You should keep this in mind when you carry out an API command that immediately follows a previous API command. GetCommandInvocation only gives the execution status of a plugin in a document. To get the command execution status on a specific managed node, use ListCommandInvocations. To get the command execution status across managed nodes, use ListCommands."]
 module StringDateTime =
   struct
     type nonrec t = string
@@ -10387,33 +11426,36 @@ module GetCommandInvocationResult =
         ?responseCode ?pluginName ?documentVersion ?documentName ?comment
         ?instanceId ?commandId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cloudWatchOutputConfig =
-        field_map json "CloudWatchOutputConfig"
+        field_map json__ "CloudWatchOutputConfig"
           CloudWatchOutputConfig.of_json in
-      let standardErrorUrl = field_map json "StandardErrorUrl" Url.of_json in
+      let standardErrorUrl = field_map json__ "StandardErrorUrl" Url.of_json in
       let standardErrorContent =
-        field_map json "StandardErrorContent" StandardErrorContent.of_json in
-      let standardOutputUrl = field_map json "StandardOutputUrl" Url.of_json in
+        field_map json__ "StandardErrorContent" StandardErrorContent.of_json in
+      let standardOutputUrl =
+        field_map json__ "StandardOutputUrl" Url.of_json in
       let standardOutputContent =
-        field_map json "StandardOutputContent" StandardOutputContent.of_json in
+        field_map json__ "StandardOutputContent"
+          StandardOutputContent.of_json in
       let statusDetails =
-        field_map json "StatusDetails" StatusDetails.of_json in
-      let status = field_map json "Status" CommandInvocationStatus.of_json in
+        field_map json__ "StatusDetails" StatusDetails.of_json in
+      let status = field_map json__ "Status" CommandInvocationStatus.of_json in
       let executionEndDateTime =
-        field_map json "ExecutionEndDateTime" StringDateTime.of_json in
+        field_map json__ "ExecutionEndDateTime" StringDateTime.of_json in
       let executionElapsedTime =
-        field_map json "ExecutionElapsedTime" StringDateTime.of_json in
+        field_map json__ "ExecutionElapsedTime" StringDateTime.of_json in
       let executionStartDateTime =
-        field_map json "ExecutionStartDateTime" StringDateTime.of_json in
-      let responseCode = field_map json "ResponseCode" ResponseCode.of_json in
-      let pluginName = field_map json "PluginName" CommandPluginName.of_json in
+        field_map json__ "ExecutionStartDateTime" StringDateTime.of_json in
+      let responseCode = field_map json__ "ResponseCode" ResponseCode.of_json in
+      let pluginName =
+        field_map json__ "PluginName" CommandPluginName.of_json in
       let documentVersion =
-        field_map json "DocumentVersion" DocumentVersion.of_json in
-      let documentName = field_map json "DocumentName" DocumentName.of_json in
-      let comment = field_map json "Comment" Comment.of_json in
-      let instanceId = field_map json "InstanceId" InstanceId.of_json in
-      let commandId = field_map json "CommandId" CommandId.of_json in
+        field_map json__ "DocumentVersion" DocumentVersion.of_json in
+      let documentName = field_map json__ "DocumentName" DocumentName.of_json in
+      let comment = field_map json__ "Comment" Comment.of_json in
+      let instanceId = field_map json__ "InstanceId" InstanceId.of_json in
+      let commandId = field_map json__ "CommandId" CommandId.of_json in
       make ?cloudWatchOutputConfig ?standardErrorUrl ?standardErrorContent
         ?standardOutputUrl ?standardOutputContent ?statusDetails ?status
         ?executionEndDateTime ?executionElapsedTime ?executionStartDateTime
@@ -10421,7 +11463,7 @@ module GetCommandInvocationResult =
         ?instanceId ?commandId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns detailed information about command execution for an invocation or plugin. GetCommandInvocation only gives the execution status of a plugin in a document. To get the command execution status on a specific managed node, use ListCommandInvocations. To get the command execution status across managed nodes, use ListCommands."]
+       "Returns detailed information about command execution for an invocation or plugin. The Run Command API follows an eventual consistency model, due to the distributed nature of the system supporting the API. This means that the result of an API command you run that affects your resources might not be immediately visible to all subsequent commands you run. You should keep this in mind when you carry out an API command that immediately follows a previous API command. GetCommandInvocation only gives the execution status of a plugin in a document. To get the command execution status on a specific managed node, use ListCommandInvocations. To get the command execution status across managed nodes, use ListCommands."]
 module GetConnectionStatusRequest =
   struct
     type nonrec t =
@@ -10439,8 +11481,8 @@ module GetConnectionStatusRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Target") in
       make ~target ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let target = field_map_exn json "Target" SessionTarget.of_json in
+    let of_json json__ =
+      let target = field_map_exn json__ "Target" SessionTarget.of_json in
       make ~target ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10452,8 +11494,7 @@ module GetConnectionStatusResponse =
       target: SessionTarget.t option
         [@ocaml.doc "The ID of the managed node to check connection status."];
       status: ConnectionStatus.t option
-        [@ocaml.doc
-          "The status of the connection to the managed node. For example, 'Connected' or 'Not Connected'."]}
+        [@ocaml.doc "The status of the connection to the managed node."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -10494,9 +11535,9 @@ module GetConnectionStatusResponse =
         (Option.map ~f:SessionTarget.of_xml) (Xml.child xml_arg0 "Target") in
       make ?status ?target ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ConnectionStatus.of_json in
-      let target = field_map json "Target" SessionTarget.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" ConnectionStatus.of_json in
+      let target = field_map json__ "Target" SessionTarget.of_json in
       make ?status ?target ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10520,9 +11561,9 @@ module GetDefaultPatchBaselineRequest =
           (Xml.child xml_arg0 "OperatingSystem") in
       make ?operatingSystem ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let operatingSystem =
-        field_map json "OperatingSystem" OperatingSystem.of_json in
+        field_map json__ "OperatingSystem" OperatingSystem.of_json in
       make ?operatingSystem ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10578,10 +11619,10 @@ module GetDefaultPatchBaselineResult =
         (Option.map ~f:BaselineId.of_xml) (Xml.child xml_arg0 "BaselineId") in
       make ?operatingSystem ?baselineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let operatingSystem =
-        field_map json "OperatingSystem" OperatingSystem.of_json in
-      let baselineId = field_map json "BaselineId" BaselineId.of_json in
+        field_map json__ "OperatingSystem" OperatingSystem.of_json in
+      let baselineId = field_map json__ "BaselineId" BaselineId.of_json in
       make ?operatingSystem ?baselineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10598,20 +11639,35 @@ module GetDeployablePatchSnapshotForInstanceRequest =
           "The snapshot ID provided by the user when running AWS-RunPatchBaseline."];
       baselineOverride: BaselineOverride.t option
         [@ocaml.doc
-          "Defines the basic information about a patch baseline override."]}
+          "Defines the basic information about a patch baseline override."];
+      useS3DualStackEndpoint: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether to use S3 dualstack endpoints for the patch snapshot download URL. Set to true to receive a presigned URL that supports both IPv4 and IPv6 connectivity. Set to false to use standard IPv4-only endpoints. Default is false. This parameter is required for managed nodes in IPv6-only environments."]}
     let context_ = "GetDeployablePatchSnapshotForInstanceRequest"
     let make ?baselineOverride =
-      fun ~instanceId ->
-        fun ~snapshotId ->
-          fun () -> { baselineOverride; instanceId; snapshotId }
+      fun ?useS3DualStackEndpoint ->
+        fun ~instanceId ->
+          fun ~snapshotId ->
+            fun () ->
+              {
+                baselineOverride;
+                useS3DualStackEndpoint;
+                instanceId;
+                snapshotId
+              }
     let to_value x =
       structure_to_value
         [("InstanceId", (Some (InstanceId.to_value x.instanceId)));
         ("SnapshotId", (Some (SnapshotId.to_value x.snapshotId)));
         ("BaselineOverride",
-          (Option.map x.baselineOverride ~f:BaselineOverride.to_value))]
+          (Option.map x.baselineOverride ~f:BaselineOverride.to_value));
+        ("UseS3DualStackEndpoint",
+          (Option.map x.useS3DualStackEndpoint ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let useS3DualStackEndpoint =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "UseS3DualStackEndpoint") in
       let baselineOverride =
         (Option.map ~f:BaselineOverride.of_xml)
           (Xml.child xml_arg0 "BaselineOverride") in
@@ -10621,17 +11677,21 @@ module GetDeployablePatchSnapshotForInstanceRequest =
       let instanceId =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
-      make ?baselineOverride ~snapshotId ~instanceId ()
+      make ?useS3DualStackEndpoint ?baselineOverride ~snapshotId ~instanceId
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let useS3DualStackEndpoint =
+        field_map json__ "UseS3DualStackEndpoint" Boolean.of_json in
       let baselineOverride =
-        field_map json "BaselineOverride" BaselineOverride.of_json in
-      let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
-      let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
-      make ?baselineOverride ~snapshotId ~instanceId ()
+        field_map json__ "BaselineOverride" BaselineOverride.of_json in
+      let snapshotId = field_map_exn json__ "SnapshotId" SnapshotId.of_json in
+      let instanceId = field_map_exn json__ "InstanceId" InstanceId.of_json in
+      make ?useS3DualStackEndpoint ?baselineOverride ~snapshotId ~instanceId
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the current snapshot for the patch baseline the managed node uses. This API is primarily used by the AWS-RunPatchBaseline Systems Manager document (SSM document). If you run the command locally, such as with the Command Line Interface (CLI), the system attempts to use your local Amazon Web Services credentials and the operation fails. To avoid this, you can run the command in the Amazon Web Services Systems Manager console. Use Run Command, a capability of Amazon Web Services Systems Manager, with an SSM document that enables you to target a managed node with a script or command. For example, run the command using the AWS-RunShellScript document or the AWS-RunPowerShellScript document."]
+       "Retrieves the current snapshot for the patch baseline the managed node uses. This API is primarily used by the AWS-RunPatchBaseline Systems Manager document (SSM document). If you run the command locally, such as with the Command Line Interface (CLI), the system attempts to use your local Amazon Web Services credentials and the operation fails. To avoid this, you can run the command in the Amazon Web Services Systems Manager console. Use Run Command, a tool in Amazon Web Services Systems Manager, with an SSM document that enables you to target a managed node with a script or command. For example, run the command using the AWS-RunShellScript document or the AWS-RunPowerShellScript document."]
 module UnsupportedFeatureRequiredException =
   struct
     type nonrec t = {
@@ -10646,12 +11706,12 @@ module UnsupportedFeatureRequiredException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Patching for applications released by Microsoft is only available on EC2 instances and advanced instances. To patch applications released by Microsoft on on-premises servers and VMs, you must enable advanced instances. For more information, see Enabling the advanced-instances tier in the Amazon Web Services Systems Manager User Guide."]
+       "Patching for applications released by Microsoft is only available on EC2 instances and advanced instances. To patch applications released by Microsoft on on-premises servers and VMs, you must enable advanced instances. For more information, see Turning on the advanced-instances tier in the Amazon Web Services Systems Manager User Guide."]
 module SnapshotDownloadUrl =
   struct
     type nonrec t = string
@@ -10766,16 +11826,16 @@ module GetDeployablePatchSnapshotForInstanceResult =
         (Option.map ~f:InstanceId.of_xml) (Xml.child xml_arg0 "InstanceId") in
       make ?product ?snapshotDownloadUrl ?snapshotId ?instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let product = field_map json "Product" Product.of_json in
+    let of_json json__ =
+      let product = field_map json__ "Product" Product.of_json in
       let snapshotDownloadUrl =
-        field_map json "SnapshotDownloadUrl" SnapshotDownloadUrl.of_json in
-      let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
-      let instanceId = field_map json "InstanceId" InstanceId.of_json in
+        field_map json__ "SnapshotDownloadUrl" SnapshotDownloadUrl.of_json in
+      let snapshotId = field_map json__ "SnapshotId" SnapshotId.of_json in
+      let instanceId = field_map json__ "InstanceId" InstanceId.of_json in
       make ?product ?snapshotDownloadUrl ?snapshotId ?instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the current snapshot for the patch baseline the managed node uses. This API is primarily used by the AWS-RunPatchBaseline Systems Manager document (SSM document). If you run the command locally, such as with the Command Line Interface (CLI), the system attempts to use your local Amazon Web Services credentials and the operation fails. To avoid this, you can run the command in the Amazon Web Services Systems Manager console. Use Run Command, a capability of Amazon Web Services Systems Manager, with an SSM document that enables you to target a managed node with a script or command. For example, run the command using the AWS-RunShellScript document or the AWS-RunPowerShellScript document."]
+       "Retrieves the current snapshot for the patch baseline the managed node uses. This API is primarily used by the AWS-RunPatchBaseline Systems Manager document (SSM document). If you run the command locally, such as with the Command Line Interface (CLI), the system attempts to use your local Amazon Web Services credentials and the operation fails. To avoid this, you can run the command in the Amazon Web Services Systems Manager console. Use Run Command, a tool in Amazon Web Services Systems Manager, with an SSM document that enables you to target a managed node with a script or command. For example, run the command using the AWS-RunShellScript document or the AWS-RunPowerShellScript document."]
 module GetDocumentRequest =
   struct
     type nonrec t =
@@ -10783,7 +11843,7 @@ module GetDocumentRequest =
       name: DocumentARN.t [@ocaml.doc "The name of the SSM document."];
       versionName: DocumentVersionName.t option
         [@ocaml.doc
-          "An optional field specifying the version of the artifact associated with the document. For example, \"Release 12, Update 6\". This value is unique across all versions of a document and can't be changed."];
+          "An optional field specifying the version of the artifact associated with the document. For example, 12.6. This value is unique across all versions of a document and can't be changed."];
       documentVersion: DocumentVersion.t option
         [@ocaml.doc "The document version for which you want information."];
       documentFormat: DocumentFormat.t option
@@ -10819,14 +11879,14 @@ module GetDocumentRequest =
         DocumentARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?documentFormat ?documentVersion ?versionName ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let documentFormat =
-        field_map json "DocumentFormat" DocumentFormat.of_json in
+        field_map json__ "DocumentFormat" DocumentFormat.of_json in
       let documentVersion =
-        field_map json "DocumentVersion" DocumentVersion.of_json in
+        field_map json__ "DocumentVersion" DocumentVersion.of_json in
       let versionName =
-        field_map json "VersionName" DocumentVersionName.of_json in
-      let name = field_map_exn json "Name" DocumentARN.of_json in
+        field_map json__ "VersionName" DocumentVersionName.of_json in
+      let name = field_map_exn json__ "Name" DocumentARN.of_json in
       make ?documentFormat ?documentVersion ?versionName ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10843,7 +11903,7 @@ module GetDocumentResult =
           "The friendly name of the SSM document. This value can differ for each version of the document. If you want to update this value, see UpdateDocument."];
       versionName: DocumentVersionName.t option
         [@ocaml.doc
-          "The version of the artifact associated with the document. For example, \"Release 12, Update 6\". This value is unique across all versions of a document, and can't be changed."];
+          "The version of the artifact associated with the document. For example, 12.6. This value is unique across all versions of a document, and can't be changed."];
       documentVersion: DocumentVersion.t option
         [@ocaml.doc "The document version."];
       status: DocumentStatus.t option
@@ -11004,32 +12064,163 @@ module GetDocumentResult =
         ?documentType ?content ?statusInformation ?status ?documentVersion
         ?versionName ?displayName ?createdDate ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reviewStatus = field_map json "ReviewStatus" ReviewStatus.of_json in
+    let of_json json__ =
+      let reviewStatus = field_map json__ "ReviewStatus" ReviewStatus.of_json in
       let attachmentsContent =
-        field_map json "AttachmentsContent" AttachmentContentList.of_json in
-      let requires = field_map json "Requires" DocumentRequiresList.of_json in
+        field_map json__ "AttachmentsContent" AttachmentContentList.of_json in
+      let requires = field_map json__ "Requires" DocumentRequiresList.of_json in
       let documentFormat =
-        field_map json "DocumentFormat" DocumentFormat.of_json in
-      let documentType = field_map json "DocumentType" DocumentType.of_json in
-      let content = field_map json "Content" DocumentContent.of_json in
+        field_map json__ "DocumentFormat" DocumentFormat.of_json in
+      let documentType = field_map json__ "DocumentType" DocumentType.of_json in
+      let content = field_map json__ "Content" DocumentContent.of_json in
       let statusInformation =
-        field_map json "StatusInformation" DocumentStatusInformation.of_json in
-      let status = field_map json "Status" DocumentStatus.of_json in
+        field_map json__ "StatusInformation"
+          DocumentStatusInformation.of_json in
+      let status = field_map json__ "Status" DocumentStatus.of_json in
       let documentVersion =
-        field_map json "DocumentVersion" DocumentVersion.of_json in
+        field_map json__ "DocumentVersion" DocumentVersion.of_json in
       let versionName =
-        field_map json "VersionName" DocumentVersionName.of_json in
+        field_map json__ "VersionName" DocumentVersionName.of_json in
       let displayName =
-        field_map json "DisplayName" DocumentDisplayName.of_json in
-      let createdDate = field_map json "CreatedDate" DateTime.of_json in
-      let name = field_map json "Name" DocumentARN.of_json in
+        field_map json__ "DisplayName" DocumentDisplayName.of_json in
+      let createdDate = field_map json__ "CreatedDate" DateTime.of_json in
+      let name = field_map json__ "Name" DocumentARN.of_json in
       make ?reviewStatus ?attachmentsContent ?requires ?documentFormat
         ?documentType ?content ?statusInformation ?status ?documentVersion
         ?versionName ?displayName ?createdDate ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the contents of the specified Amazon Web Services Systems Manager document (SSM document)."]
+module GetExecutionPreviewRequest =
+  struct
+    type nonrec t =
+      {
+      executionPreviewId: ExecutionPreviewId.t
+        [@ocaml.doc "The ID of the existing execution preview."]}
+    let context_ = "GetExecutionPreviewRequest"
+    let make ~executionPreviewId = fun () -> { executionPreviewId }
+    let to_value x =
+      structure_to_value
+        [("ExecutionPreviewId",
+           (Some (ExecutionPreviewId.to_value x.executionPreviewId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let executionPreviewId =
+        ExecutionPreviewId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ExecutionPreviewId") in
+      make ~executionPreviewId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let executionPreviewId =
+        field_map_exn json__ "ExecutionPreviewId" ExecutionPreviewId.of_json in
+      make ~executionPreviewId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Initiates the process of retrieving an existing preview that shows the effects that running a specified Automation runbook would have on the targeted resources."]
+module GetExecutionPreviewResponse =
+  struct
+    type nonrec t =
+      {
+      executionPreviewId: ExecutionPreviewId.t option
+        [@ocaml.doc "The generated ID for the existing execution preview."];
+      endedAt: DateTime.t option
+        [@ocaml.doc
+          "A UTC timestamp indicating when the execution preview operation ended."];
+      status: ExecutionPreviewStatus.t option
+        [@ocaml.doc "The current status of the execution preview operation."];
+      statusMessage: String_.t option
+        [@ocaml.doc
+          "Supplemental information about the current status of the execution preview."];
+      executionPreview: ExecutionPreview.t option }
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?executionPreviewId =
+      fun ?endedAt ->
+        fun ?status ->
+          fun ?statusMessage ->
+            fun ?executionPreview ->
+              fun () ->
+                {
+                  executionPreviewId;
+                  endedAt;
+                  status;
+                  statusMessage;
+                  executionPreview
+                }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ExecutionPreviewId",
+           (Option.map x.executionPreviewId ~f:ExecutionPreviewId.to_value));
+        ("EndedAt", (Option.map x.endedAt ~f:DateTime.to_value));
+        ("Status", (Option.map x.status ~f:ExecutionPreviewStatus.to_value));
+        ("StatusMessage", (Option.map x.statusMessage ~f:String_.to_value));
+        ("ExecutionPreview",
+          (Option.map x.executionPreview ~f:ExecutionPreview.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let executionPreview =
+        (Option.map ~f:ExecutionPreview.of_xml)
+          (Xml.child xml_arg0 "ExecutionPreview") in
+      let statusMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StatusMessage") in
+      let status =
+        (Option.map ~f:ExecutionPreviewStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let endedAt =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "EndedAt") in
+      let executionPreviewId =
+        (Option.map ~f:ExecutionPreviewId.of_xml)
+          (Xml.child xml_arg0 "ExecutionPreviewId") in
+      make ?executionPreview ?statusMessage ?status ?endedAt
+        ?executionPreviewId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let executionPreview =
+        field_map json__ "ExecutionPreview" ExecutionPreview.of_json in
+      let statusMessage = field_map json__ "StatusMessage" String_.of_json in
+      let status = field_map json__ "Status" ExecutionPreviewStatus.of_json in
+      let endedAt = field_map json__ "EndedAt" DateTime.of_json in
+      let executionPreviewId =
+        field_map json__ "ExecutionPreviewId" ExecutionPreviewId.of_json in
+      make ?executionPreview ?statusMessage ?status ?endedAt
+        ?executionPreviewId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Initiates the process of retrieving an existing preview that shows the effects that running a specified Automation runbook would have on the targeted resources."]
 module ResultAttribute =
   struct
     type nonrec t =
@@ -11049,9 +12240,9 @@ module ResultAttribute =
           (Xml.child_exn ~context:context_ xml_arg0 "TypeName") in
       make ~typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let typeName =
-        field_map_exn json "TypeName" InventoryItemTypeName.of_json in
+        field_map_exn json__ "TypeName" InventoryItemTypeName.of_json in
       make ~typeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The inventory item result attribute."]
@@ -11063,6 +12254,9 @@ module ResultAttributeList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResultAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11145,6 +12339,9 @@ module InventoryFilterValueList =
         ok_or_failwith
           ((check_list_max i ~max:40) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InventoryFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -11191,8 +12388,7 @@ module InventoryFilter =
       {
       key: InventoryFilterKey.t [@ocaml.doc "The name of the filter key."];
       values: InventoryFilterValueList.t
-        [@ocaml.doc
-          "Inventory filter values. Example: inventory filter where managed node IDs are specified as values Key=AWS:InstanceInformation.InstanceId,Values= i-a12b3c4d5e6g, i-1a2b3c4d5e6,Type=Equal."];
+        [@ocaml.doc "Inventory filter values."];
       type_: InventoryQueryOperatorType.t option
         [@ocaml.doc
           "The type of filter. The Exists filter must be used with aggregators. For more information, see Aggregating inventory data in the Amazon Web Services Systems Manager User Guide."]}
@@ -11217,15 +12413,15 @@ module InventoryFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?type_ ~values ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" InventoryQueryOperatorType.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" InventoryQueryOperatorType.of_json in
       let values =
-        field_map_exn json "Values" InventoryFilterValueList.of_json in
-      let key = field_map_exn json "Key" InventoryFilterKey.of_json in
+        field_map_exn json__ "Values" InventoryFilterValueList.of_json in
+      let key = field_map_exn json__ "Key" InventoryFilterKey.of_json in
       make ?type_ ~values ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "One or more filters. Use a filter to return a more specific list of results."]
+       "One or more filters. Use a filter to return a more specific list of results. Example formats for the aws ssm get-inventory command: --filters Key=AWS:InstanceInformation.AgentType,Values=amazon-ssm-agent,Type=Equal --filters Key=AWS:InstanceInformation.AgentVersion,Values=3.3.2299.0,Type=Equal --filters Key=AWS:InstanceInformation.ComputerName,Values=ip-192.0.2.0.us-east-2.compute.internal,Type=Equal --filters Key=AWS:InstanceInformation.InstanceId,Values=i-0a4cd6ceffEXAMPLE,i-1a2b3c4d5e6EXAMPLE,Type=Equal --filters Key=AWS:InstanceInformation.InstanceStatus,Values=Active,Type=Equal --filters Key=AWS:InstanceInformation.IpAddress,Values=198.51.100.0,Type=Equal --filters Key=AWS:InstanceInformation.PlatformName,Values=\"Amazon Linux\",Type=Equal --filters Key=AWS:InstanceInformation.PlatformType,Values=Linux,Type=Equal --filters Key=AWS:InstanceInformation.PlatformVersion,Values=2023,Type=BeginWith --filters Key=AWS:InstanceInformation.ResourceType,Values=EC2Instance,Type=Equal"]
 module InventoryFilterList =
   struct
     type nonrec t = InventoryFilter.t list
@@ -11234,6 +12430,9 @@ module InventoryFilterList =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InventoryFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11297,9 +12496,10 @@ module InventoryGroup =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~filters ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map_exn json "Filters" InventoryFilterList.of_json in
-      let name = field_map_exn json "Name" InventoryGroupName.of_json in
+    let of_json json__ =
+      let filters =
+        field_map_exn json__ "Filters" InventoryFilterList.of_json in
+      let name = field_map_exn json__ "Name" InventoryGroupName.of_json in
       make ~filters ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11312,6 +12512,9 @@ module InventoryGroupList =
         ok_or_failwith
           ((check_list_max i ~max:15) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InventoryGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11408,12 +12611,12 @@ module rec
           (Xml.child xml_arg0 "Expression") in
       make ?groups ?aggregators ?expression ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groups = field_map json "Groups" InventoryGroupList.of_json in
+    let of_json json__ =
+      let groups = field_map json__ "Groups" InventoryGroupList.of_json in
       let aggregators =
-        field_map json "Aggregators" InventoryAggregatorList.of_json in
+        field_map json__ "Aggregators" InventoryAggregatorList.of_json in
       let expression =
-        field_map json "Expression" InventoryAggregatorExpression.of_json in
+        field_map json__ "Expression" InventoryAggregatorExpression.of_json in
       make ?groups ?aggregators ?expression ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11436,6 +12639,9 @@ module rec
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InventoryAggregator.to_value)) |>
         (fun x -> `List x)
@@ -11515,14 +12721,14 @@ module GetInventoryRequest =
           (Xml.child xml_arg0 "Filters") in
       make ?maxResults ?nextToken ?resultAttributes ?aggregators ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let resultAttributes =
-        field_map json "ResultAttributes" ResultAttributeList.of_json in
+        field_map json__ "ResultAttributes" ResultAttributeList.of_json in
       let aggregators =
-        field_map json "Aggregators" InventoryAggregatorList.of_json in
-      let filters = field_map json "Filters" InventoryFilterList.of_json in
+        field_map json__ "Aggregators" InventoryAggregatorList.of_json in
+      let filters = field_map json__ "Filters" InventoryFilterList.of_json in
       make ?maxResults ?nextToken ?resultAttributes ?aggregators ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11566,6 +12772,8 @@ module InventoryItemEntry =
                        (AttributeValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -11582,6 +12790,9 @@ module InventoryItemEntryList =
           ((check_list_max i ~max:10000) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InventoryItemEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11639,42 +12850,43 @@ module InventoryResultItem =
   struct
     type nonrec t =
       {
-      typeName: InventoryItemTypeName.t
+      typeName: InventoryItemTypeName.t option
         [@ocaml.doc "The name of the inventory result item type."];
-      schemaVersion: InventoryItemSchemaVersion.t
+      schemaVersion: InventoryItemSchemaVersion.t option
         [@ocaml.doc "The schema version for the inventory result item/"];
       captureTime: InventoryItemCaptureTime.t option
         [@ocaml.doc "The time inventory item data was captured."];
       contentHash: InventoryItemContentHash.t option
         [@ocaml.doc
           "MD5 hash of the inventory item type contents. The content hash is used to determine whether to update inventory information. The PutInventory API doesn't update the inventory item type contents if the MD5 hash hasn't changed since last update."];
-      content: InventoryItemEntryList.t
+      content: InventoryItemEntryList.t option
         [@ocaml.doc
           "Contains all the inventory data of the item type. Results include attribute names and values."]}
-    let context_ = "InventoryResultItem"
-    let make ?captureTime =
-      fun ?contentHash ->
-        fun ~typeName ->
-          fun ~schemaVersion ->
-            fun ~content ->
+    let make ?typeName =
+      fun ?schemaVersion ->
+        fun ?captureTime ->
+          fun ?contentHash ->
+            fun ?content ->
               fun () ->
-                { captureTime; contentHash; typeName; schemaVersion; content
+                { typeName; schemaVersion; captureTime; contentHash; content
                 }
     let to_value x =
       structure_to_value
-        [("TypeName", (Some (InventoryItemTypeName.to_value x.typeName)));
+        [("TypeName",
+           (Option.map x.typeName ~f:InventoryItemTypeName.to_value));
         ("SchemaVersion",
-          (Some (InventoryItemSchemaVersion.to_value x.schemaVersion)));
+          (Option.map x.schemaVersion ~f:InventoryItemSchemaVersion.to_value));
         ("CaptureTime",
           (Option.map x.captureTime ~f:InventoryItemCaptureTime.to_value));
         ("ContentHash",
           (Option.map x.contentHash ~f:InventoryItemContentHash.to_value));
-        ("Content", (Some (InventoryItemEntryList.to_value x.content)))]
+        ("Content",
+          (Option.map x.content ~f:InventoryItemEntryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let content =
-        InventoryItemEntryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Content") in
+        (Option.map ~f:InventoryItemEntryList.of_xml)
+          (Xml.child xml_arg0 "Content") in
       let contentHash =
         (Option.map ~f:InventoryItemContentHash.of_xml)
           (Xml.child xml_arg0 "ContentHash") in
@@ -11682,25 +12894,24 @@ module InventoryResultItem =
         (Option.map ~f:InventoryItemCaptureTime.of_xml)
           (Xml.child xml_arg0 "CaptureTime") in
       let schemaVersion =
-        InventoryItemSchemaVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SchemaVersion") in
+        (Option.map ~f:InventoryItemSchemaVersion.of_xml)
+          (Xml.child xml_arg0 "SchemaVersion") in
       let typeName =
-        InventoryItemTypeName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TypeName") in
-      make ~content ?contentHash ?captureTime ~schemaVersion ~typeName ()
+        (Option.map ~f:InventoryItemTypeName.of_xml)
+          (Xml.child xml_arg0 "TypeName") in
+      make ?content ?contentHash ?captureTime ?schemaVersion ?typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let content =
-        field_map_exn json "Content" InventoryItemEntryList.of_json in
+    let of_json json__ =
+      let content = field_map json__ "Content" InventoryItemEntryList.of_json in
       let contentHash =
-        field_map json "ContentHash" InventoryItemContentHash.of_json in
+        field_map json__ "ContentHash" InventoryItemContentHash.of_json in
       let captureTime =
-        field_map json "CaptureTime" InventoryItemCaptureTime.of_json in
+        field_map json__ "CaptureTime" InventoryItemCaptureTime.of_json in
       let schemaVersion =
-        field_map_exn json "SchemaVersion" InventoryItemSchemaVersion.of_json in
+        field_map json__ "SchemaVersion" InventoryItemSchemaVersion.of_json in
       let typeName =
-        field_map_exn json "TypeName" InventoryItemTypeName.of_json in
-      make ~content ?contentHash ?captureTime ~schemaVersion ~typeName ()
+        field_map json__ "TypeName" InventoryItemTypeName.of_json in
+      make ?content ?contentHash ?captureTime ?schemaVersion ?typeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The inventory result item."]
 module InventoryResultItemMap =
@@ -11727,6 +12938,8 @@ module InventoryResultItemMap =
                        (InventoryResultItem.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -11771,9 +12984,9 @@ module InventoryResultEntity =
           (Xml.child xml_arg0 "Id") in
       make ?data ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let data = field_map json "Data" InventoryResultItemMap.of_json in
-      let id = field_map json "Id" InventoryResultEntityId.of_json in
+    let of_json json__ =
+      let data = field_map json__ "Data" InventoryResultItemMap.of_json in
+      let id = field_map json__ "Id" InventoryResultEntityId.of_json in
       make ?data ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Inventory query results."]
@@ -11781,6 +12994,9 @@ module InventoryResultEntityList =
   struct
     type nonrec t = InventoryResultEntity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InventoryResultEntity.to_value)) |>
         (fun x -> `List x)
@@ -11817,8 +13033,8 @@ module InvalidResultAttributeException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11837,8 +13053,8 @@ module InvalidInventoryGroupException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified inventory group isn't valid."]
@@ -11856,12 +13072,12 @@ module InvalidAggregatorException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified aggregator isn't valid for inventory groups. Verify that the aggregator uses a valid inventory type such as AWS:Application or AWS:InstanceInformation."]
+       "The specified aggregator isn't valid for the group type. Verify that the aggregator you provided is supported."]
 module GetInventoryResult =
   struct
     type nonrec t =
@@ -11970,10 +13186,10 @@ module GetInventoryResult =
           (Xml.child xml_arg0 "Entities") in
       make ?nextToken ?entities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let entities =
-        field_map json "Entities" InventoryResultEntityList.of_json in
+        field_map json__ "Entities" InventoryResultEntityList.of_json in
       make ?nextToken ?entities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12080,15 +13296,15 @@ module GetInventorySchemaRequest =
           (Xml.child xml_arg0 "TypeName") in
       make ?subType ?aggregator ?maxResults ?nextToken ?typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subType = field_map json "SubType" IsSubTypeSchema.of_json in
+    let of_json json__ =
+      let subType = field_map json__ "SubType" IsSubTypeSchema.of_json in
       let aggregator =
-        field_map json "Aggregator" AggregatorSchemaOnly.of_json in
+        field_map json__ "Aggregator" AggregatorSchemaOnly.of_json in
       let maxResults =
-        field_map json "MaxResults" GetInventorySchemaMaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "MaxResults" GetInventorySchemaMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let typeName =
-        field_map json "TypeName" InventoryItemTypeNameFilter.of_json in
+        field_map json__ "TypeName" InventoryItemTypeNameFilter.of_json in
       make ?subType ?aggregator ?maxResults ?nextToken ?typeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12151,31 +13367,31 @@ module InventoryItemAttribute =
   struct
     type nonrec t =
       {
-      name: InventoryItemAttributeName.t
+      name: InventoryItemAttributeName.t option
         [@ocaml.doc "Name of the inventory item attribute."];
-      dataType: InventoryAttributeDataType.t
+      dataType: InventoryAttributeDataType.t option
         [@ocaml.doc "The data type of the inventory item attribute."]}
-    let context_ = "InventoryItemAttribute"
-    let make ~name = fun ~dataType -> fun () -> { name; dataType }
+    let make ?name = fun ?dataType -> fun () -> { name; dataType }
     let to_value x =
       structure_to_value
-        [("Name", (Some (InventoryItemAttributeName.to_value x.name)));
-        ("DataType", (Some (InventoryAttributeDataType.to_value x.dataType)))]
+        [("Name", (Option.map x.name ~f:InventoryItemAttributeName.to_value));
+        ("DataType",
+          (Option.map x.dataType ~f:InventoryAttributeDataType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let dataType =
-        InventoryAttributeDataType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DataType") in
+        (Option.map ~f:InventoryAttributeDataType.of_xml)
+          (Xml.child xml_arg0 "DataType") in
       let name =
-        InventoryItemAttributeName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~dataType ~name ()
+        (Option.map ~f:InventoryItemAttributeName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      make ?dataType ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataType =
-        field_map_exn json "DataType" InventoryAttributeDataType.of_json in
-      let name = field_map_exn json "Name" InventoryItemAttributeName.of_json in
-      make ~dataType ~name ()
+        field_map json__ "DataType" InventoryAttributeDataType.of_json in
+      let name = field_map json__ "Name" InventoryItemAttributeName.of_json in
+      make ?dataType ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Attributes are the entries within the inventory item content. It contains name and value."]
@@ -12187,6 +13403,9 @@ module InventoryItemAttributeList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InventoryItemAttribute.to_value)) |>
         (fun x -> `List x)
@@ -12213,30 +13432,30 @@ module InventoryItemSchema =
   struct
     type nonrec t =
       {
-      typeName: InventoryItemTypeName.t
+      typeName: InventoryItemTypeName.t option
         [@ocaml.doc
           "The name of the inventory type. Default inventory item type names start with Amazon Web Services. Custom inventory type names will start with Custom. Default inventory item types include the following: AWS:AWSComponent, AWS:Application, AWS:InstanceInformation, AWS:Network, and AWS:WindowsUpdate."];
       version: InventoryItemSchemaVersion.t option
         [@ocaml.doc "The schema version for the inventory item."];
-      attributes: InventoryItemAttributeList.t
+      attributes: InventoryItemAttributeList.t option
         [@ocaml.doc
           "The schema attributes for inventory. This contains data type and attribute name."];
       displayName: InventoryTypeDisplayName.t option
         [@ocaml.doc
           "The alias name of the inventory type. The alias name is used for display purposes."]}
-    let context_ = "InventoryItemSchema"
-    let make ?version =
-      fun ?displayName ->
-        fun ~typeName ->
-          fun ~attributes ->
-            fun () -> { version; displayName; typeName; attributes }
+    let make ?typeName =
+      fun ?version ->
+        fun ?attributes ->
+          fun ?displayName ->
+            fun () -> { typeName; version; attributes; displayName }
     let to_value x =
       structure_to_value
-        [("TypeName", (Some (InventoryItemTypeName.to_value x.typeName)));
+        [("TypeName",
+           (Option.map x.typeName ~f:InventoryItemTypeName.to_value));
         ("Version",
           (Option.map x.version ~f:InventoryItemSchemaVersion.to_value));
         ("Attributes",
-          (Some (InventoryItemAttributeList.to_value x.attributes)));
+          (Option.map x.attributes ~f:InventoryItemAttributeList.to_value));
         ("DisplayName",
           (Option.map x.displayName ~f:InventoryTypeDisplayName.to_value))]
     let to_query v = to_query to_value v
@@ -12245,26 +13464,26 @@ module InventoryItemSchema =
         (Option.map ~f:InventoryTypeDisplayName.of_xml)
           (Xml.child xml_arg0 "DisplayName") in
       let attributes =
-        InventoryItemAttributeList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Attributes") in
+        (Option.map ~f:InventoryItemAttributeList.of_xml)
+          (Xml.child xml_arg0 "Attributes") in
       let version =
         (Option.map ~f:InventoryItemSchemaVersion.of_xml)
           (Xml.child xml_arg0 "Version") in
       let typeName =
-        InventoryItemTypeName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TypeName") in
-      make ?displayName ~attributes ?version ~typeName ()
+        (Option.map ~f:InventoryItemTypeName.of_xml)
+          (Xml.child xml_arg0 "TypeName") in
+      make ?displayName ?attributes ?version ?typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let displayName =
-        field_map json "DisplayName" InventoryTypeDisplayName.of_json in
+        field_map json__ "DisplayName" InventoryTypeDisplayName.of_json in
       let attributes =
-        field_map_exn json "Attributes" InventoryItemAttributeList.of_json in
+        field_map json__ "Attributes" InventoryItemAttributeList.of_json in
       let version =
-        field_map json "Version" InventoryItemSchemaVersion.of_json in
+        field_map json__ "Version" InventoryItemSchemaVersion.of_json in
       let typeName =
-        field_map_exn json "TypeName" InventoryItemTypeName.of_json in
-      make ?displayName ~attributes ?version ~typeName ()
+        field_map json__ "TypeName" InventoryItemTypeName.of_json in
+      make ?displayName ?attributes ?version ?typeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The inventory item schema definition. Users can use this to compose inventory query filters."]
@@ -12272,6 +13491,9 @@ module InventoryItemSchemaResultList =
   struct
     type nonrec t = InventoryItemSchema.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InventoryItemSchema.to_value)) |>
         (fun x -> `List x)
@@ -12362,10 +13584,10 @@ module GetInventorySchemaResult =
           (Xml.child xml_arg0 "Schemas") in
       make ?nextToken ?schemas ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let schemas =
-        field_map json "Schemas" InventoryItemSchemaResultList.of_json in
+        field_map json__ "Schemas" InventoryItemSchemaResultList.of_json in
       make ?nextToken ?schemas ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12390,9 +13612,9 @@ module GetMaintenanceWindowExecutionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WindowExecutionId") in
       make ~windowExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let windowExecutionId =
-        field_map_exn json "WindowExecutionId"
+        field_map_exn json__ "WindowExecutionId"
           MaintenanceWindowExecutionId.of_json in
       make ~windowExecutionId ()
     let to_json v = composed_to_json to_value v
@@ -12402,6 +13624,9 @@ module MaintenanceWindowExecutionTaskIdList =
   struct
     type nonrec t = MaintenanceWindowExecutionTaskId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MaintenanceWindowExecutionTaskId.to_value)) |>
         (fun x -> `List x)
@@ -12530,18 +13755,19 @@ module GetMaintenanceWindowExecutionResult =
       make ?endTime ?startTime ?statusDetails ?status ?taskIds
         ?windowExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "EndTime" DateTime.of_json in
-      let startTime = field_map json "StartTime" DateTime.of_json in
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
       let statusDetails =
-        field_map json "StatusDetails"
+        field_map json__ "StatusDetails"
           MaintenanceWindowExecutionStatusDetails.of_json in
       let status =
-        field_map json "Status" MaintenanceWindowExecutionStatus.of_json in
+        field_map json__ "Status" MaintenanceWindowExecutionStatus.of_json in
       let taskIds =
-        field_map json "TaskIds" MaintenanceWindowExecutionTaskIdList.of_json in
+        field_map json__ "TaskIds"
+          MaintenanceWindowExecutionTaskIdList.of_json in
       let windowExecutionId =
-        field_map json "WindowExecutionId"
+        field_map json__ "WindowExecutionId"
           MaintenanceWindowExecutionId.of_json in
       make ?endTime ?startTime ?statusDetails ?status ?taskIds
         ?windowExecutionId ()
@@ -12588,14 +13814,15 @@ module GetMaintenanceWindowExecutionTaskInvocationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WindowExecutionId") in
       make ~invocationId ~taskId ~windowExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let invocationId =
-        field_map_exn json "InvocationId"
+        field_map_exn json__ "InvocationId"
           MaintenanceWindowExecutionTaskInvocationId.of_json in
       let taskId =
-        field_map_exn json "TaskId" MaintenanceWindowExecutionTaskId.of_json in
+        field_map_exn json__ "TaskId"
+          MaintenanceWindowExecutionTaskId.of_json in
       let windowExecutionId =
-        field_map_exn json "WindowExecutionId"
+        field_map_exn json__ "WindowExecutionId"
           MaintenanceWindowExecutionId.of_json in
       make ~invocationId ~taskId ~windowExecutionId ()
     let to_json v = composed_to_json to_value v
@@ -12766,34 +13993,35 @@ module GetMaintenanceWindowExecutionTaskInvocationResult =
         ?statusDetails ?status ?parameters ?taskType ?executionId
         ?invocationId ?taskExecutionId ?windowExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let windowTargetId =
-        field_map json "WindowTargetId" MaintenanceWindowTaskTargetId.of_json in
+        field_map json__ "WindowTargetId"
+          MaintenanceWindowTaskTargetId.of_json in
       let ownerInformation =
-        field_map json "OwnerInformation" OwnerInformation.of_json in
-      let endTime = field_map json "EndTime" DateTime.of_json in
-      let startTime = field_map json "StartTime" DateTime.of_json in
+        field_map json__ "OwnerInformation" OwnerInformation.of_json in
+      let endTime = field_map json__ "EndTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
       let statusDetails =
-        field_map json "StatusDetails"
+        field_map json__ "StatusDetails"
           MaintenanceWindowExecutionStatusDetails.of_json in
       let status =
-        field_map json "Status" MaintenanceWindowExecutionStatus.of_json in
+        field_map json__ "Status" MaintenanceWindowExecutionStatus.of_json in
       let parameters =
-        field_map json "Parameters"
+        field_map json__ "Parameters"
           MaintenanceWindowExecutionTaskInvocationParameters.of_json in
       let taskType =
-        field_map json "TaskType" MaintenanceWindowTaskType.of_json in
+        field_map json__ "TaskType" MaintenanceWindowTaskType.of_json in
       let executionId =
-        field_map json "ExecutionId"
+        field_map json__ "ExecutionId"
           MaintenanceWindowExecutionTaskExecutionId.of_json in
       let invocationId =
-        field_map json "InvocationId"
+        field_map json__ "InvocationId"
           MaintenanceWindowExecutionTaskInvocationId.of_json in
       let taskExecutionId =
-        field_map json "TaskExecutionId"
+        field_map json__ "TaskExecutionId"
           MaintenanceWindowExecutionTaskId.of_json in
       let windowExecutionId =
-        field_map json "WindowExecutionId"
+        field_map json__ "WindowExecutionId"
           MaintenanceWindowExecutionId.of_json in
       make ?windowTargetId ?ownerInformation ?endTime ?startTime
         ?statusDetails ?status ?parameters ?taskType ?executionId
@@ -12830,11 +14058,12 @@ module GetMaintenanceWindowExecutionTaskRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WindowExecutionId") in
       make ~taskId ~windowExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let taskId =
-        field_map_exn json "TaskId" MaintenanceWindowExecutionTaskId.of_json in
+        field_map_exn json__ "TaskId"
+          MaintenanceWindowExecutionTaskId.of_json in
       let windowExecutionId =
-        field_map_exn json "WindowExecutionId"
+        field_map_exn json__ "WindowExecutionId"
           MaintenanceWindowExecutionId.of_json in
       make ~taskId ~windowExecutionId ()
     let to_json v = composed_to_json to_value v
@@ -12844,6 +14073,9 @@ module MaintenanceWindowTaskParametersList =
   struct
     type nonrec t = MaintenanceWindowTaskParameters.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MaintenanceWindowTaskParameters.to_value)) |>
         (fun x -> `List x)
@@ -12901,7 +14133,13 @@ module GetMaintenanceWindowExecutionTaskResult =
       startTime: DateTime.t option
         [@ocaml.doc "The time the task execution started."];
       endTime: DateTime.t option
-        [@ocaml.doc "The time the task execution completed."]}
+        [@ocaml.doc "The time the task execution completed."];
+      alarmConfiguration: AlarmConfiguration.t option
+        [@ocaml.doc
+          "The details for the CloudWatch alarm you applied to your maintenance window task."];
+      triggeredAlarms: AlarmStateInformationList.t option
+        [@ocaml.doc
+          "The CloudWatch alarms that were invoked by the maintenance window task."]}
     type nonrec error =
       [ `DoesNotExistException of DoesNotExistException.t 
       | `InternalServerError of InternalServerError.t 
@@ -12919,22 +14157,26 @@ module GetMaintenanceWindowExecutionTaskResult =
                         fun ?statusDetails ->
                           fun ?startTime ->
                             fun ?endTime ->
-                              fun () ->
-                                {
-                                  windowExecutionId;
-                                  taskExecutionId;
-                                  taskArn;
-                                  serviceRole;
-                                  type_;
-                                  taskParameters;
-                                  priority;
-                                  maxConcurrency;
-                                  maxErrors;
-                                  status;
-                                  statusDetails;
-                                  startTime;
-                                  endTime
-                                }
+                              fun ?alarmConfiguration ->
+                                fun ?triggeredAlarms ->
+                                  fun () ->
+                                    {
+                                      windowExecutionId;
+                                      taskExecutionId;
+                                      taskArn;
+                                      serviceRole;
+                                      type_;
+                                      taskParameters;
+                                      priority;
+                                      maxConcurrency;
+                                      maxErrors;
+                                      status;
+                                      statusDetails;
+                                      startTime;
+                                      endTime;
+                                      alarmConfiguration;
+                                      triggeredAlarms
+                                    }
     let error_of_json name json =
       match name with
       | "DoesNotExistException" ->
@@ -12993,9 +14235,19 @@ module GetMaintenanceWindowExecutionTaskResult =
           (Option.map x.statusDetails
              ~f:MaintenanceWindowExecutionStatusDetails.to_value));
         ("StartTime", (Option.map x.startTime ~f:DateTime.to_value));
-        ("EndTime", (Option.map x.endTime ~f:DateTime.to_value))]
+        ("EndTime", (Option.map x.endTime ~f:DateTime.to_value));
+        ("AlarmConfiguration",
+          (Option.map x.alarmConfiguration ~f:AlarmConfiguration.to_value));
+        ("TriggeredAlarms",
+          (Option.map x.triggeredAlarms ~f:AlarmStateInformationList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let triggeredAlarms =
+        (Option.map ~f:AlarmStateInformationList.of_xml)
+          (Xml.child xml_arg0 "TriggeredAlarms") in
+      let alarmConfiguration =
+        (Option.map ~f:AlarmConfiguration.of_xml)
+          (Xml.child xml_arg0 "AlarmConfiguration") in
       let endTime =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "EndTime") in
       let startTime =
@@ -13031,38 +14283,45 @@ module GetMaintenanceWindowExecutionTaskResult =
       let windowExecutionId =
         (Option.map ~f:MaintenanceWindowExecutionId.of_xml)
           (Xml.child xml_arg0 "WindowExecutionId") in
-      make ?endTime ?startTime ?statusDetails ?status ?maxErrors
-        ?maxConcurrency ?priority ?taskParameters ?type_ ?serviceRole
-        ?taskArn ?taskExecutionId ?windowExecutionId ()
+      make ?triggeredAlarms ?alarmConfiguration ?endTime ?startTime
+        ?statusDetails ?status ?maxErrors ?maxConcurrency ?priority
+        ?taskParameters ?type_ ?serviceRole ?taskArn ?taskExecutionId
+        ?windowExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "EndTime" DateTime.of_json in
-      let startTime = field_map json "StartTime" DateTime.of_json in
+    let of_json json__ =
+      let triggeredAlarms =
+        field_map json__ "TriggeredAlarms" AlarmStateInformationList.of_json in
+      let alarmConfiguration =
+        field_map json__ "AlarmConfiguration" AlarmConfiguration.of_json in
+      let endTime = field_map json__ "EndTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
       let statusDetails =
-        field_map json "StatusDetails"
+        field_map json__ "StatusDetails"
           MaintenanceWindowExecutionStatusDetails.of_json in
       let status =
-        field_map json "Status" MaintenanceWindowExecutionStatus.of_json in
-      let maxErrors = field_map json "MaxErrors" MaxErrors.of_json in
+        field_map json__ "Status" MaintenanceWindowExecutionStatus.of_json in
+      let maxErrors = field_map json__ "MaxErrors" MaxErrors.of_json in
       let maxConcurrency =
-        field_map json "MaxConcurrency" MaxConcurrency.of_json in
+        field_map json__ "MaxConcurrency" MaxConcurrency.of_json in
       let priority =
-        field_map json "Priority" MaintenanceWindowTaskPriority.of_json in
+        field_map json__ "Priority" MaintenanceWindowTaskPriority.of_json in
       let taskParameters =
-        field_map json "TaskParameters"
+        field_map json__ "TaskParameters"
           MaintenanceWindowTaskParametersList.of_json in
-      let type_ = field_map json "Type" MaintenanceWindowTaskType.of_json in
-      let serviceRole = field_map json "ServiceRole" ServiceRole.of_json in
-      let taskArn = field_map json "TaskArn" MaintenanceWindowTaskArn.of_json in
+      let type_ = field_map json__ "Type" MaintenanceWindowTaskType.of_json in
+      let serviceRole = field_map json__ "ServiceRole" ServiceRole.of_json in
+      let taskArn =
+        field_map json__ "TaskArn" MaintenanceWindowTaskArn.of_json in
       let taskExecutionId =
-        field_map json "TaskExecutionId"
+        field_map json__ "TaskExecutionId"
           MaintenanceWindowExecutionTaskId.of_json in
       let windowExecutionId =
-        field_map json "WindowExecutionId"
+        field_map json__ "WindowExecutionId"
           MaintenanceWindowExecutionId.of_json in
-      make ?endTime ?startTime ?statusDetails ?status ?maxErrors
-        ?maxConcurrency ?priority ?taskParameters ?type_ ?serviceRole
-        ?taskArn ?taskExecutionId ?windowExecutionId ()
+      make ?triggeredAlarms ?alarmConfiguration ?endTime ?startTime
+        ?statusDetails ?status ?maxErrors ?maxConcurrency ?priority
+        ?taskParameters ?type_ ?serviceRole ?taskArn ?taskExecutionId
+        ?windowExecutionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the details about a specific task run as part of a maintenance window execution."]
@@ -13085,9 +14344,9 @@ module GetMaintenanceWindowRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WindowId") in
       make ~windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let windowId =
-        field_map_exn json "WindowId" MaintenanceWindowId.of_json in
+        field_map_exn json__ "WindowId" MaintenanceWindowId.of_json in
       make ~windowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a maintenance window."]
@@ -13284,33 +14543,34 @@ module GetMaintenanceWindowResult =
         ?scheduleTimezone ?schedule ?endDate ?startDate ?description ?name
         ?windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modifiedDate = field_map json "ModifiedDate" DateTime.of_json in
-      let createdDate = field_map json "CreatedDate" DateTime.of_json in
-      let enabled = field_map json "Enabled" MaintenanceWindowEnabled.of_json in
+    let of_json json__ =
+      let modifiedDate = field_map json__ "ModifiedDate" DateTime.of_json in
+      let createdDate = field_map json__ "CreatedDate" DateTime.of_json in
+      let enabled =
+        field_map json__ "Enabled" MaintenanceWindowEnabled.of_json in
       let allowUnassociatedTargets =
-        field_map json "AllowUnassociatedTargets"
+        field_map json__ "AllowUnassociatedTargets"
           MaintenanceWindowAllowUnassociatedTargets.of_json in
-      let cutoff = field_map json "Cutoff" MaintenanceWindowCutoff.of_json in
+      let cutoff = field_map json__ "Cutoff" MaintenanceWindowCutoff.of_json in
       let duration =
-        field_map json "Duration" MaintenanceWindowDurationHours.of_json in
+        field_map json__ "Duration" MaintenanceWindowDurationHours.of_json in
       let nextExecutionTime =
-        field_map json "NextExecutionTime"
+        field_map json__ "NextExecutionTime"
           MaintenanceWindowStringDateTime.of_json in
       let scheduleOffset =
-        field_map json "ScheduleOffset" MaintenanceWindowOffset.of_json in
+        field_map json__ "ScheduleOffset" MaintenanceWindowOffset.of_json in
       let scheduleTimezone =
-        field_map json "ScheduleTimezone" MaintenanceWindowTimezone.of_json in
+        field_map json__ "ScheduleTimezone" MaintenanceWindowTimezone.of_json in
       let schedule =
-        field_map json "Schedule" MaintenanceWindowSchedule.of_json in
+        field_map json__ "Schedule" MaintenanceWindowSchedule.of_json in
       let endDate =
-        field_map json "EndDate" MaintenanceWindowStringDateTime.of_json in
+        field_map json__ "EndDate" MaintenanceWindowStringDateTime.of_json in
       let startDate =
-        field_map json "StartDate" MaintenanceWindowStringDateTime.of_json in
+        field_map json__ "StartDate" MaintenanceWindowStringDateTime.of_json in
       let description =
-        field_map json "Description" MaintenanceWindowDescription.of_json in
-      let name = field_map json "Name" MaintenanceWindowName.of_json in
-      let windowId = field_map json "WindowId" MaintenanceWindowId.of_json in
+        field_map json__ "Description" MaintenanceWindowDescription.of_json in
+      let name = field_map json__ "Name" MaintenanceWindowName.of_json in
+      let windowId = field_map json__ "WindowId" MaintenanceWindowId.of_json in
       make ?modifiedDate ?createdDate ?enabled ?allowUnassociatedTargets
         ?cutoff ?duration ?nextExecutionTime ?scheduleOffset
         ?scheduleTimezone ?schedule ?endDate ?startDate ?description ?name
@@ -13344,11 +14604,11 @@ module GetMaintenanceWindowTaskRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WindowId") in
       make ~windowTaskId ~windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let windowTaskId =
-        field_map_exn json "WindowTaskId" MaintenanceWindowTaskId.of_json in
+        field_map_exn json__ "WindowTaskId" MaintenanceWindowTaskId.of_json in
       let windowId =
-        field_map_exn json "WindowId" MaintenanceWindowId.of_json in
+        field_map_exn json__ "WindowId" MaintenanceWindowId.of_json in
       make ~windowTaskId ~windowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13413,11 +14673,11 @@ module MaintenanceWindowStepFunctionsParameters =
           (Xml.child xml_arg0 "Input") in
       make ?name ?input ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let name =
-        field_map json "Name" MaintenanceWindowStepFunctionsName.of_json in
+        field_map json__ "Name" MaintenanceWindowStepFunctionsName.of_json in
       let input =
-        field_map json "Input" MaintenanceWindowStepFunctionsInput.of_json in
+        field_map json__ "Input" MaintenanceWindowStepFunctionsInput.of_json in
       make ?name ?input ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13449,7 +14709,7 @@ module MaintenanceWindowRunCommandParameters =
         [@ocaml.doc "The parameters for the RUN_COMMAND task execution."];
       serviceRoleArn: ServiceRole.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) service role to use to publish Amazon Simple Notification Service (Amazon SNS) notifications for maintenance window Run Command tasks."];
+          "The Amazon Resource Name (ARN) of the IAM service role for Amazon Web Services Systems Manager to assume when running a maintenance window task. If you do not specify a service role ARN, Systems Manager uses a service-linked role in your account. If no appropriate service-linked role for Systems Manager exists in your account, it is created when you run RegisterTaskWithMaintenanceWindow. However, for an improved security posture, we strongly recommend creating a custom policy and custom service role for running your maintenance window tasks. The policy can be crafted to provide only the permissions needed for your particular maintenance window tasks. For more information, see Setting up Maintenance Windows in the in the Amazon Web Services Systems Manager User Guide."];
       timeoutSeconds: TimeoutSeconds.t option
         [@ocaml.doc
           "If this time is reached and the command hasn't already started running, it doesn't run."]}
@@ -13538,27 +14798,27 @@ module MaintenanceWindowRunCommandParameters =
         ?outputS3BucketName ?notificationConfig ?documentVersion
         ?documentHashType ?documentHash ?cloudWatchOutputConfig ?comment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timeoutSeconds =
-        field_map json "TimeoutSeconds" TimeoutSeconds.of_json in
+        field_map json__ "TimeoutSeconds" TimeoutSeconds.of_json in
       let serviceRoleArn =
-        field_map json "ServiceRoleArn" ServiceRole.of_json in
-      let parameters = field_map json "Parameters" Parameters.of_json in
+        field_map json__ "ServiceRoleArn" ServiceRole.of_json in
+      let parameters = field_map json__ "Parameters" Parameters.of_json in
       let outputS3KeyPrefix =
-        field_map json "OutputS3KeyPrefix" S3KeyPrefix.of_json in
+        field_map json__ "OutputS3KeyPrefix" S3KeyPrefix.of_json in
       let outputS3BucketName =
-        field_map json "OutputS3BucketName" S3BucketName.of_json in
+        field_map json__ "OutputS3BucketName" S3BucketName.of_json in
       let notificationConfig =
-        field_map json "NotificationConfig" NotificationConfig.of_json in
+        field_map json__ "NotificationConfig" NotificationConfig.of_json in
       let documentVersion =
-        field_map json "DocumentVersion" DocumentVersion.of_json in
+        field_map json__ "DocumentVersion" DocumentVersion.of_json in
       let documentHashType =
-        field_map json "DocumentHashType" DocumentHashType.of_json in
-      let documentHash = field_map json "DocumentHash" DocumentHash.of_json in
+        field_map json__ "DocumentHashType" DocumentHashType.of_json in
+      let documentHash = field_map json__ "DocumentHash" DocumentHash.of_json in
       let cloudWatchOutputConfig =
-        field_map json "CloudWatchOutputConfig"
+        field_map json__ "CloudWatchOutputConfig"
           CloudWatchOutputConfig.of_json in
-      let comment = field_map json "Comment" Comment.of_json in
+      let comment = field_map json__ "Comment" Comment.of_json in
       make ?timeoutSeconds ?serviceRoleArn ?parameters ?outputS3KeyPrefix
         ?outputS3BucketName ?notificationConfig ?documentVersion
         ?documentHashType ?documentHash ?cloudWatchOutputConfig ?comment ()
@@ -13652,13 +14912,13 @@ module MaintenanceWindowLambdaParameters =
           (Xml.child xml_arg0 "ClientContext") in
       make ?payload ?qualifier ?clientContext ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let payload =
-        field_map json "Payload" MaintenanceWindowLambdaPayload.of_json in
+        field_map json__ "Payload" MaintenanceWindowLambdaPayload.of_json in
       let qualifier =
-        field_map json "Qualifier" MaintenanceWindowLambdaQualifier.of_json in
+        field_map json__ "Qualifier" MaintenanceWindowLambdaQualifier.of_json in
       let clientContext =
-        field_map json "ClientContext"
+        field_map json__ "ClientContext"
           MaintenanceWindowLambdaClientContext.of_json in
       make ?payload ?qualifier ?clientContext ()
     let to_json v = composed_to_json to_value v
@@ -13692,11 +14952,11 @@ module MaintenanceWindowAutomationParameters =
           (Xml.child xml_arg0 "DocumentVersion") in
       make ?parameters ?documentVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameters =
-        field_map json "Parameters" AutomationParameterMap.of_json in
+        field_map json__ "Parameters" AutomationParameterMap.of_json in
       let documentVersion =
-        field_map json "DocumentVersion" DocumentVersion.of_json in
+        field_map json__ "DocumentVersion" DocumentVersion.of_json in
       make ?parameters ?documentVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The parameters for an AUTOMATION task type."]
@@ -13746,17 +15006,17 @@ module MaintenanceWindowTaskInvocationParameters =
           (Xml.child xml_arg0 "RunCommand") in
       make ?lambda ?stepFunctions ?automation ?runCommand ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lambda =
-        field_map json "Lambda" MaintenanceWindowLambdaParameters.of_json in
+        field_map json__ "Lambda" MaintenanceWindowLambdaParameters.of_json in
       let stepFunctions =
-        field_map json "StepFunctions"
+        field_map json__ "StepFunctions"
           MaintenanceWindowStepFunctionsParameters.of_json in
       let automation =
-        field_map json "Automation"
+        field_map json__ "Automation"
           MaintenanceWindowAutomationParameters.of_json in
       let runCommand =
-        field_map json "RunCommand"
+        field_map json__ "RunCommand"
           MaintenanceWindowRunCommandParameters.of_json in
       make ?lambda ?stepFunctions ?automation ?runCommand ()
     let to_json v = composed_to_json to_value v
@@ -13776,7 +15036,7 @@ module GetMaintenanceWindowTaskResult =
           "The resource that the task used during execution. For RUN_COMMAND and AUTOMATION task types, the value of TaskArn is the SSM document name/ARN. For LAMBDA tasks, the value is the function name/ARN. For STEP_FUNCTIONS tasks, the value is the state machine ARN."];
       serviceRoleArn: ServiceRole.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) service role to use to publish Amazon Simple Notification Service (Amazon SNS) notifications for maintenance window Run Command tasks."];
+          "The Amazon Resource Name (ARN) of the IAM service role for Amazon Web Services Systems Manager to assume when running a maintenance window task. If you do not specify a service role ARN, Systems Manager uses a service-linked role in your account. If no appropriate service-linked role for Systems Manager exists in your account, it is created when you run RegisterTaskWithMaintenanceWindow. However, for an improved security posture, we strongly recommend creating a custom policy and custom service role for running your maintenance window tasks. The policy can be crafted to provide only the permissions needed for your particular maintenance window tasks. For more information, see Setting up Maintenance Windows in the in the Amazon Web Services Systems Manager User Guide."];
       taskType: MaintenanceWindowTaskType.t option
         [@ocaml.doc "The type of task to run."];
       taskParameters: MaintenanceWindowTaskParameters.t option
@@ -13803,7 +15063,10 @@ module GetMaintenanceWindowTaskResult =
         [@ocaml.doc "The retrieved task description."];
       cutoffBehavior: MaintenanceWindowTaskCutoffBehavior.t option
         [@ocaml.doc
-          "The action to take on tasks when the maintenance window cutoff time is reached. CONTINUE_TASK means that tasks continue to run. For Automation, Lambda, Step Functions tasks, CANCEL_TASK means that currently running task invocations continue, but no new task invocations are started. For Run Command tasks, CANCEL_TASK means the system attempts to stop the task by sending a CancelCommand operation."]}
+          "The action to take on tasks when the maintenance window cutoff time is reached. CONTINUE_TASK means that tasks continue to run. For Automation, Lambda, Step Functions tasks, CANCEL_TASK means that currently running task invocations continue, but no new task invocations are started. For Run Command tasks, CANCEL_TASK means the system attempts to stop the task by sending a CancelCommand operation."];
+      alarmConfiguration: AlarmConfiguration.t option
+        [@ocaml.doc
+          "The details for the CloudWatch alarm you applied to your maintenance window task."]}
     type nonrec error =
       [ `DoesNotExistException of DoesNotExistException.t 
       | `InternalServerError of InternalServerError.t 
@@ -13823,24 +15086,26 @@ module GetMaintenanceWindowTaskResult =
                             fun ?name ->
                               fun ?description ->
                                 fun ?cutoffBehavior ->
-                                  fun () ->
-                                    {
-                                      windowId;
-                                      windowTaskId;
-                                      targets;
-                                      taskArn;
-                                      serviceRoleArn;
-                                      taskType;
-                                      taskParameters;
-                                      taskInvocationParameters;
-                                      priority;
-                                      maxConcurrency;
-                                      maxErrors;
-                                      loggingInfo;
-                                      name;
-                                      description;
-                                      cutoffBehavior
-                                    }
+                                  fun ?alarmConfiguration ->
+                                    fun () ->
+                                      {
+                                        windowId;
+                                        windowTaskId;
+                                        targets;
+                                        taskArn;
+                                        serviceRoleArn;
+                                        taskType;
+                                        taskParameters;
+                                        taskInvocationParameters;
+                                        priority;
+                                        maxConcurrency;
+                                        maxErrors;
+                                        loggingInfo;
+                                        name;
+                                        description;
+                                        cutoffBehavior;
+                                        alarmConfiguration
+                                      }
     let error_of_json name json =
       match name with
       | "DoesNotExistException" ->
@@ -13903,9 +15168,14 @@ module GetMaintenanceWindowTaskResult =
           (Option.map x.description ~f:MaintenanceWindowDescription.to_value));
         ("CutoffBehavior",
           (Option.map x.cutoffBehavior
-             ~f:MaintenanceWindowTaskCutoffBehavior.to_value))]
+             ~f:MaintenanceWindowTaskCutoffBehavior.to_value));
+        ("AlarmConfiguration",
+          (Option.map x.alarmConfiguration ~f:AlarmConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let alarmConfiguration =
+        (Option.map ~f:AlarmConfiguration.of_xml)
+          (Xml.child xml_arg0 "AlarmConfiguration") in
       let cutoffBehavior =
         (Option.map ~f:MaintenanceWindowTaskCutoffBehavior.of_xml)
           (Xml.child xml_arg0 "CutoffBehavior") in
@@ -13948,43 +15218,46 @@ module GetMaintenanceWindowTaskResult =
       let windowId =
         (Option.map ~f:MaintenanceWindowId.of_xml)
           (Xml.child xml_arg0 "WindowId") in
-      make ?cutoffBehavior ?description ?name ?loggingInfo ?maxErrors
-        ?maxConcurrency ?priority ?taskInvocationParameters ?taskParameters
-        ?taskType ?serviceRoleArn ?taskArn ?targets ?windowTaskId ?windowId
-        ()
+      make ?alarmConfiguration ?cutoffBehavior ?description ?name
+        ?loggingInfo ?maxErrors ?maxConcurrency ?priority
+        ?taskInvocationParameters ?taskParameters ?taskType ?serviceRoleArn
+        ?taskArn ?targets ?windowTaskId ?windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let alarmConfiguration =
+        field_map json__ "AlarmConfiguration" AlarmConfiguration.of_json in
       let cutoffBehavior =
-        field_map json "CutoffBehavior"
+        field_map json__ "CutoffBehavior"
           MaintenanceWindowTaskCutoffBehavior.of_json in
       let description =
-        field_map json "Description" MaintenanceWindowDescription.of_json in
-      let name = field_map json "Name" MaintenanceWindowName.of_json in
-      let loggingInfo = field_map json "LoggingInfo" LoggingInfo.of_json in
-      let maxErrors = field_map json "MaxErrors" MaxErrors.of_json in
+        field_map json__ "Description" MaintenanceWindowDescription.of_json in
+      let name = field_map json__ "Name" MaintenanceWindowName.of_json in
+      let loggingInfo = field_map json__ "LoggingInfo" LoggingInfo.of_json in
+      let maxErrors = field_map json__ "MaxErrors" MaxErrors.of_json in
       let maxConcurrency =
-        field_map json "MaxConcurrency" MaxConcurrency.of_json in
+        field_map json__ "MaxConcurrency" MaxConcurrency.of_json in
       let priority =
-        field_map json "Priority" MaintenanceWindowTaskPriority.of_json in
+        field_map json__ "Priority" MaintenanceWindowTaskPriority.of_json in
       let taskInvocationParameters =
-        field_map json "TaskInvocationParameters"
+        field_map json__ "TaskInvocationParameters"
           MaintenanceWindowTaskInvocationParameters.of_json in
       let taskParameters =
-        field_map json "TaskParameters"
+        field_map json__ "TaskParameters"
           MaintenanceWindowTaskParameters.of_json in
       let taskType =
-        field_map json "TaskType" MaintenanceWindowTaskType.of_json in
+        field_map json__ "TaskType" MaintenanceWindowTaskType.of_json in
       let serviceRoleArn =
-        field_map json "ServiceRoleArn" ServiceRole.of_json in
-      let taskArn = field_map json "TaskArn" MaintenanceWindowTaskArn.of_json in
-      let targets = field_map json "Targets" Targets.of_json in
+        field_map json__ "ServiceRoleArn" ServiceRole.of_json in
+      let taskArn =
+        field_map json__ "TaskArn" MaintenanceWindowTaskArn.of_json in
+      let targets = field_map json__ "Targets" Targets.of_json in
       let windowTaskId =
-        field_map json "WindowTaskId" MaintenanceWindowTaskId.of_json in
-      let windowId = field_map json "WindowId" MaintenanceWindowId.of_json in
-      make ?cutoffBehavior ?description ?name ?loggingInfo ?maxErrors
-        ?maxConcurrency ?priority ?taskInvocationParameters ?taskParameters
-        ?taskType ?serviceRoleArn ?taskArn ?targets ?windowTaskId ?windowId
-        ()
+        field_map json__ "WindowTaskId" MaintenanceWindowTaskId.of_json in
+      let windowId = field_map json__ "WindowId" MaintenanceWindowId.of_json in
+      make ?alarmConfiguration ?cutoffBehavior ?description ?name
+        ?loggingInfo ?maxErrors ?maxConcurrency ?priority
+        ?taskInvocationParameters ?taskParameters ?taskType ?serviceRoleArn
+        ?taskArn ?targets ?windowTaskId ?windowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the details of a maintenance window task. For maintenance window tasks without a specified target, you can't supply values for --max-errors and --max-concurrency. Instead, the system inserts a placeholder value of 1, which may be reported in the response to this command. These values don't affect the running of your task and can be ignored. To retrieve a list of tasks in a maintenance window, instead use the DescribeMaintenanceWindowTasks command."]
@@ -13993,25 +15266,32 @@ module GetOpsItemRequest =
     type nonrec t =
       {
       opsItemId: OpsItemId.t
-        [@ocaml.doc "The ID of the OpsItem that you want to get."]}
+        [@ocaml.doc "The ID of the OpsItem that you want to get."];
+      opsItemArn: OpsItemArn.t option
+        [@ocaml.doc "The OpsItem Amazon Resource Name (ARN)."]}
     let context_ = "GetOpsItemRequest"
-    let make ~opsItemId = fun () -> { opsItemId }
+    let make ?opsItemArn =
+      fun ~opsItemId -> fun () -> { opsItemArn; opsItemId }
     let to_value x =
       structure_to_value
-        [("OpsItemId", (Some (OpsItemId.to_value x.opsItemId)))]
+        [("OpsItemId", (Some (OpsItemId.to_value x.opsItemId)));
+        ("OpsItemArn", (Option.map x.opsItemArn ~f:OpsItemArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let opsItemArn =
+        (Option.map ~f:OpsItemArn.of_xml) (Xml.child xml_arg0 "OpsItemArn") in
       let opsItemId =
         OpsItemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OpsItemId") in
-      make ~opsItemId ()
+      make ?opsItemArn ~opsItemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let opsItemId = field_map_exn json "OpsItemId" OpsItemId.of_json in
-      make ~opsItemId ()
+    let of_json json__ =
+      let opsItemArn = field_map json__ "OpsItemArn" OpsItemArn.of_json in
+      let opsItemId = field_map_exn json__ "OpsItemId" OpsItemId.of_json in
+      make ?opsItemArn ~opsItemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Get information about an OpsItem by using the ID. You must have permission in Identity and Access Management (IAM) to view information about an OpsItem. For more information, see Getting started with OpsCenter in the Amazon Web Services Systems Manager User Guide. Operations engineers and IT professionals use Amazon Web Services Systems Manager OpsCenter to view, investigate, and remediate operational issues impacting the performance and health of their Amazon Web Services resources. For more information, see OpsCenter in the Amazon Web Services Systems Manager User Guide."]
+       "Get information about an OpsItem by using the ID. You must have permission in Identity and Access Management (IAM) to view information about an OpsItem. For more information, see Set up OpsCenter in the Amazon Web Services Systems Manager User Guide. Operations engineers and IT professionals use Amazon Web Services Systems Manager OpsCenter to view, investigate, and remediate operational issues impacting the performance and health of their Amazon Web Services resources. For more information, see Amazon Web Services Systems Manager OpsCenter in the Amazon Web Services Systems Manager User Guide."]
 module OpsItem =
   struct
     type nonrec t =
@@ -14021,7 +15301,7 @@ module OpsItem =
           "The ARN of the Amazon Web Services account that created the OpsItem."];
       opsItemType: OpsItemType.t option
         [@ocaml.doc
-          "The type of OpsItem. Currently, the only valid values are /aws/changerequest and /aws/issue."];
+          "The type of OpsItem. Systems Manager supports the following types of OpsItems: /aws/issue This type of OpsItem is used for default OpsItems created by OpsCenter. /aws/changerequest This type of OpsItem is used by Change Manager for reviewing and approving or rejecting change requests. /aws/insight This type of OpsItem is used by OpsCenter for aggregating and reporting on duplicate OpsItems."];
       createdTime: DateTime.t option
         [@ocaml.doc "The date and time the OpsItem was created."];
       description: OpsItemDescription.t option
@@ -14042,7 +15322,7 @@ module OpsItem =
           "One or more OpsItems that share something in common with the current OpsItem. For example, related OpsItems can include OpsItems with similar error messages, impacted resources, or statuses for the impacted resource."];
       status: OpsItemStatus.t option
         [@ocaml.doc
-          "The OpsItem status. Status can be Open, In Progress, or Resolved. For more information, see Editing OpsItem details in the Amazon Web Services Systems Manager User Guide."];
+          "The OpsItem status. For more information, see Editing OpsItem details in the Amazon Web Services Systems Manager User Guide."];
       opsItemId: OpsItemId.t option [@ocaml.doc "The ID of the OpsItem."];
       version: String_.t option
         [@ocaml.doc
@@ -14073,7 +15353,9 @@ module OpsItem =
           "The time specified in a change request for a runbook workflow to start. Currently supported only for the OpsItem type /aws/changerequest."];
       plannedEndTime: DateTime.t option
         [@ocaml.doc
-          "The time specified in a change request for a runbook workflow to end. Currently supported only for the OpsItem type /aws/changerequest."]}
+          "The time specified in a change request for a runbook workflow to end. Currently supported only for the OpsItem type /aws/changerequest."];
+      opsItemArn: OpsItemArn.t option
+        [@ocaml.doc "The OpsItem Amazon Resource Name (ARN)."]}
     let make ?createdBy =
       fun ?opsItemType ->
         fun ?createdTime ->
@@ -14095,30 +15377,32 @@ module OpsItem =
                                         fun ?actualEndTime ->
                                           fun ?plannedStartTime ->
                                             fun ?plannedEndTime ->
-                                              fun () ->
-                                                {
-                                                  createdBy;
-                                                  opsItemType;
-                                                  createdTime;
-                                                  description;
-                                                  lastModifiedBy;
-                                                  lastModifiedTime;
-                                                  notifications;
-                                                  priority;
-                                                  relatedOpsItems;
-                                                  status;
-                                                  opsItemId;
-                                                  version;
-                                                  title;
-                                                  source;
-                                                  operationalData;
-                                                  category;
-                                                  severity;
-                                                  actualStartTime;
-                                                  actualEndTime;
-                                                  plannedStartTime;
-                                                  plannedEndTime
-                                                }
+                                              fun ?opsItemArn ->
+                                                fun () ->
+                                                  {
+                                                    createdBy;
+                                                    opsItemType;
+                                                    createdTime;
+                                                    description;
+                                                    lastModifiedBy;
+                                                    lastModifiedTime;
+                                                    notifications;
+                                                    priority;
+                                                    relatedOpsItems;
+                                                    status;
+                                                    opsItemId;
+                                                    version;
+                                                    title;
+                                                    source;
+                                                    operationalData;
+                                                    category;
+                                                    severity;
+                                                    actualStartTime;
+                                                    actualEndTime;
+                                                    plannedStartTime;
+                                                    plannedEndTime;
+                                                    opsItemArn
+                                                  }
     let to_value x =
       structure_to_value
         [("CreatedBy", (Option.map x.createdBy ~f:String_.to_value));
@@ -14149,9 +15433,12 @@ module OpsItem =
         ("PlannedStartTime",
           (Option.map x.plannedStartTime ~f:DateTime.to_value));
         ("PlannedEndTime",
-          (Option.map x.plannedEndTime ~f:DateTime.to_value))]
+          (Option.map x.plannedEndTime ~f:DateTime.to_value));
+        ("OpsItemArn", (Option.map x.opsItemArn ~f:OpsItemArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let opsItemArn =
+        (Option.map ~f:OpsItemArn.of_xml) (Xml.child xml_arg0 "OpsItemArn") in
       let plannedEndTime =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "PlannedEndTime") in
       let plannedStartTime =
@@ -14204,54 +15491,57 @@ module OpsItem =
         (Option.map ~f:OpsItemType.of_xml) (Xml.child xml_arg0 "OpsItemType") in
       let createdBy =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CreatedBy") in
-      make ?plannedEndTime ?plannedStartTime ?actualEndTime ?actualStartTime
-        ?severity ?category ?operationalData ?source ?title ?version
-        ?opsItemId ?status ?relatedOpsItems ?priority ?notifications
+      make ?opsItemArn ?plannedEndTime ?plannedStartTime ?actualEndTime
+        ?actualStartTime ?severity ?category ?operationalData ?source ?title
+        ?version ?opsItemId ?status ?relatedOpsItems ?priority ?notifications
         ?lastModifiedTime ?lastModifiedBy ?description ?createdTime
         ?opsItemType ?createdBy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let plannedEndTime = field_map json "PlannedEndTime" DateTime.of_json in
+    let of_json json__ =
+      let opsItemArn = field_map json__ "OpsItemArn" OpsItemArn.of_json in
+      let plannedEndTime = field_map json__ "PlannedEndTime" DateTime.of_json in
       let plannedStartTime =
-        field_map json "PlannedStartTime" DateTime.of_json in
-      let actualEndTime = field_map json "ActualEndTime" DateTime.of_json in
-      let actualStartTime = field_map json "ActualStartTime" DateTime.of_json in
-      let severity = field_map json "Severity" OpsItemSeverity.of_json in
-      let category = field_map json "Category" OpsItemCategory.of_json in
+        field_map json__ "PlannedStartTime" DateTime.of_json in
+      let actualEndTime = field_map json__ "ActualEndTime" DateTime.of_json in
+      let actualStartTime =
+        field_map json__ "ActualStartTime" DateTime.of_json in
+      let severity = field_map json__ "Severity" OpsItemSeverity.of_json in
+      let category = field_map json__ "Category" OpsItemCategory.of_json in
       let operationalData =
-        field_map json "OperationalData" OpsItemOperationalData.of_json in
-      let source = field_map json "Source" OpsItemSource.of_json in
-      let title = field_map json "Title" OpsItemTitle.of_json in
-      let version = field_map json "Version" String_.of_json in
-      let opsItemId = field_map json "OpsItemId" OpsItemId.of_json in
-      let status = field_map json "Status" OpsItemStatus.of_json in
+        field_map json__ "OperationalData" OpsItemOperationalData.of_json in
+      let source = field_map json__ "Source" OpsItemSource.of_json in
+      let title = field_map json__ "Title" OpsItemTitle.of_json in
+      let version = field_map json__ "Version" String_.of_json in
+      let opsItemId = field_map json__ "OpsItemId" OpsItemId.of_json in
+      let status = field_map json__ "Status" OpsItemStatus.of_json in
       let relatedOpsItems =
-        field_map json "RelatedOpsItems" RelatedOpsItems.of_json in
-      let priority = field_map json "Priority" OpsItemPriority.of_json in
+        field_map json__ "RelatedOpsItems" RelatedOpsItems.of_json in
+      let priority = field_map json__ "Priority" OpsItemPriority.of_json in
       let notifications =
-        field_map json "Notifications" OpsItemNotifications.of_json in
+        field_map json__ "Notifications" OpsItemNotifications.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" DateTime.of_json in
-      let lastModifiedBy = field_map json "LastModifiedBy" String_.of_json in
+        field_map json__ "LastModifiedTime" DateTime.of_json in
+      let lastModifiedBy = field_map json__ "LastModifiedBy" String_.of_json in
       let description =
-        field_map json "Description" OpsItemDescription.of_json in
-      let createdTime = field_map json "CreatedTime" DateTime.of_json in
-      let opsItemType = field_map json "OpsItemType" OpsItemType.of_json in
-      let createdBy = field_map json "CreatedBy" String_.of_json in
-      make ?plannedEndTime ?plannedStartTime ?actualEndTime ?actualStartTime
-        ?severity ?category ?operationalData ?source ?title ?version
-        ?opsItemId ?status ?relatedOpsItems ?priority ?notifications
+        field_map json__ "Description" OpsItemDescription.of_json in
+      let createdTime = field_map json__ "CreatedTime" DateTime.of_json in
+      let opsItemType = field_map json__ "OpsItemType" OpsItemType.of_json in
+      let createdBy = field_map json__ "CreatedBy" String_.of_json in
+      make ?opsItemArn ?plannedEndTime ?plannedStartTime ?actualEndTime
+        ?actualStartTime ?severity ?category ?operationalData ?source ?title
+        ?version ?opsItemId ?status ?relatedOpsItems ?priority ?notifications
         ?lastModifiedTime ?lastModifiedBy ?description ?createdTime
         ?opsItemType ?createdBy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Operations engineers and IT professionals use Amazon Web Services Systems Manager OpsCenter to view, investigate, and remediate operational work items (OpsItems) impacting the performance and health of their Amazon Web Services resources. OpsCenter is integrated with Amazon EventBridge and Amazon CloudWatch. This means you can configure these services to automatically create an OpsItem in OpsCenter when a CloudWatch alarm enters the ALARM state or when EventBridge processes an event from any Amazon Web Services service that publishes events. Configuring Amazon CloudWatch alarms and EventBridge events to automatically create OpsItems allows you to quickly diagnose and remediate issues with Amazon Web Services resources from a single console. To help you diagnose issues, each OpsItem includes contextually relevant information such as the name and ID of the Amazon Web Services resource that generated the OpsItem, alarm or event details, alarm history, and an alarm timeline graph. For the Amazon Web Services resource, OpsCenter aggregates information from Config, CloudTrail logs, and EventBridge, so you don't have to navigate across multiple console pages during your investigation. For more information, see OpsCenter in the Amazon Web Services Systems Manager User Guide."]
+       "Operations engineers and IT professionals use Amazon Web Services Systems Manager OpsCenter to view, investigate, and remediate operational work items (OpsItems) impacting the performance and health of their Amazon Web Services resources. OpsCenter is integrated with Amazon EventBridge and Amazon CloudWatch. This means you can configure these services to automatically create an OpsItem in OpsCenter when a CloudWatch alarm enters the ALARM state or when EventBridge processes an event from any Amazon Web Services service that publishes events. Configuring Amazon CloudWatch alarms and EventBridge events to automatically create OpsItems allows you to quickly diagnose and remediate issues with Amazon Web Services resources from a single console. To help you diagnose issues, each OpsItem includes contextually relevant information such as the name and ID of the Amazon Web Services resource that generated the OpsItem, alarm or event details, alarm history, and an alarm timeline graph. For the Amazon Web Services resource, OpsCenter aggregates information from Config, CloudTrail logs, and EventBridge, so you don't have to navigate across multiple console pages during your investigation. For more information, see Amazon Web Services Systems Manager OpsCenter in the Amazon Web Services Systems Manager User Guide."]
 module GetOpsItemResponse =
   struct
     type nonrec t = {
       opsItem: OpsItem.t option [@ocaml.doc "The OpsItem."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
+      | `OpsItemAccessDeniedException of OpsItemAccessDeniedException.t 
       | `OpsItemNotFoundException of OpsItemNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?opsItem = fun () -> { opsItem }
@@ -14259,6 +15549,9 @@ module GetOpsItemResponse =
       match name with
       | "InternalServerError" ->
           `InternalServerError (InternalServerError.of_json json)
+      | "OpsItemAccessDeniedException" ->
+          `OpsItemAccessDeniedException
+            (OpsItemAccessDeniedException.of_json json)
       | "OpsItemNotFoundException" ->
           `OpsItemNotFoundException (OpsItemNotFoundException.of_json json)
       | name ->
@@ -14268,6 +15561,9 @@ module GetOpsItemResponse =
       match name with
       | "InternalServerError" ->
           `InternalServerError (InternalServerError.of_xml xml)
+      | "OpsItemAccessDeniedException" ->
+          `OpsItemAccessDeniedException
+            (OpsItemAccessDeniedException.of_xml xml)
       | "OpsItemNotFoundException" ->
           `OpsItemNotFoundException (OpsItemNotFoundException.of_xml xml)
       | name ->
@@ -14278,6 +15574,10 @@ module GetOpsItemResponse =
           `Assoc
             [("error", (`String "InternalServerError"));
             ("details", (InternalServerError.to_json e))]
+      | `OpsItemAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "OpsItemAccessDeniedException"));
+            ("details", (OpsItemAccessDeniedException.to_json e))]
       | `OpsItemNotFoundException e ->
           `Assoc
             [("error", (`String "OpsItemNotFoundException"));
@@ -14296,12 +15596,12 @@ module GetOpsItemResponse =
         (Option.map ~f:OpsItem.of_xml) (Xml.child xml_arg0 "OpsItem") in
       make ?opsItem ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let opsItem = field_map json "OpsItem" OpsItem.of_json in
+    let of_json json__ =
+      let opsItem = field_map json__ "OpsItem" OpsItem.of_json in
       make ?opsItem ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Get information about an OpsItem by using the ID. You must have permission in Identity and Access Management (IAM) to view information about an OpsItem. For more information, see Getting started with OpsCenter in the Amazon Web Services Systems Manager User Guide. Operations engineers and IT professionals use Amazon Web Services Systems Manager OpsCenter to view, investigate, and remediate operational issues impacting the performance and health of their Amazon Web Services resources. For more information, see OpsCenter in the Amazon Web Services Systems Manager User Guide."]
+       "Get information about an OpsItem by using the ID. You must have permission in Identity and Access Management (IAM) to view information about an OpsItem. For more information, see Set up OpsCenter in the Amazon Web Services Systems Manager User Guide. Operations engineers and IT professionals use Amazon Web Services Systems Manager OpsCenter to view, investigate, and remediate operational issues impacting the performance and health of their Amazon Web Services resources. For more information, see Amazon Web Services Systems Manager OpsCenter in the Amazon Web Services Systems Manager User Guide."]
 module GetOpsMetadataMaxResults =
   struct
     type nonrec t = int
@@ -14358,12 +15658,12 @@ module GetOpsMetadataRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OpsMetadataArn") in
       make ?nextToken ?maxResults ~opsMetadataArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" GetOpsMetadataMaxResults.of_json in
+        field_map json__ "MaxResults" GetOpsMetadataMaxResults.of_json in
       let opsMetadataArn =
-        field_map_exn json "OpsMetadataArn" OpsMetadataArn.of_json in
+        field_map_exn json__ "OpsMetadataArn" OpsMetadataArn.of_json in
       make ?nextToken ?maxResults ~opsMetadataArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14450,11 +15750,11 @@ module GetOpsMetadataResult =
           (Xml.child xml_arg0 "ResourceId") in
       make ?nextToken ?metadata ?resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let metadata = field_map json "Metadata" MetadataMap.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let metadata = field_map json__ "Metadata" MetadataMap.of_json in
       let resourceId =
-        field_map json "ResourceId" OpsMetadataResourceId.of_json in
+        field_map json__ "ResourceId" OpsMetadataResourceId.of_json in
       make ?nextToken ?metadata ?resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14498,8 +15798,8 @@ module OpsResultAttribute =
           (Xml.child_exn ~context:context_ xml_arg0 "TypeName") in
       make ~typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let typeName = field_map_exn json "TypeName" OpsDataTypeName.of_json in
+    let of_json json__ =
+      let typeName = field_map_exn json__ "TypeName" OpsDataTypeName.of_json in
       make ~typeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The OpsItem data type to return."]
@@ -14508,6 +15808,9 @@ module OpsResultAttributeList =
     type nonrec t = OpsResultAttribute.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpsResultAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -14555,6 +15858,9 @@ module OpsFilterValueList =
         ok_or_failwith
           ((check_list_max i ~max:40) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpsFilterValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -14661,10 +15967,10 @@ module OpsFilter =
         OpsFilterKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?type_ ~values ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" OpsFilterOperatorType.of_json in
-      let values = field_map_exn json "Values" OpsFilterValueList.of_json in
-      let key = field_map_exn json "Key" OpsFilterKey.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" OpsFilterOperatorType.of_json in
+      let values = field_map_exn json__ "Values" OpsFilterValueList.of_json in
+      let key = field_map_exn json__ "Key" OpsFilterKey.of_json in
       make ?type_ ~values ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A filter for viewing OpsData summaries."]
@@ -14676,6 +15982,9 @@ module OpsFilterList =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpsFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -14776,6 +16085,8 @@ module OpsAggregatorValueMap =
                        (OpsAggregatorValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -14901,16 +16212,16 @@ module rec
       make ?aggregators ?filters ?values ?attributeName ?typeName
         ?aggregatorType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let aggregators =
-        field_map json "Aggregators" OpsAggregatorList.of_json in
-      let filters = field_map json "Filters" OpsFilterList.of_json in
-      let values = field_map json "Values" OpsAggregatorValueMap.of_json in
+        field_map json__ "Aggregators" OpsAggregatorList.of_json in
+      let filters = field_map json__ "Filters" OpsFilterList.of_json in
+      let values = field_map json__ "Values" OpsAggregatorValueMap.of_json in
       let attributeName =
-        field_map json "AttributeName" OpsDataAttributeName.of_json in
-      let typeName = field_map json "TypeName" OpsDataTypeName.of_json in
+        field_map json__ "AttributeName" OpsDataAttributeName.of_json in
+      let typeName = field_map json__ "TypeName" OpsDataTypeName.of_json in
       let aggregatorType =
-        field_map json "AggregatorType" OpsAggregatorType.of_json in
+        field_map json__ "AggregatorType" OpsAggregatorType.of_json in
       make ?aggregators ?filters ?values ?attributeName ?typeName
         ?aggregatorType ()
     let to_json v = composed_to_json to_value v
@@ -14934,6 +16245,9 @@ module rec
         ok_or_failwith
           ((check_list_max i ~max:12) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpsAggregator.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -15020,15 +16334,15 @@ module GetOpsSummaryRequest =
       make ?maxResults ?nextToken ?resultAttributes ?aggregators ?filters
         ?syncName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let resultAttributes =
-        field_map json "ResultAttributes" OpsResultAttributeList.of_json in
+        field_map json__ "ResultAttributes" OpsResultAttributeList.of_json in
       let aggregators =
-        field_map json "Aggregators" OpsAggregatorList.of_json in
-      let filters = field_map json "Filters" OpsFilterList.of_json in
-      let syncName = field_map json "SyncName" ResourceDataSyncName.of_json in
+        field_map json__ "Aggregators" OpsAggregatorList.of_json in
+      let filters = field_map json__ "Filters" OpsFilterList.of_json in
+      let syncName = field_map json__ "SyncName" ResourceDataSyncName.of_json in
       make ?maxResults ?nextToken ?resultAttributes ?aggregators ?filters
         ?syncName ()
     let to_json v = composed_to_json to_value v
@@ -15073,6 +16387,8 @@ module OpsEntityItemEntry =
                        (AttributeValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -15089,6 +16405,9 @@ module OpsEntityItemEntryList =
           ((check_list_max i ~max:10000) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpsEntityItemEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -15154,10 +16473,10 @@ module OpsEntityItem =
           (Xml.child xml_arg0 "CaptureTime") in
       make ?content ?captureTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let content = field_map json "Content" OpsEntityItemEntryList.of_json in
+    let of_json json__ =
+      let content = field_map json__ "Content" OpsEntityItemEntryList.of_json in
       let captureTime =
-        field_map json "CaptureTime" OpsEntityItemCaptureTime.of_json in
+        field_map json__ "CaptureTime" OpsEntityItemCaptureTime.of_json in
       make ?content ?captureTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The OpsData summary."]
@@ -15184,6 +16503,8 @@ module OpsEntityItemMap =
                     (fun x -> (OpsEntityItem.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -15223,15 +16544,18 @@ module OpsEntity =
       let id = (Option.map ~f:OpsEntityId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?data ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let data = field_map json "Data" OpsEntityItemMap.of_json in
-      let id = field_map json "Id" OpsEntityId.of_json in make ?data ?id ()
+    let of_json json__ =
+      let data = field_map json__ "Data" OpsEntityItemMap.of_json in
+      let id = field_map json__ "Id" OpsEntityId.of_json in make ?data ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result of the query."]
 module OpsEntityList =
   struct
     type nonrec t = OpsEntity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpsEntity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -15347,9 +16671,9 @@ module GetOpsSummaryResult =
         (Option.map ~f:OpsEntityList.of_xml) (Xml.child xml_arg0 "Entities") in
       make ?nextToken ?entities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let entities = field_map json "Entities" OpsEntityList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let entities = field_map json__ "Entities" OpsEntityList.of_json in
       make ?nextToken ?entities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15360,7 +16684,7 @@ module GetParameterHistoryRequest =
       {
       name: PSParameterName.t
         [@ocaml.doc
-          "The name of the parameter for which you want to review history."];
+          "The name or Amazon Resource Name (ARN) of the parameter for which you want to review history. For parameters shared with you from another account, you must use the full ARN."];
       withDecryption: Boolean.t option
         [@ocaml.doc
           "Return decrypted values for secure string parameters. This flag is ignored for String and StringList parameter types."];
@@ -15395,15 +16719,15 @@ module GetParameterHistoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?nextToken ?maxResults ?withDecryption ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let withDecryption = field_map json "WithDecryption" Boolean.of_json in
-      let name = field_map_exn json "Name" PSParameterName.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let withDecryption = field_map json__ "WithDecryption" Boolean.of_json in
+      let name = field_map_exn json__ "Name" PSParameterName.of_json in
       make ?nextToken ?maxResults ?withDecryption ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the history of all changes to a parameter. If you change the KMS key alias for the KMS key used to encrypt a parameter, then you must also update the key alias the parameter uses to reference KMS. Otherwise, GetParameterHistory retrieves whatever the original key alias was referencing."]
+       "Retrieves the history of all changes to a parameter. Parameter names can't contain spaces. The service removes any spaces specified for the beginning or end of a parameter name. If the specified name for a parameter contains spaces between characters, the request fails with a ValidationException error. If you change the KMS key alias for the KMS key used to encrypt a parameter, then you must also update the key alias the parameter uses to reference KMS. Otherwise, GetParameterHistory retrieves whatever the original key alias was referencing."]
 module ParameterLabel =
   struct
     type nonrec t = string
@@ -15430,6 +16754,9 @@ module ParameterLabelList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterLabel.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -15473,7 +16800,8 @@ module ParameterHistory =
       type_: ParameterType.t option
         [@ocaml.doc "The type of parameter used."];
       keyId: ParameterKeyId.t option
-        [@ocaml.doc "The ID of the query key used for this parameter."];
+        [@ocaml.doc
+          "The alias of the Key Management Service (KMS) key used to encrypt the parameter. Applies to SecureString parameters only"];
       lastModifiedDate: DateTime.t option
         [@ocaml.doc "Date the parameter was last changed or updated."];
       lastModifiedUser: String_.t option
@@ -15584,24 +16912,24 @@ module ParameterHistory =
         ?description ?lastModifiedUser ?lastModifiedDate ?keyId ?type_ ?name
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataType = field_map json "DataType" ParameterDataType.of_json in
-      let policies = field_map json "Policies" ParameterPolicyList.of_json in
-      let tier = field_map json "Tier" ParameterTier.of_json in
-      let labels = field_map json "Labels" ParameterLabelList.of_json in
-      let version = field_map json "Version" PSParameterVersion.of_json in
+    let of_json json__ =
+      let dataType = field_map json__ "DataType" ParameterDataType.of_json in
+      let policies = field_map json__ "Policies" ParameterPolicyList.of_json in
+      let tier = field_map json__ "Tier" ParameterTier.of_json in
+      let labels = field_map json__ "Labels" ParameterLabelList.of_json in
+      let version = field_map json__ "Version" PSParameterVersion.of_json in
       let allowedPattern =
-        field_map json "AllowedPattern" AllowedPattern.of_json in
-      let value = field_map json "Value" PSParameterValue.of_json in
+        field_map json__ "AllowedPattern" AllowedPattern.of_json in
+      let value = field_map json__ "Value" PSParameterValue.of_json in
       let description =
-        field_map json "Description" ParameterDescription.of_json in
+        field_map json__ "Description" ParameterDescription.of_json in
       let lastModifiedUser =
-        field_map json "LastModifiedUser" String_.of_json in
+        field_map json__ "LastModifiedUser" String_.of_json in
       let lastModifiedDate =
-        field_map json "LastModifiedDate" DateTime.of_json in
-      let keyId = field_map json "KeyId" ParameterKeyId.of_json in
-      let type_ = field_map json "Type" ParameterType.of_json in
-      let name = field_map json "Name" PSParameterName.of_json in
+        field_map json__ "LastModifiedDate" DateTime.of_json in
+      let keyId = field_map json__ "KeyId" ParameterKeyId.of_json in
+      let type_ = field_map json__ "Type" ParameterType.of_json in
+      let name = field_map json__ "Name" PSParameterName.of_json in
       make ?dataType ?policies ?tier ?labels ?version ?allowedPattern ?value
         ?description ?lastModifiedUser ?lastModifiedDate ?keyId ?type_ ?name
         ()
@@ -15611,6 +16939,9 @@ module ParameterHistoryList =
   struct
     type nonrec t = ParameterHistory.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterHistory.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -15646,8 +16977,8 @@ module InvalidKeyId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The query key ID isn't valid."]
@@ -15727,21 +17058,21 @@ module GetParameterHistoryResult =
           (Xml.child xml_arg0 "Parameters") in
       make ?nextToken ?parameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let parameters =
-        field_map json "Parameters" ParameterHistoryList.of_json in
+        field_map json__ "Parameters" ParameterHistoryList.of_json in
       make ?nextToken ?parameters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the history of all changes to a parameter. If you change the KMS key alias for the KMS key used to encrypt a parameter, then you must also update the key alias the parameter uses to reference KMS. Otherwise, GetParameterHistory retrieves whatever the original key alias was referencing."]
+       "Retrieves the history of all changes to a parameter. Parameter names can't contain spaces. The service removes any spaces specified for the beginning or end of a parameter name. If the specified name for a parameter contains spaces between characters, the request fails with a ValidationException error. If you change the KMS key alias for the KMS key used to encrypt a parameter, then you must also update the key alias the parameter uses to reference KMS. Otherwise, GetParameterHistory retrieves whatever the original key alias was referencing."]
 module GetParameterRequest =
   struct
     type nonrec t =
       {
       name: PSParameterName.t
         [@ocaml.doc
-          "The name of the parameter you want to query. To query by parameter label, use \"Name\": \"name:label\". To query by parameter version, use \"Name\": \"name:version\"."];
+          "The name or Amazon Resource Name (ARN) of the parameter that you want to query. For parameters shared with you from another account, you must use the full ARN. To query by parameter label, use \"Name\": \"name:label\". To query by parameter version, use \"Name\": \"name:version\". For more information about shared parameters, see Working with shared parameters in the Amazon Web Services Systems Manager User Guide."];
       withDecryption: Boolean.t option
         [@ocaml.doc
           "Return decrypted values for secure string parameters. This flag is ignored for String and StringList parameter types."]}
@@ -15761,13 +17092,13 @@ module GetParameterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?withDecryption ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let withDecryption = field_map json "WithDecryption" Boolean.of_json in
-      let name = field_map_exn json "Name" PSParameterName.of_json in
+    let of_json json__ =
+      let withDecryption = field_map json__ "WithDecryption" Boolean.of_json in
+      let name = field_map_exn json__ "Name" PSParameterName.of_json in
       make ?withDecryption ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Get information about a single parameter by specifying the parameter name. To get information about more than one parameter at a time, use the GetParameters operation."]
+       "Get information about a single parameter by specifying the parameter name. Parameter names can't contain spaces. The service removes any spaces specified for the beginning or end of a parameter name. If the specified name for a parameter contains spaces between characters, the request fails with a ValidationException error. To get information about more than one parameter at a time, use the GetParameters operation."]
 module ParameterVersionNotFound =
   struct
     type nonrec t = {
@@ -15782,8 +17113,8 @@ module ParameterVersionNotFound =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15893,17 +17224,17 @@ module Parameter =
       make ?dataType ?aRN ?lastModifiedDate ?sourceResult ?selector ?version
         ?value ?type_ ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataType = field_map json "DataType" ParameterDataType.of_json in
-      let aRN = field_map json "ARN" String_.of_json in
+    let of_json json__ =
+      let dataType = field_map json__ "DataType" ParameterDataType.of_json in
+      let aRN = field_map json__ "ARN" String_.of_json in
       let lastModifiedDate =
-        field_map json "LastModifiedDate" DateTime.of_json in
-      let sourceResult = field_map json "SourceResult" String_.of_json in
-      let selector = field_map json "Selector" PSParameterSelector.of_json in
-      let version = field_map json "Version" PSParameterVersion.of_json in
-      let value = field_map json "Value" PSParameterValue.of_json in
-      let type_ = field_map json "Type" ParameterType.of_json in
-      let name = field_map json "Name" PSParameterName.of_json in
+        field_map json__ "LastModifiedDate" DateTime.of_json in
+      let sourceResult = field_map json__ "SourceResult" String_.of_json in
+      let selector = field_map json__ "Selector" PSParameterSelector.of_json in
+      let version = field_map json__ "Version" PSParameterVersion.of_json in
+      let value = field_map json__ "Value" PSParameterValue.of_json in
+      let type_ = field_map json__ "Type" ParameterType.of_json in
+      let name = field_map json__ "Name" PSParameterName.of_json in
       make ?dataType ?aRN ?lastModifiedDate ?sourceResult ?selector ?version
         ?value ?type_ ?name ()
     let to_json v = composed_to_json to_value v
@@ -15977,12 +17308,12 @@ module GetParameterResult =
         (Option.map ~f:Parameter.of_xml) (Xml.child xml_arg0 "Parameter") in
       make ?parameter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameter = field_map json "Parameter" Parameter.of_json in
+    let of_json json__ =
+      let parameter = field_map json__ "Parameter" Parameter.of_json in
       make ?parameter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Get information about a single parameter by specifying the parameter name. To get information about more than one parameter at a time, use the GetParameters operation."]
+       "Get information about a single parameter by specifying the parameter name. Parameter names can't contain spaces. The service removes any spaces specified for the beginning or end of a parameter name. If the specified name for a parameter contains spaces between characters, the request fails with a ValidationException error. To get information about more than one parameter at a time, use the GetParameters operation."]
 module GetParametersByPathMaxResults =
   struct
     type nonrec t = int
@@ -16071,24 +17402,27 @@ module GetParametersByPathRequest =
       make ?nextToken ?maxResults ?withDecryption ?parameterFilters
         ?recursive ~path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" GetParametersByPathMaxResults.of_json in
-      let withDecryption = field_map json "WithDecryption" Boolean.of_json in
+        field_map json__ "MaxResults" GetParametersByPathMaxResults.of_json in
+      let withDecryption = field_map json__ "WithDecryption" Boolean.of_json in
       let parameterFilters =
-        field_map json "ParameterFilters" ParameterStringFilterList.of_json in
-      let recursive = field_map json "Recursive" Boolean.of_json in
-      let path = field_map_exn json "Path" PSParameterName.of_json in
+        field_map json__ "ParameterFilters" ParameterStringFilterList.of_json in
+      let recursive = field_map json__ "Recursive" Boolean.of_json in
+      let path = field_map_exn json__ "Path" PSParameterName.of_json in
       make ?nextToken ?maxResults ?withDecryption ?parameterFilters
         ?recursive ~path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieve information about one or more parameters in a specific hierarchy. Request results are returned on a best-effort basis. If you specify MaxResults in the request, the response includes information up to the limit specified. The number of items returned, however, can be between zero and the value of MaxResults. If the service reaches an internal limit while processing the results, it stops the operation and returns the matching values up to that point and a NextToken. You can specify the NextToken in a subsequent call to get the next set of results."]
+       "Retrieve information about one or more parameters under a specified level in a hierarchy. Request results are returned on a best-effort basis. If you specify MaxResults in the request, the response includes information up to the limit specified. The number of items returned, however, can be between zero and the value of MaxResults. If the service reaches an internal limit while processing the results, it stops the operation and returns the matching values up to that point and a NextToken. You can specify the NextToken in a subsequent call to get the next set of results. Parameter names can't contain spaces. The service removes any spaces specified for the beginning or end of a parameter name. If the specified name for a parameter contains spaces between characters, the request fails with a ValidationException error."]
 module ParameterList =
   struct
     type nonrec t = Parameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Parameter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -16201,20 +17535,20 @@ module GetParametersByPathResult =
           (Xml.child xml_arg0 "Parameters") in
       make ?nextToken ?parameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let parameters = field_map json "Parameters" ParameterList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let parameters = field_map json__ "Parameters" ParameterList.of_json in
       make ?nextToken ?parameters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieve information about one or more parameters in a specific hierarchy. Request results are returned on a best-effort basis. If you specify MaxResults in the request, the response includes information up to the limit specified. The number of items returned, however, can be between zero and the value of MaxResults. If the service reaches an internal limit while processing the results, it stops the operation and returns the matching values up to that point and a NextToken. You can specify the NextToken in a subsequent call to get the next set of results."]
+       "Retrieve information about one or more parameters under a specified level in a hierarchy. Request results are returned on a best-effort basis. If you specify MaxResults in the request, the response includes information up to the limit specified. The number of items returned, however, can be between zero and the value of MaxResults. If the service reaches an internal limit while processing the results, it stops the operation and returns the matching values up to that point and a NextToken. You can specify the NextToken in a subsequent call to get the next set of results. Parameter names can't contain spaces. The service removes any spaces specified for the beginning or end of a parameter name. If the specified name for a parameter contains spaces between characters, the request fails with a ValidationException error."]
 module GetParametersRequest =
   struct
     type nonrec t =
       {
       names: ParameterNameList.t
         [@ocaml.doc
-          "Names of the parameters for which you want to query information. To query by parameter label, use \"Name\": \"name:label\". To query by parameter version, use \"Name\": \"name:version\"."];
+          "The names or Amazon Resource Names (ARNs) of the parameters that you want to query. For parameters shared with you from another account, you must use the full ARNs. To query by parameter label, use \"Name\": \"name:label\". To query by parameter version, use \"Name\": \"name:version\". The results for GetParameters requests are listed in alphabetical order in query responses. For information about shared parameters, see Working with shared parameters in the Amazon Web Services Systems Manager User Guide."];
       withDecryption: Boolean.t option
         [@ocaml.doc
           "Return decrypted secure string value. Return decrypted values for secure string parameters. This flag is ignored for String and StringList parameter types."]}
@@ -16234,13 +17568,13 @@ module GetParametersRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Names") in
       make ?withDecryption ~names ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let withDecryption = field_map json "WithDecryption" Boolean.of_json in
-      let names = field_map_exn json "Names" ParameterNameList.of_json in
+    let of_json json__ =
+      let withDecryption = field_map json__ "WithDecryption" Boolean.of_json in
+      let names = field_map_exn json__ "Names" ParameterNameList.of_json in
       make ?withDecryption ~names ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Get information about one or more parameters by specifying multiple parameter names. To get information about a single parameter, you can use the GetParameter operation instead."]
+       "Get information about one or more parameters by specifying multiple parameter names. To get information about a single parameter, you can use the GetParameter operation instead. Parameter names can't contain spaces. The service removes any spaces specified for the beginning or end of a parameter name. If the specified name for a parameter contains spaces between characters, the request fails with a ValidationException error."]
 module GetParametersResult =
   struct
     type nonrec t =
@@ -16301,14 +17635,14 @@ module GetParametersResult =
           (Xml.child xml_arg0 "Parameters") in
       make ?invalidParameters ?parameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let invalidParameters =
-        field_map json "InvalidParameters" ParameterNameList.of_json in
-      let parameters = field_map json "Parameters" ParameterList.of_json in
+        field_map json__ "InvalidParameters" ParameterNameList.of_json in
+      let parameters = field_map json__ "Parameters" ParameterList.of_json in
       make ?invalidParameters ?parameters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Get information about one or more parameters by specifying multiple parameter names. To get information about a single parameter, you can use the GetParameter operation instead."]
+       "Get information about one or more parameters by specifying multiple parameter names. To get information about a single parameter, you can use the GetParameter operation instead. Parameter names can't contain spaces. The service removes any spaces specified for the beginning or end of a parameter name. If the specified name for a parameter contains spaces between characters, the request fails with a ValidationException error."]
 module GetPatchBaselineForPatchGroupRequest =
   struct
     type nonrec t =
@@ -16337,10 +17671,10 @@ module GetPatchBaselineForPatchGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PatchGroup") in
       make ?operatingSystem ~patchGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let operatingSystem =
-        field_map json "OperatingSystem" OperatingSystem.of_json in
-      let patchGroup = field_map_exn json "PatchGroup" PatchGroup.of_json in
+        field_map json__ "OperatingSystem" OperatingSystem.of_json in
+      let patchGroup = field_map_exn json__ "PatchGroup" PatchGroup.of_json in
       make ?operatingSystem ~patchGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16405,11 +17739,11 @@ module GetPatchBaselineForPatchGroupResult =
         (Option.map ~f:BaselineId.of_xml) (Xml.child xml_arg0 "BaselineId") in
       make ?operatingSystem ?patchGroup ?baselineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let operatingSystem =
-        field_map json "OperatingSystem" OperatingSystem.of_json in
-      let patchGroup = field_map json "PatchGroup" PatchGroup.of_json in
-      let baselineId = field_map json "BaselineId" BaselineId.of_json in
+        field_map json__ "OperatingSystem" OperatingSystem.of_json in
+      let patchGroup = field_map json__ "PatchGroup" PatchGroup.of_json in
+      let baselineId = field_map json__ "BaselineId" BaselineId.of_json in
       make ?operatingSystem ?patchGroup ?baselineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16433,8 +17767,8 @@ module GetPatchBaselineRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "BaselineId") in
       make ~baselineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let baselineId = field_map_exn json "BaselineId" BaselineId.of_json in
+    let of_json json__ =
+      let baselineId = field_map_exn json__ "BaselineId" BaselineId.of_json in
       make ~baselineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about a patch baseline."]
@@ -16442,6 +17776,9 @@ module PatchGroupList =
   struct
     type nonrec t = PatchGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PatchGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -16504,7 +17841,11 @@ module GetPatchBaselineResult =
         [@ocaml.doc "A description of the patch baseline."];
       sources: PatchSourceList.t option
         [@ocaml.doc
-          "Information about the patches to use to update the managed nodes, including target operating systems and source repositories. Applies to Linux managed nodes only."]}
+          "Information about the patches to use to update the managed nodes, including target operating systems and source repositories. Applies to Linux managed nodes only."];
+      availableSecurityUpdatesComplianceStatus:
+        PatchComplianceStatus.t option
+        [@ocaml.doc
+          "Indicates the compliance status of managed nodes for which security-related patches are available but were not approved. This preference is specified when the CreatePatchBaseline or UpdatePatchBaseline commands are run. Applies to Windows Server managed nodes only."]}
     type nonrec error =
       [ `DoesNotExistException of DoesNotExistException.t 
       | `InternalServerError of InternalServerError.t 
@@ -16525,24 +17866,28 @@ module GetPatchBaselineResult =
                             fun ?modifiedDate ->
                               fun ?description ->
                                 fun ?sources ->
-                                  fun () ->
-                                    {
-                                      baselineId;
-                                      name;
-                                      operatingSystem;
-                                      globalFilters;
-                                      approvalRules;
-                                      approvedPatches;
-                                      approvedPatchesComplianceLevel;
-                                      approvedPatchesEnableNonSecurity;
-                                      rejectedPatches;
-                                      rejectedPatchesAction;
-                                      patchGroups;
-                                      createdDate;
-                                      modifiedDate;
-                                      description;
-                                      sources
-                                    }
+                                  fun
+                                    ?availableSecurityUpdatesComplianceStatus
+                                    ->
+                                    fun () ->
+                                      {
+                                        baselineId;
+                                        name;
+                                        operatingSystem;
+                                        globalFilters;
+                                        approvalRules;
+                                        approvedPatches;
+                                        approvedPatchesComplianceLevel;
+                                        approvedPatchesEnableNonSecurity;
+                                        rejectedPatches;
+                                        rejectedPatchesAction;
+                                        patchGroups;
+                                        createdDate;
+                                        modifiedDate;
+                                        description;
+                                        sources;
+                                        availableSecurityUpdatesComplianceStatus
+                                      }
     let error_of_json name json =
       match name with
       | "DoesNotExistException" ->
@@ -16610,9 +17955,15 @@ module GetPatchBaselineResult =
         ("ModifiedDate", (Option.map x.modifiedDate ~f:DateTime.to_value));
         ("Description",
           (Option.map x.description ~f:BaselineDescription.to_value));
-        ("Sources", (Option.map x.sources ~f:PatchSourceList.to_value))]
+        ("Sources", (Option.map x.sources ~f:PatchSourceList.to_value));
+        ("AvailableSecurityUpdatesComplianceStatus",
+          (Option.map x.availableSecurityUpdatesComplianceStatus
+             ~f:PatchComplianceStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let availableSecurityUpdatesComplianceStatus =
+        (Option.map ~f:PatchComplianceStatus.of_xml)
+          (Xml.child xml_arg0 "AvailableSecurityUpdatesComplianceStatus") in
       let sources =
         (Option.map ~f:PatchSourceList.of_xml) (Xml.child xml_arg0 "Sources") in
       let description =
@@ -16653,45 +18004,274 @@ module GetPatchBaselineResult =
         (Option.map ~f:BaselineName.of_xml) (Xml.child xml_arg0 "Name") in
       let baselineId =
         (Option.map ~f:BaselineId.of_xml) (Xml.child xml_arg0 "BaselineId") in
-      make ?sources ?description ?modifiedDate ?createdDate ?patchGroups
-        ?rejectedPatchesAction ?rejectedPatches
-        ?approvedPatchesEnableNonSecurity ?approvedPatchesComplianceLevel
-        ?approvedPatches ?approvalRules ?globalFilters ?operatingSystem ?name
-        ?baselineId ()
+      make ?availableSecurityUpdatesComplianceStatus ?sources ?description
+        ?modifiedDate ?createdDate ?patchGroups ?rejectedPatchesAction
+        ?rejectedPatches ?approvedPatchesEnableNonSecurity
+        ?approvedPatchesComplianceLevel ?approvedPatches ?approvalRules
+        ?globalFilters ?operatingSystem ?name ?baselineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sources = field_map json "Sources" PatchSourceList.of_json in
+    let of_json json__ =
+      let availableSecurityUpdatesComplianceStatus =
+        field_map json__ "AvailableSecurityUpdatesComplianceStatus"
+          PatchComplianceStatus.of_json in
+      let sources = field_map json__ "Sources" PatchSourceList.of_json in
       let description =
-        field_map json "Description" BaselineDescription.of_json in
-      let modifiedDate = field_map json "ModifiedDate" DateTime.of_json in
-      let createdDate = field_map json "CreatedDate" DateTime.of_json in
-      let patchGroups = field_map json "PatchGroups" PatchGroupList.of_json in
+        field_map json__ "Description" BaselineDescription.of_json in
+      let modifiedDate = field_map json__ "ModifiedDate" DateTime.of_json in
+      let createdDate = field_map json__ "CreatedDate" DateTime.of_json in
+      let patchGroups = field_map json__ "PatchGroups" PatchGroupList.of_json in
       let rejectedPatchesAction =
-        field_map json "RejectedPatchesAction" PatchAction.of_json in
+        field_map json__ "RejectedPatchesAction" PatchAction.of_json in
       let rejectedPatches =
-        field_map json "RejectedPatches" PatchIdList.of_json in
+        field_map json__ "RejectedPatches" PatchIdList.of_json in
       let approvedPatchesEnableNonSecurity =
-        field_map json "ApprovedPatchesEnableNonSecurity" Boolean.of_json in
+        field_map json__ "ApprovedPatchesEnableNonSecurity" Boolean.of_json in
       let approvedPatchesComplianceLevel =
-        field_map json "ApprovedPatchesComplianceLevel"
+        field_map json__ "ApprovedPatchesComplianceLevel"
           PatchComplianceLevel.of_json in
       let approvedPatches =
-        field_map json "ApprovedPatches" PatchIdList.of_json in
+        field_map json__ "ApprovedPatches" PatchIdList.of_json in
       let approvalRules =
-        field_map json "ApprovalRules" PatchRuleGroup.of_json in
+        field_map json__ "ApprovalRules" PatchRuleGroup.of_json in
       let globalFilters =
-        field_map json "GlobalFilters" PatchFilterGroup.of_json in
+        field_map json__ "GlobalFilters" PatchFilterGroup.of_json in
       let operatingSystem =
-        field_map json "OperatingSystem" OperatingSystem.of_json in
-      let name = field_map json "Name" BaselineName.of_json in
-      let baselineId = field_map json "BaselineId" BaselineId.of_json in
-      make ?sources ?description ?modifiedDate ?createdDate ?patchGroups
-        ?rejectedPatchesAction ?rejectedPatches
-        ?approvedPatchesEnableNonSecurity ?approvedPatchesComplianceLevel
-        ?approvedPatches ?approvalRules ?globalFilters ?operatingSystem ?name
-        ?baselineId ()
+        field_map json__ "OperatingSystem" OperatingSystem.of_json in
+      let name = field_map json__ "Name" BaselineName.of_json in
+      let baselineId = field_map json__ "BaselineId" BaselineId.of_json in
+      make ?availableSecurityUpdatesComplianceStatus ?sources ?description
+        ?modifiedDate ?createdDate ?patchGroups ?rejectedPatchesAction
+        ?rejectedPatches ?approvedPatchesEnableNonSecurity
+        ?approvedPatchesComplianceLevel ?approvedPatches ?approvalRules
+        ?globalFilters ?operatingSystem ?name ?baselineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about a patch baseline."]
+module ResourcePolicyMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ResourcePolicyMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module GetResourcePoliciesRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArnString.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the resource to which the policies are attached."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "A token to start the list. Use this token to get the next set of results."];
+      maxResults: ResourcePolicyMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results."]}
+    let context_ = "GetResourcePoliciesRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~resourceArn -> fun () -> { nextToken; maxResults; resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceArnString.to_value x.resourceArn)));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:ResourcePolicyMaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:ResourcePolicyMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let resourceArn =
+        ResourceArnString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ?maxResults ?nextToken ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" ResourcePolicyMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArnString.of_json in
+      make ?maxResults ?nextToken ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns an array of the Policy object."]
+module Policy =
+  struct
+    type nonrec t = string
+    let context_ = "Policy"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^(?!\\s*$).+"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Policy" j
+    let to_json = simple_to_json to_value
+  end
+module GetResourcePoliciesResponseEntry =
+  struct
+    type nonrec t =
+      {
+      policyId: PolicyId.t option [@ocaml.doc "A policy ID."];
+      policyHash: PolicyHash.t option
+        [@ocaml.doc
+          "ID of the current policy version. The hash helps to prevent a situation where multiple users attempt to overwrite a policy. You must provide this hash when updating or deleting a policy."];
+      policy: Policy.t option
+        [@ocaml.doc
+          "A resource policy helps you to define the IAM entity (for example, an Amazon Web Services account) that can manage your Systems Manager resources. Currently, OpsItemGroup is the only resource that supports Systems Manager resource policies. The resource policy for OpsItemGroup enables Amazon Web Services accounts to view and interact with OpsCenter operational work items (OpsItems)."]}
+    let make ?policyId =
+      fun ?policyHash ->
+        fun ?policy -> fun () -> { policyId; policyHash; policy }
+    let to_value x =
+      structure_to_value
+        [("PolicyId", (Option.map x.policyId ~f:PolicyId.to_value));
+        ("PolicyHash", (Option.map x.policyHash ~f:PolicyHash.to_value));
+        ("Policy", (Option.map x.policy ~f:Policy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policy =
+        (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "Policy") in
+      let policyHash =
+        (Option.map ~f:PolicyHash.of_xml) (Xml.child xml_arg0 "PolicyHash") in
+      let policyId =
+        (Option.map ~f:PolicyId.of_xml) (Xml.child xml_arg0 "PolicyId") in
+      make ?policy ?policyHash ?policyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policy = field_map json__ "Policy" Policy.of_json in
+      let policyHash = field_map json__ "PolicyHash" PolicyHash.of_json in
+      let policyId = field_map json__ "PolicyId" PolicyId.of_json in
+      make ?policy ?policyHash ?policyId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A resource policy helps you to define the IAM entity (for example, an Amazon Web Services account) that can manage your Systems Manager resources. Currently, OpsItemGroup is the only resource that supports Systems Manager resource policies. The resource policy for OpsItemGroup enables Amazon Web Services accounts to view and interact with OpsCenter operational work items (OpsItems)."]
+module GetResourcePoliciesResponseEntries =
+  struct
+    type nonrec t = GetResourcePoliciesResponseEntry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GetResourcePoliciesResponseEntry.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:GetResourcePoliciesResponseEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GetResourcePoliciesResponseEntries"
+        ~of_json:GetResourcePoliciesResponseEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GetResourcePoliciesResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The token for the next set of items to return. Use this token to get the next set of results."];
+      policies: GetResourcePoliciesResponseEntries.t option
+        [@ocaml.doc "An array of the Policy object."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ResourcePolicyInvalidParameterException of
+          ResourcePolicyInvalidParameterException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken = fun ?policies -> fun () -> { nextToken; policies }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ResourcePolicyInvalidParameterException" ->
+          `ResourcePolicyInvalidParameterException
+            (ResourcePolicyInvalidParameterException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ResourcePolicyInvalidParameterException" ->
+          `ResourcePolicyInvalidParameterException
+            (ResourcePolicyInvalidParameterException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ResourcePolicyInvalidParameterException e ->
+          `Assoc
+            [("error", (`String "ResourcePolicyInvalidParameterException"));
+            ("details", (ResourcePolicyInvalidParameterException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("Policies",
+          (Option.map x.policies
+             ~f:GetResourcePoliciesResponseEntries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policies =
+        (Option.map ~f:GetResourcePoliciesResponseEntries.of_xml)
+          (Xml.child xml_arg0 "Policies") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?policies ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policies =
+        field_map json__ "Policies"
+          GetResourcePoliciesResponseEntries.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      make ?policies ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns an array of the Policy object."]
 module ServiceSettingId =
   struct
     type nonrec t = string
@@ -16716,7 +18296,7 @@ module GetServiceSettingRequest =
       {
       settingId: ServiceSettingId.t
         [@ocaml.doc
-          "The ID of the service setting to get. The setting ID can be one of the following. /ssm/automation/customer-script-log-destination /ssm/automation/customer-script-log-group-name /ssm/documents/console/public-sharing-permission /ssm/parameter-store/default-parameter-tier /ssm/parameter-store/high-throughput-enabled /ssm/managed-instance/activation-tier"]}
+          "The ID of the service setting to get. The setting ID can be one of the following. /ssm/appmanager/appmanager-enabled /ssm/automation/customer-script-log-destination /ssm/automation/customer-script-log-group-name /ssm/automation/enable-adaptive-concurrency /ssm/documents/console/public-sharing-permission /ssm/managed-instance/activation-tier /ssm/managed-instance/default-ec2-instance-management-role /ssm/opsinsights/opscenter /ssm/parameter-store/default-parameter-tier /ssm/parameter-store/high-throughput-enabled"]}
     let context_ = "GetServiceSettingRequest"
     let make ~settingId = fun () -> { settingId }
     let to_value x =
@@ -16729,8 +18309,9 @@ module GetServiceSettingRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SettingId") in
       make ~settingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let settingId = field_map_exn json "SettingId" ServiceSettingId.of_json in
+    let of_json json__ =
+      let settingId =
+        field_map_exn json__ "SettingId" ServiceSettingId.of_json in
       make ~settingId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request body of the GetServiceSetting API operation."]
@@ -16748,8 +18329,8 @@ module ServiceSettingNotFound =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16835,16 +18416,16 @@ module ServiceSetting =
       make ?status ?aRN ?lastModifiedUser ?lastModifiedDate ?settingValue
         ?settingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" String_.of_json in
-      let aRN = field_map json "ARN" String_.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" String_.of_json in
+      let aRN = field_map json__ "ARN" String_.of_json in
       let lastModifiedUser =
-        field_map json "LastModifiedUser" String_.of_json in
+        field_map json__ "LastModifiedUser" String_.of_json in
       let lastModifiedDate =
-        field_map json "LastModifiedDate" DateTime.of_json in
+        field_map json__ "LastModifiedDate" DateTime.of_json in
       let settingValue =
-        field_map json "SettingValue" ServiceSettingValue.of_json in
-      let settingId = field_map json "SettingId" ServiceSettingId.of_json in
+        field_map json__ "SettingValue" ServiceSettingValue.of_json in
+      let settingId = field_map json__ "SettingId" ServiceSettingId.of_json in
       make ?status ?aRN ?lastModifiedUser ?lastModifiedDate ?settingValue
         ?settingId ()
     let to_json v = composed_to_json to_value v
@@ -16904,9 +18485,9 @@ module GetServiceSettingResult =
           (Xml.child xml_arg0 "ServiceSetting") in
       make ?serviceSetting ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceSetting =
-        field_map json "ServiceSetting" ServiceSetting.of_json in
+        field_map json__ "ServiceSetting" ServiceSetting.of_json in
       make ?serviceSetting ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16917,7 +18498,7 @@ module HierarchyLevelLimitExceededException =
       {
       message: String_.t option
         [@ocaml.doc
-          "A hierarchy can have a maximum of 15 levels. For more information, see Requirements and constraints for parameter names in the Amazon Web Services Systems Manager User Guide."]}
+          "A hierarchy can have a maximum of 15 levels. For more information, see About requirements and constraints for parameter names in the Amazon Web Services Systems Manager User Guide."]}
     let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
@@ -16928,8 +18509,8 @@ module HierarchyLevelLimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16951,8 +18532,8 @@ module HierarchyTypeMismatchException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16993,12 +18574,201 @@ module IncompatiblePolicyException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "There is a conflict in the policies specified for this parameter. You can't, for example, specify two Expiration policies for a parameter. Review your policies, and try again."]
+module ManagedStatus =
+  struct
+    type nonrec t =
+      | All 
+      | Managed 
+      | Unmanaged 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | All -> "All"
+      | Managed -> "Managed"
+      | Unmanaged -> "Unmanaged"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "All" -> All
+      | "Managed" -> Managed
+      | "Unmanaged" -> Unmanaged
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ManagedStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ManagedStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module IpAddress =
+  struct
+    type nonrec t = string
+    let context_ = "IpAddress"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:46) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IpAddress" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceStatus =
+  struct
+    type nonrec t = string
+    let context_ = "InstanceStatus"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstanceStatus" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceInfo =
+  struct
+    type nonrec t =
+      {
+      agentType: AgentType.t option
+        [@ocaml.doc "The type of agent installed on the node."];
+      agentVersion: AgentVersion.t option
+        [@ocaml.doc "The version number of the agent installed on the node."];
+      computerName: ComputerName.t option
+        [@ocaml.doc "The fully qualified host name of the managed node."];
+      instanceStatus: InstanceStatus.t option
+        [@ocaml.doc "The current status of the managed node."];
+      ipAddress: IpAddress.t option
+        [@ocaml.doc "The IP address of the managed node."];
+      managedStatus: ManagedStatus.t option
+        [@ocaml.doc
+          "Indicates whether the node is managed by Systems Manager."];
+      platformType: PlatformType.t option
+        [@ocaml.doc
+          "The operating system platform type of the managed node."];
+      platformName: PlatformName.t option
+        [@ocaml.doc
+          "The name of the operating system platform running on your managed node."];
+      platformVersion: PlatformVersion.t option
+        [@ocaml.doc
+          "The version of the OS platform running on your managed node."];
+      resourceType: ResourceType.t option
+        [@ocaml.doc
+          "The type of instance, either an EC2 instance or another supported machine type in a hybrid fleet."]}
+    let make ?agentType =
+      fun ?agentVersion ->
+        fun ?computerName ->
+          fun ?instanceStatus ->
+            fun ?ipAddress ->
+              fun ?managedStatus ->
+                fun ?platformType ->
+                  fun ?platformName ->
+                    fun ?platformVersion ->
+                      fun ?resourceType ->
+                        fun () ->
+                          {
+                            agentType;
+                            agentVersion;
+                            computerName;
+                            instanceStatus;
+                            ipAddress;
+                            managedStatus;
+                            platformType;
+                            platformName;
+                            platformVersion;
+                            resourceType
+                          }
+    let to_value x =
+      structure_to_value
+        [("AgentType", (Option.map x.agentType ~f:AgentType.to_value));
+        ("AgentVersion",
+          (Option.map x.agentVersion ~f:AgentVersion.to_value));
+        ("ComputerName",
+          (Option.map x.computerName ~f:ComputerName.to_value));
+        ("InstanceStatus",
+          (Option.map x.instanceStatus ~f:InstanceStatus.to_value));
+        ("IpAddress", (Option.map x.ipAddress ~f:IpAddress.to_value));
+        ("ManagedStatus",
+          (Option.map x.managedStatus ~f:ManagedStatus.to_value));
+        ("PlatformType",
+          (Option.map x.platformType ~f:PlatformType.to_value));
+        ("PlatformName",
+          (Option.map x.platformName ~f:PlatformName.to_value));
+        ("PlatformVersion",
+          (Option.map x.platformVersion ~f:PlatformVersion.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType ~f:ResourceType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceType =
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      let platformVersion =
+        (Option.map ~f:PlatformVersion.of_xml)
+          (Xml.child xml_arg0 "PlatformVersion") in
+      let platformName =
+        (Option.map ~f:PlatformName.of_xml)
+          (Xml.child xml_arg0 "PlatformName") in
+      let platformType =
+        (Option.map ~f:PlatformType.of_xml)
+          (Xml.child xml_arg0 "PlatformType") in
+      let managedStatus =
+        (Option.map ~f:ManagedStatus.of_xml)
+          (Xml.child xml_arg0 "ManagedStatus") in
+      let ipAddress =
+        (Option.map ~f:IpAddress.of_xml) (Xml.child xml_arg0 "IpAddress") in
+      let instanceStatus =
+        (Option.map ~f:InstanceStatus.of_xml)
+          (Xml.child xml_arg0 "InstanceStatus") in
+      let computerName =
+        (Option.map ~f:ComputerName.of_xml)
+          (Xml.child xml_arg0 "ComputerName") in
+      let agentVersion =
+        (Option.map ~f:AgentVersion.of_xml)
+          (Xml.child xml_arg0 "AgentVersion") in
+      let agentType =
+        (Option.map ~f:AgentType.of_xml) (Xml.child xml_arg0 "AgentType") in
+      make ?resourceType ?platformVersion ?platformName ?platformType
+        ?managedStatus ?ipAddress ?instanceStatus ?computerName ?agentVersion
+        ?agentType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let platformVersion =
+        field_map json__ "PlatformVersion" PlatformVersion.of_json in
+      let platformName = field_map json__ "PlatformName" PlatformName.of_json in
+      let platformType = field_map json__ "PlatformType" PlatformType.of_json in
+      let managedStatus =
+        field_map json__ "ManagedStatus" ManagedStatus.of_json in
+      let ipAddress = field_map json__ "IpAddress" IpAddress.of_json in
+      let instanceStatus =
+        field_map json__ "InstanceStatus" InstanceStatus.of_json in
+      let computerName = field_map json__ "ComputerName" ComputerName.of_json in
+      let agentVersion = field_map json__ "AgentVersion" AgentVersion.of_json in
+      let agentType = field_map json__ "AgentType" AgentType.of_json in
+      make ?resourceType ?platformVersion ?platformName ?platformType
+        ?managedStatus ?ipAddress ?instanceStatus ?computerName ?agentVersion
+        ?agentType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details about a specific managed node."]
 module InvalidAllowedPatternException =
   struct
     type nonrec t =
@@ -17016,8 +18786,8 @@ module InvalidAllowedPatternException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17036,8 +18806,8 @@ module InvalidAssociation =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The association isn't valid or doesn't exist."]
@@ -17055,8 +18825,8 @@ module InvalidAutomationExecutionParametersException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17075,8 +18845,8 @@ module InvalidAutomationSignalException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17095,8 +18865,8 @@ module InvalidAutomationStatusUpdateException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified update status operation isn't valid."]
@@ -17114,8 +18884,8 @@ module InvalidInventoryItemContextException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17141,9 +18911,10 @@ module InvalidItemContentException =
           (Xml.child xml_arg0 "TypeName") in
       make ?message ?typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let typeName = field_map json "TypeName" InventoryItemTypeName.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let typeName =
+        field_map json__ "TypeName" InventoryItemTypeName.of_json in
       make ?message ?typeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One or more content items isn't valid."]
@@ -17161,8 +18932,8 @@ module InvalidNotificationConfig =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17193,8 +18964,8 @@ module InvalidPolicyAttributeException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A policy attribute or its value is invalid."]
@@ -17212,8 +18983,8 @@ module InvalidPolicyTypeException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17232,12 +19003,12 @@ module InvalidRole =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The role name can't contain invalid characters. Also verify that you specified an IAM role for notifications that includes the required trust policy. For information about configuring the IAM role for Run Command notifications, see Configuring Amazon SNS Notifications for Run Command in the Amazon Web Services Systems Manager User Guide."]
+       "The role name can't contain invalid characters. Also verify that you specified an IAM role for notifications that includes the required trust policy. For information about configuring the IAM role for Run Command notifications, see Monitoring Systems Manager status changes using Amazon SNS notifications in the Amazon Web Services Systems Manager User Guide."]
 module InvalidUpdate =
   struct
     type nonrec t = {
@@ -17252,8 +19023,8 @@ module InvalidUpdate =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The update isn't valid."]
@@ -17283,6 +19054,8 @@ module InventoryItemContentContext =
                        (AttributeValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -17361,18 +19134,19 @@ module InventoryItem =
       make ?context ?content ?contentHash ~captureTime ~schemaVersion
         ~typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let context =
-        field_map json "Context" InventoryItemContentContext.of_json in
-      let content = field_map json "Content" InventoryItemEntryList.of_json in
+        field_map json__ "Context" InventoryItemContentContext.of_json in
+      let content = field_map json__ "Content" InventoryItemEntryList.of_json in
       let contentHash =
-        field_map json "ContentHash" InventoryItemContentHash.of_json in
+        field_map json__ "ContentHash" InventoryItemContentHash.of_json in
       let captureTime =
-        field_map_exn json "CaptureTime" InventoryItemCaptureTime.of_json in
+        field_map_exn json__ "CaptureTime" InventoryItemCaptureTime.of_json in
       let schemaVersion =
-        field_map_exn json "SchemaVersion" InventoryItemSchemaVersion.of_json in
+        field_map_exn json__ "SchemaVersion"
+          InventoryItemSchemaVersion.of_json in
       let typeName =
-        field_map_exn json "TypeName" InventoryItemTypeName.of_json in
+        field_map_exn json__ "TypeName" InventoryItemTypeName.of_json in
       make ?context ?content ?contentHash ~captureTime ~schemaVersion
         ~typeName ()
     let to_json v = composed_to_json to_value v
@@ -17386,6 +19160,9 @@ module InventoryItemList =
         ok_or_failwith
           ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InventoryItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -17427,9 +19204,10 @@ module ItemContentMismatchException =
           (Xml.child xml_arg0 "TypeName") in
       make ?message ?typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let typeName = field_map json "TypeName" InventoryItemTypeName.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let typeName =
+        field_map json__ "TypeName" InventoryItemTypeName.of_json in
       make ?message ?typeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The inventory item has invalid content."]
@@ -17454,9 +19232,10 @@ module ItemSizeLimitExceededException =
           (Xml.child xml_arg0 "TypeName") in
       make ?message ?typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let typeName = field_map json "TypeName" InventoryItemTypeName.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let typeName =
+        field_map json__ "TypeName" InventoryItemTypeName.of_json in
       make ?message ?typeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The inventory item size has exceeded the size limit."]
@@ -17464,6 +19243,9 @@ module KeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -17489,7 +19271,7 @@ module LabelParameterVersionRequest =
       {
       name: PSParameterName.t
         [@ocaml.doc
-          "The parameter name on which you want to attach one or more labels."];
+          "The parameter name on which you want to attach one or more labels. You can't enter the Amazon Resource Name (ARN) for a parameter, only the parameter name itself."];
       parameterVersion: PSParameterVersion.t option
         [@ocaml.doc
           "The specific version of the parameter on which you want to attach one or more labels. If no version is specified, the system attaches the label to the latest version."];
@@ -17519,15 +19301,15 @@ module LabelParameterVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~labels ?parameterVersion ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let labels = field_map_exn json "Labels" ParameterLabelList.of_json in
+    let of_json json__ =
+      let labels = field_map_exn json__ "Labels" ParameterLabelList.of_json in
       let parameterVersion =
-        field_map json "ParameterVersion" PSParameterVersion.of_json in
-      let name = field_map_exn json "Name" PSParameterName.of_json in
+        field_map json__ "ParameterVersion" PSParameterVersion.of_json in
+      let name = field_map_exn json__ "Name" PSParameterName.of_json in
       make ~labels ?parameterVersion ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A parameter label is a user-defined alias to help you manage different versions of a parameter. When you modify a parameter, Amazon Web Services Systems Manager automatically saves a new version and increments the version number by one. A label can help you remember the purpose of a parameter when there are multiple versions. Parameter labels have the following requirements and restrictions. A version of a parameter can have a maximum of 10 labels. You can't attach the same label to different versions of the same parameter. For example, if version 1 has the label Production, then you can't attach Production to version 2. You can move a label from one version of a parameter to another. You can't create a label when you create a new parameter. You must attach a label to a specific version of a parameter. If you no longer want to use a parameter label, then you can either delete it or move it to a different version of a parameter. A label can have a maximum of 100 characters. Labels can contain letters (case sensitive), numbers, periods (.), hyphens (-), or underscores (_). Labels can't begin with a number, \"aws\" or \"ssm\" (not case sensitive). If a label fails to meet these requirements, then the label isn't associated with a parameter and the system displays it in the list of InvalidLabels."]
+       "A parameter label is a user-defined alias to help you manage different versions of a parameter. When you modify a parameter, Amazon Web Services Systems Manager automatically saves a new version and increments the version number by one. A label can help you remember the purpose of a parameter when there are multiple versions. Parameter labels have the following requirements and restrictions. A version of a parameter can have a maximum of 10 labels. You can't attach the same label to different versions of the same parameter. For example, if version 1 has the label Production, then you can't attach Production to version 2. You can move a label from one version of a parameter to another. You can't create a label when you create a new parameter. You must attach a label to a specific version of a parameter. If you no longer want to use a parameter label, then you can either delete it or move it to a different version of a parameter. A label can have a maximum of 100 characters. Labels can contain letters (case sensitive), numbers, periods (.), hyphens (-), or underscores (_). Labels can't begin with a number, \"aws\" or \"ssm\" (not case sensitive). If a label fails to meet these requirements, then the label isn't associated with a parameter and the system displays it in the list of InvalidLabels. Parameter names can't contain spaces. The service removes any spaces specified for the beginning or end of a parameter name. If the specified name for a parameter contains spaces between characters, the request fails with a ValidationException error."]
 module ParameterVersionLabelLimitExceeded =
   struct
     type nonrec t = {
@@ -17542,8 +19324,8 @@ module ParameterVersionLabelLimitExceeded =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A parameter version can have a maximum of ten labels."]
@@ -17553,7 +19335,7 @@ module LabelParameterVersionResult =
       {
       invalidLabels: ParameterLabelList.t option
         [@ocaml.doc
-          "The label doesn't meet the requirements. For information about parameter label requirements, see Labeling parameters in the Amazon Web Services Systems Manager User Guide."];
+          "The label doesn't meet the requirements. For information about parameter label requirements, see Working with parameter labels in the Amazon Web Services Systems Manager User Guide."];
       parameterVersion: PSParameterVersion.t option
         [@ocaml.doc "The version of the parameter that has been labeled."]}
     type nonrec error =
@@ -17638,15 +19420,15 @@ module LabelParameterVersionResult =
           (Xml.child xml_arg0 "InvalidLabels") in
       make ?parameterVersion ?invalidLabels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterVersion =
-        field_map json "ParameterVersion" PSParameterVersion.of_json in
+        field_map json__ "ParameterVersion" PSParameterVersion.of_json in
       let invalidLabels =
-        field_map json "InvalidLabels" ParameterLabelList.of_json in
+        field_map json__ "InvalidLabels" ParameterLabelList.of_json in
       make ?parameterVersion ?invalidLabels ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A parameter label is a user-defined alias to help you manage different versions of a parameter. When you modify a parameter, Amazon Web Services Systems Manager automatically saves a new version and increments the version number by one. A label can help you remember the purpose of a parameter when there are multiple versions. Parameter labels have the following requirements and restrictions. A version of a parameter can have a maximum of 10 labels. You can't attach the same label to different versions of the same parameter. For example, if version 1 has the label Production, then you can't attach Production to version 2. You can move a label from one version of a parameter to another. You can't create a label when you create a new parameter. You must attach a label to a specific version of a parameter. If you no longer want to use a parameter label, then you can either delete it or move it to a different version of a parameter. A label can have a maximum of 100 characters. Labels can contain letters (case sensitive), numbers, periods (.), hyphens (-), or underscores (_). Labels can't begin with a number, \"aws\" or \"ssm\" (not case sensitive). If a label fails to meet these requirements, then the label isn't associated with a parameter and the system displays it in the list of InvalidLabels."]
+       "A parameter label is a user-defined alias to help you manage different versions of a parameter. When you modify a parameter, Amazon Web Services Systems Manager automatically saves a new version and increments the version number by one. A label can help you remember the purpose of a parameter when there are multiple versions. Parameter labels have the following requirements and restrictions. A version of a parameter can have a maximum of 10 labels. You can't attach the same label to different versions of the same parameter. For example, if version 1 has the label Production, then you can't attach Production to version 2. You can move a label from one version of a parameter to another. You can't create a label when you create a new parameter. You must attach a label to a specific version of a parameter. If you no longer want to use a parameter label, then you can either delete it or move it to a different version of a parameter. A label can have a maximum of 100 characters. Labels can contain letters (case sensitive), numbers, periods (.), hyphens (-), or underscores (_). Labels can't begin with a number, \"aws\" or \"ssm\" (not case sensitive). If a label fails to meet these requirements, then the label isn't associated with a parameter and the system displays it in the list of InvalidLabels. Parameter names can't contain spaces. The service removes any spaces specified for the beginning or end of a parameter name. If the specified name for a parameter contains spaces between characters, the request fails with a ValidationException error."]
 module LastResourceDataSyncMessage =
   struct
     type nonrec t = string
@@ -17749,11 +19531,11 @@ module ListAssociationVersionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AssociationId") in
       make ?nextToken ?maxResults ~associationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let associationId =
-        field_map_exn json "AssociationId" AssociationId.of_json in
+        field_map_exn json__ "AssociationId" AssociationId.of_json in
       make ?nextToken ?maxResults ~associationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17829,10 +19611,10 @@ module ListAssociationVersionsResult =
           (Xml.child xml_arg0 "AssociationVersions") in
       make ?nextToken ?associationVersions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let associationVersions =
-        field_map json "AssociationVersions" AssociationVersionList.of_json in
+        field_map json__ "AssociationVersions" AssociationVersionList.of_json in
       make ?nextToken ?associationVersions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17872,15 +19654,16 @@ module ListAssociationsRequest =
           (Xml.child xml_arg0 "AssociationFilterList") in
       make ?nextToken ?maxResults ?associationFilterList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let associationFilterList =
-        field_map json "AssociationFilterList" AssociationFilterList.of_json in
+        field_map json__ "AssociationFilterList"
+          AssociationFilterList.of_json in
       make ?nextToken ?maxResults ?associationFilterList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns all State Manager associations in the current Amazon Web Services account and Amazon Web Services Region. You can limit the results to a specific State Manager association document or managed node by specifying a filter. State Manager is a capability of Amazon Web Services Systems Manager."]
+       "Returns all State Manager associations in the current Amazon Web Services account and Amazon Web Services Region. You can limit the results to a specific State Manager association document or managed node by specifying a filter. State Manager is a tool in Amazon Web Services Systems Manager."]
 module ListAssociationsResult =
   struct
     type nonrec t =
@@ -17940,14 +19723,14 @@ module ListAssociationsResult =
           (Xml.child xml_arg0 "Associations") in
       make ?nextToken ?associations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let associations =
-        field_map json "Associations" AssociationList.of_json in
+        field_map json__ "Associations" AssociationList.of_json in
       make ?nextToken ?associations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns all State Manager associations in the current Amazon Web Services account and Amazon Web Services Region. You can limit the results to a specific State Manager association document or managed node by specifying a filter. State Manager is a capability of Amazon Web Services Systems Manager."]
+       "Returns all State Manager associations in the current Amazon Web Services account and Amazon Web Services Region. You can limit the results to a specific State Manager association document or managed node by specifying a filter. State Manager is a tool in Amazon Web Services Systems Manager."]
 module ListCommandInvocationsRequest =
   struct
     type nonrec t =
@@ -18011,13 +19794,14 @@ module ListCommandInvocationsRequest =
         (Option.map ~f:CommandId.of_xml) (Xml.child xml_arg0 "CommandId") in
       make ?details ?filters ?nextToken ?maxResults ?instanceId ?commandId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let details = field_map json "Details" Boolean.of_json in
-      let filters = field_map json "Filters" CommandFilterList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" CommandMaxResults.of_json in
-      let instanceId = field_map json "InstanceId" InstanceId.of_json in
-      let commandId = field_map json "CommandId" CommandId.of_json in
+    let of_json json__ =
+      let details = field_map json__ "Details" Boolean.of_json in
+      let filters = field_map json__ "Filters" CommandFilterList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" CommandMaxResults.of_json in
+      let instanceId = field_map json__ "InstanceId" InstanceId.of_json in
+      let commandId = field_map json__ "CommandId" CommandId.of_json in
       make ?details ?filters ?nextToken ?maxResults ?instanceId ?commandId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18107,10 +19891,10 @@ module ListCommandInvocationsResult =
           (Xml.child xml_arg0 "CommandInvocations") in
       make ?nextToken ?commandInvocations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let commandInvocations =
-        field_map json "CommandInvocations" CommandInvocationList.of_json in
+        field_map json__ "CommandInvocations" CommandInvocationList.of_json in
       make ?nextToken ?commandInvocations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18165,12 +19949,13 @@ module ListCommandsRequest =
         (Option.map ~f:CommandId.of_xml) (Xml.child xml_arg0 "CommandId") in
       make ?filters ?nextToken ?maxResults ?instanceId ?commandId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" CommandFilterList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" CommandMaxResults.of_json in
-      let instanceId = field_map json "InstanceId" InstanceId.of_json in
-      let commandId = field_map json "CommandId" CommandId.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" CommandFilterList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" CommandMaxResults.of_json in
+      let instanceId = field_map json__ "InstanceId" InstanceId.of_json in
+      let commandId = field_map json__ "CommandId" CommandId.of_json in
       make ?filters ?nextToken ?maxResults ?instanceId ?commandId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18257,9 +20042,9 @@ module ListCommandsResult =
         (Option.map ~f:CommandList.of_xml) (Xml.child xml_arg0 "Commands") in
       make ?nextToken ?commands ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let commands = field_map json "Commands" CommandList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let commands = field_map json__ "Commands" CommandList.of_json in
       make ?nextToken ?commands ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18318,15 +20103,15 @@ module ListComplianceItemsRequest =
           (Xml.child xml_arg0 "Filters") in
       make ?maxResults ?nextToken ?resourceTypes ?resourceIds ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let resourceTypes =
-        field_map json "ResourceTypes" ComplianceResourceTypeList.of_json in
+        field_map json__ "ResourceTypes" ComplianceResourceTypeList.of_json in
       let resourceIds =
-        field_map json "ResourceIds" ComplianceResourceIdList.of_json in
+        field_map json__ "ResourceIds" ComplianceResourceIdList.of_json in
       let filters =
-        field_map json "Filters" ComplianceStringFilterList.of_json in
+        field_map json__ "Filters" ComplianceStringFilterList.of_json in
       make ?maxResults ?nextToken ?resourceTypes ?resourceIds ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18417,10 +20202,10 @@ module ListComplianceItemsResult =
           (Xml.child xml_arg0 "ComplianceItems") in
       make ?nextToken ?complianceItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let complianceItems =
-        field_map json "ComplianceItems" ComplianceItemList.of_json in
+        field_map json__ "ComplianceItems" ComplianceItemList.of_json in
       make ?nextToken ?complianceItems ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18458,11 +20243,11 @@ module ListComplianceSummariesRequest =
           (Xml.child xml_arg0 "Filters") in
       make ?maxResults ?nextToken ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let filters =
-        field_map json "Filters" ComplianceStringFilterList.of_json in
+        field_map json__ "Filters" ComplianceStringFilterList.of_json in
       make ?maxResults ?nextToken ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18536,10 +20321,10 @@ module ListComplianceSummariesResult =
           (Xml.child xml_arg0 "ComplianceSummaryItems") in
       make ?nextToken ?complianceSummaryItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let complianceSummaryItems =
-        field_map json "ComplianceSummaryItems"
+        field_map json__ "ComplianceSummaryItems"
           ComplianceSummaryItemList.of_json in
       make ?nextToken ?complianceSummaryItems ()
     let to_json v = composed_to_json to_value v
@@ -18593,18 +20378,18 @@ module ListDocumentMetadataHistoryRequest =
         DocumentName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?maxResults ?nextToken ~metadata ?documentVersion ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let metadata =
-        field_map_exn json "Metadata" DocumentMetadataEnum.of_json in
+        field_map_exn json__ "Metadata" DocumentMetadataEnum.of_json in
       let documentVersion =
-        field_map json "DocumentVersion" DocumentVersion.of_json in
-      let name = field_map_exn json "Name" DocumentName.of_json in
+        field_map json__ "DocumentVersion" DocumentVersion.of_json in
+      let name = field_map_exn json__ "Name" DocumentName.of_json in
       make ?maxResults ?nextToken ~metadata ?documentVersion ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about approval reviews for a version of a change template in Change Manager."]
+       "Amazon Web Services Systems Manager Change Manager is no longer open to new customers. Existing customers can continue to use the service as normal. For more information, see Amazon Web Services Systems Manager Change Manager availability change. Information about approval reviews for a version of a change template in Change Manager."]
 module ListDocumentMetadataHistoryResponse =
   struct
     type nonrec t =
@@ -18705,18 +20490,18 @@ module ListDocumentMetadataHistoryResponse =
         (Option.map ~f:DocumentName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?nextToken ?metadata ?author ?documentVersion ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let metadata =
-        field_map json "Metadata" DocumentMetadataResponseInfo.of_json in
-      let author = field_map json "Author" DocumentAuthor.of_json in
+        field_map json__ "Metadata" DocumentMetadataResponseInfo.of_json in
+      let author = field_map json__ "Author" DocumentAuthor.of_json in
       let documentVersion =
-        field_map json "DocumentVersion" DocumentVersion.of_json in
-      let name = field_map json "Name" DocumentName.of_json in
+        field_map json__ "DocumentVersion" DocumentVersion.of_json in
+      let name = field_map json__ "Name" DocumentName.of_json in
       make ?nextToken ?metadata ?author ?documentVersion ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about approval reviews for a version of a change template in Change Manager."]
+       "Amazon Web Services Systems Manager Change Manager is no longer open to new customers. Existing customers can continue to use the service as normal. For more information, see Amazon Web Services Systems Manager Change Manager availability change. Information about approval reviews for a version of a change template in Change Manager."]
 module ListDocumentVersionsRequest =
   struct
     type nonrec t =
@@ -18749,10 +20534,10 @@ module ListDocumentVersionsRequest =
         DocumentARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?nextToken ?maxResults ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let name = field_map_exn json "Name" DocumentARN.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let name = field_map_exn json__ "Name" DocumentARN.of_json in
       make ?nextToken ?maxResults ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List all versions for a document."]
@@ -18823,10 +20608,10 @@ module ListDocumentVersionsResult =
           (Xml.child xml_arg0 "DocumentVersions") in
       make ?nextToken ?documentVersions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let documentVersions =
-        field_map json "DocumentVersions" DocumentVersionList.of_json in
+        field_map json__ "DocumentVersions" DocumentVersionList.of_json in
       make ?nextToken ?documentVersions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List all versions for a document."]
@@ -18872,13 +20657,13 @@ module ListDocumentsRequest =
           (Xml.child xml_arg0 "DocumentFilterList") in
       make ?nextToken ?maxResults ?filters ?documentFilterList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let filters =
-        field_map json "Filters" DocumentKeyValuesFilterList.of_json in
+        field_map json__ "Filters" DocumentKeyValuesFilterList.of_json in
       let documentFilterList =
-        field_map json "DocumentFilterList" DocumentFilterList.of_json in
+        field_map json__ "DocumentFilterList" DocumentFilterList.of_json in
       make ?nextToken ?maxResults ?filters ?documentFilterList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18952,10 +20737,10 @@ module ListDocumentsResult =
           (Xml.child xml_arg0 "DocumentIdentifiers") in
       make ?nextToken ?documentIdentifiers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let documentIdentifiers =
-        field_map json "DocumentIdentifiers" DocumentIdentifierList.of_json in
+        field_map json__ "DocumentIdentifiers" DocumentIdentifierList.of_json in
       make ?nextToken ?documentIdentifiers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19011,13 +20796,13 @@ module ListInventoryEntriesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?maxResults ?nextToken ?filters ~typeName ~instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let filters = field_map json "Filters" InventoryFilterList.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filters = field_map json__ "Filters" InventoryFilterList.of_json in
       let typeName =
-        field_map_exn json "TypeName" InventoryItemTypeName.of_json in
-      let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
+        field_map_exn json__ "TypeName" InventoryItemTypeName.of_json in
+      let instanceId = field_map_exn json__ "InstanceId" InstanceId.of_json in
       make ?maxResults ?nextToken ?filters ~typeName ~instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of inventory items returned by the request."]
@@ -19032,12 +20817,12 @@ module ListInventoryEntriesResult =
           "The managed node ID targeted by the request to query inventory information."];
       schemaVersion: InventoryItemSchemaVersion.t option
         [@ocaml.doc
-          "The inventory schema version used by the managed node(s)."];
+          "The inventory schema version used by the managed nodes."];
       captureTime: InventoryItemCaptureTime.t option
         [@ocaml.doc
-          "The time that inventory information was collected for the managed node(s)."];
+          "The time that inventory information was collected for the managed nodes."];
       entries: InventoryItemEntryList.t option
-        [@ocaml.doc "A list of inventory items on the managed node(s)."];
+        [@ocaml.doc "A list of inventory items on the managed nodes."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The token to use when requesting the next set of items. If there are no additional items to return, the string is empty."]}
@@ -19149,19 +20934,1089 @@ module ListInventoryEntriesResult =
       make ?nextToken ?entries ?captureTime ?schemaVersion ?instanceId
         ?typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let entries = field_map json "Entries" InventoryItemEntryList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let entries = field_map json__ "Entries" InventoryItemEntryList.of_json in
       let captureTime =
-        field_map json "CaptureTime" InventoryItemCaptureTime.of_json in
+        field_map json__ "CaptureTime" InventoryItemCaptureTime.of_json in
       let schemaVersion =
-        field_map json "SchemaVersion" InventoryItemSchemaVersion.of_json in
-      let instanceId = field_map json "InstanceId" InstanceId.of_json in
-      let typeName = field_map json "TypeName" InventoryItemTypeName.of_json in
+        field_map json__ "SchemaVersion" InventoryItemSchemaVersion.of_json in
+      let instanceId = field_map json__ "InstanceId" InstanceId.of_json in
+      let typeName =
+        field_map json__ "TypeName" InventoryItemTypeName.of_json in
       make ?nextToken ?entries ?captureTime ?schemaVersion ?instanceId
         ?typeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of inventory items returned by the request."]
+module NodeFilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "NodeFilterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NodeFilterValue" j
+    let to_json = simple_to_json to_value
+  end
+module NodeFilterValueList =
+  struct
+    type nonrec t = NodeFilterValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NodeFilterValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NodeFilterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NodeFilterValueList"
+        ~of_json:NodeFilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NodeFilterOperatorType =
+  struct
+    type nonrec t =
+      | Equal 
+      | NotEqual 
+      | BeginWith 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Equal -> "Equal"
+      | NotEqual -> "NotEqual"
+      | BeginWith -> "BeginWith"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Equal" -> Equal
+      | "NotEqual" -> NotEqual
+      | "BeginWith" -> BeginWith
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration NodeFilterOperatorType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"NodeFilterOperatorType" j)
+    let to_json = simple_to_json to_value
+  end
+module NodeFilterKey =
+  struct
+    type nonrec t =
+      | AgentType 
+      | AgentVersion 
+      | ComputerName 
+      | InstanceId 
+      | InstanceStatus 
+      | IpAddress 
+      | ManagedStatus 
+      | PlatformName 
+      | PlatformType 
+      | PlatformVersion 
+      | ResourceType 
+      | OrganizationalUnitId 
+      | OrganizationalUnitPath 
+      | Region 
+      | AccountId 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AgentType -> "AgentType"
+      | AgentVersion -> "AgentVersion"
+      | ComputerName -> "ComputerName"
+      | InstanceId -> "InstanceId"
+      | InstanceStatus -> "InstanceStatus"
+      | IpAddress -> "IpAddress"
+      | ManagedStatus -> "ManagedStatus"
+      | PlatformName -> "PlatformName"
+      | PlatformType -> "PlatformType"
+      | PlatformVersion -> "PlatformVersion"
+      | ResourceType -> "ResourceType"
+      | OrganizationalUnitId -> "OrganizationalUnitId"
+      | OrganizationalUnitPath -> "OrganizationalUnitPath"
+      | Region -> "Region"
+      | AccountId -> "AccountId"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AgentType" -> AgentType
+      | "AgentVersion" -> AgentVersion
+      | "ComputerName" -> ComputerName
+      | "InstanceId" -> InstanceId
+      | "InstanceStatus" -> InstanceStatus
+      | "IpAddress" -> IpAddress
+      | "ManagedStatus" -> ManagedStatus
+      | "PlatformName" -> PlatformName
+      | "PlatformType" -> PlatformType
+      | "PlatformVersion" -> PlatformVersion
+      | "ResourceType" -> ResourceType
+      | "OrganizationalUnitId" -> OrganizationalUnitId
+      | "OrganizationalUnitPath" -> OrganizationalUnitPath
+      | "Region" -> Region
+      | "AccountId" -> AccountId
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration NodeFilterKey" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NodeFilterKey" j)
+    let to_json = simple_to_json to_value
+  end
+module NodeFilter =
+  struct
+    type nonrec t =
+      {
+      key: NodeFilterKey.t [@ocaml.doc "The name of the filter."];
+      values: NodeFilterValueList.t
+        [@ocaml.doc
+          "A filter value supported by the specified key. For example, for the key PlatformType, supported values include Linux and Windows."];
+      type_: NodeFilterOperatorType.t option
+        [@ocaml.doc "The type of filter operator."]}
+    let context_ = "NodeFilter"
+    let make ?type_ =
+      fun ~key -> fun ~values -> fun () -> { type_; key; values }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (NodeFilterKey.to_value x.key)));
+        ("Values", (Some (NodeFilterValueList.to_value x.values)));
+        ("Type", (Option.map x.type_ ~f:NodeFilterOperatorType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:NodeFilterOperatorType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let values =
+        NodeFilterValueList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Values") in
+      let key =
+        NodeFilterKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ?type_ ~values ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" NodeFilterOperatorType.of_json in
+      let values = field_map_exn json__ "Values" NodeFilterValueList.of_json in
+      let key = field_map_exn json__ "Key" NodeFilterKey.of_json in
+      make ?type_ ~values ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The filters for the operation."]
+module NodeFilterList =
+  struct
+    type nonrec t = NodeFilter.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NodeFilter.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NodeFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NodeFilterList" ~of_json:NodeFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListNodesRequest =
+  struct
+    type nonrec t =
+      {
+      syncName: ResourceDataSyncName.t option
+        [@ocaml.doc
+          "The name of the Amazon Web Services managed resource data sync to retrieve information about. For cross-account/cross-Region configurations, this parameter is required, and the name of the supported resource data sync is AWS-QuickSetup-ManagedNode. For single account/single-Region configurations, the parameter is not required."];
+      filters: NodeFilterList.t option
+        [@ocaml.doc
+          "One or more filters. Use a filter to return a more specific list of managed nodes."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of items to return. (You received this token from a previous call.)"];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results."]}
+    let make ?syncName =
+      fun ?filters ->
+        fun ?nextToken ->
+          fun ?maxResults ->
+            fun () -> { syncName; filters; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("SyncName",
+           (Option.map x.syncName ~f:ResourceDataSyncName.to_value));
+        ("Filters", (Option.map x.filters ~f:NodeFilterList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let filters =
+        (Option.map ~f:NodeFilterList.of_xml) (Xml.child xml_arg0 "Filters") in
+      let syncName =
+        (Option.map ~f:ResourceDataSyncName.of_xml)
+          (Xml.child xml_arg0 "SyncName") in
+      make ?maxResults ?nextToken ?filters ?syncName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filters = field_map json__ "Filters" NodeFilterList.of_json in
+      let syncName = field_map json__ "SyncName" ResourceDataSyncName.of_json in
+      make ?maxResults ?nextToken ?filters ?syncName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Takes in filters and returns a list of managed nodes matching the filter criteria."]
+module UnsupportedOperationException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This operation is not supported for the current account. You must first enable the Systems Manager integrated experience in your account."]
+module NodeType =
+  struct
+    type nonrec t =
+      {
+      instance: InstanceInfo.t option
+        [@ocaml.doc "Information about a specific managed node."]}
+    let make ?instance = fun () -> { instance }
+    let to_value x =
+      structure_to_value
+        [("Instance", (Option.map x.instance ~f:InstanceInfo.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let instance =
+        (Option.map ~f:InstanceInfo.of_xml) (Xml.child xml_arg0 "Instance") in
+      make ?instance ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let instance = field_map json__ "Instance" InstanceInfo.of_json in
+      make ?instance ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a managed node's type."]
+module NodeRegion =
+  struct
+    type nonrec t = string
+    let context_ = "NodeRegion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NodeRegion" j
+    let to_json = simple_to_json to_value
+  end
+module NodeOrganizationalUnitPath =
+  struct
+    type nonrec t = string
+    let context_ = "NodeOrganizationalUnitPath"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NodeOrganizationalUnitPath" j
+    let to_json = simple_to_json to_value
+  end
+module NodeOrganizationalUnitId =
+  struct
+    type nonrec t = string
+    let context_ = "NodeOrganizationalUnitId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:68) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^ou-[0-9a-z]{4,32}-[a-z0-9]{8,32}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NodeOrganizationalUnitId" j
+    let to_json = simple_to_json to_value
+  end
+module NodeAccountId =
+  struct
+    type nonrec t = string
+    let context_ = "NodeAccountId"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"[0-9]{12}"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NodeAccountId" j
+    let to_json = simple_to_json to_value
+  end
+module NodeOwnerInfo =
+  struct
+    type nonrec t =
+      {
+      accountId: NodeAccountId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that owns the managed node."];
+      organizationalUnitId: NodeOrganizationalUnitId.t option
+        [@ocaml.doc
+          "The ID of the organization unit (OU) that the account is part of."];
+      organizationalUnitPath: NodeOrganizationalUnitPath.t option
+        [@ocaml.doc
+          "The path for the organizational unit (OU) that owns the managed node. The path for the OU is built using the IDs of the organization, root, and all OUs in the path down to and including the OU. For example: o-a1b2c3d4e5/r-f6g7h8i9j0example/ou-ghi0-awsccccc/ou-jkl0-awsddddd/"]}
+    let make ?accountId =
+      fun ?organizationalUnitId ->
+        fun ?organizationalUnitPath ->
+          fun () ->
+            { accountId; organizationalUnitId; organizationalUnitPath }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Option.map x.accountId ~f:NodeAccountId.to_value));
+        ("OrganizationalUnitId",
+          (Option.map x.organizationalUnitId
+             ~f:NodeOrganizationalUnitId.to_value));
+        ("OrganizationalUnitPath",
+          (Option.map x.organizationalUnitPath
+             ~f:NodeOrganizationalUnitPath.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let organizationalUnitPath =
+        (Option.map ~f:NodeOrganizationalUnitPath.of_xml)
+          (Xml.child xml_arg0 "OrganizationalUnitPath") in
+      let organizationalUnitId =
+        (Option.map ~f:NodeOrganizationalUnitId.of_xml)
+          (Xml.child xml_arg0 "OrganizationalUnitId") in
+      let accountId =
+        (Option.map ~f:NodeAccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ?organizationalUnitPath ?organizationalUnitId ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let organizationalUnitPath =
+        field_map json__ "OrganizationalUnitPath"
+          NodeOrganizationalUnitPath.of_json in
+      let organizationalUnitId =
+        field_map json__ "OrganizationalUnitId"
+          NodeOrganizationalUnitId.of_json in
+      let accountId = field_map json__ "AccountId" NodeAccountId.of_json in
+      make ?organizationalUnitPath ?organizationalUnitId ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about ownership of a managed node."]
+module NodeId =
+  struct
+    type nonrec t = string
+    let context_ = "NodeId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i ~pattern:"(^i-(\\w{8}|\\w{17})$)|(^mi-\\w{17}$)");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NodeId" j
+    let to_json = simple_to_json to_value
+  end
+module NodeCaptureTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module Node =
+  struct
+    type nonrec t =
+      {
+      captureTime: NodeCaptureTime.t option
+        [@ocaml.doc
+          "The UTC timestamp for when the managed node data was last captured."];
+      id: NodeId.t option [@ocaml.doc "The ID of the managed node."];
+      owner: NodeOwnerInfo.t option
+        [@ocaml.doc "Information about the ownership of the managed node."];
+      region: NodeRegion.t option
+        [@ocaml.doc
+          "The Amazon Web Services Region that a managed node was created in or assigned to."];
+      nodeType: NodeType.t option
+        [@ocaml.doc "Information about the type of node."]}
+    let make ?captureTime =
+      fun ?id ->
+        fun ?owner ->
+          fun ?region ->
+            fun ?nodeType ->
+              fun () -> { captureTime; id; owner; region; nodeType }
+    let to_value x =
+      structure_to_value
+        [("CaptureTime",
+           (Option.map x.captureTime ~f:NodeCaptureTime.to_value));
+        ("Id", (Option.map x.id ~f:NodeId.to_value));
+        ("Owner", (Option.map x.owner ~f:NodeOwnerInfo.to_value));
+        ("Region", (Option.map x.region ~f:NodeRegion.to_value));
+        ("NodeType", (Option.map x.nodeType ~f:NodeType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nodeType =
+        (Option.map ~f:NodeType.of_xml) (Xml.child xml_arg0 "NodeType") in
+      let region =
+        (Option.map ~f:NodeRegion.of_xml) (Xml.child xml_arg0 "Region") in
+      let owner =
+        (Option.map ~f:NodeOwnerInfo.of_xml) (Xml.child xml_arg0 "Owner") in
+      let id = (Option.map ~f:NodeId.of_xml) (Xml.child xml_arg0 "Id") in
+      let captureTime =
+        (Option.map ~f:NodeCaptureTime.of_xml)
+          (Xml.child xml_arg0 "CaptureTime") in
+      make ?nodeType ?region ?owner ?id ?captureTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nodeType = field_map json__ "NodeType" NodeType.of_json in
+      let region = field_map json__ "Region" NodeRegion.of_json in
+      let owner = field_map json__ "Owner" NodeOwnerInfo.of_json in
+      let id = field_map json__ "Id" NodeId.of_json in
+      let captureTime =
+        field_map json__ "CaptureTime" NodeCaptureTime.of_json in
+      make ?nodeType ?region ?owner ?id ?captureTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details about an individual managed node."]
+module NodeList =
+  struct
+    type nonrec t = Node.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Node.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Node.of_xml)
+    let of_json j = list_of_json ~kind:"NodeList" ~of_json:Node.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListNodesResult =
+  struct
+    type nonrec t =
+      {
+      nodes: NodeList.t option
+        [@ocaml.doc
+          "A list of managed nodes that match the specified filter criteria."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use when requesting the next set of items. If there are no additional items to return, the string is empty."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `InvalidFilter of InvalidFilter.t 
+      | `InvalidNextToken of InvalidNextToken.t 
+      | `ResourceDataSyncNotFoundException of
+          ResourceDataSyncNotFoundException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nodes = fun ?nextToken -> fun () -> { nodes; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidFilter" -> `InvalidFilter (InvalidFilter.of_json json)
+      | "InvalidNextToken" ->
+          `InvalidNextToken (InvalidNextToken.of_json json)
+      | "ResourceDataSyncNotFoundException" ->
+          `ResourceDataSyncNotFoundException
+            (ResourceDataSyncNotFoundException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidFilter" -> `InvalidFilter (InvalidFilter.of_xml xml)
+      | "InvalidNextToken" -> `InvalidNextToken (InvalidNextToken.of_xml xml)
+      | "ResourceDataSyncNotFoundException" ->
+          `ResourceDataSyncNotFoundException
+            (ResourceDataSyncNotFoundException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidFilter e ->
+          `Assoc
+            [("error", (`String "InvalidFilter"));
+            ("details", (InvalidFilter.to_json e))]
+      | `InvalidNextToken e ->
+          `Assoc
+            [("error", (`String "InvalidNextToken"));
+            ("details", (InvalidNextToken.to_json e))]
+      | `ResourceDataSyncNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceDataSyncNotFoundException"));
+            ("details", (ResourceDataSyncNotFoundException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Nodes", (Option.map x.nodes ~f:NodeList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let nodes =
+        (Option.map ~f:NodeList.of_xml) (Xml.child xml_arg0 "Nodes") in
+      make ?nextToken ?nodes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let nodes = field_map json__ "Nodes" NodeList.of_json in
+      make ?nextToken ?nodes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Takes in filters and returns a list of managed nodes matching the filter criteria."]
+module NodeTypeName =
+  struct
+    type nonrec t =
+      | Instance 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | Instance -> "Instance" | Non_static_id s -> s
+    let of_string = function | "Instance" -> Instance | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration NodeTypeName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NodeTypeName" j)
+    let to_json = simple_to_json to_value
+  end
+module NodeAttributeName =
+  struct
+    type nonrec t =
+      | AgentVersion 
+      | PlatformName 
+      | PlatformType 
+      | PlatformVersion 
+      | Region 
+      | ResourceType 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AgentVersion -> "AgentVersion"
+      | PlatformName -> "PlatformName"
+      | PlatformType -> "PlatformType"
+      | PlatformVersion -> "PlatformVersion"
+      | Region -> "Region"
+      | ResourceType -> "ResourceType"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AgentVersion" -> AgentVersion
+      | "PlatformName" -> PlatformName
+      | "PlatformType" -> PlatformType
+      | "PlatformVersion" -> PlatformVersion
+      | "Region" -> Region
+      | "ResourceType" -> ResourceType
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration NodeAttributeName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NodeAttributeName" j)
+    let to_json = simple_to_json to_value
+  end
+module NodeAggregatorType =
+  struct
+    type nonrec t =
+      | Count 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | Count -> "Count" | Non_static_id s -> s
+    let of_string = function | "Count" -> Count | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration NodeAggregatorType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NodeAggregatorType" j)
+    let to_json = simple_to_json to_value
+  end
+module rec
+  NodeAggregator:sig
+                   type nonrec t =
+                     {
+                     aggregatorType: NodeAggregatorType.t
+                       [@ocaml.doc
+                         "The aggregator type for limiting a node summary. Currently, only Count is supported."];
+                     typeName: NodeTypeName.t
+                       [@ocaml.doc
+                         "The data type name to use for viewing counts of nodes. Currently, only Instance is supported."];
+                     attributeName: NodeAttributeName.t
+                       [@ocaml.doc
+                         "The name of a node attribute on which to limit the count of nodes."];
+                     aggregators: NodeAggregatorList.t option
+                       [@ocaml.doc
+                         "Information about aggregators used to refine a node summary."]}
+                   val make :
+                     ?aggregators:NodeAggregatorList.t ->
+                       aggregatorType:NodeAggregatorType.t ->
+                         typeName:NodeTypeName.t ->
+                           attributeName:NodeAttributeName.t -> unit -> t
+                   val to_value : t -> Botodata.value
+                   val to_query : t -> Client.Query.t
+                   val of_xml : Xml.t -> t
+                   val of_json : Yojson.Safe.t -> t
+                   val to_json : t -> Yojson.Safe.t
+                 end =
+  struct
+    type nonrec t =
+      {
+      aggregatorType: NodeAggregatorType.t
+        [@ocaml.doc
+          "The aggregator type for limiting a node summary. Currently, only Count is supported."];
+      typeName: NodeTypeName.t
+        [@ocaml.doc
+          "The data type name to use for viewing counts of nodes. Currently, only Instance is supported."];
+      attributeName: NodeAttributeName.t
+        [@ocaml.doc
+          "The name of a node attribute on which to limit the count of nodes."];
+      aggregators: NodeAggregatorList.t option
+        [@ocaml.doc
+          "Information about aggregators used to refine a node summary."]}
+    let context_ = "NodeAggregator"
+    let make ?aggregators =
+      fun ~aggregatorType ->
+        fun ~typeName ->
+          fun ~attributeName ->
+            fun () ->
+              { aggregators; aggregatorType; typeName; attributeName }
+    let to_value x =
+      structure_to_value
+        [("AggregatorType",
+           (Some (NodeAggregatorType.to_value x.aggregatorType)));
+        ("TypeName", (Some (NodeTypeName.to_value x.typeName)));
+        ("AttributeName",
+          (Some (NodeAttributeName.to_value x.attributeName)));
+        ("Aggregators",
+          (Option.map x.aggregators ~f:NodeAggregatorList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aggregators =
+        (Option.map ~f:NodeAggregatorList.of_xml)
+          (Xml.child xml_arg0 "Aggregators") in
+      let attributeName =
+        NodeAttributeName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AttributeName") in
+      let typeName =
+        NodeTypeName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TypeName") in
+      let aggregatorType =
+        NodeAggregatorType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AggregatorType") in
+      make ?aggregators ~attributeName ~typeName ~aggregatorType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aggregators =
+        field_map json__ "Aggregators" NodeAggregatorList.of_json in
+      let attributeName =
+        field_map_exn json__ "AttributeName" NodeAttributeName.of_json in
+      let typeName = field_map_exn json__ "TypeName" NodeTypeName.of_json in
+      let aggregatorType =
+        field_map_exn json__ "AggregatorType" NodeAggregatorType.of_json in
+      make ?aggregators ~attributeName ~typeName ~aggregatorType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "One or more aggregators for viewing counts of nodes using different dimensions."]
+ and
+  NodeAggregatorList:sig
+                       type nonrec t = NodeAggregator.t list
+                       val make : NodeAggregator.t list -> t
+                       val to_value : t -> Botodata.value
+                       val to_query : t -> Client.Query.t
+                       val of_xml : Xml.t -> NodeAggregator.t list
+                       val of_json : Yojson.Safe.t -> t
+                       val to_json : t -> Yojson.Safe.t
+                       val to_header : t -> string
+                     end =
+  struct
+    type nonrec t = NodeAggregator.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NodeAggregator.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NodeAggregator.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NodeAggregatorList" ~of_json:NodeAggregator.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ListNodesSummaryRequest =
+  struct
+    type nonrec t =
+      {
+      syncName: ResourceDataSyncName.t option
+        [@ocaml.doc
+          "The name of the Amazon Web Services managed resource data sync to retrieve information about. For cross-account/cross-Region configurations, this parameter is required, and the name of the supported resource data sync is AWS-QuickSetup-ManagedNode. For single account/single-Region configurations, the parameter is not required."];
+      filters: NodeFilterList.t option
+        [@ocaml.doc
+          "One or more filters. Use a filter to generate a summary that matches your specified filter criteria."];
+      aggregators: NodeAggregatorList.t
+        [@ocaml.doc
+          "Specify one or more aggregators to return a count of managed nodes that match that expression. For example, a count of managed nodes by operating system."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of items to return. (You received this token from a previous call.) The call also returns a token that you can specify in a subsequent call to get the next set of results."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results."]}
+    let context_ = "ListNodesSummaryRequest"
+    let make ?syncName =
+      fun ?filters ->
+        fun ?nextToken ->
+          fun ?maxResults ->
+            fun ~aggregators ->
+              fun () ->
+                { syncName; filters; nextToken; maxResults; aggregators }
+    let to_value x =
+      structure_to_value
+        [("SyncName",
+           (Option.map x.syncName ~f:ResourceDataSyncName.to_value));
+        ("Filters", (Option.map x.filters ~f:NodeFilterList.to_value));
+        ("Aggregators", (Some (NodeAggregatorList.to_value x.aggregators)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let aggregators =
+        NodeAggregatorList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Aggregators") in
+      let filters =
+        (Option.map ~f:NodeFilterList.of_xml) (Xml.child xml_arg0 "Filters") in
+      let syncName =
+        (Option.map ~f:ResourceDataSyncName.of_xml)
+          (Xml.child xml_arg0 "SyncName") in
+      make ?maxResults ?nextToken ~aggregators ?filters ?syncName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let aggregators =
+        field_map_exn json__ "Aggregators" NodeAggregatorList.of_json in
+      let filters = field_map json__ "Filters" NodeFilterList.of_json in
+      let syncName = field_map json__ "SyncName" ResourceDataSyncName.of_json in
+      make ?maxResults ?nextToken ~aggregators ?filters ?syncName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Generates a summary of managed instance/node metadata based on the filters and aggregators you specify. Results are grouped by the input aggregator you specify."]
+module NodeSummary =
+  struct
+    type nonrec t = (AttributeName.t * AttributeValue.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((AttributeName.of_string chopped),
+                              (AttributeValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (AttributeName.to_value x) |>
+                    (fun x ->
+                       (AttributeValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:AttributeName.of_string
+        ~of_json:AttributeValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NodeSummaryList =
+  struct
+    type nonrec t = NodeSummary.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NodeSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NodeSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NodeSummaryList" ~of_json:NodeSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListNodesSummaryResult =
+  struct
+    type nonrec t =
+      {
+      summary: NodeSummaryList.t option
+        [@ocaml.doc
+          "A collection of objects reporting information about your managed nodes, such as the count of nodes by operating system."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use when requesting the next set of items. If there are no additional items to return, the string is empty."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `InvalidAggregatorException of InvalidAggregatorException.t 
+      | `InvalidFilter of InvalidFilter.t 
+      | `InvalidNextToken of InvalidNextToken.t 
+      | `ResourceDataSyncNotFoundException of
+          ResourceDataSyncNotFoundException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?summary = fun ?nextToken -> fun () -> { summary; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidAggregatorException" ->
+          `InvalidAggregatorException
+            (InvalidAggregatorException.of_json json)
+      | "InvalidFilter" -> `InvalidFilter (InvalidFilter.of_json json)
+      | "InvalidNextToken" ->
+          `InvalidNextToken (InvalidNextToken.of_json json)
+      | "ResourceDataSyncNotFoundException" ->
+          `ResourceDataSyncNotFoundException
+            (ResourceDataSyncNotFoundException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidAggregatorException" ->
+          `InvalidAggregatorException (InvalidAggregatorException.of_xml xml)
+      | "InvalidFilter" -> `InvalidFilter (InvalidFilter.of_xml xml)
+      | "InvalidNextToken" -> `InvalidNextToken (InvalidNextToken.of_xml xml)
+      | "ResourceDataSyncNotFoundException" ->
+          `ResourceDataSyncNotFoundException
+            (ResourceDataSyncNotFoundException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidAggregatorException e ->
+          `Assoc
+            [("error", (`String "InvalidAggregatorException"));
+            ("details", (InvalidAggregatorException.to_json e))]
+      | `InvalidFilter e ->
+          `Assoc
+            [("error", (`String "InvalidFilter"));
+            ("details", (InvalidFilter.to_json e))]
+      | `InvalidNextToken e ->
+          `Assoc
+            [("error", (`String "InvalidNextToken"));
+            ("details", (InvalidNextToken.to_json e))]
+      | `ResourceDataSyncNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceDataSyncNotFoundException"));
+            ("details", (ResourceDataSyncNotFoundException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Summary", (Option.map x.summary ~f:NodeSummaryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let summary =
+        (Option.map ~f:NodeSummaryList.of_xml) (Xml.child xml_arg0 "Summary") in
+      make ?nextToken ?summary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let summary = field_map json__ "Summary" NodeSummaryList.of_json in
+      make ?nextToken ?summary ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Generates a summary of managed instance/node metadata based on the filters and aggregators you specify. Results are grouped by the input aggregator you specify."]
 module OpsItemEventMaxResults =
   struct
     type nonrec t = int
@@ -19204,6 +22059,9 @@ module OpsItemEventFilterValues =
   struct
     type nonrec t = OpsItemEventFilterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpsItemEventFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -19299,12 +22157,12 @@ module OpsItemEventFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~operator ~values ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let operator =
-        field_map_exn json "Operator" OpsItemEventFilterOperator.of_json in
+        field_map_exn json__ "Operator" OpsItemEventFilterOperator.of_json in
       let values =
-        field_map_exn json "Values" OpsItemEventFilterValues.of_json in
-      let key = field_map_exn json "Key" OpsItemEventFilterKey.of_json in
+        field_map_exn json__ "Values" OpsItemEventFilterValues.of_json in
+      let key = field_map_exn json__ "Key" OpsItemEventFilterKey.of_json in
       make ~operator ~values ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19313,6 +22171,9 @@ module OpsItemEventFilters =
   struct
     type nonrec t = OpsItemEventFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpsItemEventFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -19368,11 +22229,11 @@ module ListOpsItemEventsRequest =
           (Xml.child xml_arg0 "Filters") in
       make ?nextToken ?maxResults ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let maxResults =
-        field_map json "MaxResults" OpsItemEventMaxResults.of_json in
-      let filters = field_map json "Filters" OpsItemEventFilters.of_json in
+        field_map json__ "MaxResults" OpsItemEventMaxResults.of_json in
+      let filters = field_map json__ "Filters" OpsItemEventFilters.of_json in
       make ?nextToken ?maxResults ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19392,8 +22253,8 @@ module OpsItemIdentity =
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" String_.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" String_.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the user or resource that created an OpsItem event."]
@@ -19460,14 +22321,14 @@ module OpsItemEventSummary =
       make ?createdTime ?createdBy ?detail ?detailType ?source ?eventId
         ?opsItemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdTime = field_map json "CreatedTime" DateTime.of_json in
-      let createdBy = field_map json "CreatedBy" OpsItemIdentity.of_json in
-      let detail = field_map json "Detail" String_.of_json in
-      let detailType = field_map json "DetailType" String_.of_json in
-      let source = field_map json "Source" String_.of_json in
-      let eventId = field_map json "EventId" String_.of_json in
-      let opsItemId = field_map json "OpsItemId" String_.of_json in
+    let of_json json__ =
+      let createdTime = field_map json__ "CreatedTime" DateTime.of_json in
+      let createdBy = field_map json__ "CreatedBy" OpsItemIdentity.of_json in
+      let detail = field_map json__ "Detail" String_.of_json in
+      let detailType = field_map json__ "DetailType" String_.of_json in
+      let source = field_map json__ "Source" String_.of_json in
+      let eventId = field_map json__ "EventId" String_.of_json in
+      let opsItemId = field_map json__ "OpsItemId" String_.of_json in
       make ?createdTime ?createdBy ?detail ?detailType ?source ?eventId
         ?opsItemId ()
     let to_json v = composed_to_json to_value v
@@ -19477,6 +22338,9 @@ module OpsItemEventSummaries =
   struct
     type nonrec t = OpsItemEventSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpsItemEventSummary.to_value)) |>
         (fun x -> `List x)
@@ -19584,10 +22448,10 @@ module ListOpsItemEventsResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?summaries ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let summaries =
-        field_map json "Summaries" OpsItemEventSummaries.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+        field_map json__ "Summaries" OpsItemEventSummaries.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?summaries ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19628,6 +22492,9 @@ module OpsItemRelatedItemsFilterValues =
   struct
     type nonrec t = OpsItemRelatedItemsFilterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpsItemRelatedItemsFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -19735,13 +22602,14 @@ module OpsItemRelatedItemsFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~operator ~values ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let operator =
-        field_map_exn json "Operator"
+        field_map_exn json__ "Operator"
           OpsItemRelatedItemsFilterOperator.of_json in
       let values =
-        field_map_exn json "Values" OpsItemRelatedItemsFilterValues.of_json in
-      let key = field_map_exn json "Key" OpsItemRelatedItemsFilterKey.of_json in
+        field_map_exn json__ "Values" OpsItemRelatedItemsFilterValues.of_json in
+      let key =
+        field_map_exn json__ "Key" OpsItemRelatedItemsFilterKey.of_json in
       make ~operator ~values ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19750,6 +22618,9 @@ module OpsItemRelatedItemsFilters =
   struct
     type nonrec t = OpsItemRelatedItemsFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpsItemRelatedItemsFilter.to_value)) |>
         (fun x -> `List x)
@@ -19815,17 +22686,17 @@ module ListOpsItemRelatedItemsRequest =
         (Option.map ~f:OpsItemId.of_xml) (Xml.child xml_arg0 "OpsItemId") in
       make ?nextToken ?maxResults ?filters ?opsItemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let maxResults =
-        field_map json "MaxResults" OpsItemRelatedItemsMaxResults.of_json in
+        field_map json__ "MaxResults" OpsItemRelatedItemsMaxResults.of_json in
       let filters =
-        field_map json "Filters" OpsItemRelatedItemsFilters.of_json in
-      let opsItemId = field_map json "OpsItemId" OpsItemId.of_json in
+        field_map json__ "Filters" OpsItemRelatedItemsFilters.of_json in
+      let opsItemId = field_map json__ "OpsItemId" OpsItemId.of_json in
       make ?nextToken ?maxResults ?filters ?opsItemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all related-item resources associated with a Systems Manager OpsCenter OpsItem. OpsCenter is a capability of Amazon Web Services Systems Manager."]
+       "Lists all related-item resources associated with a Systems Manager OpsCenter OpsItem. OpsCenter is a tool in Amazon Web Services Systems Manager."]
 module OpsItemRelatedItemSummary =
   struct
     type nonrec t =
@@ -19920,26 +22791,26 @@ module OpsItemRelatedItemSummary =
         ?resourceUri ?associationType ?resourceType ?associationId ?opsItemId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModifiedTime =
-        field_map json "LastModifiedTime" DateTime.of_json in
+        field_map json__ "LastModifiedTime" DateTime.of_json in
       let lastModifiedBy =
-        field_map json "LastModifiedBy" OpsItemIdentity.of_json in
-      let createdTime = field_map json "CreatedTime" DateTime.of_json in
-      let createdBy = field_map json "CreatedBy" OpsItemIdentity.of_json in
+        field_map json__ "LastModifiedBy" OpsItemIdentity.of_json in
+      let createdTime = field_map json__ "CreatedTime" DateTime.of_json in
+      let createdBy = field_map json__ "CreatedBy" OpsItemIdentity.of_json in
       let resourceUri =
-        field_map json "ResourceUri"
+        field_map json__ "ResourceUri"
           OpsItemRelatedItemAssociationResourceUri.of_json in
       let associationType =
-        field_map json "AssociationType"
+        field_map json__ "AssociationType"
           OpsItemRelatedItemAssociationType.of_json in
       let resourceType =
-        field_map json "ResourceType"
+        field_map json__ "ResourceType"
           OpsItemRelatedItemAssociationResourceType.of_json in
       let associationId =
-        field_map json "AssociationId"
+        field_map json__ "AssociationId"
           OpsItemRelatedItemAssociationId.of_json in
-      let opsItemId = field_map json "OpsItemId" OpsItemId.of_json in
+      let opsItemId = field_map json__ "OpsItemId" OpsItemId.of_json in
       make ?lastModifiedTime ?lastModifiedBy ?createdTime ?createdBy
         ?resourceUri ?associationType ?resourceType ?associationId ?opsItemId
         ()
@@ -19950,6 +22821,9 @@ module OpsItemRelatedItemSummaries =
   struct
     type nonrec t = OpsItemRelatedItemSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpsItemRelatedItemSummary.to_value)) |>
         (fun x -> `List x)
@@ -20037,14 +22911,14 @@ module ListOpsItemRelatedItemsResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?summaries ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let summaries =
-        field_map json "Summaries" OpsItemRelatedItemSummaries.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+        field_map json__ "Summaries" OpsItemRelatedItemSummaries.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?summaries ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all related-item resources associated with a Systems Manager OpsCenter OpsItem. OpsCenter is a capability of Amazon Web Services Systems Manager."]
+       "Lists all related-item resources associated with a Systems Manager OpsCenter OpsItem. OpsCenter is a tool in Amazon Web Services Systems Manager."]
 module ListOpsMetadataMaxResults =
   struct
     type nonrec t = int
@@ -20090,6 +22964,9 @@ module OpsMetadataFilterValueList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpsMetadataFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -20154,10 +23031,10 @@ module OpsMetadataFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~values ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let values =
-        field_map_exn json "Values" OpsMetadataFilterValueList.of_json in
-      let key = field_map_exn json "Key" OpsMetadataFilterKey.of_json in
+        field_map_exn json__ "Values" OpsMetadataFilterValueList.of_json in
+      let key = field_map_exn json__ "Key" OpsMetadataFilterKey.of_json in
       make ~values ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20170,6 +23047,9 @@ module OpsMetadataFilterList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpsMetadataFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -20226,11 +23106,11 @@ module ListOpsMetadataRequest =
           (Xml.child xml_arg0 "Filters") in
       make ?nextToken ?maxResults ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" ListOpsMetadataMaxResults.of_json in
-      let filters = field_map json "Filters" OpsMetadataFilterList.of_json in
+        field_map json__ "MaxResults" ListOpsMetadataMaxResults.of_json in
+      let filters = field_map json__ "Filters" OpsMetadataFilterList.of_json in
       make ?nextToken ?maxResults ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20293,16 +23173,16 @@ module OpsMetadata =
       make ?creationDate ?lastModifiedUser ?lastModifiedDate ?opsMetadataArn
         ?resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationDate = field_map json "CreationDate" DateTime.of_json in
+    let of_json json__ =
+      let creationDate = field_map json__ "CreationDate" DateTime.of_json in
       let lastModifiedUser =
-        field_map json "LastModifiedUser" String_.of_json in
+        field_map json__ "LastModifiedUser" String_.of_json in
       let lastModifiedDate =
-        field_map json "LastModifiedDate" DateTime.of_json in
+        field_map json__ "LastModifiedDate" DateTime.of_json in
       let opsMetadataArn =
-        field_map json "OpsMetadataArn" OpsMetadataArn.of_json in
+        field_map json__ "OpsMetadataArn" OpsMetadataArn.of_json in
       let resourceId =
-        field_map json "ResourceId" OpsMetadataResourceId.of_json in
+        field_map json__ "ResourceId" OpsMetadataResourceId.of_json in
       make ?creationDate ?lastModifiedUser ?lastModifiedDate ?opsMetadataArn
         ?resourceId ()
     let to_json v = composed_to_json to_value v
@@ -20316,6 +23196,9 @@ module OpsMetadataList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OpsMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -20400,10 +23283,10 @@ module ListOpsMetadataResult =
           (Xml.child xml_arg0 "OpsMetadataList") in
       make ?nextToken ?opsMetadataList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let opsMetadataList =
-        field_map json "OpsMetadataList" OpsMetadataList.of_json in
+        field_map json__ "OpsMetadataList" OpsMetadataList.of_json in
       make ?nextToken ?opsMetadataList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20441,11 +23324,11 @@ module ListResourceComplianceSummariesRequest =
           (Xml.child xml_arg0 "Filters") in
       make ?maxResults ?nextToken ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let filters =
-        field_map json "Filters" ComplianceStringFilterList.of_json in
+        field_map json__ "Filters" ComplianceStringFilterList.of_json in
       make ?maxResults ?nextToken ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20537,22 +23420,23 @@ module ResourceComplianceSummaryItem =
       make ?nonCompliantSummary ?compliantSummary ?executionSummary
         ?overallSeverity ?status ?resourceId ?resourceType ?complianceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nonCompliantSummary =
-        field_map json "NonCompliantSummary" NonCompliantSummary.of_json in
+        field_map json__ "NonCompliantSummary" NonCompliantSummary.of_json in
       let compliantSummary =
-        field_map json "CompliantSummary" CompliantSummary.of_json in
+        field_map json__ "CompliantSummary" CompliantSummary.of_json in
       let executionSummary =
-        field_map json "ExecutionSummary" ComplianceExecutionSummary.of_json in
+        field_map json__ "ExecutionSummary"
+          ComplianceExecutionSummary.of_json in
       let overallSeverity =
-        field_map json "OverallSeverity" ComplianceSeverity.of_json in
-      let status = field_map json "Status" ComplianceStatus.of_json in
+        field_map json__ "OverallSeverity" ComplianceSeverity.of_json in
+      let status = field_map json__ "Status" ComplianceStatus.of_json in
       let resourceId =
-        field_map json "ResourceId" ComplianceResourceId.of_json in
+        field_map json__ "ResourceId" ComplianceResourceId.of_json in
       let resourceType =
-        field_map json "ResourceType" ComplianceResourceType.of_json in
+        field_map json__ "ResourceType" ComplianceResourceType.of_json in
       let complianceType =
-        field_map json "ComplianceType" ComplianceTypeName.of_json in
+        field_map json__ "ComplianceType" ComplianceTypeName.of_json in
       make ?nonCompliantSummary ?compliantSummary ?executionSummary
         ?overallSeverity ?status ?resourceId ?resourceType ?complianceType ()
     let to_json v = composed_to_json to_value v
@@ -20561,6 +23445,9 @@ module ResourceComplianceSummaryItemList =
   struct
     type nonrec t = ResourceComplianceSummaryItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceComplianceSummaryItem.to_value)) |>
         (fun x -> `List x)
@@ -20654,10 +23541,10 @@ module ListResourceComplianceSummariesResult =
           (Xml.child xml_arg0 "ResourceComplianceSummaryItems") in
       make ?nextToken ?resourceComplianceSummaryItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let resourceComplianceSummaryItems =
-        field_map json "ResourceComplianceSummaryItems"
+        field_map json__ "ResourceComplianceSummaryItems"
           ResourceComplianceSummaryItemList.of_json in
       make ?nextToken ?resourceComplianceSummaryItems ()
     let to_json v = composed_to_json to_value v
@@ -20696,10 +23583,10 @@ module ListResourceDataSyncRequest =
           (Xml.child xml_arg0 "SyncType") in
       make ?maxResults ?nextToken ?syncType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let syncType = field_map json "SyncType" ResourceDataSyncType.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let syncType = field_map json__ "SyncType" ResourceDataSyncType.of_json in
       make ?maxResults ?nextToken ?syncType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20744,7 +23631,7 @@ module ResourceDataSyncSourceWithState =
       enableAllOpsDataSources:
         ResourceDataSyncEnableAllOpsDataSources.t option
         [@ocaml.doc
-          "When you create a resource data sync, if you choose one of the Organizations options, then Systems Manager automatically enables all OpsData sources in the selected Amazon Web Services Regions for all Amazon Web Services accounts in your organization (or in the selected organization units). For more information, see About multiple account and Region resource data syncs in the Amazon Web Services Systems Manager User Guide."]}
+          "When you create a resource data sync, if you choose one of the Organizations options, then Systems Manager automatically enables all OpsData sources in the selected Amazon Web Services Regions for all Amazon Web Services accounts in your organization (or in the selected organization units). For more information, see Setting up Systems Manager Explorer to display data from multiple accounts and Regions in the Amazon Web Services Systems Manager User Guide."]}
     let make ?sourceType =
       fun ?awsOrganizationsSource ->
         fun ?sourceRegions ->
@@ -20800,22 +23687,22 @@ module ResourceDataSyncSourceWithState =
       make ?enableAllOpsDataSources ?state ?includeFutureRegions
         ?sourceRegions ?awsOrganizationsSource ?sourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let enableAllOpsDataSources =
-        field_map json "EnableAllOpsDataSources"
+        field_map json__ "EnableAllOpsDataSources"
           ResourceDataSyncEnableAllOpsDataSources.of_json in
-      let state = field_map json "State" ResourceDataSyncState.of_json in
+      let state = field_map json__ "State" ResourceDataSyncState.of_json in
       let includeFutureRegions =
-        field_map json "IncludeFutureRegions"
+        field_map json__ "IncludeFutureRegions"
           ResourceDataSyncIncludeFutureRegions.of_json in
       let sourceRegions =
-        field_map json "SourceRegions"
+        field_map json__ "SourceRegions"
           ResourceDataSyncSourceRegionList.of_json in
       let awsOrganizationsSource =
-        field_map json "AwsOrganizationsSource"
+        field_map json__ "AwsOrganizationsSource"
           ResourceDataSyncAwsOrganizationsSource.of_json in
       let sourceType =
-        field_map json "SourceType" ResourceDataSyncSourceType.of_json in
+        field_map json__ "SourceType" ResourceDataSyncSourceType.of_json in
       make ?enableAllOpsDataSources ?state ?includeFutureRegions
         ?sourceRegions ?awsOrganizationsSource ?sourceType ()
     let to_json v = composed_to_json to_value v
@@ -20960,28 +23847,30 @@ module ResourceDataSyncItem =
         ?syncLastModifiedTime ?lastSuccessfulSyncTime ?lastSyncTime
         ?s3Destination ?syncSource ?syncType ?syncName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastSyncStatusMessage =
-        field_map json "LastSyncStatusMessage"
+        field_map json__ "LastSyncStatusMessage"
           LastResourceDataSyncMessage.of_json in
       let syncCreatedTime =
-        field_map json "SyncCreatedTime" ResourceDataSyncCreatedTime.of_json in
+        field_map json__ "SyncCreatedTime"
+          ResourceDataSyncCreatedTime.of_json in
       let lastStatus =
-        field_map json "LastStatus" LastResourceDataSyncStatus.of_json in
+        field_map json__ "LastStatus" LastResourceDataSyncStatus.of_json in
       let syncLastModifiedTime =
-        field_map json "SyncLastModifiedTime"
+        field_map json__ "SyncLastModifiedTime"
           ResourceDataSyncLastModifiedTime.of_json in
       let lastSuccessfulSyncTime =
-        field_map json "LastSuccessfulSyncTime"
+        field_map json__ "LastSuccessfulSyncTime"
           LastSuccessfulResourceDataSyncTime.of_json in
       let lastSyncTime =
-        field_map json "LastSyncTime" LastResourceDataSyncTime.of_json in
+        field_map json__ "LastSyncTime" LastResourceDataSyncTime.of_json in
       let s3Destination =
-        field_map json "S3Destination" ResourceDataSyncS3Destination.of_json in
+        field_map json__ "S3Destination"
+          ResourceDataSyncS3Destination.of_json in
       let syncSource =
-        field_map json "SyncSource" ResourceDataSyncSourceWithState.of_json in
-      let syncType = field_map json "SyncType" ResourceDataSyncType.of_json in
-      let syncName = field_map json "SyncName" ResourceDataSyncName.of_json in
+        field_map json__ "SyncSource" ResourceDataSyncSourceWithState.of_json in
+      let syncType = field_map json__ "SyncType" ResourceDataSyncType.of_json in
+      let syncName = field_map json__ "SyncName" ResourceDataSyncName.of_json in
       make ?lastSyncStatusMessage ?syncCreatedTime ?lastStatus
         ?syncLastModifiedTime ?lastSuccessfulSyncTime ?lastSyncTime
         ?s3Destination ?syncSource ?syncType ?syncName ()
@@ -20992,6 +23881,9 @@ module ResourceDataSyncItemList =
   struct
     type nonrec t = ResourceDataSyncItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceDataSyncItem.to_value)) |>
         (fun x -> `List x)
@@ -21090,10 +23982,10 @@ module ListResourceDataSyncResult =
           (Xml.child xml_arg0 "ResourceDataSyncItems") in
       make ?nextToken ?resourceDataSyncItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let resourceDataSyncItems =
-        field_map json "ResourceDataSyncItems"
+        field_map json__ "ResourceDataSyncItems"
           ResourceDataSyncItemList.of_json in
       make ?nextToken ?resourceDataSyncItems ()
     let to_json v = composed_to_json to_value v
@@ -21126,10 +24018,10 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
       make ~resourceId ~resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" ResourceTypeForTagging.of_json in
+        field_map_exn json__ "ResourceType" ResourceTypeForTagging.of_json in
       make ~resourceId ~resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21194,8 +24086,8 @@ module ListTagsForResourceResult =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
       make ?tagList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map json "TagList" TagList.of_json in
+    let of_json json__ =
+      let tagList = field_map json__ "TagList" TagList.of_json in
       make ?tagList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21208,6 +24100,9 @@ module MetadataKeysToDeleteList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetadataKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -21240,10 +24135,10 @@ module ModifyDocumentPermissionRequest =
           "The permission type for the document. The permission type can be Share."];
       accountIdsToAdd: AccountIdList.t option
         [@ocaml.doc
-          "The Amazon Web Services user accounts that should have access to the document. The account IDs can either be a group of account IDs or All."];
+          "The Amazon Web Services users that should have access to the document. The account IDs can either be a group of account IDs or All. You must specify a value for this parameter or the AccountIdsToRemove parameter."];
       accountIdsToRemove: AccountIdList.t option
         [@ocaml.doc
-          "The Amazon Web Services user accounts that should no longer have access to the document. The Amazon Web Services user account can either be a group of account IDs or All. This action has a higher priority than AccountIdsToAdd. If you specify an account ID to add and the same ID to remove, the system removes access to the document."];
+          "The Amazon Web Services users that should no longer have access to the document. The Amazon Web Services user can either be a group of account IDs or All. This action has a higher priority than AccountIdsToAdd. If you specify an ID to add and the same ID to remove, the system removes access to the document. You must specify a value for this parameter or the AccountIdsToAdd parameter."];
       sharedDocumentVersion: SharedDocumentVersion.t option
         [@ocaml.doc
           "(Optional) The version of the document to share. If it isn't specified, the system choose the Default version to share."]}
@@ -21292,21 +24187,22 @@ module ModifyDocumentPermissionRequest =
       make ?sharedDocumentVersion ?accountIdsToRemove ?accountIdsToAdd
         ~permissionType ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sharedDocumentVersion =
-        field_map json "SharedDocumentVersion" SharedDocumentVersion.of_json in
+        field_map json__ "SharedDocumentVersion"
+          SharedDocumentVersion.of_json in
       let accountIdsToRemove =
-        field_map json "AccountIdsToRemove" AccountIdList.of_json in
+        field_map json__ "AccountIdsToRemove" AccountIdList.of_json in
       let accountIdsToAdd =
-        field_map json "AccountIdsToAdd" AccountIdList.of_json in
+        field_map json__ "AccountIdsToAdd" AccountIdList.of_json in
       let permissionType =
-        field_map_exn json "PermissionType" DocumentPermissionType.of_json in
-      let name = field_map_exn json "Name" DocumentName.of_json in
+        field_map_exn json__ "PermissionType" DocumentPermissionType.of_json in
+      let name = field_map_exn json__ "Name" DocumentName.of_json in
       make ?sharedDocumentVersion ?accountIdsToRemove ?accountIdsToAdd
         ~permissionType ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Shares a Amazon Web Services Systems Manager document (SSM document)publicly or privately. If you share a document privately, you must specify the Amazon Web Services user account IDs for those people who can use the document. If you share a document publicly, you must specify All as the account ID."]
+       "Shares a Amazon Web Services Systems Manager document (SSM document)publicly or privately. If you share a document privately, you must specify the Amazon Web Services user IDs for those people who can use the document. If you share a document publicly, you must specify All as the account ID."]
 module ModifyDocumentPermissionResponse =
   struct
     type nonrec t = unit
@@ -21380,11 +24276,14 @@ module ModifyDocumentPermissionResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Shares a Amazon Web Services Systems Manager document (SSM document)publicly or privately. If you share a document privately, you must specify the Amazon Web Services user account IDs for those people who can use the document. If you share a document publicly, you must specify All as the account ID."]
+       "Shares a Amazon Web Services Systems Manager document (SSM document)publicly or privately. If you share a document privately, you must specify the Amazon Web Services user IDs for those people who can use the document. If you share a document publicly, you must specify All as the account ID."]
 module OpsItemOpsDataKeysList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -21419,8 +24318,8 @@ module OpsMetadataKeyLimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21439,8 +24338,8 @@ module ParameterAlreadyExists =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21459,8 +24358,8 @@ module ParameterLimitExceeded =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21479,8 +24378,8 @@ module ParameterMaxVersionLimitExceeded =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21501,8 +24400,8 @@ module ParameterPatternMismatchException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The parameter name isn't valid."]
@@ -21538,8 +24437,8 @@ module PoliciesLimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21559,7 +24458,7 @@ module PutComplianceItemsRequest =
           "Specify the compliance type. For example, specify Association (for a State Manager association), Patch, or Custom:string."];
       executionSummary: ComplianceExecutionSummary.t
         [@ocaml.doc
-          "A summary of the call execution that includes an execution ID, the type of execution (for example, Command), and the date/time of the execution using a datetime object that is saved in the following format: yyyy-MM-dd'T'HH:mm:ss'Z'."];
+          "A summary of the call execution that includes an execution ID, the type of execution (for example, Command), and the date/time of the execution using a datetime object that is saved in the following format: yyyy-MM-dd'T'HH:mm:ss'Z'"];
       items: ComplianceItemEntryList.t
         [@ocaml.doc
           "Information about the compliance as defined by the resource type. For example, for a patch compliance type, Items includes information about the PatchSeverity, Classification, and so on."];
@@ -21627,26 +24526,27 @@ module PutComplianceItemsRequest =
       make ?uploadType ?itemContentHash ~items ~executionSummary
         ~complianceType ~resourceType ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let uploadType =
-        field_map json "UploadType" ComplianceUploadType.of_json in
+        field_map json__ "UploadType" ComplianceUploadType.of_json in
       let itemContentHash =
-        field_map json "ItemContentHash" ComplianceItemContentHash.of_json in
-      let items = field_map_exn json "Items" ComplianceItemEntryList.of_json in
+        field_map json__ "ItemContentHash" ComplianceItemContentHash.of_json in
+      let items =
+        field_map_exn json__ "Items" ComplianceItemEntryList.of_json in
       let executionSummary =
-        field_map_exn json "ExecutionSummary"
+        field_map_exn json__ "ExecutionSummary"
           ComplianceExecutionSummary.of_json in
       let complianceType =
-        field_map_exn json "ComplianceType" ComplianceTypeName.of_json in
+        field_map_exn json__ "ComplianceType" ComplianceTypeName.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" ComplianceResourceType.of_json in
+        field_map_exn json__ "ResourceType" ComplianceResourceType.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" ComplianceResourceId.of_json in
+        field_map_exn json__ "ResourceId" ComplianceResourceId.of_json in
       make ?uploadType ?itemContentHash ~items ~executionSummary
         ~complianceType ~resourceType ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers a compliance type and other compliance details on a designated resource. This operation lets you register custom compliance details with a resource. This call overwrites existing compliance information on the resource, so you must provide a full list of compliance items each time that you send the request. ComplianceType can be one of the following: ExecutionId: The execution ID when the patch, association, or custom compliance item was applied. ExecutionType: Specify patch, association, or Custom:string. ExecutionTime. The time the patch, association, or custom compliance item was applied to the managed node. Id: The patch, association, or custom compliance ID. Title: A title. Status: The status of the compliance item. For example, approved for patches, or Failed for associations. Severity: A patch severity. For example, critical. DocumentName: An SSM document name. For example, AWS-RunPatchBaseline. DocumentVersion: An SSM document version number. For example, 4. Classification: A patch classification. For example, security updates. PatchBaselineId: A patch baseline ID. PatchSeverity: A patch severity. For example, Critical. PatchState: A patch state. For example, InstancesWithFailedPatches. PatchGroup: The name of a patch group. InstalledTime: The time the association, patch, or custom compliance item was applied to the resource. Specify the time by using the following format: yyyy-MM-dd'T'HH:mm:ss'Z'"]
+       "Registers a compliance type and other compliance details on a designated resource. This operation lets you register custom compliance details with a resource. This call overwrites existing compliance information on the resource, so you must provide a full list of compliance items each time that you send the request. ComplianceType can be one of the following: ExecutionId: The execution ID when the patch, association, or custom compliance item was applied. ExecutionType: Specify patch, association, or Custom:string. ExecutionTime. The time the patch, association, or custom compliance item was applied to the managed node. For State Manager associations, this represents the time when compliance status was captured by the Systems Manager service during its internal compliance aggregation workflow, not necessarily when the association was executed on the managed node. State Manager updates compliance information for all associations on an instance whenever any association executes, which may result in multiple associations showing the same execution time. Id: The patch, association, or custom compliance ID. Title: A title. Status: The status of the compliance item. For example, approved for patches, or Failed for associations. Severity: A patch severity. For example, Critical. DocumentName: An SSM document name. For example, AWS-RunPatchBaseline. DocumentVersion: An SSM document version number. For example, 4. Classification: A patch classification. For example, security updates. PatchBaselineId: A patch baseline ID. PatchSeverity: A patch severity. For example, Critical. PatchState: A patch state. For example, InstancesWithFailedPatches. PatchGroup: The name of a patch group. InstalledTime: The time the association, patch, or custom compliance item was applied to the resource. Specify the time by using the following format: yyyy-MM-dd'T'HH:mm:ss'Z'"]
 module TotalSizeLimitExceededException =
   struct
     type nonrec t = {
@@ -21661,8 +24561,8 @@ module TotalSizeLimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21771,7 +24671,7 @@ module PutComplianceItemsResult =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers a compliance type and other compliance details on a designated resource. This operation lets you register custom compliance details with a resource. This call overwrites existing compliance information on the resource, so you must provide a full list of compliance items each time that you send the request. ComplianceType can be one of the following: ExecutionId: The execution ID when the patch, association, or custom compliance item was applied. ExecutionType: Specify patch, association, or Custom:string. ExecutionTime. The time the patch, association, or custom compliance item was applied to the managed node. Id: The patch, association, or custom compliance ID. Title: A title. Status: The status of the compliance item. For example, approved for patches, or Failed for associations. Severity: A patch severity. For example, critical. DocumentName: An SSM document name. For example, AWS-RunPatchBaseline. DocumentVersion: An SSM document version number. For example, 4. Classification: A patch classification. For example, security updates. PatchBaselineId: A patch baseline ID. PatchSeverity: A patch severity. For example, Critical. PatchState: A patch state. For example, InstancesWithFailedPatches. PatchGroup: The name of a patch group. InstalledTime: The time the association, patch, or custom compliance item was applied to the resource. Specify the time by using the following format: yyyy-MM-dd'T'HH:mm:ss'Z'"]
+       "Registers a compliance type and other compliance details on a designated resource. This operation lets you register custom compliance details with a resource. This call overwrites existing compliance information on the resource, so you must provide a full list of compliance items each time that you send the request. ComplianceType can be one of the following: ExecutionId: The execution ID when the patch, association, or custom compliance item was applied. ExecutionType: Specify patch, association, or Custom:string. ExecutionTime. The time the patch, association, or custom compliance item was applied to the managed node. For State Manager associations, this represents the time when compliance status was captured by the Systems Manager service during its internal compliance aggregation workflow, not necessarily when the association was executed on the managed node. State Manager updates compliance information for all associations on an instance whenever any association executes, which may result in multiple associations showing the same execution time. Id: The patch, association, or custom compliance ID. Title: A title. Status: The status of the compliance item. For example, approved for patches, or Failed for associations. Severity: A patch severity. For example, Critical. DocumentName: An SSM document name. For example, AWS-RunPatchBaseline. DocumentVersion: An SSM document version number. For example, 4. Classification: A patch classification. For example, security updates. PatchBaselineId: A patch baseline ID. PatchSeverity: A patch severity. For example, Critical. PatchState: A patch state. For example, InstancesWithFailedPatches. PatchGroup: The name of a patch group. InstalledTime: The time the association, patch, or custom compliance item was applied to the resource. Specify the time by using the following format: yyyy-MM-dd'T'HH:mm:ss'Z'"]
 module PutInventoryMessage =
   struct
     type nonrec t = string
@@ -21811,9 +24711,9 @@ module PutInventoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~items ~instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let items = field_map_exn json "Items" InventoryItemList.of_json in
-      let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
+    let of_json json__ =
+      let items = field_map_exn json__ "Items" InventoryItemList.of_json in
+      let instanceId = field_map_exn json__ "InstanceId" InstanceId.of_json in
       make ~items ~instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21832,8 +24732,8 @@ module UnsupportedInventorySchemaVersionException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21859,9 +24759,10 @@ module UnsupportedInventoryItemContextException =
           (Xml.child xml_arg0 "TypeName") in
       make ?message ?typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let typeName = field_map json "TypeName" InventoryItemTypeName.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let typeName =
+        field_map json__ "TypeName" InventoryItemTypeName.of_json in
       make ?message ?typeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21880,8 +24781,8 @@ module SubTypeCountLimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22055,8 +24956,8 @@ module PutInventoryResult =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" PutInventoryMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" PutInventoryMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22067,19 +24968,19 @@ module PutParameterRequest =
       {
       name: PSParameterName.t
         [@ocaml.doc
-          "The fully qualified name of the parameter that you want to add to the system. The fully qualified name includes the complete hierarchy of the parameter path and name. For parameters in a hierarchy, you must include a leading forward slash character (/) when you create or reference a parameter. For example: /Dev/DBServer/MySQL/db-string13 Naming Constraints: Parameter names are case sensitive. A parameter name must be unique within an Amazon Web Services Region A parameter name can't be prefixed with \"aws\" or \"ssm\" (case-insensitive). Parameter names can include only the following symbols and letters: a-zA-Z0-9_.- In addition, the slash character ( / ) is used to delineate hierarchies in parameter names. For example: /Dev/Production/East/Project-ABC/MyParameter A parameter name can't include spaces. Parameter hierarchies are limited to a maximum depth of fifteen levels. For additional information about valid values for parameter names, see Creating Systems Manager parameters in the Amazon Web Services Systems Manager User Guide. The maximum length constraint of 2048 characters listed below includes 1037 characters reserved for internal use by Systems Manager. The maximum length for a parameter name that you create is 1011 characters. This includes the characters in the ARN that precede the name you specify, such as arn:aws:ssm:us-east-2:111122223333:parameter/."];
+          "The fully qualified name of the parameter that you want to create or update. You can't enter the Amazon Resource Name (ARN) for a parameter, only the parameter name itself. The fully qualified name includes the complete hierarchy of the parameter path and name. For parameters in a hierarchy, you must include a leading forward slash character (/) when you create or reference a parameter. For example: /Dev/DBServer/MySQL/db-string13 Naming Constraints: Parameter names are case sensitive. A parameter name must be unique within an Amazon Web Services Region A parameter name can't be prefixed with \"aws\" or \"ssm\" (case-insensitive). Parameter names can include only the following symbols and letters: a-zA-Z0-9_.- In addition, the slash character ( / ) is used to delineate hierarchies in parameter names. For example: /Dev/Production/East/Project-ABC/MyParameter Parameter names can't contain spaces. The service removes any spaces specified for the beginning or end of a parameter name. If the specified name for a parameter contains spaces between characters, the request fails with a ValidationException error. Parameter hierarchies are limited to a maximum depth of fifteen levels. For additional information about valid values for parameter names, see Creating Systems Manager parameters in the Amazon Web Services Systems Manager User Guide. The reported maximum length of 2048 characters for a parameter name includes 1037 characters that are reserved for internal use by Systems Manager. The maximum length for a parameter name that you specify is 1011 characters. This count of 1011 characters includes the characters in the ARN that precede the name you specify. This ARN length will vary depending on your partition and Region. For example, the following 45 characters count toward the 1011 character maximum for a parameter created in the US East (Ohio) Region: arn:aws:ssm:us-east-2:111122223333:parameter/."];
       description: ParameterDescription.t option
         [@ocaml.doc
           "Information about the parameter that you want to add to the system. Optional but recommended. Don't enter personally identifiable information in this field."];
       value: PSParameterValue.t
         [@ocaml.doc
-          "The parameter value that you want to add to the system. Standard parameters have a value limit of 4 KB. Advanced parameters have a value limit of 8 KB. Parameters can't be referenced or nested in the values of other parameters. You can't include \\{\\{\\}\\} or \\{\\{ssm:parameter-name\\}\\} in a parameter value."];
+          "The parameter value that you want to add to the system. Standard parameters have a value limit of 4 KB. Advanced parameters have a value limit of 8 KB. Parameters can't be referenced or nested in the values of other parameters. You can't include values wrapped in double brackets \\{\\{\\}\\} or \\{\\{ssm:parameter-name\\}\\} in a parameter value."];
       type_: ParameterType.t option
         [@ocaml.doc
-          "The type of parameter that you want to add to the system. SecureString isn't currently supported for CloudFormation templates. Items in a StringList must be separated by a comma (,). You can't use other punctuation or special character to escape items in the list. If you have a parameter value that requires a comma, then use the String data type. Specifying a parameter type isn't required when updating a parameter. You must specify a parameter type when creating a parameter."];
+          "The type of parameter that you want to create. SecureString isn't currently supported for CloudFormation templates. Items in a StringList must be separated by a comma (,). You can't use other punctuation or special character to escape items in the list. If you have a parameter value that requires a comma, then use the String data type. Specifying a parameter type isn't required when updating a parameter. You must specify a parameter type when creating a parameter."];
       keyId: ParameterKeyId.t option
         [@ocaml.doc
-          "The Key Management Service (KMS) ID that you want to use to encrypt a parameter. Either the default KMS key automatically assigned to your Amazon Web Services account or a custom key. Required for parameters that use the SecureString data type. If you don't specify a key ID, the system uses the default key associated with your Amazon Web Services account. To use your default KMS key, choose the SecureString data type, and do not specify the Key ID when you create the parameter. The system automatically populates Key ID with your default KMS key. To use a custom KMS key, choose the SecureString data type with the Key ID parameter."];
+          "The Key Management Service (KMS) ID that you want to use to encrypt a parameter. Use a custom key for better security. Required for parameters that use the SecureString data type. If you don't specify a key ID, the system uses the default key associated with your Amazon Web Services account, which is not as secure as using a custom key. To use a custom KMS key, choose the SecureString data type with the Key ID parameter."];
       overwrite: Boolean.t option
         [@ocaml.doc
           "Overwrite an existing parameter. The default value is false."];
@@ -22091,13 +24992,13 @@ module PutParameterRequest =
           "Optional metadata that you assign to a resource. Tags enable you to categorize a resource in different ways, such as by purpose, owner, or environment. For example, you might want to tag a Systems Manager parameter to identify the type of resource to which it applies, the environment, or the type of configuration data referenced by the parameter. In this case, you could specify the following key-value pairs: Key=Resource,Value=S3bucket Key=OS,Value=Windows Key=ParameterType,Value=LicenseKey To add tags to an existing Systems Manager parameter, use the AddTagsToResource operation."];
       tier: ParameterTier.t option
         [@ocaml.doc
-          "The parameter tier to assign to a parameter. Parameter Store offers a standard tier and an advanced tier for parameters. Standard parameters have a content size limit of 4 KB and can't be configured to use parameter policies. You can create a maximum of 10,000 standard parameters for each Region in an Amazon Web Services account. Standard parameters are offered at no additional cost. Advanced parameters have a content size limit of 8 KB and can be configured to use parameter policies. You can create a maximum of 100,000 advanced parameters for each Region in an Amazon Web Services account. Advanced parameters incur a charge. For more information, see Standard and advanced parameter tiers in the Amazon Web Services Systems Manager User Guide. You can change a standard parameter to an advanced parameter any time. But you can't revert an advanced parameter to a standard parameter. Reverting an advanced parameter to a standard parameter would result in data loss because the system would truncate the size of the parameter from 8 KB to 4 KB. Reverting would also remove any policies attached to the parameter. Lastly, advanced parameters use a different form of encryption than standard parameters. If you no longer need an advanced parameter, or if you no longer want to incur charges for an advanced parameter, you must delete it and recreate it as a new standard parameter. Using the Default Tier Configuration In PutParameter requests, you can specify the tier to create the parameter in. Whenever you specify a tier in the request, Parameter Store creates or updates the parameter according to that request. However, if you don't specify a tier in a request, Parameter Store assigns the tier based on the current Parameter Store default tier configuration. The default tier when you begin using Parameter Store is the standard-parameter tier. If you use the advanced-parameter tier, you can specify one of the following as the default: Advanced: With this option, Parameter Store evaluates all requests as advanced parameters. Intelligent-Tiering: With this option, Parameter Store evaluates each request to determine if the parameter is standard or advanced. If the request doesn't include any options that require an advanced parameter, the parameter is created in the standard-parameter tier. If one or more options requiring an advanced parameter are included in the request, Parameter Store create a parameter in the advanced-parameter tier. This approach helps control your parameter-related costs by always creating standard parameters unless an advanced parameter is necessary. Options that require an advanced parameter include the following: The content size of the parameter is more than 4 KB. The parameter uses a parameter policy. More than 10,000 parameters already exist in your Amazon Web Services account in the current Amazon Web Services Region. For more information about configuring the default tier option, see Specifying a default parameter tier in the Amazon Web Services Systems Manager User Guide."];
+          "The parameter tier to assign to a parameter. Parameter Store offers a standard tier and an advanced tier for parameters. Standard parameters have a content size limit of 4 KB and can't be configured to use parameter policies. You can create a maximum of 10,000 standard parameters for each Region in an Amazon Web Services account. Standard parameters are offered at no additional cost. Advanced parameters have a content size limit of 8 KB and can be configured to use parameter policies. You can create a maximum of 100,000 advanced parameters for each Region in an Amazon Web Services account. Advanced parameters incur a charge. For more information, see Managing parameter tiers in the Amazon Web Services Systems Manager User Guide. You can change a standard parameter to an advanced parameter any time. But you can't revert an advanced parameter to a standard parameter. Reverting an advanced parameter to a standard parameter would result in data loss because the system would truncate the size of the parameter from 8 KB to 4 KB. Reverting would also remove any policies attached to the parameter. Lastly, advanced parameters use a different form of encryption than standard parameters. If you no longer need an advanced parameter, or if you no longer want to incur charges for an advanced parameter, you must delete it and recreate it as a new standard parameter. Using the Default Tier Configuration In PutParameter requests, you can specify the tier to create the parameter in. Whenever you specify a tier in the request, Parameter Store creates or updates the parameter according to that request. However, if you don't specify a tier in a request, Parameter Store assigns the tier based on the current Parameter Store default tier configuration. The default tier when you begin using Parameter Store is the standard-parameter tier. If you use the advanced-parameter tier, you can specify one of the following as the default: Advanced: With this option, Parameter Store evaluates all requests as advanced parameters. Intelligent-Tiering: With this option, Parameter Store evaluates each request to determine if the parameter is standard or advanced. If the request doesn't include any options that require an advanced parameter, the parameter is created in the standard-parameter tier. If one or more options requiring an advanced parameter are included in the request, Parameter Store create a parameter in the advanced-parameter tier. This approach helps control your parameter-related costs by always creating standard parameters unless an advanced parameter is necessary. Options that require an advanced parameter include the following: The content size of the parameter is more than 4 KB. The parameter uses a parameter policy. More than 10,000 parameters already exist in your Amazon Web Services account in the current Amazon Web Services Region. For more information about configuring the default tier option, see Specifying a default parameter tier in the Amazon Web Services Systems Manager User Guide."];
       policies: ParameterPolicies.t option
         [@ocaml.doc
-          "One or more policies to apply to a parameter. This operation takes a JSON array. Parameter Store, a capability of Amazon Web Services Systems Manager supports the following policy types: Expiration: This policy deletes the parameter after it expires. When you create the policy, you specify the expiration date. You can update the expiration date and time by updating the policy. Updating the parameter doesn't affect the expiration date and time. When the expiration time is reached, Parameter Store deletes the parameter. ExpirationNotification: This policy initiates an event in Amazon CloudWatch Events that notifies you about the expiration. By using this policy, you can receive notification before or after the expiration time is reached, in units of days or hours. NoChangeNotification: This policy initiates a CloudWatch Events event if a parameter hasn't been modified for a specified period of time. This policy type is useful when, for example, a secret needs to be changed within a period of time, but it hasn't been changed. All existing policies are preserved until you send new policies or an empty policy. For more information about parameter policies, see Assigning parameter policies."];
+          "One or more policies to apply to a parameter. This operation takes a JSON array. Parameter Store, a tool in Amazon Web Services Systems Manager supports the following policy types: Expiration: This policy deletes the parameter after it expires. When you create the policy, you specify the expiration date. You can update the expiration date and time by updating the policy. Updating the parameter doesn't affect the expiration date and time. When the expiration time is reached, Parameter Store deletes the parameter. ExpirationNotification: This policy initiates an event in Amazon CloudWatch Events that notifies you about the expiration. By using this policy, you can receive notification before or after the expiration time is reached, in units of days or hours. NoChangeNotification: This policy initiates a CloudWatch Events event if a parameter hasn't been modified for a specified period of time. This policy type is useful when, for example, a secret needs to be changed within a period of time, but it hasn't been changed. All existing policies are preserved until you send new policies or an empty policy. For more information about parameter policies, see Assigning parameter policies."];
       dataType: ParameterDataType.t option
         [@ocaml.doc
-          "The data type for a String parameter. Supported data types include plain text and Amazon Machine Image (AMI) IDs. The following data type values are supported. text aws:ec2:image aws:ssm:integration When you create a String parameter and specify aws:ec2:image, Amazon Web Services Systems Manager validates the parameter value is in the required format, such as ami-12345abcdeEXAMPLE, and that the specified AMI is available in your Amazon Web Services account. For more information, see Native parameter support for Amazon Machine Image (AMI) IDs in the Amazon Web Services Systems Manager User Guide."]}
+          "The data type for a String parameter. Supported data types include plain text and Amazon Machine Image (AMI) IDs. The following data type values are supported. text aws:ec2:image aws:ssm:integration When you create a String parameter and specify aws:ec2:image, Amazon Web Services Systems Manager validates the parameter value is in the required format, such as ami-12345abcdeEXAMPLE, and that the specified AMI is available in your Amazon Web Services account. If the action is successful, the service sends back an HTTP 200 response which indicates a successful PutParameter call for all cases except for data type aws:ec2:image. If you call PutParameter with aws:ec2:image data type, a successful HTTP 200 response does not guarantee that your parameter was successfully created or updated. The aws:ec2:image value is validated asynchronously, and the PutParameter call returns before the validation is complete. If you submit an invalid AMI value, the PutParameter operation will return success, but the asynchronous validation will fail and the parameter will not be created or updated. To monitor whether your aws:ec2:image parameters are created successfully, see Setting up notifications or trigger actions based on Parameter Store events. For more information about AMI format validation , see Native parameter support for Amazon Machine Image IDs."]}
     let context_ = "PutParameterRequest"
     let make ?description =
       fun ?type_ ->
@@ -22171,24 +25072,24 @@ module PutParameterRequest =
       make ?dataType ?policies ?tier ?tags ?allowedPattern ?overwrite ?keyId
         ?type_ ~value ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataType = field_map json "DataType" ParameterDataType.of_json in
-      let policies = field_map json "Policies" ParameterPolicies.of_json in
-      let tier = field_map json "Tier" ParameterTier.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let dataType = field_map json__ "DataType" ParameterDataType.of_json in
+      let policies = field_map json__ "Policies" ParameterPolicies.of_json in
+      let tier = field_map json__ "Tier" ParameterTier.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let allowedPattern =
-        field_map json "AllowedPattern" AllowedPattern.of_json in
-      let overwrite = field_map json "Overwrite" Boolean.of_json in
-      let keyId = field_map json "KeyId" ParameterKeyId.of_json in
-      let type_ = field_map json "Type" ParameterType.of_json in
-      let value = field_map_exn json "Value" PSParameterValue.of_json in
+        field_map json__ "AllowedPattern" AllowedPattern.of_json in
+      let overwrite = field_map json__ "Overwrite" Boolean.of_json in
+      let keyId = field_map json__ "KeyId" ParameterKeyId.of_json in
+      let type_ = field_map json__ "Type" ParameterType.of_json in
+      let value = field_map_exn json__ "Value" PSParameterValue.of_json in
       let description =
-        field_map json "Description" ParameterDescription.of_json in
-      let name = field_map_exn json "Name" PSParameterName.of_json in
+        field_map json__ "Description" ParameterDescription.of_json in
+      let name = field_map_exn json__ "Name" PSParameterName.of_json in
       make ?dataType ?policies ?tier ?tags ?allowedPattern ?overwrite ?keyId
         ?type_ ~value ?description ~name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Add a parameter to the system."]
+  end[@@ocaml.doc "Create or update a parameter in Parameter Store."]
 module UnsupportedParameterType =
   struct
     type nonrec t = {
@@ -22203,8 +25104,8 @@ module UnsupportedParameterType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The parameter type isn't supported."]
@@ -22401,12 +25302,216 @@ module PutParameterResult =
           (Xml.child xml_arg0 "Version") in
       make ?tier ?version ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tier = field_map json "Tier" ParameterTier.of_json in
-      let version = field_map json "Version" PSParameterVersion.of_json in
+    let of_json json__ =
+      let tier = field_map json__ "Tier" ParameterTier.of_json in
+      let version = field_map json__ "Version" PSParameterVersion.of_json in
       make ?tier ?version ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Add a parameter to the system."]
+  end[@@ocaml.doc "Create or update a parameter in Parameter Store."]
+module PutResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArnString.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the resource to which you want to attach a policy."];
+      policy: Policy.t
+        [@ocaml.doc "A policy you want to associate with a resource."];
+      policyId: PolicyId.t option [@ocaml.doc "The policy ID."];
+      policyHash: PolicyHash.t option
+        [@ocaml.doc
+          "ID of the current policy version. The hash helps to prevent a situation where multiple users attempt to overwrite a policy. You must provide this hash when updating or deleting a policy."]}
+    let context_ = "PutResourcePolicyRequest"
+    let make ?policyId =
+      fun ?policyHash ->
+        fun ~resourceArn ->
+          fun ~policy ->
+            fun () -> { policyId; policyHash; resourceArn; policy }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceArnString.to_value x.resourceArn)));
+        ("Policy", (Some (Policy.to_value x.policy)));
+        ("PolicyId", (Option.map x.policyId ~f:PolicyId.to_value));
+        ("PolicyHash", (Option.map x.policyHash ~f:PolicyHash.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policyHash =
+        (Option.map ~f:PolicyHash.of_xml) (Xml.child xml_arg0 "PolicyHash") in
+      let policyId =
+        (Option.map ~f:PolicyId.of_xml) (Xml.child xml_arg0 "PolicyId") in
+      let policy =
+        Policy.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Policy") in
+      let resourceArn =
+        ResourceArnString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ?policyHash ?policyId ~policy ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policyHash = field_map json__ "PolicyHash" PolicyHash.of_json in
+      let policyId = field_map json__ "PolicyId" PolicyId.of_json in
+      let policy = field_map_exn json__ "Policy" Policy.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArnString.of_json in
+      make ?policyHash ?policyId ~policy ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates or updates a Systems Manager resource policy. A resource policy helps you to define the IAM entity (for example, an Amazon Web Services account) that can manage your Systems Manager resources. The following resources support Systems Manager resource policies. OpsItemGroup - The resource policy for OpsItemGroup enables Amazon Web Services accounts to view and interact with OpsCenter operational work items (OpsItems). Parameter - The resource policy is used to share a parameter with other accounts using Resource Access Manager (RAM). To share a parameter, it must be in the advanced parameter tier. For information about parameter tiers, see Managing parameter tiers. For information about changing an existing standard parameter to an advanced parameter, see Changing a standard parameter to an advanced parameter. To share a SecureString parameter, it must be encrypted with a customer managed key, and you must share the key separately through Key Management Service. Amazon Web Services managed keys cannot be shared. Parameters encrypted with the default Amazon Web Services managed key can be updated to use a customer managed key instead. For KMS key definitions, see KMS concepts in the Key Management Service Developer Guide. While you can share a parameter using the Systems Manager PutResourcePolicy operation, we recommend using Resource Access Manager (RAM) instead. This is because using PutResourcePolicy requires the extra step of promoting the parameter to a standard RAM Resource Share using the RAM PromoteResourceShareCreatedFromPolicy API operation. Otherwise, the parameter won't be returned by the Systems Manager DescribeParameters API operation using the --shared option. For more information, see Sharing a parameter in the Amazon Web Services Systems Manager User Guide"]
+module ResourcePolicyLimitExceededException =
+  struct
+    type nonrec t =
+      {
+      limit: Integer.t option ;
+      limitType: String_.t option ;
+      message: String_.t option }
+    let make ?limit =
+      fun ?limitType ->
+        fun ?message -> fun () -> { limit; limitType; message }
+    let to_value x =
+      structure_to_value
+        [("Limit", (Option.map x.limit ~f:Integer.to_value));
+        ("LimitType", (Option.map x.limitType ~f:String_.to_value));
+        ("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      let limitType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "LimitType") in
+      let limit = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Limit") in
+      make ?message ?limitType ?limit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let limitType = field_map json__ "LimitType" String_.of_json in
+      let limit = field_map json__ "Limit" Integer.of_json in
+      make ?message ?limitType ?limit ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The PutResourcePolicy API action enforces two limits. A policy can't be greater than 1024 bytes in size. And only one policy can be attached to OpsItemGroup. Verify these limits and try again."]
+module PutResourcePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      policyId: PolicyId.t option
+        [@ocaml.doc
+          "The policy ID. To update a policy, you must specify PolicyId and PolicyHash."];
+      policyHash: PolicyHash.t option
+        [@ocaml.doc "ID of the current policy version."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `MalformedResourcePolicyDocumentException of
+          MalformedResourcePolicyDocumentException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ResourcePolicyConflictException of ResourcePolicyConflictException.t 
+      | `ResourcePolicyInvalidParameterException of
+          ResourcePolicyInvalidParameterException.t 
+      | `ResourcePolicyLimitExceededException of
+          ResourcePolicyLimitExceededException.t 
+      | `ResourcePolicyNotFoundException of ResourcePolicyNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?policyId =
+      fun ?policyHash -> fun () -> { policyId; policyHash }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "MalformedResourcePolicyDocumentException" ->
+          `MalformedResourcePolicyDocumentException
+            (MalformedResourcePolicyDocumentException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ResourcePolicyConflictException" ->
+          `ResourcePolicyConflictException
+            (ResourcePolicyConflictException.of_json json)
+      | "ResourcePolicyInvalidParameterException" ->
+          `ResourcePolicyInvalidParameterException
+            (ResourcePolicyInvalidParameterException.of_json json)
+      | "ResourcePolicyLimitExceededException" ->
+          `ResourcePolicyLimitExceededException
+            (ResourcePolicyLimitExceededException.of_json json)
+      | "ResourcePolicyNotFoundException" ->
+          `ResourcePolicyNotFoundException
+            (ResourcePolicyNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "MalformedResourcePolicyDocumentException" ->
+          `MalformedResourcePolicyDocumentException
+            (MalformedResourcePolicyDocumentException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ResourcePolicyConflictException" ->
+          `ResourcePolicyConflictException
+            (ResourcePolicyConflictException.of_xml xml)
+      | "ResourcePolicyInvalidParameterException" ->
+          `ResourcePolicyInvalidParameterException
+            (ResourcePolicyInvalidParameterException.of_xml xml)
+      | "ResourcePolicyLimitExceededException" ->
+          `ResourcePolicyLimitExceededException
+            (ResourcePolicyLimitExceededException.of_xml xml)
+      | "ResourcePolicyNotFoundException" ->
+          `ResourcePolicyNotFoundException
+            (ResourcePolicyNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `MalformedResourcePolicyDocumentException e ->
+          `Assoc
+            [("error", (`String "MalformedResourcePolicyDocumentException"));
+            ("details", (MalformedResourcePolicyDocumentException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ResourcePolicyConflictException e ->
+          `Assoc
+            [("error", (`String "ResourcePolicyConflictException"));
+            ("details", (ResourcePolicyConflictException.to_json e))]
+      | `ResourcePolicyInvalidParameterException e ->
+          `Assoc
+            [("error", (`String "ResourcePolicyInvalidParameterException"));
+            ("details", (ResourcePolicyInvalidParameterException.to_json e))]
+      | `ResourcePolicyLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ResourcePolicyLimitExceededException"));
+            ("details", (ResourcePolicyLimitExceededException.to_json e))]
+      | `ResourcePolicyNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourcePolicyNotFoundException"));
+            ("details", (ResourcePolicyNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PolicyId", (Option.map x.policyId ~f:PolicyId.to_value));
+        ("PolicyHash", (Option.map x.policyHash ~f:PolicyHash.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policyHash =
+        (Option.map ~f:PolicyHash.of_xml) (Xml.child xml_arg0 "PolicyHash") in
+      let policyId =
+        (Option.map ~f:PolicyId.of_xml) (Xml.child xml_arg0 "PolicyId") in
+      make ?policyHash ?policyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policyHash = field_map json__ "PolicyHash" PolicyHash.of_json in
+      let policyId = field_map json__ "PolicyId" PolicyId.of_json in
+      make ?policyHash ?policyId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates or updates a Systems Manager resource policy. A resource policy helps you to define the IAM entity (for example, an Amazon Web Services account) that can manage your Systems Manager resources. The following resources support Systems Manager resource policies. OpsItemGroup - The resource policy for OpsItemGroup enables Amazon Web Services accounts to view and interact with OpsCenter operational work items (OpsItems). Parameter - The resource policy is used to share a parameter with other accounts using Resource Access Manager (RAM). To share a parameter, it must be in the advanced parameter tier. For information about parameter tiers, see Managing parameter tiers. For information about changing an existing standard parameter to an advanced parameter, see Changing a standard parameter to an advanced parameter. To share a SecureString parameter, it must be encrypted with a customer managed key, and you must share the key separately through Key Management Service. Amazon Web Services managed keys cannot be shared. Parameters encrypted with the default Amazon Web Services managed key can be updated to use a customer managed key instead. For KMS key definitions, see KMS concepts in the Key Management Service Developer Guide. While you can share a parameter using the Systems Manager PutResourcePolicy operation, we recommend using Resource Access Manager (RAM) instead. This is because using PutResourcePolicy requires the extra step of promoting the parameter to a standard RAM Resource Share using the RAM PromoteResourceShareCreatedFromPolicy API operation. Otherwise, the parameter won't be returned by the Systems Manager DescribeParameters API operation using the --shared option. For more information, see Sharing a parameter in the Amazon Web Services Systems Manager User Guide"]
 module RegisterDefaultPatchBaselineRequest =
   struct
     type nonrec t =
@@ -22426,8 +25531,8 @@ module RegisterDefaultPatchBaselineRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "BaselineId") in
       make ~baselineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let baselineId = field_map_exn json "BaselineId" BaselineId.of_json in
+    let of_json json__ =
+      let baselineId = field_map_exn json__ "BaselineId" BaselineId.of_json in
       make ~baselineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22493,8 +25598,8 @@ module RegisterDefaultPatchBaselineResult =
         (Option.map ~f:BaselineId.of_xml) (Xml.child xml_arg0 "BaselineId") in
       make ?baselineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let baselineId = field_map json "BaselineId" BaselineId.of_json in
+    let of_json json__ =
+      let baselineId = field_map json__ "BaselineId" BaselineId.of_json in
       make ?baselineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22526,9 +25631,9 @@ module RegisterPatchBaselineForPatchGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "BaselineId") in
       make ~patchGroup ~baselineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let patchGroup = field_map_exn json "PatchGroup" PatchGroup.of_json in
-      let baselineId = field_map_exn json "BaselineId" BaselineId.of_json in
+    let of_json json__ =
+      let patchGroup = field_map_exn json__ "PatchGroup" PatchGroup.of_json in
+      let baselineId = field_map_exn json__ "BaselineId" BaselineId.of_json in
       make ~patchGroup ~baselineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Registers a patch baseline for a patch group."]
@@ -22621,9 +25726,9 @@ module RegisterPatchBaselineForPatchGroupResult =
         (Option.map ~f:BaselineId.of_xml) (Xml.child xml_arg0 "BaselineId") in
       make ?patchGroup ?baselineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let patchGroup = field_map json "PatchGroup" PatchGroup.of_json in
-      let baselineId = field_map json "BaselineId" BaselineId.of_json in
+    let of_json json__ =
+      let patchGroup = field_map json__ "PatchGroup" PatchGroup.of_json in
+      let baselineId = field_map json__ "BaselineId" BaselineId.of_json in
       make ?patchGroup ?baselineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Registers a patch baseline for a patch group."]
@@ -22703,19 +25808,19 @@ module RegisterTargetWithMaintenanceWindowRequest =
       make ?clientToken ?description ?name ?ownerInformation ~targets
         ~resourceType ~windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
       let description =
-        field_map json "Description" MaintenanceWindowDescription.of_json in
-      let name = field_map json "Name" MaintenanceWindowName.of_json in
+        field_map json__ "Description" MaintenanceWindowDescription.of_json in
+      let name = field_map json__ "Name" MaintenanceWindowName.of_json in
       let ownerInformation =
-        field_map json "OwnerInformation" OwnerInformation.of_json in
-      let targets = field_map_exn json "Targets" Targets.of_json in
+        field_map json__ "OwnerInformation" OwnerInformation.of_json in
+      let targets = field_map_exn json__ "Targets" Targets.of_json in
       let resourceType =
-        field_map_exn json "ResourceType"
+        field_map_exn json__ "ResourceType"
           MaintenanceWindowResourceType.of_json in
       let windowId =
-        field_map_exn json "WindowId" MaintenanceWindowId.of_json in
+        field_map_exn json__ "WindowId" MaintenanceWindowId.of_json in
       make ?clientToken ?description ?name ?ownerInformation ~targets
         ~resourceType ~windowId ()
     let to_json v = composed_to_json to_value v
@@ -22797,9 +25902,9 @@ module RegisterTargetWithMaintenanceWindowResult =
           (Xml.child xml_arg0 "WindowTargetId") in
       make ?windowTargetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let windowTargetId =
-        field_map json "WindowTargetId" MaintenanceWindowTargetId.of_json in
+        field_map json__ "WindowTargetId" MaintenanceWindowTargetId.of_json in
       make ?windowTargetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Registers a target with a maintenance window."]
@@ -22817,7 +25922,7 @@ module RegisterTaskWithMaintenanceWindowRequest =
         [@ocaml.doc "The ARN of the task to run."];
       serviceRoleArn: ServiceRole.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the IAM service role for Amazon Web Services Systems Manager to assume when running a maintenance window task. If you do not specify a service role ARN, Systems Manager uses your account's service-linked role. If no service-linked role for Systems Manager exists in your account, it is created when you run RegisterTaskWithMaintenanceWindow. For more information, see the following topics in the in the Amazon Web Services Systems Manager User Guide: Using service-linked roles for Systems Manager Should I use a service-linked role or a custom service role to run maintenance window tasks?"];
+          "The Amazon Resource Name (ARN) of the IAM service role for Amazon Web Services Systems Manager to assume when running a maintenance window task. If you do not specify a service role ARN, Systems Manager uses a service-linked role in your account. If no appropriate service-linked role for Systems Manager exists in your account, it is created when you run RegisterTaskWithMaintenanceWindow. However, for an improved security posture, we strongly recommend creating a custom policy and custom service role for running your maintenance window tasks. The policy can be crafted to provide only the permissions needed for your particular maintenance window tasks. For more information, see Setting up Maintenance Windows in the in the Amazon Web Services Systems Manager User Guide."];
       taskType: MaintenanceWindowTaskType.t
         [@ocaml.doc "The type of task being registered."];
       taskParameters: MaintenanceWindowTaskParameters.t option
@@ -22847,7 +25952,10 @@ module RegisterTaskWithMaintenanceWindowRequest =
         [@ocaml.doc "User-provided idempotency token."];
       cutoffBehavior: MaintenanceWindowTaskCutoffBehavior.t option
         [@ocaml.doc
-          "Indicates whether tasks should continue to run after the cutoff time specified in the maintenance windows is reached. CONTINUE_TASK: When the cutoff time is reached, any tasks that are running continue. The default value. CANCEL_TASK: For Automation, Lambda, Step Functions tasks: When the cutoff time is reached, any task invocations that are already running continue, but no new task invocations are started. For Run Command tasks: When the cutoff time is reached, the system sends a CancelCommand operation that attempts to cancel the command associated with the task. However, there is no guarantee that the command will be terminated and the underlying process stopped. The status for tasks that are not completed is TIMED_OUT."]}
+          "Indicates whether tasks should continue to run after the cutoff time specified in the maintenance windows is reached. CONTINUE_TASK: When the cutoff time is reached, any tasks that are running continue. The default value. CANCEL_TASK: For Automation, Lambda, Step Functions tasks: When the cutoff time is reached, any task invocations that are already running continue, but no new task invocations are started. For Run Command tasks: When the cutoff time is reached, the system sends a CancelCommand operation that attempts to cancel the command associated with the task. However, there is no guarantee that the command will be terminated and the underlying process stopped. The status for tasks that are not completed is TIMED_OUT."];
+      alarmConfiguration: AlarmConfiguration.t option
+        [@ocaml.doc
+          "The CloudWatch alarm you want to apply to your maintenance window task."]}
     let context_ = "RegisterTaskWithMaintenanceWindowRequest"
     let make ?targets =
       fun ?serviceRoleArn ->
@@ -22861,27 +25969,29 @@ module RegisterTaskWithMaintenanceWindowRequest =
                       fun ?description ->
                         fun ?clientToken ->
                           fun ?cutoffBehavior ->
-                            fun ~windowId ->
-                              fun ~taskArn ->
-                                fun ~taskType ->
-                                  fun () ->
-                                    {
-                                      targets;
-                                      serviceRoleArn;
-                                      taskParameters;
-                                      taskInvocationParameters;
-                                      priority;
-                                      maxConcurrency;
-                                      maxErrors;
-                                      loggingInfo;
-                                      name;
-                                      description;
-                                      clientToken;
-                                      cutoffBehavior;
-                                      windowId;
-                                      taskArn;
-                                      taskType
-                                    }
+                            fun ?alarmConfiguration ->
+                              fun ~windowId ->
+                                fun ~taskArn ->
+                                  fun ~taskType ->
+                                    fun () ->
+                                      {
+                                        targets;
+                                        serviceRoleArn;
+                                        taskParameters;
+                                        taskInvocationParameters;
+                                        priority;
+                                        maxConcurrency;
+                                        maxErrors;
+                                        loggingInfo;
+                                        name;
+                                        description;
+                                        clientToken;
+                                        cutoffBehavior;
+                                        alarmConfiguration;
+                                        windowId;
+                                        taskArn;
+                                        taskType
+                                      }
     let to_value x =
       structure_to_value
         [("WindowId", (Some (MaintenanceWindowId.to_value x.windowId)));
@@ -22908,9 +26018,14 @@ module RegisterTaskWithMaintenanceWindowRequest =
         ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
         ("CutoffBehavior",
           (Option.map x.cutoffBehavior
-             ~f:MaintenanceWindowTaskCutoffBehavior.to_value))]
+             ~f:MaintenanceWindowTaskCutoffBehavior.to_value));
+        ("AlarmConfiguration",
+          (Option.map x.alarmConfiguration ~f:AlarmConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let alarmConfiguration =
+        (Option.map ~f:AlarmConfiguration.of_xml)
+          (Xml.child xml_arg0 "AlarmConfiguration") in
       let cutoffBehavior =
         (Option.map ~f:MaintenanceWindowTaskCutoffBehavior.of_xml)
           (Xml.child xml_arg0 "CutoffBehavior") in
@@ -22952,44 +26067,46 @@ module RegisterTaskWithMaintenanceWindowRequest =
       let windowId =
         MaintenanceWindowId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WindowId") in
-      make ?cutoffBehavior ?clientToken ?description ?name ?loggingInfo
-        ?maxErrors ?maxConcurrency ?priority ?taskInvocationParameters
-        ?taskParameters ~taskType ?serviceRoleArn ~taskArn ?targets ~windowId
-        ()
+      make ?alarmConfiguration ?cutoffBehavior ?clientToken ?description
+        ?name ?loggingInfo ?maxErrors ?maxConcurrency ?priority
+        ?taskInvocationParameters ?taskParameters ~taskType ?serviceRoleArn
+        ~taskArn ?targets ~windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let alarmConfiguration =
+        field_map json__ "AlarmConfiguration" AlarmConfiguration.of_json in
       let cutoffBehavior =
-        field_map json "CutoffBehavior"
+        field_map json__ "CutoffBehavior"
           MaintenanceWindowTaskCutoffBehavior.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
       let description =
-        field_map json "Description" MaintenanceWindowDescription.of_json in
-      let name = field_map json "Name" MaintenanceWindowName.of_json in
-      let loggingInfo = field_map json "LoggingInfo" LoggingInfo.of_json in
-      let maxErrors = field_map json "MaxErrors" MaxErrors.of_json in
+        field_map json__ "Description" MaintenanceWindowDescription.of_json in
+      let name = field_map json__ "Name" MaintenanceWindowName.of_json in
+      let loggingInfo = field_map json__ "LoggingInfo" LoggingInfo.of_json in
+      let maxErrors = field_map json__ "MaxErrors" MaxErrors.of_json in
       let maxConcurrency =
-        field_map json "MaxConcurrency" MaxConcurrency.of_json in
+        field_map json__ "MaxConcurrency" MaxConcurrency.of_json in
       let priority =
-        field_map json "Priority" MaintenanceWindowTaskPriority.of_json in
+        field_map json__ "Priority" MaintenanceWindowTaskPriority.of_json in
       let taskInvocationParameters =
-        field_map json "TaskInvocationParameters"
+        field_map json__ "TaskInvocationParameters"
           MaintenanceWindowTaskInvocationParameters.of_json in
       let taskParameters =
-        field_map json "TaskParameters"
+        field_map json__ "TaskParameters"
           MaintenanceWindowTaskParameters.of_json in
       let taskType =
-        field_map_exn json "TaskType" MaintenanceWindowTaskType.of_json in
+        field_map_exn json__ "TaskType" MaintenanceWindowTaskType.of_json in
       let serviceRoleArn =
-        field_map json "ServiceRoleArn" ServiceRole.of_json in
+        field_map json__ "ServiceRoleArn" ServiceRole.of_json in
       let taskArn =
-        field_map_exn json "TaskArn" MaintenanceWindowTaskArn.of_json in
-      let targets = field_map json "Targets" Targets.of_json in
+        field_map_exn json__ "TaskArn" MaintenanceWindowTaskArn.of_json in
+      let targets = field_map json__ "Targets" Targets.of_json in
       let windowId =
-        field_map_exn json "WindowId" MaintenanceWindowId.of_json in
-      make ?cutoffBehavior ?clientToken ?description ?name ?loggingInfo
-        ?maxErrors ?maxConcurrency ?priority ?taskInvocationParameters
-        ?taskParameters ~taskType ?serviceRoleArn ~taskArn ?targets ~windowId
-        ()
+        field_map_exn json__ "WindowId" MaintenanceWindowId.of_json in
+      make ?alarmConfiguration ?cutoffBehavior ?clientToken ?description
+        ?name ?loggingInfo ?maxErrors ?maxConcurrency ?priority
+        ?taskInvocationParameters ?taskParameters ~taskType ?serviceRoleArn
+        ~taskArn ?targets ~windowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds a new task to a maintenance window."]
 module RegisterTaskWithMaintenanceWindowResult =
@@ -23079,9 +26196,9 @@ module RegisterTaskWithMaintenanceWindowResult =
           (Xml.child xml_arg0 "WindowTaskId") in
       make ?windowTaskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let windowTaskId =
-        field_map json "WindowTaskId" MaintenanceWindowTaskId.of_json in
+        field_map json__ "WindowTaskId" MaintenanceWindowTaskId.of_json in
       make ?windowTaskId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds a new task to a maintenance window."]
@@ -23094,7 +26211,7 @@ module RemoveTagsFromResourceRequest =
           "The type of resource from which you want to remove a tag. The ManagedInstance type for this API operation is only for on-premises managed nodes. Specify the name of the managed node in the following format: mi-ID_number . For example, mi-1a2b3c4d5e6f."];
       resourceId: ResourceId.t
         [@ocaml.doc
-          "The ID of the resource from which you want to remove tags. For example: ManagedInstance: mi-012345abcde MaintenanceWindow: mw-012345abcde PatchBaseline: pb-012345abcde OpsMetadata object: ResourceID for tagging is created from the Amazon Resource Name (ARN) for the object. Specifically, ResourceID is created from the strings that come after the word opsmetadata in the ARN. For example, an OpsMetadata object with an ARN of arn:aws:ssm:us-east-2:1234567890:opsmetadata/aws/ssm/MyGroup/appmanager has a ResourceID of either aws/ssm/MyGroup/appmanager or /aws/ssm/MyGroup/appmanager. For the Document and Parameter values, use the name of the resource. The ManagedInstance type for this API operation is only for on-premises managed nodes. Specify the name of the managed node in the following format: mi-ID_number. For example, mi-1a2b3c4d5e6f."];
+          "The ID of the resource from which you want to remove tags. For example: ManagedInstance: mi-012345abcde MaintenanceWindow: mw-012345abcde Automation: example-c160-4567-8519-012345abcde PatchBaseline: pb-012345abcde OpsMetadata object: ResourceID for tagging is created from the Amazon Resource Name (ARN) for the object. Specifically, ResourceID is created from the strings that come after the word opsmetadata in the ARN. For example, an OpsMetadata object with an ARN of arn:aws:ssm:us-east-2:1234567890:opsmetadata/aws/ssm/MyGroup/appmanager has a ResourceID of either aws/ssm/MyGroup/appmanager or /aws/ssm/MyGroup/appmanager. For the Document and Parameter values, use the name of the resource. The ManagedInstance type for this API operation is only for on-premises managed nodes. Specify the name of the managed node in the following format: mi-ID_number. For example, mi-1a2b3c4d5e6f."];
       tagKeys: KeyList.t
         [@ocaml.doc
           "Tag keys that you want to remove from the specified resource."]}
@@ -23120,11 +26237,11 @@ module RemoveTagsFromResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
       make ~tagKeys ~resourceId ~resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" KeyList.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" KeyList.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" ResourceTypeForTagging.of_json in
+        field_map_exn json__ "ResourceType" ResourceTypeForTagging.of_json in
       make ~tagKeys ~resourceId ~resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tag keys from the specified resource."]
@@ -23198,7 +26315,7 @@ module ResetServiceSettingRequest =
       {
       settingId: ServiceSettingId.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the service setting to reset. The setting ID can be one of the following. /ssm/automation/customer-script-log-destination /ssm/automation/customer-script-log-group-name /ssm/documents/console/public-sharing-permission /ssm/parameter-store/default-parameter-tier /ssm/parameter-store/high-throughput-enabled /ssm/managed-instance/activation-tier"]}
+          "The Amazon Resource Name (ARN) of the service setting to reset. The setting ID can be one of the following. /ssm/appmanager/appmanager-enabled /ssm/automation/customer-script-log-destination /ssm/automation/customer-script-log-group-name /ssm/automation/enable-adaptive-concurrency /ssm/documents/console/public-sharing-permission /ssm/managed-instance/activation-tier /ssm/managed-instance/default-ec2-instance-management-role /ssm/opsinsights/opscenter /ssm/parameter-store/default-parameter-tier /ssm/parameter-store/high-throughput-enabled"]}
     let context_ = "ResetServiceSettingRequest"
     let make ~settingId = fun () -> { settingId }
     let to_value x =
@@ -23211,8 +26328,9 @@ module ResetServiceSettingRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SettingId") in
       make ~settingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let settingId = field_map_exn json "SettingId" ServiceSettingId.of_json in
+    let of_json json__ =
+      let settingId =
+        field_map_exn json__ "SettingId" ServiceSettingId.of_json in
       make ~settingId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23279,9 +26397,9 @@ module ResetServiceSettingResult =
           (Xml.child xml_arg0 "ServiceSetting") in
       make ?serviceSetting ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceSetting =
-        field_map json "ServiceSetting" ServiceSetting.of_json in
+        field_map json__ "ServiceSetting" ServiceSetting.of_json in
       make ?serviceSetting ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23300,8 +26418,8 @@ module ResourceDataSyncConflictException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23324,8 +26442,8 @@ module ResumeSessionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SessionId") in
       make ~sessionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sessionId = field_map_exn json "SessionId" SessionId.of_json in
+    let of_json json__ =
+      let sessionId = field_map_exn json__ "SessionId" SessionId.of_json in
       make ~sessionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23426,10 +26544,10 @@ module ResumeSessionResponse =
         (Option.map ~f:SessionId.of_xml) (Xml.child xml_arg0 "SessionId") in
       make ?streamUrl ?tokenValue ?sessionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamUrl = field_map json "StreamUrl" StreamUrl.of_json in
-      let tokenValue = field_map json "TokenValue" TokenValue.of_json in
-      let sessionId = field_map json "SessionId" SessionId.of_json in
+    let of_json json__ =
+      let streamUrl = field_map json__ "StreamUrl" StreamUrl.of_json in
+      let tokenValue = field_map json__ "TokenValue" TokenValue.of_json in
+      let sessionId = field_map json__ "SessionId" SessionId.of_json in
       make ?streamUrl ?tokenValue ?sessionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23442,6 +26560,7 @@ module SignalType =
       | StartStep 
       | StopStep 
       | Resume 
+      | Revoke 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -23451,6 +26570,7 @@ module SignalType =
       | StartStep -> "StartStep"
       | StopStep -> "StopStep"
       | Resume -> "Resume"
+      | Revoke -> "Revoke"
       | Non_static_id s -> s
     let of_string =
       function
@@ -23459,6 +26579,7 @@ module SignalType =
       | "StartStep" -> StartStep
       | "StopStep" -> StopStep
       | "Resume" -> Resume
+      | "Revoke" -> Revoke
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -23505,11 +26626,11 @@ module SendAutomationSignalRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AutomationExecutionId") in
       make ?payload ~signalType ~automationExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let payload = field_map json "Payload" AutomationParameterMap.of_json in
-      let signalType = field_map_exn json "SignalType" SignalType.of_json in
+    let of_json json__ =
+      let payload = field_map json__ "Payload" AutomationParameterMap.of_json in
+      let signalType = field_map_exn json__ "SignalType" SignalType.of_json in
       let automationExecutionId =
-        field_map_exn json "AutomationExecutionId"
+        field_map_exn json__ "AutomationExecutionId"
           AutomationExecutionId.of_json in
       make ?payload ~signalType ~automationExecutionId ()
     let to_json v = composed_to_json to_value v
@@ -23597,13 +26718,13 @@ module SendCommandRequest =
       {
       instanceIds: InstanceIdList.t option
         [@ocaml.doc
-          "The IDs of the managed nodes where the command should run. Specifying managed node IDs is most useful when you are targeting a limited number of managed nodes, though you can specify up to 50 IDs. To target a larger number of managed nodes, or if you prefer not to list individual node IDs, we recommend using the Targets option instead. Using Targets, which accepts tag key-value pairs to identify the managed nodes to send commands to, you can a send command to tens, hundreds, or thousands of nodes at once. For more information about how to use targets, see Using targets and rate controls to send commands to a fleet in the Amazon Web Services Systems Manager User Guide."];
+          "The IDs of the managed nodes where the command should run. Specifying managed node IDs is most useful when you are targeting a limited number of managed nodes, though you can specify up to 50 IDs. To target a larger number of managed nodes, or if you prefer not to list individual node IDs, we recommend using the Targets option instead. Using Targets, which accepts tag key-value pairs to identify the managed nodes to send commands to, you can a send command to tens, hundreds, or thousands of nodes at once. For more information about how to use targets, see Run commands at scale in the Amazon Web Services Systems Manager User Guide."];
       targets: Targets.t option
         [@ocaml.doc
-          "An array of search criteria that targets managed nodes using a Key,Value combination that you specify. Specifying targets is most useful when you want to send a command to a large number of managed nodes at once. Using Targets, which accepts tag key-value pairs to identify managed nodes, you can send a command to tens, hundreds, or thousands of nodes at once. To send a command to a smaller number of managed nodes, you can use the InstanceIds option instead. For more information about how to use targets, see Sending commands to a fleet in the Amazon Web Services Systems Manager User Guide."];
+          "An array of search criteria that targets managed nodes using a Key,Value combination that you specify. Specifying targets is most useful when you want to send a command to a large number of managed nodes at once. Using Targets, which accepts tag key-value pairs to identify managed nodes, you can send a command to tens, hundreds, or thousands of nodes at once. To send a command to a smaller number of managed nodes, you can use the InstanceIds option instead. For more information about how to use targets, see Run commands at scale in the Amazon Web Services Systems Manager User Guide."];
       documentName: DocumentARN.t
         [@ocaml.doc
-          "The name of the Amazon Web Services Systems Manager document (SSM document) to run. This can be a public document or a custom document. To run a shared document belonging to another account, specify the document Amazon Resource Name (ARN). For more information about how to use shared documents, see Using shared SSM documents in the Amazon Web Services Systems Manager User Guide. If you specify a document name or ARN that hasn't been shared with your account, you receive an InvalidDocument error."];
+          "The name of the Amazon Web Services Systems Manager document (SSM document) to run. This can be a public document or a custom document. To run a shared document belonging to another account, specify the document Amazon Resource Name (ARN). For more information about how to use shared documents, see Sharing SSM documents in the Amazon Web Services Systems Manager User Guide. If you specify a document name or ARN that hasn't been shared with your account, you receive an InvalidDocument error."];
       documentVersion: DocumentVersion.t option
         [@ocaml.doc
           "The SSM document version to use in the request. You can specify $DEFAULT, $LATEST, or a specific version number. If you run commands by using the Command Line Interface (Amazon Web Services CLI), then you must escape the first two options by using a backslash. If you specify a version number, then you don't need to use the backslash. For example: --document-version \"\\$DEFAULT\" --document-version \"\\$LATEST\" --document-version \"3\""];
@@ -23638,12 +26759,15 @@ module SendCommandRequest =
           "The maximum number of errors allowed without the command failing. When the command fails one more time beyond the value of MaxErrors, the systems stops sending the command to additional targets. You can specify a number like 10 or a percentage like 10%. The default value is 0. For more information about how to use MaxErrors, see Using error controls in the Amazon Web Services Systems Manager User Guide."];
       serviceRoleArn: ServiceRole.t option
         [@ocaml.doc
-          "The ARN of the Identity and Access Management (IAM) service role to use to publish Amazon Simple Notification Service (Amazon SNS) notifications for Run Command commands."];
+          "The ARN of the Identity and Access Management (IAM) service role to use to publish Amazon Simple Notification Service (Amazon SNS) notifications for Run Command commands. This role must provide the sns:Publish permission for your notification topic. For information about creating and using this service role, see Monitoring Systems Manager status changes using Amazon SNS notifications in the Amazon Web Services Systems Manager User Guide."];
       notificationConfig: NotificationConfig.t option
         [@ocaml.doc "Configurations for sending notifications."];
       cloudWatchOutputConfig: CloudWatchOutputConfig.t option
         [@ocaml.doc
-          "Enables Amazon Web Services Systems Manager to send Run Command output to Amazon CloudWatch Logs. Run Command is a capability of Amazon Web Services Systems Manager."]}
+          "Enables Amazon Web Services Systems Manager to send Run Command output to Amazon CloudWatch Logs. Run Command is a tool in Amazon Web Services Systems Manager."];
+      alarmConfiguration: AlarmConfiguration.t option
+        [@ocaml.doc
+          "The CloudWatch alarm you want to apply to your command."]}
     let context_ = "SendCommandRequest"
     let make ?instanceIds =
       fun ?targets ->
@@ -23661,27 +26785,29 @@ module SendCommandRequest =
                               fun ?serviceRoleArn ->
                                 fun ?notificationConfig ->
                                   fun ?cloudWatchOutputConfig ->
-                                    fun ~documentName ->
-                                      fun () ->
-                                        {
-                                          instanceIds;
-                                          targets;
-                                          documentVersion;
-                                          documentHash;
-                                          documentHashType;
-                                          timeoutSeconds;
-                                          comment;
-                                          parameters;
-                                          outputS3Region;
-                                          outputS3BucketName;
-                                          outputS3KeyPrefix;
-                                          maxConcurrency;
-                                          maxErrors;
-                                          serviceRoleArn;
-                                          notificationConfig;
-                                          cloudWatchOutputConfig;
-                                          documentName
-                                        }
+                                    fun ?alarmConfiguration ->
+                                      fun ~documentName ->
+                                        fun () ->
+                                          {
+                                            instanceIds;
+                                            targets;
+                                            documentVersion;
+                                            documentHash;
+                                            documentHashType;
+                                            timeoutSeconds;
+                                            comment;
+                                            parameters;
+                                            outputS3Region;
+                                            outputS3BucketName;
+                                            outputS3KeyPrefix;
+                                            maxConcurrency;
+                                            maxErrors;
+                                            serviceRoleArn;
+                                            notificationConfig;
+                                            cloudWatchOutputConfig;
+                                            alarmConfiguration;
+                                            documentName
+                                          }
     let to_value x =
       structure_to_value
         [("InstanceIds",
@@ -23713,9 +26839,14 @@ module SendCommandRequest =
           (Option.map x.notificationConfig ~f:NotificationConfig.to_value));
         ("CloudWatchOutputConfig",
           (Option.map x.cloudWatchOutputConfig
-             ~f:CloudWatchOutputConfig.to_value))]
+             ~f:CloudWatchOutputConfig.to_value));
+        ("AlarmConfiguration",
+          (Option.map x.alarmConfiguration ~f:AlarmConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let alarmConfiguration =
+        (Option.map ~f:AlarmConfiguration.of_xml)
+          (Xml.child xml_arg0 "AlarmConfiguration") in
       let cloudWatchOutputConfig =
         (Option.map ~f:CloudWatchOutputConfig.of_xml)
           (Xml.child xml_arg0 "CloudWatchOutputConfig") in
@@ -23762,46 +26893,48 @@ module SendCommandRequest =
       let instanceIds =
         (Option.map ~f:InstanceIdList.of_xml)
           (Xml.child xml_arg0 "InstanceIds") in
-      make ?cloudWatchOutputConfig ?notificationConfig ?serviceRoleArn
-        ?maxErrors ?maxConcurrency ?outputS3KeyPrefix ?outputS3BucketName
-        ?outputS3Region ?parameters ?comment ?timeoutSeconds
-        ?documentHashType ?documentHash ?documentVersion ~documentName
-        ?targets ?instanceIds ()
+      make ?alarmConfiguration ?cloudWatchOutputConfig ?notificationConfig
+        ?serviceRoleArn ?maxErrors ?maxConcurrency ?outputS3KeyPrefix
+        ?outputS3BucketName ?outputS3Region ?parameters ?comment
+        ?timeoutSeconds ?documentHashType ?documentHash ?documentVersion
+        ~documentName ?targets ?instanceIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let alarmConfiguration =
+        field_map json__ "AlarmConfiguration" AlarmConfiguration.of_json in
       let cloudWatchOutputConfig =
-        field_map json "CloudWatchOutputConfig"
+        field_map json__ "CloudWatchOutputConfig"
           CloudWatchOutputConfig.of_json in
       let notificationConfig =
-        field_map json "NotificationConfig" NotificationConfig.of_json in
+        field_map json__ "NotificationConfig" NotificationConfig.of_json in
       let serviceRoleArn =
-        field_map json "ServiceRoleArn" ServiceRole.of_json in
-      let maxErrors = field_map json "MaxErrors" MaxErrors.of_json in
+        field_map json__ "ServiceRoleArn" ServiceRole.of_json in
+      let maxErrors = field_map json__ "MaxErrors" MaxErrors.of_json in
       let maxConcurrency =
-        field_map json "MaxConcurrency" MaxConcurrency.of_json in
+        field_map json__ "MaxConcurrency" MaxConcurrency.of_json in
       let outputS3KeyPrefix =
-        field_map json "OutputS3KeyPrefix" S3KeyPrefix.of_json in
+        field_map json__ "OutputS3KeyPrefix" S3KeyPrefix.of_json in
       let outputS3BucketName =
-        field_map json "OutputS3BucketName" S3BucketName.of_json in
-      let outputS3Region = field_map json "OutputS3Region" S3Region.of_json in
-      let parameters = field_map json "Parameters" Parameters.of_json in
-      let comment = field_map json "Comment" Comment.of_json in
+        field_map json__ "OutputS3BucketName" S3BucketName.of_json in
+      let outputS3Region = field_map json__ "OutputS3Region" S3Region.of_json in
+      let parameters = field_map json__ "Parameters" Parameters.of_json in
+      let comment = field_map json__ "Comment" Comment.of_json in
       let timeoutSeconds =
-        field_map json "TimeoutSeconds" TimeoutSeconds.of_json in
+        field_map json__ "TimeoutSeconds" TimeoutSeconds.of_json in
       let documentHashType =
-        field_map json "DocumentHashType" DocumentHashType.of_json in
-      let documentHash = field_map json "DocumentHash" DocumentHash.of_json in
+        field_map json__ "DocumentHashType" DocumentHashType.of_json in
+      let documentHash = field_map json__ "DocumentHash" DocumentHash.of_json in
       let documentVersion =
-        field_map json "DocumentVersion" DocumentVersion.of_json in
+        field_map json__ "DocumentVersion" DocumentVersion.of_json in
       let documentName =
-        field_map_exn json "DocumentName" DocumentARN.of_json in
-      let targets = field_map json "Targets" Targets.of_json in
-      let instanceIds = field_map json "InstanceIds" InstanceIdList.of_json in
-      make ?cloudWatchOutputConfig ?notificationConfig ?serviceRoleArn
-        ?maxErrors ?maxConcurrency ?outputS3KeyPrefix ?outputS3BucketName
-        ?outputS3Region ?parameters ?comment ?timeoutSeconds
-        ?documentHashType ?documentHash ?documentVersion ~documentName
-        ?targets ?instanceIds ()
+        field_map_exn json__ "DocumentName" DocumentARN.of_json in
+      let targets = field_map json__ "Targets" Targets.of_json in
+      let instanceIds = field_map json__ "InstanceIds" InstanceIdList.of_json in
+      make ?alarmConfiguration ?cloudWatchOutputConfig ?notificationConfig
+        ?serviceRoleArn ?maxErrors ?maxConcurrency ?outputS3KeyPrefix
+        ?outputS3BucketName ?outputS3Region ?parameters ?comment
+        ?timeoutSeconds ?documentHashType ?documentHash ?documentVersion
+        ~documentName ?targets ?instanceIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Runs commands on one or more managed nodes."]
 module SendCommandResult =
@@ -23934,11 +27067,66 @@ module SendCommandResult =
         (Option.map ~f:Command.of_xml) (Xml.child xml_arg0 "Command") in
       make ?command ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let command = field_map json "Command" Command.of_json in
+    let of_json json__ =
+      let command = field_map json__ "Command" Command.of_json in
       make ?command ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Runs commands on one or more managed nodes."]
+module ServiceQuotaExceededException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option ;
+      resourceId: String_.t option
+        [@ocaml.doc
+          "The unique ID of the resource referenced in the failed request."];
+      resourceType: String_.t option
+        [@ocaml.doc
+          "The resource type of the resource referenced in the failed request."];
+      quotaCode: String_.t option
+        [@ocaml.doc
+          "The quota code recognized by the Amazon Web Services Service Quotas service."];
+      serviceCode: String_.t option
+        [@ocaml.doc
+          "The code for the Amazon Web Services service that owns the quota."]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType ->
+          fun ?quotaCode ->
+            fun ?serviceCode ->
+              fun () ->
+                { message; resourceId; resourceType; quotaCode; serviceCode }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value));
+        ("ResourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("ResourceType", (Option.map x.resourceType ~f:String_.to_value));
+        ("QuotaCode", (Option.map x.quotaCode ~f:String_.to_value));
+        ("ServiceCode", (Option.map x.serviceCode ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ServiceCode") in
+      let quotaCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "QuotaCode") in
+      let resourceType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceType") in
+      let resourceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceId") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?serviceCode ?quotaCode ?resourceType ?resourceId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceCode = field_map json__ "ServiceCode" String_.of_json in
+      let quotaCode = field_map json__ "QuotaCode" String_.of_json in
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?serviceCode ?quotaCode ?resourceType ?resourceId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request exceeds the service quota. Service quotas, also referred to as limits, are the maximum number of service resources or operations for your Amazon Web Services account."]
 module SessionManagerParameterName =
   struct
     type nonrec t = string
@@ -23979,6 +27167,9 @@ module SessionManagerParameterValueList =
   struct
     type nonrec t = SessionManagerParameterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SessionManagerParameterValue.to_value)) |>
         (fun x -> `List x)
@@ -24028,6 +27219,8 @@ module SessionManagerParameters =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -24035,6 +27228,161 @@ module SessionManagerParameters =
         ~of_json:SessionManagerParameterValueList.of_json j
     let to_json v = composed_to_json to_value v
   end
+module String1to256 =
+  struct
+    type nonrec t = string
+    let context_ = "String1to256"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String1to256" j
+    let to_json = simple_to_json to_value
+  end
+module StartAccessRequestRequest =
+  struct
+    type nonrec t =
+      {
+      reason: String1to256.t
+        [@ocaml.doc
+          "A brief description explaining why you are requesting access to the node."];
+      targets: Targets.t
+        [@ocaml.doc "The node you are requesting access to."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "Key-value pairs of metadata you want to assign to the access request."]}
+    let context_ = "StartAccessRequestRequest"
+    let make ?tags =
+      fun ~reason -> fun ~targets -> fun () -> { tags; reason; targets }
+    let to_value x =
+      structure_to_value
+        [("Reason", (Some (String1to256.to_value x.reason)));
+        ("Targets", (Some (Targets.to_value x.targets)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let targets =
+        Targets.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Targets") in
+      let reason =
+        String1to256.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Reason") in
+      make ?tags ~targets ~reason ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let targets = field_map_exn json__ "Targets" Targets.of_json in
+      let reason = field_map_exn json__ "Reason" String1to256.of_json in
+      make ?tags ~targets ~reason ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts the workflow for just-in-time node access sessions."]
+module StartAccessRequestResponse =
+  struct
+    type nonrec t =
+      {
+      accessRequestId: AccessRequestId.t option
+        [@ocaml.doc "The ID of the access request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accessRequestId = fun () -> { accessRequestId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AccessRequestId",
+           (Option.map x.accessRequestId ~f:AccessRequestId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accessRequestId =
+        (Option.map ~f:AccessRequestId.of_xml)
+          (Xml.child xml_arg0 "AccessRequestId") in
+      make ?accessRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accessRequestId =
+        field_map json__ "AccessRequestId" AccessRequestId.of_json in
+      make ?accessRequestId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts the workflow for just-in-time node access sessions."]
 module StartAssociationsOnceRequest =
   struct
     type nonrec t =
@@ -24055,9 +27403,9 @@ module StartAssociationsOnceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AssociationIds") in
       make ~associationIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let associationIds =
-        field_map_exn json "AssociationIds" AssociationIdList.of_json in
+        field_map_exn json__ "AssociationIds" AssociationIdList.of_json in
       make ~associationIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -24117,7 +27465,7 @@ module StartAutomationExecutionRequest =
       {
       documentName: DocumentARN.t
         [@ocaml.doc
-          "The name of the SSM document to run. This can be a public document or a custom document. To run a shared document belonging to another account, specify the document ARN. For more information about how to use shared documents, see Using shared SSM documents in the Amazon Web Services Systems Manager User Guide."];
+          "The name of the SSM document to run. This can be a public document or a custom document. To run a shared document belonging to another account, specify the document ARN. For more information about how to use shared documents, see Sharing SSM documents in the Amazon Web Services Systems Manager User Guide."];
       documentVersion: DocumentVersion.t option
         [@ocaml.doc
           "The version of the Automation runbook to use for this execution."];
@@ -24135,22 +27483,28 @@ module StartAutomationExecutionRequest =
           "The name of the parameter used as the target resource for the rate-controlled execution. Required if you specify targets."];
       targets: Targets.t option
         [@ocaml.doc
-          "A key-value mapping to target resources. Required if you specify TargetParameterName."];
+          "A key-value mapping to target resources. Required if you specify TargetParameterName. If both this parameter and the TargetLocation:Targets parameter are supplied, TargetLocation:Targets takes precedence."];
       targetMaps: TargetMaps.t option
         [@ocaml.doc
           "A key-value mapping of document parameters to target resources. Both Targets and TargetMaps can't be specified together."];
       maxConcurrency: MaxConcurrency.t option
         [@ocaml.doc
-          "The maximum number of targets allowed to run this task in parallel. You can specify a number, such as 10, or a percentage, such as 10%. The default value is 10."];
+          "The maximum number of targets allowed to run this task in parallel. You can specify a number, such as 10, or a percentage, such as 10%. The default value is 10. If both this parameter and the TargetLocation:TargetsMaxConcurrency are supplied, TargetLocation:TargetsMaxConcurrency takes precedence."];
       maxErrors: MaxErrors.t option
         [@ocaml.doc
-          "The number of errors that are allowed before the system stops running the automation on additional targets. You can specify either an absolute number of errors, for example 10, or a percentage of the target set, for example 10%. If you specify 3, for example, the system stops running the automation when the fourth error is received. If you specify 0, then the system stops running the automation on additional targets after the first error result is returned. If you run an automation on 50 resources and set max-errors to 10%, then the system stops running the automation on additional targets when the sixth error is received. Executions that are already running an automation when max-errors is reached are allowed to complete, but some of these executions may fail as well. If you need to ensure that there won't be more than max-errors failed executions, set max-concurrency to 1 so the executions proceed one at a time."];
+          "The number of errors that are allowed before the system stops running the automation on additional targets. You can specify either an absolute number of errors, for example 10, or a percentage of the target set, for example 10%. If you specify 3, for example, the system stops running the automation when the fourth error is received. If you specify 0, then the system stops running the automation on additional targets after the first error result is returned. If you run an automation on 50 resources and set max-errors to 10%, then the system stops running the automation on additional targets when the sixth error is received. Executions that are already running an automation when max-errors is reached are allowed to complete, but some of these executions may fail as well. If you need to ensure that there won't be more than max-errors failed executions, set max-concurrency to 1 so the executions proceed one at a time. If this parameter and the TargetLocation:TargetsMaxErrors parameter are both supplied, TargetLocation:TargetsMaxErrors takes precedence."];
       targetLocations: TargetLocations.t option
         [@ocaml.doc
-          "A location is a combination of Amazon Web Services Regions and/or Amazon Web Services accounts where you want to run the automation. Use this operation to start an automation in multiple Amazon Web Services Regions and multiple Amazon Web Services accounts. For more information, see Running Automation workflows in multiple Amazon Web Services Regions and Amazon Web Services accounts in the Amazon Web Services Systems Manager User Guide."];
+          "A location is a combination of Amazon Web Services Regions and/or Amazon Web Services accounts where you want to run the automation. Use this operation to start an automation in multiple Amazon Web Services Regions and multiple Amazon Web Services accounts. For more information, see Running automations in multiple Amazon Web Services Regions and accounts in the Amazon Web Services Systems Manager User Guide."];
       tags: TagList.t option
         [@ocaml.doc
-          "Optional metadata that you assign to a resource. You can specify a maximum of five tags for an automation. Tags enable you to categorize a resource in different ways, such as by purpose, owner, or environment. For example, you might want to tag an automation to identify an environment or operating system. In this case, you could specify the following key-value pairs: Key=environment,Value=test Key=OS,Value=Windows To add tags to an existing patch baseline, use the AddTagsToResource operation."]}
+          "Optional metadata that you assign to a resource. You can specify a maximum of five tags for an automation. Tags enable you to categorize a resource in different ways, such as by purpose, owner, or environment. For example, you might want to tag an automation to identify an environment or operating system. In this case, you could specify the following key-value pairs: Key=environment,Value=test Key=OS,Value=Windows The Array Members maximum value is reported as 1000. This number includes capacity reserved for internal operations. When calling the StartAutomationExecution action, you can specify a maximum of 5 tags. You can, however, use the AddTagsToResource action to add up to a total of 50 tags to an existing automation configuration."];
+      alarmConfiguration: AlarmConfiguration.t option
+        [@ocaml.doc
+          "The CloudWatch alarm you want to apply to your automation."];
+      targetLocationsURL: TargetLocationsURL.t option
+        [@ocaml.doc
+          "Specify a publicly accessible URL for a file that contains the TargetLocations body. Currently, only files in presigned Amazon S3 buckets are supported."]}
     let context_ = "StartAutomationExecutionRequest"
     let make ?documentVersion =
       fun ?parameters ->
@@ -24163,22 +27517,26 @@ module StartAutomationExecutionRequest =
                     fun ?maxErrors ->
                       fun ?targetLocations ->
                         fun ?tags ->
-                          fun ~documentName ->
-                            fun () ->
-                              {
-                                documentVersion;
-                                parameters;
-                                clientToken;
-                                mode;
-                                targetParameterName;
-                                targets;
-                                targetMaps;
-                                maxConcurrency;
-                                maxErrors;
-                                targetLocations;
-                                tags;
-                                documentName
-                              }
+                          fun ?alarmConfiguration ->
+                            fun ?targetLocationsURL ->
+                              fun ~documentName ->
+                                fun () ->
+                                  {
+                                    documentVersion;
+                                    parameters;
+                                    clientToken;
+                                    mode;
+                                    targetParameterName;
+                                    targets;
+                                    targetMaps;
+                                    maxConcurrency;
+                                    maxErrors;
+                                    targetLocations;
+                                    tags;
+                                    alarmConfiguration;
+                                    targetLocationsURL;
+                                    documentName
+                                  }
     let to_value x =
       structure_to_value
         [("DocumentName", (Some (DocumentARN.to_value x.documentName)));
@@ -24199,9 +27557,19 @@ module StartAutomationExecutionRequest =
         ("MaxErrors", (Option.map x.maxErrors ~f:MaxErrors.to_value));
         ("TargetLocations",
           (Option.map x.targetLocations ~f:TargetLocations.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("AlarmConfiguration",
+          (Option.map x.alarmConfiguration ~f:AlarmConfiguration.to_value));
+        ("TargetLocationsURL",
+          (Option.map x.targetLocationsURL ~f:TargetLocationsURL.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let targetLocationsURL =
+        (Option.map ~f:TargetLocationsURL.of_xml)
+          (Xml.child xml_arg0 "TargetLocationsURL") in
+      let alarmConfiguration =
+        (Option.map ~f:AlarmConfiguration.of_xml)
+          (Xml.child xml_arg0 "AlarmConfiguration") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let targetLocations =
         (Option.map ~f:TargetLocations.of_xml)
@@ -24232,32 +27600,37 @@ module StartAutomationExecutionRequest =
       let documentName =
         DocumentARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DocumentName") in
-      make ?tags ?targetLocations ?maxErrors ?maxConcurrency ?targetMaps
-        ?targets ?targetParameterName ?mode ?clientToken ?parameters
-        ?documentVersion ~documentName ()
+      make ?targetLocationsURL ?alarmConfiguration ?tags ?targetLocations
+        ?maxErrors ?maxConcurrency ?targetMaps ?targets ?targetParameterName
+        ?mode ?clientToken ?parameters ?documentVersion ~documentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let targetLocationsURL =
+        field_map json__ "TargetLocationsURL" TargetLocationsURL.of_json in
+      let alarmConfiguration =
+        field_map json__ "AlarmConfiguration" AlarmConfiguration.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let targetLocations =
-        field_map json "TargetLocations" TargetLocations.of_json in
-      let maxErrors = field_map json "MaxErrors" MaxErrors.of_json in
+        field_map json__ "TargetLocations" TargetLocations.of_json in
+      let maxErrors = field_map json__ "MaxErrors" MaxErrors.of_json in
       let maxConcurrency =
-        field_map json "MaxConcurrency" MaxConcurrency.of_json in
-      let targetMaps = field_map json "TargetMaps" TargetMaps.of_json in
-      let targets = field_map json "Targets" Targets.of_json in
+        field_map json__ "MaxConcurrency" MaxConcurrency.of_json in
+      let targetMaps = field_map json__ "TargetMaps" TargetMaps.of_json in
+      let targets = field_map json__ "Targets" Targets.of_json in
       let targetParameterName =
-        field_map json "TargetParameterName" AutomationParameterKey.of_json in
-      let mode = field_map json "Mode" ExecutionMode.of_json in
-      let clientToken = field_map json "ClientToken" IdempotencyToken.of_json in
+        field_map json__ "TargetParameterName" AutomationParameterKey.of_json in
+      let mode = field_map json__ "Mode" ExecutionMode.of_json in
+      let clientToken =
+        field_map json__ "ClientToken" IdempotencyToken.of_json in
       let parameters =
-        field_map json "Parameters" AutomationParameterMap.of_json in
+        field_map json__ "Parameters" AutomationParameterMap.of_json in
       let documentVersion =
-        field_map json "DocumentVersion" DocumentVersion.of_json in
+        field_map json__ "DocumentVersion" DocumentVersion.of_json in
       let documentName =
-        field_map_exn json "DocumentName" DocumentARN.of_json in
-      make ?tags ?targetLocations ?maxErrors ?maxConcurrency ?targetMaps
-        ?targets ?targetParameterName ?mode ?clientToken ?parameters
-        ?documentVersion ~documentName ()
+        field_map_exn json__ "DocumentName" DocumentARN.of_json in
+      make ?targetLocationsURL ?alarmConfiguration ?tags ?targetLocations
+        ?maxErrors ?maxConcurrency ?targetMaps ?targets ?targetParameterName
+        ?mode ?clientToken ?parameters ?documentVersion ~documentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Initiates execution of an Automation runbook."]
 module StartAutomationExecutionResult =
@@ -24379,9 +27752,10 @@ module StartAutomationExecutionResult =
           (Xml.child xml_arg0 "AutomationExecutionId") in
       make ?automationExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let automationExecutionId =
-        field_map json "AutomationExecutionId" AutomationExecutionId.of_json in
+        field_map json__ "AutomationExecutionId"
+          AutomationExecutionId.of_json in
       make ?automationExecutionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Initiates execution of an Automation runbook."]
@@ -24415,7 +27789,7 @@ module StartChangeRequestExecutionRequest =
           "Information about the Automation runbooks that are run during the runbook workflow. The Automation runbooks specified for the runbook workflow can't run until all required approvals for the change request have been received."];
       tags: TagList.t option
         [@ocaml.doc
-          "Optional metadata that you assign to a resource. You can specify a maximum of five tags for a change request. Tags enable you to categorize a resource in different ways, such as by purpose, owner, or environment. For example, you might want to tag a change request to identify an environment or target Amazon Web Services Region. In this case, you could specify the following key-value pairs: Key=Environment,Value=Production Key=Region,Value=us-east-2"];
+          "Optional metadata that you assign to a resource. You can specify a maximum of five tags for a change request. Tags enable you to categorize a resource in different ways, such as by purpose, owner, or environment. For example, you might want to tag a change request to identify an environment or target Amazon Web Services Region. In this case, you could specify the following key-value pairs: Key=Environment,Value=Production Key=Region,Value=us-east-2 The Array Members maximum value is reported as 1000. This number includes capacity reserved for internal operations. When calling the StartChangeRequestExecution action, you can specify a maximum of 5 tags. You can, however, use the AddTagsToResource action to add up to a total of 50 tags to an existing change request configuration."];
       scheduledEndTime: DateTime.t option
         [@ocaml.doc
           "The time that the requester expects the runbook workflow related to the change request to complete. The time is an estimate only that the requester provides for reviewers."];
@@ -24501,30 +27875,31 @@ module StartChangeRequestExecutionRequest =
         ?clientToken ?changeRequestName ?parameters ?documentVersion
         ~documentName ?scheduledTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let changeDetails =
-        field_map json "ChangeDetails" ChangeDetailsValue.of_json in
+        field_map json__ "ChangeDetails" ChangeDetailsValue.of_json in
       let scheduledEndTime =
-        field_map json "ScheduledEndTime" DateTime.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let runbooks = field_map_exn json "Runbooks" Runbooks.of_json in
-      let autoApprove = field_map json "AutoApprove" Boolean.of_json in
-      let clientToken = field_map json "ClientToken" IdempotencyToken.of_json in
+        field_map json__ "ScheduledEndTime" DateTime.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let runbooks = field_map_exn json__ "Runbooks" Runbooks.of_json in
+      let autoApprove = field_map json__ "AutoApprove" Boolean.of_json in
+      let clientToken =
+        field_map json__ "ClientToken" IdempotencyToken.of_json in
       let changeRequestName =
-        field_map json "ChangeRequestName" ChangeRequestName.of_json in
+        field_map json__ "ChangeRequestName" ChangeRequestName.of_json in
       let parameters =
-        field_map json "Parameters" AutomationParameterMap.of_json in
+        field_map json__ "Parameters" AutomationParameterMap.of_json in
       let documentVersion =
-        field_map json "DocumentVersion" DocumentVersion.of_json in
+        field_map json__ "DocumentVersion" DocumentVersion.of_json in
       let documentName =
-        field_map_exn json "DocumentName" DocumentARN.of_json in
-      let scheduledTime = field_map json "ScheduledTime" DateTime.of_json in
+        field_map_exn json__ "DocumentName" DocumentARN.of_json in
+      let scheduledTime = field_map json__ "ScheduledTime" DateTime.of_json in
       make ?changeDetails ?scheduledEndTime ?tags ~runbooks ?autoApprove
         ?clientToken ?changeRequestName ?parameters ?documentVersion
         ~documentName ?scheduledTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a change request for Change Manager. The Automation runbooks specified in the change request run only after all required approvals for the change request have been received."]
+       "Amazon Web Services Systems Manager Change Manager is no longer open to new customers. Existing customers can continue to use the service as normal. For more information, see Amazon Web Services Systems Manager Change Manager availability change. Creates a change request for Change Manager. The Automation runbooks specified in the change request run only after all required approvals for the change request have been received."]
 module StartChangeRequestExecutionResult =
   struct
     type nonrec t =
@@ -24546,6 +27921,7 @@ module StartChangeRequestExecutionResult =
       | `InternalServerError of InternalServerError.t 
       | `InvalidAutomationExecutionParametersException of
           InvalidAutomationExecutionParametersException.t 
+      | `NoLongerSupportedException of NoLongerSupportedException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?automationExecutionId = fun () -> { automationExecutionId }
     let error_of_json name json =
@@ -24570,6 +27946,9 @@ module StartChangeRequestExecutionResult =
       | "InvalidAutomationExecutionParametersException" ->
           `InvalidAutomationExecutionParametersException
             (InvalidAutomationExecutionParametersException.of_json json)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException
+            (NoLongerSupportedException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -24595,6 +27974,8 @@ module StartChangeRequestExecutionResult =
       | "InvalidAutomationExecutionParametersException" ->
           `InvalidAutomationExecutionParametersException
             (InvalidAutomationExecutionParametersException.of_xml xml)
+      | "NoLongerSupportedException" ->
+          `NoLongerSupportedException (NoLongerSupportedException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -24632,6 +28013,10 @@ module StartChangeRequestExecutionResult =
                (`String "InvalidAutomationExecutionParametersException"));
             ("details",
               (InvalidAutomationExecutionParametersException.to_json e))]
+      | `NoLongerSupportedException e ->
+          `Assoc
+            [("error", (`String "NoLongerSupportedException"));
+            ("details", (NoLongerSupportedException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -24649,13 +28034,125 @@ module StartChangeRequestExecutionResult =
           (Xml.child xml_arg0 "AutomationExecutionId") in
       make ?automationExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let automationExecutionId =
-        field_map json "AutomationExecutionId" AutomationExecutionId.of_json in
+        field_map json__ "AutomationExecutionId"
+          AutomationExecutionId.of_json in
       make ?automationExecutionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a change request for Change Manager. The Automation runbooks specified in the change request run only after all required approvals for the change request have been received."]
+       "Amazon Web Services Systems Manager Change Manager is no longer open to new customers. Existing customers can continue to use the service as normal. For more information, see Amazon Web Services Systems Manager Change Manager availability change. Creates a change request for Change Manager. The Automation runbooks specified in the change request run only after all required approvals for the change request have been received."]
+module StartExecutionPreviewRequest =
+  struct
+    type nonrec t =
+      {
+      documentName: DocumentName.t
+        [@ocaml.doc
+          "The name of the Automation runbook to run. The result of the execution preview indicates what the impact would be of running this runbook."];
+      documentVersion: DocumentVersion.t option
+        [@ocaml.doc
+          "The version of the Automation runbook to run. The default value is $DEFAULT."];
+      executionInputs: ExecutionInputs.t option
+        [@ocaml.doc
+          "Information about the inputs that can be specified for the preview operation."]}
+    let context_ = "StartExecutionPreviewRequest"
+    let make ?documentVersion =
+      fun ?executionInputs ->
+        fun ~documentName ->
+          fun () -> { documentVersion; executionInputs; documentName }
+    let to_value x =
+      structure_to_value
+        [("DocumentName", (Some (DocumentName.to_value x.documentName)));
+        ("DocumentVersion",
+          (Option.map x.documentVersion ~f:DocumentVersion.to_value));
+        ("ExecutionInputs",
+          (Option.map x.executionInputs ~f:ExecutionInputs.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let executionInputs =
+        (Option.map ~f:ExecutionInputs.of_xml)
+          (Xml.child xml_arg0 "ExecutionInputs") in
+      let documentVersion =
+        (Option.map ~f:DocumentVersion.of_xml)
+          (Xml.child xml_arg0 "DocumentVersion") in
+      let documentName =
+        DocumentName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DocumentName") in
+      make ?executionInputs ?documentVersion ~documentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let executionInputs =
+        field_map json__ "ExecutionInputs" ExecutionInputs.of_json in
+      let documentVersion =
+        field_map json__ "DocumentVersion" DocumentVersion.of_json in
+      let documentName =
+        field_map_exn json__ "DocumentName" DocumentName.of_json in
+      make ?executionInputs ?documentVersion ~documentName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Initiates the process of creating a preview showing the effects that running a specified Automation runbook would have on the targeted resources."]
+module StartExecutionPreviewResponse =
+  struct
+    type nonrec t =
+      {
+      executionPreviewId: ExecutionPreviewId.t option
+        [@ocaml.doc
+          "The ID of the execution preview generated by the system."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?executionPreviewId = fun () -> { executionPreviewId }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ExecutionPreviewId",
+           (Option.map x.executionPreviewId ~f:ExecutionPreviewId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let executionPreviewId =
+        (Option.map ~f:ExecutionPreviewId.of_xml)
+          (Xml.child xml_arg0 "ExecutionPreviewId") in
+      make ?executionPreviewId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let executionPreviewId =
+        field_map json__ "ExecutionPreviewId" ExecutionPreviewId.of_json in
+      make ?executionPreviewId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Initiates the process of creating a preview showing the effects that running a specified Automation runbook would have on the targeted resources."]
 module StartSessionRequest =
   struct
     type nonrec t =
@@ -24664,13 +28161,13 @@ module StartSessionRequest =
         [@ocaml.doc "The managed node to connect to for the session."];
       documentName: DocumentARN.t option
         [@ocaml.doc
-          "The name of the SSM document to define the parameters and plugin settings for the session. For example, SSM-SessionManagerRunShell. You can call the GetDocument API to verify the document exists before attempting to start a session. If no document name is provided, a shell to the managed node is launched by default."];
+          "The name of the SSM document you want to use to define the type of session, input parameters, or preferences for the session. For example, SSM-SessionManagerRunShell. You can call the GetDocument API to verify the document exists before attempting to start a session. If no document name is provided, a shell to the managed node is launched by default. For more information, see Start a session in the Amazon Web Services Systems Manager User Guide."];
       reason: SessionReason.t option
         [@ocaml.doc
           "The reason for connecting to the instance. This value is included in the details for the Amazon CloudWatch Events event created when you start the session."];
       parameters: SessionManagerParameters.t option
         [@ocaml.doc
-          "The values you want to specify for the parameters defined in the Session document."]}
+          "The values you want to specify for the parameters defined in the Session document. For more information about these parameters, see Create a Session Manager preferences document in the Amazon Web Services Systems Manager User Guide."]}
     let context_ = "StartSessionRequest"
     let make ?documentName =
       fun ?reason ->
@@ -24699,12 +28196,12 @@ module StartSessionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Target") in
       make ?parameters ?reason ?documentName ~target ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameters =
-        field_map json "Parameters" SessionManagerParameters.of_json in
-      let reason = field_map json "Reason" SessionReason.of_json in
-      let documentName = field_map json "DocumentName" DocumentARN.of_json in
-      let target = field_map_exn json "Target" SessionTarget.of_json in
+        field_map json__ "Parameters" SessionManagerParameters.of_json in
+      let reason = field_map json__ "Reason" SessionReason.of_json in
+      let documentName = field_map json__ "DocumentName" DocumentARN.of_json in
+      let target = field_map_exn json__ "Target" SessionTarget.of_json in
       make ?parameters ?reason ?documentName ~target ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -24723,12 +28220,12 @@ module TargetNotConnected =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified target managed node for the session isn't fully configured for use with Session Manager. For more information, see Getting started with Session Manager in the Amazon Web Services Systems Manager User Guide. This error is also returned if you attempt to start a session on a managed node that is located in a different account or Region"]
+       "The specified target managed node for the session isn't fully configured for use with Session Manager. For more information, see Setting up Session Manager in the Amazon Web Services Systems Manager User Guide. This error is also returned if you attempt to start a session on a managed node that is located in a different account or Region"]
 module StartSessionResponse =
   struct
     type nonrec t =
@@ -24736,7 +28233,7 @@ module StartSessionResponse =
       sessionId: SessionId.t option [@ocaml.doc "The ID of the session."];
       tokenValue: TokenValue.t option
         [@ocaml.doc
-          "An encrypted token value containing session and caller information. Used to authenticate the connection to the managed node."];
+          "An encrypted token value containing session and caller information. This token is used to authenticate the connection to the managed node, and is valid only long enough to ensure the connection is successful. Never share your session's token."];
       streamUrl: StreamUrl.t option
         [@ocaml.doc
           "A URL back to SSM Agent on the managed node that the Session Manager client uses to send commands and receive output from the node. Format: wss://ssmmessages.region.amazonaws.com/v1/data-channel/session-id?stream=(input|output) region represents the Region identifier for an Amazon Web Services Region supported by Amazon Web Services Systems Manager, such as us-east-2 for the US East (Ohio) Region. For a list of supported region values, see the Region column in Systems Manager service endpoints in the Amazon Web Services General Reference. session-id represents the ID of a Session Manager session, such as 1a2b3c4dEXAMPLE."]}
@@ -24801,10 +28298,10 @@ module StartSessionResponse =
         (Option.map ~f:SessionId.of_xml) (Xml.child xml_arg0 "SessionId") in
       make ?streamUrl ?tokenValue ?sessionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamUrl = field_map json "StreamUrl" StreamUrl.of_json in
-      let tokenValue = field_map json "TokenValue" TokenValue.of_json in
-      let sessionId = field_map json "SessionId" SessionId.of_json in
+    let of_json json__ =
+      let streamUrl = field_map json__ "StreamUrl" StreamUrl.of_json in
+      let tokenValue = field_map json__ "TokenValue" TokenValue.of_json in
+      let sessionId = field_map json__ "SessionId" SessionId.of_json in
       make ?streamUrl ?tokenValue ?sessionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -24872,10 +28369,10 @@ module StopAutomationExecutionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AutomationExecutionId") in
       make ?type_ ~automationExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" StopType.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" StopType.of_json in
       let automationExecutionId =
-        field_map_exn json "AutomationExecutionId"
+        field_map_exn json__ "AutomationExecutionId"
           AutomationExecutionId.of_json in
       make ?type_ ~automationExecutionId ()
     let to_json v = composed_to_json to_value v
@@ -24962,8 +28459,8 @@ module TerminateSessionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SessionId") in
       make ~sessionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sessionId = field_map_exn json "SessionId" SessionId.of_json in
+    let of_json json__ =
+      let sessionId = field_map_exn json__ "SessionId" SessionId.of_json in
       make ~sessionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -25011,8 +28508,8 @@ module TerminateSessionResponse =
         (Option.map ~f:SessionId.of_xml) (Xml.child xml_arg0 "SessionId") in
       make ?sessionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sessionId = field_map json "SessionId" SessionId.of_json in
+    let of_json json__ =
+      let sessionId = field_map json__ "SessionId" SessionId.of_json in
       make ?sessionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -25023,7 +28520,7 @@ module UnlabelParameterVersionRequest =
       {
       name: PSParameterName.t
         [@ocaml.doc
-          "The name of the parameter from which you want to delete one or more labels."];
+          "The name of the parameter from which you want to delete one or more labels. You can't enter the Amazon Resource Name (ARN) for a parameter, only the parameter name itself."];
       parameterVersion: PSParameterVersion.t
         [@ocaml.doc
           "The specific version of the parameter which you want to delete one or more labels from. If it isn't present, the call will fail."];
@@ -25053,14 +28550,15 @@ module UnlabelParameterVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~labels ~parameterVersion ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let labels = field_map_exn json "Labels" ParameterLabelList.of_json in
+    let of_json json__ =
+      let labels = field_map_exn json__ "Labels" ParameterLabelList.of_json in
       let parameterVersion =
-        field_map_exn json "ParameterVersion" PSParameterVersion.of_json in
-      let name = field_map_exn json "Name" PSParameterName.of_json in
+        field_map_exn json__ "ParameterVersion" PSParameterVersion.of_json in
+      let name = field_map_exn json__ "Name" PSParameterName.of_json in
       make ~labels ~parameterVersion ~name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Remove a label or labels from a parameter."]
+  end[@@ocaml.doc
+       "Remove a label or labels from a parameter. Parameter names can't contain spaces. The service removes any spaces specified for the beginning or end of a parameter name. If the specified name for a parameter contains spaces between characters, the request fails with a ValidationException error."]
 module UnlabelParameterVersionResult =
   struct
     type nonrec t =
@@ -25140,14 +28638,15 @@ module UnlabelParameterVersionResult =
           (Xml.child xml_arg0 "RemovedLabels") in
       make ?invalidLabels ?removedLabels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let invalidLabels =
-        field_map json "InvalidLabels" ParameterLabelList.of_json in
+        field_map json__ "InvalidLabels" ParameterLabelList.of_json in
       let removedLabels =
-        field_map json "RemovedLabels" ParameterLabelList.of_json in
+        field_map json__ "RemovedLabels" ParameterLabelList.of_json in
       make ?invalidLabels ?removedLabels ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Remove a label or labels from a parameter."]
+  end[@@ocaml.doc
+       "Remove a label or labels from a parameter. Parameter names can't contain spaces. The service removes any spaces specified for the beginning or end of a parameter name. If the specified name for a parameter contains spaces between characters, the request fails with a ValidationException error."]
 module UpdateAssociationRequest =
   struct
     type nonrec t =
@@ -25156,7 +28655,7 @@ module UpdateAssociationRequest =
         [@ocaml.doc "The ID of the association you want to update."];
       parameters: Parameters.t option
         [@ocaml.doc
-          "The parameters you want to update for the association. If you create a parameter using Parameter Store, a capability of Amazon Web Services Systems Manager, you can reference the parameter using \\{\\{ssm:parameter-name\\}\\}."];
+          "The parameters you want to update for the association. If you create a parameter using Parameter Store, a tool in Amazon Web Services Systems Manager, you can reference the parameter using \\{\\{ssm:parameter-name\\}\\}."];
       documentVersion: DocumentVersion.t option
         [@ocaml.doc
           "The document version you want update for the association. State Manager doesn't support running associations that use a new version of a document if that document is shared from another account. State Manager always runs the default version of a document if shared from another account, even though the Systems Manager console shows that a new version was processed. If you want to run an association using a new version of a document shared form another account, you must set the document version to default."];
@@ -25178,7 +28677,7 @@ module UpdateAssociationRequest =
           "This parameter is provided for concurrency control purposes. You must specify the latest association version in the service. If you want to ensure that this request succeeds, either specify $LATEST, or omit this parameter."];
       automationTargetParameterName: AutomationTargetParameterName.t option
         [@ocaml.doc
-          "Choose the parameter that will define how your automation will branch out. This target is required for associations that use an Automation runbook and target resources by using rate controls. Automation is a capability of Amazon Web Services Systems Manager."];
+          "Choose the parameter that will define how your automation will branch out. This target is required for associations that use an Automation runbook and target resources by using rate controls. Automation is a tool in Amazon Web Services Systems Manager."];
       maxErrors: MaxErrors.t option
         [@ocaml.doc
           "The number of errors that are allowed before the system stops sending requests to run the association on additional targets. You can specify either an absolute number of errors, for example 10, or a percentage of the target set, for example 10%. If you specify 3, for example, the system stops sending requests when the fourth error is received. If you specify 0, then the system stops sending requests after the first error is returned. If you run an association on 50 managed nodes and set MaxError to 10%, then the system stops sending the request when the sixth error is received. Executions that are already running an association when MaxErrors is reached are allowed to complete, but some of these executions may fail as well. If you need to ensure that there won't be more than max-errors failed executions, set MaxConcurrency to 1 so that executions proceed one at a time."];
@@ -25189,16 +28688,30 @@ module UpdateAssociationRequest =
         [@ocaml.doc "The severity level to assign to the association."];
       syncCompliance: AssociationSyncCompliance.t option
         [@ocaml.doc
-          "The mode for generating association compliance. You can specify AUTO or MANUAL. In AUTO mode, the system uses the status of the association execution to determine the compliance status. If the association execution runs successfully, then the association is COMPLIANT. If the association execution doesn't run successfully, the association is NON-COMPLIANT. In MANUAL mode, you must specify the AssociationId as a parameter for the PutComplianceItems API operation. In this case, compliance data isn't managed by State Manager, a capability of Amazon Web Services Systems Manager. It is managed by your direct call to the PutComplianceItems API operation. By default, all associations use AUTO mode."];
+          "The mode for generating association compliance. You can specify AUTO or MANUAL. In AUTO mode, the system uses the status of the association execution to determine the compliance status. If the association execution runs successfully, then the association is COMPLIANT. If the association execution doesn't run successfully, the association is NON-COMPLIANT. In MANUAL mode, you must specify the AssociationId as a parameter for the PutComplianceItems API operation. In this case, compliance data isn't managed by State Manager, a tool in Amazon Web Services Systems Manager. It is managed by your direct call to the PutComplianceItems API operation. By default, all associations use AUTO mode."];
       applyOnlyAtCronInterval: ApplyOnlyAtCronInterval.t option
         [@ocaml.doc
-          "By default, when you update an association, the system runs it immediately after it is updated and then according to the schedule you specified. Specify this option if you don't want an association to run immediately after you update it. This parameter isn't supported for rate expressions. If you chose this option when you created an association and later you edit that association or you make changes to the SSM document on which that association is based (by using the Documents page in the console), State Manager applies the association at the next specified cron interval. For example, if you chose the Latest version of an SSM document when you created an association and you edit the association by choosing a different document version on the Documents page, State Manager applies the association at the next specified cron interval if you previously selected this option. If this option wasn't selected, State Manager immediately runs the association. You can reset this option. To do so, specify the no-apply-only-at-cron-interval parameter when you update the association from the command line. This parameter forces the association to run immediately after updating it and according to the interval specified."];
+          "By default, when you update an association, the system runs it immediately after it is updated and then according to the schedule you specified. Specify true for ApplyOnlyAtCronInterval if you want the association to run only according to the schedule you specified. If you chose this option when you created an association and later you edit that association or you make changes to the Automation runbook or SSM document on which that association is based, State Manager applies the association at the next specified cron interval. For example, if you chose the Latest version of an SSM document when you created an association and you edit the association by choosing a different document version on the Documents page, State Manager applies the association at the next specified cron interval if you previously set ApplyOnlyAtCronInterval to true. If this option wasn't selected, State Manager immediately runs the association. For more information, see Understanding when associations are applied to resources and About target updates with Automation runbooks in the Amazon Web Services Systems Manager User Guide. This parameter isn't supported for rate expressions. You can reset this parameter. To do so, specify the no-apply-only-at-cron-interval parameter when you update the association from the command line. This parameter forces the association to run immediately after updating it and according to the interval specified."];
       calendarNames: CalendarNameOrARNList.t option
         [@ocaml.doc
-          "The names or Amazon Resource Names (ARNs) of the Change Calendar type documents you want to gate your associations under. The associations only run when that change calendar is open. For more information, see Amazon Web Services Systems Manager Change Calendar."];
+          "The names or Amazon Resource Names (ARNs) of the Change Calendar type documents you want to gate your associations under. The associations only run when that change calendar is open. For more information, see Amazon Web Services Systems Manager Change Calendar in the Amazon Web Services Systems Manager User Guide."];
       targetLocations: TargetLocations.t option
         [@ocaml.doc
-          "A location is a combination of Amazon Web Services Regions and Amazon Web Services accounts where you want to run the association. Use this action to update an association in multiple Regions and multiple accounts."]}
+          "A location is a combination of Amazon Web Services Regions and Amazon Web Services accounts where you want to run the association. Use this action to update an association in multiple Regions and multiple accounts. The IncludeChildOrganizationUnits parameter is not supported by State Manager."];
+      scheduleOffset: ScheduleOffset.t option
+        [@ocaml.doc
+          "Number of days to wait after the scheduled day to run an association. For example, if you specified a cron schedule of cron(0 0 ? * THU#2 *), you could specify an offset of 3 to run the association each Sunday after the second Thursday of the month. For more information about cron schedules for associations, see Reference: Cron and rate expressions for Systems Manager in the Amazon Web Services Systems Manager User Guide. To use offsets, you must specify the ApplyOnlyAtCronInterval parameter. This option tells the system not to run an association immediately after you create it."];
+      duration: Duration.t option
+        [@ocaml.doc
+          "The number of hours the association can run before it is canceled. Duration applies to associations that are currently running, and any pending and in progress commands on all targets. If a target was taken offline for the association to run, it is made available again immediately, without a reboot. The Duration parameter applies only when both these conditions are true: The association for which you specify a duration is cancelable according to the parameters of the SSM command document or Automation runbook associated with this execution. The command specifies the ApplyOnlyAtCronInterval parameter, which means that the association doesn't run immediately after it is updated, but only according to the specified schedule."];
+      targetMaps: TargetMaps.t option
+        [@ocaml.doc
+          "A key-value mapping of document parameters to target resources. Both Targets and TargetMaps can't be specified together."];
+      alarmConfiguration: AlarmConfiguration.t option ;
+      associationDispatchAssumeRole:
+        AssociationDispatchAssumeRoleArn.t option
+        [@ocaml.doc
+          "A role used by association to take actions on your behalf. State Manager will assume this role and call required APIs when dispatching configurations to nodes. If not specified, service-linked role for Systems Manager will be used by default. It is recommended that you define a custom IAM role so that you have full control of the permissions that State Manager has when taking actions on your behalf. Service-linked role support in State Manager is being phased out. Associations relying on service-linked role may require updates in the future to continue functioning properly."]}
     let context_ = "UpdateAssociationRequest"
     let make ?parameters =
       fun ?documentVersion ->
@@ -25216,27 +28729,39 @@ module UpdateAssociationRequest =
                               fun ?applyOnlyAtCronInterval ->
                                 fun ?calendarNames ->
                                   fun ?targetLocations ->
-                                    fun ~associationId ->
-                                      fun () ->
-                                        {
-                                          parameters;
-                                          documentVersion;
-                                          scheduleExpression;
-                                          outputLocation;
-                                          name;
-                                          targets;
-                                          associationName;
-                                          associationVersion;
-                                          automationTargetParameterName;
-                                          maxErrors;
-                                          maxConcurrency;
-                                          complianceSeverity;
-                                          syncCompliance;
-                                          applyOnlyAtCronInterval;
-                                          calendarNames;
-                                          targetLocations;
-                                          associationId
-                                        }
+                                    fun ?scheduleOffset ->
+                                      fun ?duration ->
+                                        fun ?targetMaps ->
+                                          fun ?alarmConfiguration ->
+                                            fun
+                                              ?associationDispatchAssumeRole
+                                              ->
+                                              fun ~associationId ->
+                                                fun () ->
+                                                  {
+                                                    parameters;
+                                                    documentVersion;
+                                                    scheduleExpression;
+                                                    outputLocation;
+                                                    name;
+                                                    targets;
+                                                    associationName;
+                                                    associationVersion;
+                                                    automationTargetParameterName;
+                                                    maxErrors;
+                                                    maxConcurrency;
+                                                    complianceSeverity;
+                                                    syncCompliance;
+                                                    applyOnlyAtCronInterval;
+                                                    calendarNames;
+                                                    targetLocations;
+                                                    scheduleOffset;
+                                                    duration;
+                                                    targetMaps;
+                                                    alarmConfiguration;
+                                                    associationDispatchAssumeRole;
+                                                    associationId
+                                                  }
     let to_value x =
       structure_to_value
         [("AssociationId", (Some (AssociationId.to_value x.associationId)));
@@ -25271,9 +28796,31 @@ module UpdateAssociationRequest =
         ("CalendarNames",
           (Option.map x.calendarNames ~f:CalendarNameOrARNList.to_value));
         ("TargetLocations",
-          (Option.map x.targetLocations ~f:TargetLocations.to_value))]
+          (Option.map x.targetLocations ~f:TargetLocations.to_value));
+        ("ScheduleOffset",
+          (Option.map x.scheduleOffset ~f:ScheduleOffset.to_value));
+        ("Duration", (Option.map x.duration ~f:Duration.to_value));
+        ("TargetMaps", (Option.map x.targetMaps ~f:TargetMaps.to_value));
+        ("AlarmConfiguration",
+          (Option.map x.alarmConfiguration ~f:AlarmConfiguration.to_value));
+        ("AssociationDispatchAssumeRole",
+          (Option.map x.associationDispatchAssumeRole
+             ~f:AssociationDispatchAssumeRoleArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let associationDispatchAssumeRole =
+        (Option.map ~f:AssociationDispatchAssumeRoleArn.of_xml)
+          (Xml.child xml_arg0 "AssociationDispatchAssumeRole") in
+      let alarmConfiguration =
+        (Option.map ~f:AlarmConfiguration.of_xml)
+          (Xml.child xml_arg0 "AlarmConfiguration") in
+      let targetMaps =
+        (Option.map ~f:TargetMaps.of_xml) (Xml.child xml_arg0 "TargetMaps") in
+      let duration =
+        (Option.map ~f:Duration.of_xml) (Xml.child xml_arg0 "Duration") in
+      let scheduleOffset =
+        (Option.map ~f:ScheduleOffset.of_xml)
+          (Xml.child xml_arg0 "ScheduleOffset") in
       let targetLocations =
         (Option.map ~f:TargetLocations.of_xml)
           (Xml.child xml_arg0 "TargetLocations") in
@@ -25321,55 +28868,66 @@ module UpdateAssociationRequest =
       let associationId =
         AssociationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AssociationId") in
-      make ?targetLocations ?calendarNames ?applyOnlyAtCronInterval
-        ?syncCompliance ?complianceSeverity ?maxConcurrency ?maxErrors
-        ?automationTargetParameterName ?associationVersion ?associationName
-        ?targets ?name ?outputLocation ?scheduleExpression ?documentVersion
-        ?parameters ~associationId ()
+      make ?associationDispatchAssumeRole ?alarmConfiguration ?targetMaps
+        ?duration ?scheduleOffset ?targetLocations ?calendarNames
+        ?applyOnlyAtCronInterval ?syncCompliance ?complianceSeverity
+        ?maxConcurrency ?maxErrors ?automationTargetParameterName
+        ?associationVersion ?associationName ?targets ?name ?outputLocation
+        ?scheduleExpression ?documentVersion ?parameters ~associationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let associationDispatchAssumeRole =
+        field_map json__ "AssociationDispatchAssumeRole"
+          AssociationDispatchAssumeRoleArn.of_json in
+      let alarmConfiguration =
+        field_map json__ "AlarmConfiguration" AlarmConfiguration.of_json in
+      let targetMaps = field_map json__ "TargetMaps" TargetMaps.of_json in
+      let duration = field_map json__ "Duration" Duration.of_json in
+      let scheduleOffset =
+        field_map json__ "ScheduleOffset" ScheduleOffset.of_json in
       let targetLocations =
-        field_map json "TargetLocations" TargetLocations.of_json in
+        field_map json__ "TargetLocations" TargetLocations.of_json in
       let calendarNames =
-        field_map json "CalendarNames" CalendarNameOrARNList.of_json in
+        field_map json__ "CalendarNames" CalendarNameOrARNList.of_json in
       let applyOnlyAtCronInterval =
-        field_map json "ApplyOnlyAtCronInterval"
+        field_map json__ "ApplyOnlyAtCronInterval"
           ApplyOnlyAtCronInterval.of_json in
       let syncCompliance =
-        field_map json "SyncCompliance" AssociationSyncCompliance.of_json in
+        field_map json__ "SyncCompliance" AssociationSyncCompliance.of_json in
       let complianceSeverity =
-        field_map json "ComplianceSeverity"
+        field_map json__ "ComplianceSeverity"
           AssociationComplianceSeverity.of_json in
       let maxConcurrency =
-        field_map json "MaxConcurrency" MaxConcurrency.of_json in
-      let maxErrors = field_map json "MaxErrors" MaxErrors.of_json in
+        field_map json__ "MaxConcurrency" MaxConcurrency.of_json in
+      let maxErrors = field_map json__ "MaxErrors" MaxErrors.of_json in
       let automationTargetParameterName =
-        field_map json "AutomationTargetParameterName"
+        field_map json__ "AutomationTargetParameterName"
           AutomationTargetParameterName.of_json in
       let associationVersion =
-        field_map json "AssociationVersion" AssociationVersion.of_json in
+        field_map json__ "AssociationVersion" AssociationVersion.of_json in
       let associationName =
-        field_map json "AssociationName" AssociationName.of_json in
-      let targets = field_map json "Targets" Targets.of_json in
-      let name = field_map json "Name" DocumentARN.of_json in
+        field_map json__ "AssociationName" AssociationName.of_json in
+      let targets = field_map json__ "Targets" Targets.of_json in
+      let name = field_map json__ "Name" DocumentARN.of_json in
       let outputLocation =
-        field_map json "OutputLocation"
+        field_map json__ "OutputLocation"
           InstanceAssociationOutputLocation.of_json in
       let scheduleExpression =
-        field_map json "ScheduleExpression" ScheduleExpression.of_json in
+        field_map json__ "ScheduleExpression" ScheduleExpression.of_json in
       let documentVersion =
-        field_map json "DocumentVersion" DocumentVersion.of_json in
-      let parameters = field_map json "Parameters" Parameters.of_json in
+        field_map json__ "DocumentVersion" DocumentVersion.of_json in
+      let parameters = field_map json__ "Parameters" Parameters.of_json in
       let associationId =
-        field_map_exn json "AssociationId" AssociationId.of_json in
-      make ?targetLocations ?calendarNames ?applyOnlyAtCronInterval
-        ?syncCompliance ?complianceSeverity ?maxConcurrency ?maxErrors
-        ?automationTargetParameterName ?associationVersion ?associationName
-        ?targets ?name ?outputLocation ?scheduleExpression ?documentVersion
-        ?parameters ~associationId ()
+        field_map_exn json__ "AssociationId" AssociationId.of_json in
+      make ?associationDispatchAssumeRole ?alarmConfiguration ?targetMaps
+        ?duration ?scheduleOffset ?targetLocations ?calendarNames
+        ?applyOnlyAtCronInterval ?syncCompliance ?complianceSeverity
+        ?maxConcurrency ?maxErrors ?automationTargetParameterName
+        ?associationVersion ?associationName ?targets ?name ?outputLocation
+        ?scheduleExpression ?documentVersion ?parameters ~associationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an association. You can update the association name and version, the document version, schedule, parameters, and Amazon Simple Storage Service (Amazon S3) output. When you call UpdateAssociation, the system removes all optional parameters from the request and overwrites the association with null values for those parameters. This is by design. You must specify all optional parameters in the call, even if you are not changing the parameters. This includes the Name parameter. Before calling this API action, we recommend that you call the DescribeAssociation API operation and make a note of all optional parameters required for your UpdateAssociation call. In order to call this API operation, your Identity and Access Management (IAM) user account, group, or role must be configured with permission to call the DescribeAssociation API operation. If you don't have permission to call DescribeAssociation, then you receive the following error: An error occurred (AccessDeniedException) when calling the UpdateAssociation operation: User: <user_arn> isn't authorized to perform: ssm:DescribeAssociation on resource: <resource_arn> When you update an association, the association immediately runs against the specified targets. You can add the ApplyOnlyAtCronInterval parameter to run the association during the next schedule run."]
+       "Updates an association. You can update the association name and version, the document version, schedule, parameters, and Amazon Simple Storage Service (Amazon S3) output. When you call UpdateAssociation, the system removes all optional parameters from the request and overwrites the association with null values for those parameters. This is by design. You must specify all optional parameters in the call, even if you are not changing the parameters. This includes the Name parameter. Before calling this API action, we recommend that you call the DescribeAssociation API operation and make a note of all optional parameters required for your UpdateAssociation call. In order to call this API operation, a user, group, or role must be granted permission to call the DescribeAssociation API operation. If you don't have permission to call DescribeAssociation, then you receive the following error: An error occurred (AccessDeniedException) when calling the UpdateAssociation operation: User: <user_arn> isn't authorized to perform: ssm:DescribeAssociation on resource: <resource_arn> When you update an association, the association immediately runs against the specified targets. You can add the ApplyOnlyAtCronInterval parameter to run the association during the next schedule run."]
 module UpdateAssociationResult =
   struct
     type nonrec t =
@@ -25387,6 +28945,7 @@ module UpdateAssociationResult =
       | `InvalidParameters of InvalidParameters.t 
       | `InvalidSchedule of InvalidSchedule.t 
       | `InvalidTarget of InvalidTarget.t 
+      | `InvalidTargetMaps of InvalidTargetMaps.t 
       | `InvalidUpdate of InvalidUpdate.t 
       | `TooManyUpdates of TooManyUpdates.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -25411,6 +28970,8 @@ module UpdateAssociationResult =
           `InvalidParameters (InvalidParameters.of_json json)
       | "InvalidSchedule" -> `InvalidSchedule (InvalidSchedule.of_json json)
       | "InvalidTarget" -> `InvalidTarget (InvalidTarget.of_json json)
+      | "InvalidTargetMaps" ->
+          `InvalidTargetMaps (InvalidTargetMaps.of_json json)
       | "InvalidUpdate" -> `InvalidUpdate (InvalidUpdate.of_json json)
       | "TooManyUpdates" -> `TooManyUpdates (TooManyUpdates.of_json json)
       | name ->
@@ -25436,6 +28997,8 @@ module UpdateAssociationResult =
           `InvalidParameters (InvalidParameters.of_xml xml)
       | "InvalidSchedule" -> `InvalidSchedule (InvalidSchedule.of_xml xml)
       | "InvalidTarget" -> `InvalidTarget (InvalidTarget.of_xml xml)
+      | "InvalidTargetMaps" ->
+          `InvalidTargetMaps (InvalidTargetMaps.of_xml xml)
       | "InvalidUpdate" -> `InvalidUpdate (InvalidUpdate.of_xml xml)
       | "TooManyUpdates" -> `TooManyUpdates (TooManyUpdates.of_xml xml)
       | name ->
@@ -25482,6 +29045,10 @@ module UpdateAssociationResult =
           `Assoc
             [("error", (`String "InvalidTarget"));
             ("details", (InvalidTarget.to_json e))]
+      | `InvalidTargetMaps e ->
+          `Assoc
+            [("error", (`String "InvalidTargetMaps"));
+            ("details", (InvalidTargetMaps.to_json e))]
       | `InvalidUpdate e ->
           `Assoc
             [("error", (`String "InvalidUpdate"));
@@ -25507,14 +29074,14 @@ module UpdateAssociationResult =
           (Xml.child xml_arg0 "AssociationDescription") in
       make ?associationDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let associationDescription =
-        field_map json "AssociationDescription"
+        field_map json__ "AssociationDescription"
           AssociationDescription.of_json in
       make ?associationDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an association. You can update the association name and version, the document version, schedule, parameters, and Amazon Simple Storage Service (Amazon S3) output. When you call UpdateAssociation, the system removes all optional parameters from the request and overwrites the association with null values for those parameters. This is by design. You must specify all optional parameters in the call, even if you are not changing the parameters. This includes the Name parameter. Before calling this API action, we recommend that you call the DescribeAssociation API operation and make a note of all optional parameters required for your UpdateAssociation call. In order to call this API operation, your Identity and Access Management (IAM) user account, group, or role must be configured with permission to call the DescribeAssociation API operation. If you don't have permission to call DescribeAssociation, then you receive the following error: An error occurred (AccessDeniedException) when calling the UpdateAssociation operation: User: <user_arn> isn't authorized to perform: ssm:DescribeAssociation on resource: <resource_arn> When you update an association, the association immediately runs against the specified targets. You can add the ApplyOnlyAtCronInterval parameter to run the association during the next schedule run."]
+       "Updates an association. You can update the association name and version, the document version, schedule, parameters, and Amazon Simple Storage Service (Amazon S3) output. When you call UpdateAssociation, the system removes all optional parameters from the request and overwrites the association with null values for those parameters. This is by design. You must specify all optional parameters in the call, even if you are not changing the parameters. This includes the Name parameter. Before calling this API action, we recommend that you call the DescribeAssociation API operation and make a note of all optional parameters required for your UpdateAssociation call. In order to call this API operation, a user, group, or role must be granted permission to call the DescribeAssociation API operation. If you don't have permission to call DescribeAssociation, then you receive the following error: An error occurred (AccessDeniedException) when calling the UpdateAssociation operation: User: <user_arn> isn't authorized to perform: ssm:DescribeAssociation on resource: <resource_arn> When you update an association, the association immediately runs against the specified targets. You can add the ApplyOnlyAtCronInterval parameter to run the association during the next schedule run."]
 module UpdateAssociationStatusRequest =
   struct
     type nonrec t =
@@ -25546,11 +29113,11 @@ module UpdateAssociationStatusRequest =
         DocumentARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~associationStatus ~instanceId ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let associationStatus =
-        field_map_exn json "AssociationStatus" AssociationStatus.of_json in
-      let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
-      let name = field_map_exn json "Name" DocumentARN.of_json in
+        field_map_exn json__ "AssociationStatus" AssociationStatus.of_json in
+      let instanceId = field_map_exn json__ "InstanceId" InstanceId.of_json in
+      let name = field_map_exn json__ "Name" DocumentARN.of_json in
       make ~associationStatus ~instanceId ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -25640,9 +29207,9 @@ module UpdateAssociationStatusResult =
           (Xml.child xml_arg0 "AssociationDescription") in
       make ?associationDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let associationDescription =
-        field_map json "AssociationDescription"
+        field_map json__ "AssociationDescription"
           AssociationDescription.of_json in
       make ?associationDescription ()
     let to_json v = composed_to_json to_value v
@@ -25675,10 +29242,10 @@ module UpdateDocumentDefaultVersionRequest =
         DocumentName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~documentVersion ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let documentVersion =
-        field_map_exn json "DocumentVersion" DocumentVersionNumber.of_json in
-      let name = field_map_exn json "Name" DocumentName.of_json in
+        field_map_exn json__ "DocumentVersion" DocumentVersionNumber.of_json in
+      let name = field_map_exn json__ "Name" DocumentName.of_json in
       make ~documentVersion ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -25757,9 +29324,9 @@ module UpdateDocumentDefaultVersionResult =
           (Xml.child xml_arg0 "Description") in
       make ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description"
+        field_map json__ "Description"
           DocumentDefaultVersionDescription.of_json in
       make ?description ()
     let to_json v = composed_to_json to_value v
@@ -25801,16 +29368,16 @@ module UpdateDocumentMetadataRequest =
         DocumentName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~documentReviews ?documentVersion ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let documentReviews =
-        field_map_exn json "DocumentReviews" DocumentReviews.of_json in
+        field_map_exn json__ "DocumentReviews" DocumentReviews.of_json in
       let documentVersion =
-        field_map json "DocumentVersion" DocumentVersion.of_json in
-      let name = field_map_exn json "Name" DocumentName.of_json in
+        field_map json__ "DocumentVersion" DocumentVersion.of_json in
+      let name = field_map_exn json__ "Name" DocumentName.of_json in
       make ~documentReviews ?documentVersion ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates information related to approval reviews for a specific version of a change template in Change Manager."]
+       "Amazon Web Services Systems Manager Change Manager is no longer open to new customers. Existing customers can continue to use the service as normal. For more information, see Amazon Web Services Systems Manager Change Manager availability change. Updates information related to approval reviews for a specific version of a change template in Change Manager."]
 module UpdateDocumentMetadataResponse =
   struct
     type nonrec t = unit
@@ -25819,6 +29386,7 @@ module UpdateDocumentMetadataResponse =
       | `InvalidDocument of InvalidDocument.t 
       | `InvalidDocumentOperation of InvalidDocumentOperation.t 
       | `InvalidDocumentVersion of InvalidDocumentVersion.t 
+      | `TooManyUpdates of TooManyUpdates.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
@@ -25830,6 +29398,7 @@ module UpdateDocumentMetadataResponse =
           `InvalidDocumentOperation (InvalidDocumentOperation.of_json json)
       | "InvalidDocumentVersion" ->
           `InvalidDocumentVersion (InvalidDocumentVersion.of_json json)
+      | "TooManyUpdates" -> `TooManyUpdates (TooManyUpdates.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -25842,6 +29411,7 @@ module UpdateDocumentMetadataResponse =
           `InvalidDocumentOperation (InvalidDocumentOperation.of_xml xml)
       | "InvalidDocumentVersion" ->
           `InvalidDocumentVersion (InvalidDocumentVersion.of_xml xml)
+      | "TooManyUpdates" -> `TooManyUpdates (TooManyUpdates.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -25862,6 +29432,10 @@ module UpdateDocumentMetadataResponse =
           `Assoc
             [("error", (`String "InvalidDocumentVersion"));
             ("details", (InvalidDocumentVersion.to_json e))]
+      | `TooManyUpdates e ->
+          `Assoc
+            [("error", (`String "TooManyUpdates"));
+            ("details", (TooManyUpdates.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -25875,7 +29449,7 @@ module UpdateDocumentMetadataResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates information related to approval reviews for a specific version of a change template in Change Manager."]
+       "Amazon Web Services Systems Manager Change Manager is no longer open to new customers. Existing customers can continue to use the service as normal. For more information, see Amazon Web Services Systems Manager Change Manager availability change. Updates information related to approval reviews for a specific version of a change template in Change Manager."]
 module UpdateDocumentRequest =
   struct
     type nonrec t =
@@ -25891,7 +29465,7 @@ module UpdateDocumentRequest =
           "The friendly name of the SSM document that you want to update. This value can differ for each version of the document. If you don't specify a value for this parameter in your request, the existing value is applied to the new document version."];
       versionName: DocumentVersionName.t option
         [@ocaml.doc
-          "An optional field specifying the version of the artifact you are updating with the document. For example, \"Release 12, Update 6\". This value is unique across all versions of a document, and can't be changed."];
+          "An optional field specifying the version of the artifact you are updating with the document. For example, 12.6. This value is unique across all versions of a document, and can't be changed."];
       documentVersion: DocumentVersion.t option
         [@ocaml.doc
           "The version of the document that you want to update. Currently, Systems Manager supports updating only the latest version of the document. You can specify the version number of the latest version or use the $LATEST variable. If you change a document version for a State Manager association, Systems Manager immediately runs the association unless you previously specifed the apply-only-at-cron-interval parameter."];
@@ -25962,20 +29536,20 @@ module UpdateDocumentRequest =
       make ?targetType ?documentFormat ?documentVersion ?versionName
         ?displayName ~name ?attachments ~content ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetType = field_map json "TargetType" TargetType.of_json in
+    let of_json json__ =
+      let targetType = field_map json__ "TargetType" TargetType.of_json in
       let documentFormat =
-        field_map json "DocumentFormat" DocumentFormat.of_json in
+        field_map json__ "DocumentFormat" DocumentFormat.of_json in
       let documentVersion =
-        field_map json "DocumentVersion" DocumentVersion.of_json in
+        field_map json__ "DocumentVersion" DocumentVersion.of_json in
       let versionName =
-        field_map json "VersionName" DocumentVersionName.of_json in
+        field_map json__ "VersionName" DocumentVersionName.of_json in
       let displayName =
-        field_map json "DisplayName" DocumentDisplayName.of_json in
-      let name = field_map_exn json "Name" DocumentName.of_json in
+        field_map json__ "DisplayName" DocumentDisplayName.of_json in
+      let name = field_map_exn json__ "Name" DocumentName.of_json in
       let attachments =
-        field_map json "Attachments" AttachmentsSourceList.of_json in
-      let content = field_map_exn json "Content" DocumentContent.of_json in
+        field_map json__ "Attachments" AttachmentsSourceList.of_json in
+      let content = field_map_exn json__ "Content" DocumentContent.of_json in
       make ?targetType ?documentFormat ?documentVersion ?versionName
         ?displayName ~name ?attachments ~content ()
     let to_json v = composed_to_json to_value v
@@ -26110,9 +29684,9 @@ module UpdateDocumentResult =
           (Xml.child xml_arg0 "DocumentDescription") in
       make ?documentDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let documentDescription =
-        field_map json "DocumentDescription" DocumentDescription.of_json in
+        field_map json__ "DocumentDescription" DocumentDescription.of_json in
       make ?documentDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates one or more values for an SSM document."]
@@ -26128,7 +29702,7 @@ module UpdateMaintenanceWindowRequest =
         [@ocaml.doc "An optional description for the update request."];
       startDate: MaintenanceWindowStringDateTime.t option
         [@ocaml.doc
-          "The date and time, in ISO-8601 Extended format, for when you want the maintenance window to become active. StartDate allows you to delay activation of the maintenance window until the specified future date."];
+          "The date and time, in ISO-8601 Extended format, for when you want the maintenance window to become active. StartDate allows you to delay activation of the maintenance window until the specified future date. When using a rate schedule, if you provide a start date that occurs in the past, the current date and time are used as the start date."];
       endDate: MaintenanceWindowStringDateTime.t option
         [@ocaml.doc
           "The date and time, in ISO-8601 Extended format, for when you want the maintenance window to become inactive. EndDate allows you to set a date and time in the future when the maintenance window will no longer run."];
@@ -26255,30 +29829,31 @@ module UpdateMaintenanceWindowRequest =
         ?scheduleOffset ?scheduleTimezone ?schedule ?endDate ?startDate
         ?description ?name ~windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let replace = field_map json "Replace" Boolean.of_json in
-      let enabled = field_map json "Enabled" MaintenanceWindowEnabled.of_json in
+    let of_json json__ =
+      let replace = field_map json__ "Replace" Boolean.of_json in
+      let enabled =
+        field_map json__ "Enabled" MaintenanceWindowEnabled.of_json in
       let allowUnassociatedTargets =
-        field_map json "AllowUnassociatedTargets"
+        field_map json__ "AllowUnassociatedTargets"
           MaintenanceWindowAllowUnassociatedTargets.of_json in
-      let cutoff = field_map json "Cutoff" MaintenanceWindowCutoff.of_json in
+      let cutoff = field_map json__ "Cutoff" MaintenanceWindowCutoff.of_json in
       let duration =
-        field_map json "Duration" MaintenanceWindowDurationHours.of_json in
+        field_map json__ "Duration" MaintenanceWindowDurationHours.of_json in
       let scheduleOffset =
-        field_map json "ScheduleOffset" MaintenanceWindowOffset.of_json in
+        field_map json__ "ScheduleOffset" MaintenanceWindowOffset.of_json in
       let scheduleTimezone =
-        field_map json "ScheduleTimezone" MaintenanceWindowTimezone.of_json in
+        field_map json__ "ScheduleTimezone" MaintenanceWindowTimezone.of_json in
       let schedule =
-        field_map json "Schedule" MaintenanceWindowSchedule.of_json in
+        field_map json__ "Schedule" MaintenanceWindowSchedule.of_json in
       let endDate =
-        field_map json "EndDate" MaintenanceWindowStringDateTime.of_json in
+        field_map json__ "EndDate" MaintenanceWindowStringDateTime.of_json in
       let startDate =
-        field_map json "StartDate" MaintenanceWindowStringDateTime.of_json in
+        field_map json__ "StartDate" MaintenanceWindowStringDateTime.of_json in
       let description =
-        field_map json "Description" MaintenanceWindowDescription.of_json in
-      let name = field_map json "Name" MaintenanceWindowName.of_json in
+        field_map json__ "Description" MaintenanceWindowDescription.of_json in
+      let name = field_map json__ "Name" MaintenanceWindowName.of_json in
       let windowId =
-        field_map_exn json "WindowId" MaintenanceWindowId.of_json in
+        field_map_exn json__ "WindowId" MaintenanceWindowId.of_json in
       make ?replace ?enabled ?allowUnassociatedTargets ?cutoff ?duration
         ?scheduleOffset ?scheduleTimezone ?schedule ?endDate ?startDate
         ?description ?name ~windowId ()
@@ -26452,28 +30027,29 @@ module UpdateMaintenanceWindowResult =
         ?scheduleOffset ?scheduleTimezone ?schedule ?endDate ?startDate
         ?description ?name ?windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "Enabled" MaintenanceWindowEnabled.of_json in
+    let of_json json__ =
+      let enabled =
+        field_map json__ "Enabled" MaintenanceWindowEnabled.of_json in
       let allowUnassociatedTargets =
-        field_map json "AllowUnassociatedTargets"
+        field_map json__ "AllowUnassociatedTargets"
           MaintenanceWindowAllowUnassociatedTargets.of_json in
-      let cutoff = field_map json "Cutoff" MaintenanceWindowCutoff.of_json in
+      let cutoff = field_map json__ "Cutoff" MaintenanceWindowCutoff.of_json in
       let duration =
-        field_map json "Duration" MaintenanceWindowDurationHours.of_json in
+        field_map json__ "Duration" MaintenanceWindowDurationHours.of_json in
       let scheduleOffset =
-        field_map json "ScheduleOffset" MaintenanceWindowOffset.of_json in
+        field_map json__ "ScheduleOffset" MaintenanceWindowOffset.of_json in
       let scheduleTimezone =
-        field_map json "ScheduleTimezone" MaintenanceWindowTimezone.of_json in
+        field_map json__ "ScheduleTimezone" MaintenanceWindowTimezone.of_json in
       let schedule =
-        field_map json "Schedule" MaintenanceWindowSchedule.of_json in
+        field_map json__ "Schedule" MaintenanceWindowSchedule.of_json in
       let endDate =
-        field_map json "EndDate" MaintenanceWindowStringDateTime.of_json in
+        field_map json__ "EndDate" MaintenanceWindowStringDateTime.of_json in
       let startDate =
-        field_map json "StartDate" MaintenanceWindowStringDateTime.of_json in
+        field_map json__ "StartDate" MaintenanceWindowStringDateTime.of_json in
       let description =
-        field_map json "Description" MaintenanceWindowDescription.of_json in
-      let name = field_map json "Name" MaintenanceWindowName.of_json in
-      let windowId = field_map json "WindowId" MaintenanceWindowId.of_json in
+        field_map json__ "Description" MaintenanceWindowDescription.of_json in
+      let name = field_map json__ "Name" MaintenanceWindowName.of_json in
+      let windowId = field_map json__ "WindowId" MaintenanceWindowId.of_json in
       make ?enabled ?allowUnassociatedTargets ?cutoff ?duration
         ?scheduleOffset ?scheduleTimezone ?schedule ?endDate ?startDate
         ?description ?name ?windowId ()
@@ -26554,18 +30130,19 @@ module UpdateMaintenanceWindowTargetRequest =
       make ?replace ?description ?name ?ownerInformation ?targets
         ~windowTargetId ~windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let replace = field_map json "Replace" Boolean.of_json in
+    let of_json json__ =
+      let replace = field_map json__ "Replace" Boolean.of_json in
       let description =
-        field_map json "Description" MaintenanceWindowDescription.of_json in
-      let name = field_map json "Name" MaintenanceWindowName.of_json in
+        field_map json__ "Description" MaintenanceWindowDescription.of_json in
+      let name = field_map json__ "Name" MaintenanceWindowName.of_json in
       let ownerInformation =
-        field_map json "OwnerInformation" OwnerInformation.of_json in
-      let targets = field_map json "Targets" Targets.of_json in
+        field_map json__ "OwnerInformation" OwnerInformation.of_json in
+      let targets = field_map json__ "Targets" Targets.of_json in
       let windowTargetId =
-        field_map_exn json "WindowTargetId" MaintenanceWindowTargetId.of_json in
+        field_map_exn json__ "WindowTargetId"
+          MaintenanceWindowTargetId.of_json in
       let windowId =
-        field_map_exn json "WindowId" MaintenanceWindowId.of_json in
+        field_map_exn json__ "WindowId" MaintenanceWindowId.of_json in
       make ?replace ?description ?name ?ownerInformation ?targets
         ~windowTargetId ~windowId ()
     let to_json v = composed_to_json to_value v
@@ -26671,16 +30248,16 @@ module UpdateMaintenanceWindowTargetResult =
       make ?description ?name ?ownerInformation ?targets ?windowTargetId
         ?windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" MaintenanceWindowDescription.of_json in
-      let name = field_map json "Name" MaintenanceWindowName.of_json in
+        field_map json__ "Description" MaintenanceWindowDescription.of_json in
+      let name = field_map json__ "Name" MaintenanceWindowName.of_json in
       let ownerInformation =
-        field_map json "OwnerInformation" OwnerInformation.of_json in
-      let targets = field_map json "Targets" Targets.of_json in
+        field_map json__ "OwnerInformation" OwnerInformation.of_json in
+      let targets = field_map json__ "Targets" Targets.of_json in
       let windowTargetId =
-        field_map json "WindowTargetId" MaintenanceWindowTargetId.of_json in
-      let windowId = field_map json "WindowId" MaintenanceWindowId.of_json in
+        field_map json__ "WindowTargetId" MaintenanceWindowTargetId.of_json in
+      let windowId = field_map json__ "WindowId" MaintenanceWindowId.of_json in
       make ?description ?name ?ownerInformation ?targets ?windowTargetId
         ?windowId ()
     let to_json v = composed_to_json to_value v
@@ -26702,7 +30279,7 @@ module UpdateMaintenanceWindowTaskRequest =
         [@ocaml.doc "The task ARN to modify."];
       serviceRoleArn: ServiceRole.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the IAM service role for Amazon Web Services Systems Manager to assume when running a maintenance window task. If you do not specify a service role ARN, Systems Manager uses your account's service-linked role. If no service-linked role for Systems Manager exists in your account, it is created when you run RegisterTaskWithMaintenanceWindow. For more information, see the following topics in the in the Amazon Web Services Systems Manager User Guide: Using service-linked roles for Systems Manager Should I use a service-linked role or a custom service role to run maintenance window tasks?"];
+          "The Amazon Resource Name (ARN) of the IAM service role for Amazon Web Services Systems Manager to assume when running a maintenance window task. If you do not specify a service role ARN, Systems Manager uses a service-linked role in your account. If no appropriate service-linked role for Systems Manager exists in your account, it is created when you run RegisterTaskWithMaintenanceWindow. However, for an improved security posture, we strongly recommend creating a custom policy and custom service role for running your maintenance window tasks. The policy can be crafted to provide only the permissions needed for your particular maintenance window tasks. For more information, see Setting up Maintenance Windows in the in the Amazon Web Services Systems Manager User Guide."];
       taskParameters: MaintenanceWindowTaskParameters.t option
         [@ocaml.doc
           "The parameters to modify. TaskParameters has been deprecated. To specify parameters to pass to a task when it runs, instead use the Parameters option in the TaskInvocationParameters structure. For information about how Systems Manager handles these options for the supported maintenance window task types, see MaintenanceWindowTaskInvocationParameters. The map has the following format: Key: string, between 1 and 255 characters Value: an array of strings, each string is between 1 and 255 characters"];
@@ -26731,7 +30308,10 @@ module UpdateMaintenanceWindowTaskRequest =
           "If True, then all fields that are required by the RegisterTaskWithMaintenanceWindow operation are also required for this API request. Optional fields that aren't specified are set to null."];
       cutoffBehavior: MaintenanceWindowTaskCutoffBehavior.t option
         [@ocaml.doc
-          "Indicates whether tasks should continue to run after the cutoff time specified in the maintenance windows is reached. CONTINUE_TASK: When the cutoff time is reached, any tasks that are running continue. The default value. CANCEL_TASK: For Automation, Lambda, Step Functions tasks: When the cutoff time is reached, any task invocations that are already running continue, but no new task invocations are started. For Run Command tasks: When the cutoff time is reached, the system sends a CancelCommand operation that attempts to cancel the command associated with the task. However, there is no guarantee that the command will be terminated and the underlying process stopped. The status for tasks that are not completed is TIMED_OUT."]}
+          "Indicates whether tasks should continue to run after the cutoff time specified in the maintenance windows is reached. CONTINUE_TASK: When the cutoff time is reached, any tasks that are running continue. The default value. CANCEL_TASK: For Automation, Lambda, Step Functions tasks: When the cutoff time is reached, any task invocations that are already running continue, but no new task invocations are started. For Run Command tasks: When the cutoff time is reached, the system sends a CancelCommand operation that attempts to cancel the command associated with the task. However, there is no guarantee that the command will be terminated and the underlying process stopped. The status for tasks that are not completed is TIMED_OUT."];
+      alarmConfiguration: AlarmConfiguration.t option
+        [@ocaml.doc
+          "The CloudWatch alarm you want to apply to your maintenance window task."]}
     let context_ = "UpdateMaintenanceWindowTaskRequest"
     let make ?targets =
       fun ?taskArn ->
@@ -26746,26 +30326,28 @@ module UpdateMaintenanceWindowTaskRequest =
                         fun ?description ->
                           fun ?replace ->
                             fun ?cutoffBehavior ->
-                              fun ~windowId ->
-                                fun ~windowTaskId ->
-                                  fun () ->
-                                    {
-                                      targets;
-                                      taskArn;
-                                      serviceRoleArn;
-                                      taskParameters;
-                                      taskInvocationParameters;
-                                      priority;
-                                      maxConcurrency;
-                                      maxErrors;
-                                      loggingInfo;
-                                      name;
-                                      description;
-                                      replace;
-                                      cutoffBehavior;
-                                      windowId;
-                                      windowTaskId
-                                    }
+                              fun ?alarmConfiguration ->
+                                fun ~windowId ->
+                                  fun ~windowTaskId ->
+                                    fun () ->
+                                      {
+                                        targets;
+                                        taskArn;
+                                        serviceRoleArn;
+                                        taskParameters;
+                                        taskInvocationParameters;
+                                        priority;
+                                        maxConcurrency;
+                                        maxErrors;
+                                        loggingInfo;
+                                        name;
+                                        description;
+                                        replace;
+                                        cutoffBehavior;
+                                        alarmConfiguration;
+                                        windowId;
+                                        windowTaskId
+                                      }
     let to_value x =
       structure_to_value
         [("WindowId", (Some (MaintenanceWindowId.to_value x.windowId)));
@@ -26794,9 +30376,14 @@ module UpdateMaintenanceWindowTaskRequest =
         ("Replace", (Option.map x.replace ~f:Boolean.to_value));
         ("CutoffBehavior",
           (Option.map x.cutoffBehavior
-             ~f:MaintenanceWindowTaskCutoffBehavior.to_value))]
+             ~f:MaintenanceWindowTaskCutoffBehavior.to_value));
+        ("AlarmConfiguration",
+          (Option.map x.alarmConfiguration ~f:AlarmConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let alarmConfiguration =
+        (Option.map ~f:AlarmConfiguration.of_xml)
+          (Xml.child xml_arg0 "AlarmConfiguration") in
       let cutoffBehavior =
         (Option.map ~f:MaintenanceWindowTaskCutoffBehavior.of_xml)
           (Xml.child xml_arg0 "CutoffBehavior") in
@@ -26838,43 +30425,46 @@ module UpdateMaintenanceWindowTaskRequest =
       let windowId =
         MaintenanceWindowId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WindowId") in
-      make ?cutoffBehavior ?replace ?description ?name ?loggingInfo
-        ?maxErrors ?maxConcurrency ?priority ?taskInvocationParameters
-        ?taskParameters ?serviceRoleArn ?taskArn ?targets ~windowTaskId
-        ~windowId ()
+      make ?alarmConfiguration ?cutoffBehavior ?replace ?description ?name
+        ?loggingInfo ?maxErrors ?maxConcurrency ?priority
+        ?taskInvocationParameters ?taskParameters ?serviceRoleArn ?taskArn
+        ?targets ~windowTaskId ~windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let alarmConfiguration =
+        field_map json__ "AlarmConfiguration" AlarmConfiguration.of_json in
       let cutoffBehavior =
-        field_map json "CutoffBehavior"
+        field_map json__ "CutoffBehavior"
           MaintenanceWindowTaskCutoffBehavior.of_json in
-      let replace = field_map json "Replace" Boolean.of_json in
+      let replace = field_map json__ "Replace" Boolean.of_json in
       let description =
-        field_map json "Description" MaintenanceWindowDescription.of_json in
-      let name = field_map json "Name" MaintenanceWindowName.of_json in
-      let loggingInfo = field_map json "LoggingInfo" LoggingInfo.of_json in
-      let maxErrors = field_map json "MaxErrors" MaxErrors.of_json in
+        field_map json__ "Description" MaintenanceWindowDescription.of_json in
+      let name = field_map json__ "Name" MaintenanceWindowName.of_json in
+      let loggingInfo = field_map json__ "LoggingInfo" LoggingInfo.of_json in
+      let maxErrors = field_map json__ "MaxErrors" MaxErrors.of_json in
       let maxConcurrency =
-        field_map json "MaxConcurrency" MaxConcurrency.of_json in
+        field_map json__ "MaxConcurrency" MaxConcurrency.of_json in
       let priority =
-        field_map json "Priority" MaintenanceWindowTaskPriority.of_json in
+        field_map json__ "Priority" MaintenanceWindowTaskPriority.of_json in
       let taskInvocationParameters =
-        field_map json "TaskInvocationParameters"
+        field_map json__ "TaskInvocationParameters"
           MaintenanceWindowTaskInvocationParameters.of_json in
       let taskParameters =
-        field_map json "TaskParameters"
+        field_map json__ "TaskParameters"
           MaintenanceWindowTaskParameters.of_json in
       let serviceRoleArn =
-        field_map json "ServiceRoleArn" ServiceRole.of_json in
-      let taskArn = field_map json "TaskArn" MaintenanceWindowTaskArn.of_json in
-      let targets = field_map json "Targets" Targets.of_json in
+        field_map json__ "ServiceRoleArn" ServiceRole.of_json in
+      let taskArn =
+        field_map json__ "TaskArn" MaintenanceWindowTaskArn.of_json in
+      let targets = field_map json__ "Targets" Targets.of_json in
       let windowTaskId =
-        field_map_exn json "WindowTaskId" MaintenanceWindowTaskId.of_json in
+        field_map_exn json__ "WindowTaskId" MaintenanceWindowTaskId.of_json in
       let windowId =
-        field_map_exn json "WindowId" MaintenanceWindowId.of_json in
-      make ?cutoffBehavior ?replace ?description ?name ?loggingInfo
-        ?maxErrors ?maxConcurrency ?priority ?taskInvocationParameters
-        ?taskParameters ?serviceRoleArn ?taskArn ?targets ~windowTaskId
-        ~windowId ()
+        field_map_exn json__ "WindowId" MaintenanceWindowId.of_json in
+      make ?alarmConfiguration ?cutoffBehavior ?replace ?description ?name
+        ?loggingInfo ?maxErrors ?maxConcurrency ?priority
+        ?taskInvocationParameters ?taskParameters ?serviceRoleArn ?taskArn
+        ?targets ~windowTaskId ~windowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Modifies a task assigned to a maintenance window. You can't change the task type, but you can change the following values: TaskARN. For example, you can change a RUN_COMMAND task from AWS-RunPowerShellScript to AWS-RunShellScript. ServiceRoleArn TaskInvocationParameters Priority MaxConcurrency MaxErrors One or more targets must be specified for maintenance window Run Command-type tasks. Depending on the task, targets are optional for other maintenance window task types (Automation, Lambda, and Step Functions). For more information about running tasks that don't specify targets, see Registering maintenance window tasks without targets in the Amazon Web Services Systems Manager User Guide. If the value for a parameter in UpdateMaintenanceWindowTask is null, then the corresponding field isn't modified. If you set Replace to true, then all fields required by the RegisterTaskWithMaintenanceWindow operation are required for this request. Optional fields that aren't specified are set to null. When you update a maintenance window task that has options specified in TaskInvocationParameters, you must provide again all the TaskInvocationParameters values that you want to retain. The values you don't specify again are removed. For example, suppose that when you registered a Run Command task, you specified TaskInvocationParameters values for Comment, NotificationConfig, and OutputS3BucketName. If you update the maintenance window task and specify only a different OutputS3BucketName value, the values for Comment and NotificationConfig are removed."]
@@ -26892,7 +30482,7 @@ module UpdateMaintenanceWindowTaskResult =
         [@ocaml.doc "The updated task ARN value."];
       serviceRoleArn: ServiceRole.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Identity and Access Management (IAM) service role to use to publish Amazon Simple Notification Service (Amazon SNS) notifications for maintenance window Run Command tasks."];
+          "The Amazon Resource Name (ARN) of the IAM service role for Amazon Web Services Systems Manager to assume when running a maintenance window task. If you do not specify a service role ARN, Systems Manager uses a service-linked role in your account. If no appropriate service-linked role for Systems Manager exists in your account, it is created when you run RegisterTaskWithMaintenanceWindow. However, for an improved security posture, we strongly recommend creating a custom policy and custom service role for running your maintenance window tasks. The policy can be crafted to provide only the permissions needed for your particular maintenance window tasks. For more information, see Setting up Maintenance Windows in the in the Amazon Web Services Systems Manager User Guide."];
       taskParameters: MaintenanceWindowTaskParameters.t option
         [@ocaml.doc
           "The updated parameter values. TaskParameters has been deprecated. To specify parameters to pass to a task when it runs, instead use the Parameters option in the TaskInvocationParameters structure. For information about how Systems Manager handles these options for the supported maintenance window task types, see MaintenanceWindowTaskInvocationParameters."];
@@ -26914,7 +30504,10 @@ module UpdateMaintenanceWindowTaskResult =
         [@ocaml.doc "The updated task description."];
       cutoffBehavior: MaintenanceWindowTaskCutoffBehavior.t option
         [@ocaml.doc
-          "The specification for whether tasks should continue to run after the cutoff time specified in the maintenance windows is reached."]}
+          "The specification for whether tasks should continue to run after the cutoff time specified in the maintenance windows is reached."];
+      alarmConfiguration: AlarmConfiguration.t option
+        [@ocaml.doc
+          "The details for the CloudWatch alarm you applied to your maintenance window task."]}
     type nonrec error =
       [ `DoesNotExistException of DoesNotExistException.t 
       | `InternalServerError of InternalServerError.t 
@@ -26933,23 +30526,25 @@ module UpdateMaintenanceWindowTaskResult =
                           fun ?name ->
                             fun ?description ->
                               fun ?cutoffBehavior ->
-                                fun () ->
-                                  {
-                                    windowId;
-                                    windowTaskId;
-                                    targets;
-                                    taskArn;
-                                    serviceRoleArn;
-                                    taskParameters;
-                                    taskInvocationParameters;
-                                    priority;
-                                    maxConcurrency;
-                                    maxErrors;
-                                    loggingInfo;
-                                    name;
-                                    description;
-                                    cutoffBehavior
-                                  }
+                                fun ?alarmConfiguration ->
+                                  fun () ->
+                                    {
+                                      windowId;
+                                      windowTaskId;
+                                      targets;
+                                      taskArn;
+                                      serviceRoleArn;
+                                      taskParameters;
+                                      taskInvocationParameters;
+                                      priority;
+                                      maxConcurrency;
+                                      maxErrors;
+                                      loggingInfo;
+                                      name;
+                                      description;
+                                      cutoffBehavior;
+                                      alarmConfiguration
+                                    }
     let error_of_json name json =
       match name with
       | "DoesNotExistException" ->
@@ -27010,9 +30605,14 @@ module UpdateMaintenanceWindowTaskResult =
           (Option.map x.description ~f:MaintenanceWindowDescription.to_value));
         ("CutoffBehavior",
           (Option.map x.cutoffBehavior
-             ~f:MaintenanceWindowTaskCutoffBehavior.to_value))]
+             ~f:MaintenanceWindowTaskCutoffBehavior.to_value));
+        ("AlarmConfiguration",
+          (Option.map x.alarmConfiguration ~f:AlarmConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let alarmConfiguration =
+        (Option.map ~f:AlarmConfiguration.of_xml)
+          (Xml.child xml_arg0 "AlarmConfiguration") in
       let cutoffBehavior =
         (Option.map ~f:MaintenanceWindowTaskCutoffBehavior.of_xml)
           (Xml.child xml_arg0 "CutoffBehavior") in
@@ -27052,39 +30652,44 @@ module UpdateMaintenanceWindowTaskResult =
       let windowId =
         (Option.map ~f:MaintenanceWindowId.of_xml)
           (Xml.child xml_arg0 "WindowId") in
-      make ?cutoffBehavior ?description ?name ?loggingInfo ?maxErrors
-        ?maxConcurrency ?priority ?taskInvocationParameters ?taskParameters
-        ?serviceRoleArn ?taskArn ?targets ?windowTaskId ?windowId ()
+      make ?alarmConfiguration ?cutoffBehavior ?description ?name
+        ?loggingInfo ?maxErrors ?maxConcurrency ?priority
+        ?taskInvocationParameters ?taskParameters ?serviceRoleArn ?taskArn
+        ?targets ?windowTaskId ?windowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let alarmConfiguration =
+        field_map json__ "AlarmConfiguration" AlarmConfiguration.of_json in
       let cutoffBehavior =
-        field_map json "CutoffBehavior"
+        field_map json__ "CutoffBehavior"
           MaintenanceWindowTaskCutoffBehavior.of_json in
       let description =
-        field_map json "Description" MaintenanceWindowDescription.of_json in
-      let name = field_map json "Name" MaintenanceWindowName.of_json in
-      let loggingInfo = field_map json "LoggingInfo" LoggingInfo.of_json in
-      let maxErrors = field_map json "MaxErrors" MaxErrors.of_json in
+        field_map json__ "Description" MaintenanceWindowDescription.of_json in
+      let name = field_map json__ "Name" MaintenanceWindowName.of_json in
+      let loggingInfo = field_map json__ "LoggingInfo" LoggingInfo.of_json in
+      let maxErrors = field_map json__ "MaxErrors" MaxErrors.of_json in
       let maxConcurrency =
-        field_map json "MaxConcurrency" MaxConcurrency.of_json in
+        field_map json__ "MaxConcurrency" MaxConcurrency.of_json in
       let priority =
-        field_map json "Priority" MaintenanceWindowTaskPriority.of_json in
+        field_map json__ "Priority" MaintenanceWindowTaskPriority.of_json in
       let taskInvocationParameters =
-        field_map json "TaskInvocationParameters"
+        field_map json__ "TaskInvocationParameters"
           MaintenanceWindowTaskInvocationParameters.of_json in
       let taskParameters =
-        field_map json "TaskParameters"
+        field_map json__ "TaskParameters"
           MaintenanceWindowTaskParameters.of_json in
       let serviceRoleArn =
-        field_map json "ServiceRoleArn" ServiceRole.of_json in
-      let taskArn = field_map json "TaskArn" MaintenanceWindowTaskArn.of_json in
-      let targets = field_map json "Targets" Targets.of_json in
+        field_map json__ "ServiceRoleArn" ServiceRole.of_json in
+      let taskArn =
+        field_map json__ "TaskArn" MaintenanceWindowTaskArn.of_json in
+      let targets = field_map json__ "Targets" Targets.of_json in
       let windowTaskId =
-        field_map json "WindowTaskId" MaintenanceWindowTaskId.of_json in
-      let windowId = field_map json "WindowId" MaintenanceWindowId.of_json in
-      make ?cutoffBehavior ?description ?name ?loggingInfo ?maxErrors
-        ?maxConcurrency ?priority ?taskInvocationParameters ?taskParameters
-        ?serviceRoleArn ?taskArn ?targets ?windowTaskId ?windowId ()
+        field_map json__ "WindowTaskId" MaintenanceWindowTaskId.of_json in
+      let windowId = field_map json__ "WindowId" MaintenanceWindowId.of_json in
+      make ?alarmConfiguration ?cutoffBehavior ?description ?name
+        ?loggingInfo ?maxErrors ?maxConcurrency ?priority
+        ?taskInvocationParameters ?taskParameters ?serviceRoleArn ?taskArn
+        ?targets ?windowTaskId ?windowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Modifies a task assigned to a maintenance window. You can't change the task type, but you can change the following values: TaskARN. For example, you can change a RUN_COMMAND task from AWS-RunPowerShellScript to AWS-RunShellScript. ServiceRoleArn TaskInvocationParameters Priority MaxConcurrency MaxErrors One or more targets must be specified for maintenance window Run Command-type tasks. Depending on the task, targets are optional for other maintenance window task types (Automation, Lambda, and Step Functions). For more information about running tasks that don't specify targets, see Registering maintenance window tasks without targets in the Amazon Web Services Systems Manager User Guide. If the value for a parameter in UpdateMaintenanceWindowTask is null, then the corresponding field isn't modified. If you set Replace to true, then all fields required by the RegisterTaskWithMaintenanceWindow operation are required for this request. Optional fields that aren't specified are set to null. When you update a maintenance window task that has options specified in TaskInvocationParameters, you must provide again all the TaskInvocationParameters values that you want to retain. The values you don't specify again are removed. For example, suppose that when you registered a Run Command task, you specified TaskInvocationParameters values for Comment, NotificationConfig, and OutputS3BucketName. If you update the maintenance window task and specify only a different OutputS3BucketName value, the values for Comment and NotificationConfig are removed."]
@@ -27096,7 +30701,8 @@ module UpdateManagedInstanceRoleRequest =
         [@ocaml.doc
           "The ID of the managed node where you want to update the role."];
       iamRole: IamRole.t
-        [@ocaml.doc "The IAM role you want to assign or change."]}
+        [@ocaml.doc
+          "The name of the Identity and Access Management (IAM) role that you want to assign to the managed node. This IAM role must provide AssumeRole permissions for the Amazon Web Services Systems Manager service principal ssm.amazonaws.com. For more information, see Create the IAM service role required for Systems Manager in hybrid and multicloud environments in the Amazon Web Services Systems Manager User Guide. You can't specify an IAM service-linked role for this parameter. You must create a unique role."]}
     let context_ = "UpdateManagedInstanceRoleRequest"
     let make ~instanceId = fun ~iamRole -> fun () -> { instanceId; iamRole }
     let to_value x =
@@ -27112,10 +30718,10 @@ module UpdateManagedInstanceRoleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ~iamRole ~instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let iamRole = field_map_exn json "IamRole" IamRole.of_json in
+    let of_json json__ =
+      let iamRole = field_map_exn json__ "IamRole" IamRole.of_json in
       let instanceId =
-        field_map_exn json "InstanceId" ManagedInstanceId.of_json in
+        field_map_exn json__ "InstanceId" ManagedInstanceId.of_json in
       make ~iamRole ~instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -27175,7 +30781,7 @@ module UpdateOpsItemRequest =
       {
       description: OpsItemDescription.t option
         [@ocaml.doc
-          "Update the information about the OpsItem. Provide enough information so that users reading this OpsItem for the first time understand the issue."];
+          "User-defined text that contains information about the OpsItem, in Markdown format."];
       operationalData: OpsItemOperationalData.t option
         [@ocaml.doc
           "Add new keys or edit existing key-value pairs of the OperationalData map in the OpsItem object. Operational data is custom data that provides useful reference details about the OpsItem. For example, you can specify log files, error strings, license keys, troubleshooting tips, or other relevant data. You enter operational data as key-value pairs. The key has a maximum length of 128 characters. The value has a maximum size of 20 KB. Operational data keys can't begin with the following: amazon, aws, amzn, ssm, /amazon, /aws, /amzn, /ssm. You can choose to make the data searchable by other users in the account or you can restrict search access. Searchable data means that all users with access to the OpsItem Overview page (as provided by the DescribeOpsItems API operation) can view and search on the specified data. Operational data that isn't searchable is only viewable by users who have access to the OpsItem (as provided by the GetOpsItem API operation). Use the /aws/resources key in OperationalData to specify a related resource in the request. Use the /aws/automations key in OperationalData to associate an Automation runbook with the OpsItem. To view Amazon Web Services CLI example commands that use these keys, see Creating OpsItems manually in the Amazon Web Services Systems Manager User Guide."];
@@ -27193,7 +30799,7 @@ module UpdateOpsItemRequest =
           "One or more OpsItems that share something in common with the current OpsItems. For example, related OpsItems can include OpsItems with similar error messages, impacted resources, or statuses for the impacted resource."];
       status: OpsItemStatus.t option
         [@ocaml.doc
-          "The OpsItem status. Status can be Open, In Progress, or Resolved. For more information, see Editing OpsItem details in the Amazon Web Services Systems Manager User Guide."];
+          "The OpsItem status. For more information, see Editing OpsItem details in the Amazon Web Services Systems Manager User Guide."];
       opsItemId: OpsItemId.t [@ocaml.doc "The ID of the OpsItem."];
       title: OpsItemTitle.t option
         [@ocaml.doc
@@ -27213,7 +30819,9 @@ module UpdateOpsItemRequest =
           "The time specified in a change request for a runbook workflow to start. Currently supported only for the OpsItem type /aws/changerequest."];
       plannedEndTime: DateTime.t option
         [@ocaml.doc
-          "The time specified in a change request for a runbook workflow to end. Currently supported only for the OpsItem type /aws/changerequest."]}
+          "The time specified in a change request for a runbook workflow to end. Currently supported only for the OpsItem type /aws/changerequest."];
+      opsItemArn: OpsItemArn.t option
+        [@ocaml.doc "The OpsItem Amazon Resource Name (ARN)."]}
     let context_ = "UpdateOpsItemRequest"
     let make ?description =
       fun ?operationalData ->
@@ -27229,25 +30837,27 @@ module UpdateOpsItemRequest =
                           fun ?actualEndTime ->
                             fun ?plannedStartTime ->
                               fun ?plannedEndTime ->
-                                fun ~opsItemId ->
-                                  fun () ->
-                                    {
-                                      description;
-                                      operationalData;
-                                      operationalDataToDelete;
-                                      notifications;
-                                      priority;
-                                      relatedOpsItems;
-                                      status;
-                                      title;
-                                      category;
-                                      severity;
-                                      actualStartTime;
-                                      actualEndTime;
-                                      plannedStartTime;
-                                      plannedEndTime;
-                                      opsItemId
-                                    }
+                                fun ?opsItemArn ->
+                                  fun ~opsItemId ->
+                                    fun () ->
+                                      {
+                                        description;
+                                        operationalData;
+                                        operationalDataToDelete;
+                                        notifications;
+                                        priority;
+                                        relatedOpsItems;
+                                        status;
+                                        title;
+                                        category;
+                                        severity;
+                                        actualStartTime;
+                                        actualEndTime;
+                                        plannedStartTime;
+                                        plannedEndTime;
+                                        opsItemArn;
+                                        opsItemId
+                                      }
     let to_value x =
       structure_to_value
         [("Description",
@@ -27273,9 +30883,12 @@ module UpdateOpsItemRequest =
         ("PlannedStartTime",
           (Option.map x.plannedStartTime ~f:DateTime.to_value));
         ("PlannedEndTime",
-          (Option.map x.plannedEndTime ~f:DateTime.to_value))]
+          (Option.map x.plannedEndTime ~f:DateTime.to_value));
+        ("OpsItemArn", (Option.map x.opsItemArn ~f:OpsItemArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let opsItemArn =
+        (Option.map ~f:OpsItemArn.of_xml) (Xml.child xml_arg0 "OpsItemArn") in
       let plannedEndTime =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "PlannedEndTime") in
       let plannedStartTime =
@@ -27317,47 +30930,51 @@ module UpdateOpsItemRequest =
       let description =
         (Option.map ~f:OpsItemDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
-      make ?plannedEndTime ?plannedStartTime ?actualEndTime ?actualStartTime
-        ?severity ?category ?title ~opsItemId ?status ?relatedOpsItems
-        ?priority ?notifications ?operationalDataToDelete ?operationalData
-        ?description ()
+      make ?opsItemArn ?plannedEndTime ?plannedStartTime ?actualEndTime
+        ?actualStartTime ?severity ?category ?title ~opsItemId ?status
+        ?relatedOpsItems ?priority ?notifications ?operationalDataToDelete
+        ?operationalData ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let plannedEndTime = field_map json "PlannedEndTime" DateTime.of_json in
+    let of_json json__ =
+      let opsItemArn = field_map json__ "OpsItemArn" OpsItemArn.of_json in
+      let plannedEndTime = field_map json__ "PlannedEndTime" DateTime.of_json in
       let plannedStartTime =
-        field_map json "PlannedStartTime" DateTime.of_json in
-      let actualEndTime = field_map json "ActualEndTime" DateTime.of_json in
-      let actualStartTime = field_map json "ActualStartTime" DateTime.of_json in
-      let severity = field_map json "Severity" OpsItemSeverity.of_json in
-      let category = field_map json "Category" OpsItemCategory.of_json in
-      let title = field_map json "Title" OpsItemTitle.of_json in
-      let opsItemId = field_map_exn json "OpsItemId" OpsItemId.of_json in
-      let status = field_map json "Status" OpsItemStatus.of_json in
+        field_map json__ "PlannedStartTime" DateTime.of_json in
+      let actualEndTime = field_map json__ "ActualEndTime" DateTime.of_json in
+      let actualStartTime =
+        field_map json__ "ActualStartTime" DateTime.of_json in
+      let severity = field_map json__ "Severity" OpsItemSeverity.of_json in
+      let category = field_map json__ "Category" OpsItemCategory.of_json in
+      let title = field_map json__ "Title" OpsItemTitle.of_json in
+      let opsItemId = field_map_exn json__ "OpsItemId" OpsItemId.of_json in
+      let status = field_map json__ "Status" OpsItemStatus.of_json in
       let relatedOpsItems =
-        field_map json "RelatedOpsItems" RelatedOpsItems.of_json in
-      let priority = field_map json "Priority" OpsItemPriority.of_json in
+        field_map json__ "RelatedOpsItems" RelatedOpsItems.of_json in
+      let priority = field_map json__ "Priority" OpsItemPriority.of_json in
       let notifications =
-        field_map json "Notifications" OpsItemNotifications.of_json in
+        field_map json__ "Notifications" OpsItemNotifications.of_json in
       let operationalDataToDelete =
-        field_map json "OperationalDataToDelete"
+        field_map json__ "OperationalDataToDelete"
           OpsItemOpsDataKeysList.of_json in
       let operationalData =
-        field_map json "OperationalData" OpsItemOperationalData.of_json in
+        field_map json__ "OperationalData" OpsItemOperationalData.of_json in
       let description =
-        field_map json "Description" OpsItemDescription.of_json in
-      make ?plannedEndTime ?plannedStartTime ?actualEndTime ?actualStartTime
-        ?severity ?category ?title ~opsItemId ?status ?relatedOpsItems
-        ?priority ?notifications ?operationalDataToDelete ?operationalData
-        ?description ()
+        field_map json__ "Description" OpsItemDescription.of_json in
+      make ?opsItemArn ?plannedEndTime ?plannedStartTime ?actualEndTime
+        ?actualStartTime ?severity ?category ?title ~opsItemId ?status
+        ?relatedOpsItems ?priority ?notifications ?operationalDataToDelete
+        ?operationalData ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Edit or change an OpsItem. You must have permission in Identity and Access Management (IAM) to update an OpsItem. For more information, see Getting started with OpsCenter in the Amazon Web Services Systems Manager User Guide. Operations engineers and IT professionals use Amazon Web Services Systems Manager OpsCenter to view, investigate, and remediate operational issues impacting the performance and health of their Amazon Web Services resources. For more information, see OpsCenter in the Amazon Web Services Systems Manager User Guide."]
+       "Edit or change an OpsItem. You must have permission in Identity and Access Management (IAM) to update an OpsItem. For more information, see Set up OpsCenter in the Amazon Web Services Systems Manager User Guide. Operations engineers and IT professionals use Amazon Web Services Systems Manager OpsCenter to view, investigate, and remediate operational issues impacting the performance and health of their Amazon Web Services resources. For more information, see Amazon Web Services Systems Manager OpsCenter in the Amazon Web Services Systems Manager User Guide."]
 module UpdateOpsItemResponse =
   struct
     type nonrec t = unit
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
+      | `OpsItemAccessDeniedException of OpsItemAccessDeniedException.t 
       | `OpsItemAlreadyExistsException of OpsItemAlreadyExistsException.t 
+      | `OpsItemConflictException of OpsItemConflictException.t 
       | `OpsItemInvalidParameterException of
           OpsItemInvalidParameterException.t 
       | `OpsItemLimitExceededException of OpsItemLimitExceededException.t 
@@ -27368,9 +30985,14 @@ module UpdateOpsItemResponse =
       match name with
       | "InternalServerError" ->
           `InternalServerError (InternalServerError.of_json json)
+      | "OpsItemAccessDeniedException" ->
+          `OpsItemAccessDeniedException
+            (OpsItemAccessDeniedException.of_json json)
       | "OpsItemAlreadyExistsException" ->
           `OpsItemAlreadyExistsException
             (OpsItemAlreadyExistsException.of_json json)
+      | "OpsItemConflictException" ->
+          `OpsItemConflictException (OpsItemConflictException.of_json json)
       | "OpsItemInvalidParameterException" ->
           `OpsItemInvalidParameterException
             (OpsItemInvalidParameterException.of_json json)
@@ -27386,9 +31008,14 @@ module UpdateOpsItemResponse =
       match name with
       | "InternalServerError" ->
           `InternalServerError (InternalServerError.of_xml xml)
+      | "OpsItemAccessDeniedException" ->
+          `OpsItemAccessDeniedException
+            (OpsItemAccessDeniedException.of_xml xml)
       | "OpsItemAlreadyExistsException" ->
           `OpsItemAlreadyExistsException
             (OpsItemAlreadyExistsException.of_xml xml)
+      | "OpsItemConflictException" ->
+          `OpsItemConflictException (OpsItemConflictException.of_xml xml)
       | "OpsItemInvalidParameterException" ->
           `OpsItemInvalidParameterException
             (OpsItemInvalidParameterException.of_xml xml)
@@ -27405,10 +31032,18 @@ module UpdateOpsItemResponse =
           `Assoc
             [("error", (`String "InternalServerError"));
             ("details", (InternalServerError.to_json e))]
+      | `OpsItemAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "OpsItemAccessDeniedException"));
+            ("details", (OpsItemAccessDeniedException.to_json e))]
       | `OpsItemAlreadyExistsException e ->
           `Assoc
             [("error", (`String "OpsItemAlreadyExistsException"));
             ("details", (OpsItemAlreadyExistsException.to_json e))]
+      | `OpsItemConflictException e ->
+          `Assoc
+            [("error", (`String "OpsItemConflictException"));
+            ("details", (OpsItemConflictException.to_json e))]
       | `OpsItemInvalidParameterException e ->
           `Assoc
             [("error", (`String "OpsItemInvalidParameterException"));
@@ -27434,7 +31069,7 @@ module UpdateOpsItemResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Edit or change an OpsItem. You must have permission in Identity and Access Management (IAM) to update an OpsItem. For more information, see Getting started with OpsCenter in the Amazon Web Services Systems Manager User Guide. Operations engineers and IT professionals use Amazon Web Services Systems Manager OpsCenter to view, investigate, and remediate operational issues impacting the performance and health of their Amazon Web Services resources. For more information, see OpsCenter in the Amazon Web Services Systems Manager User Guide."]
+       "Edit or change an OpsItem. You must have permission in Identity and Access Management (IAM) to update an OpsItem. For more information, see Set up OpsCenter in the Amazon Web Services Systems Manager User Guide. Operations engineers and IT professionals use Amazon Web Services Systems Manager OpsCenter to view, investigate, and remediate operational issues impacting the performance and health of their Amazon Web Services resources. For more information, see Amazon Web Services Systems Manager OpsCenter in the Amazon Web Services Systems Manager User Guide."]
 module UpdateOpsMetadataRequest =
   struct
     type nonrec t =
@@ -27473,13 +31108,13 @@ module UpdateOpsMetadataRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OpsMetadataArn") in
       make ?keysToDelete ?metadataToUpdate ~opsMetadataArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let keysToDelete =
-        field_map json "KeysToDelete" MetadataKeysToDeleteList.of_json in
+        field_map json__ "KeysToDelete" MetadataKeysToDeleteList.of_json in
       let metadataToUpdate =
-        field_map json "MetadataToUpdate" MetadataMap.of_json in
+        field_map json__ "MetadataToUpdate" MetadataMap.of_json in
       let opsMetadataArn =
-        field_map_exn json "OpsMetadataArn" OpsMetadataArn.of_json in
+        field_map_exn json__ "OpsMetadataArn" OpsMetadataArn.of_json in
       make ?keysToDelete ?metadataToUpdate ~opsMetadataArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -27577,9 +31212,9 @@ module UpdateOpsMetadataResult =
           (Xml.child xml_arg0 "OpsMetadataArn") in
       make ?opsMetadataArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let opsMetadataArn =
-        field_map json "OpsMetadataArn" OpsMetadataArn.of_json in
+        field_map json__ "OpsMetadataArn" OpsMetadataArn.of_json in
       make ?opsMetadataArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -27594,13 +31229,13 @@ module UpdatePatchBaselineRequest =
         [@ocaml.doc "The name of the patch baseline."];
       globalFilters: PatchFilterGroup.t option
         [@ocaml.doc
-          "A set of global filters used to include patches in the baseline."];
+          "A set of global filters used to include patches in the baseline. The GlobalFilters parameter can be configured only by using the CLI or an Amazon Web Services SDK. It can't be configured from the Patch Manager console, and its value isn't displayed in the console."];
       approvalRules: PatchRuleGroup.t option
         [@ocaml.doc
           "A set of rules used to include patches in the baseline."];
       approvedPatches: PatchIdList.t option
         [@ocaml.doc
-          "A list of explicitly approved patches for the baseline. For information about accepted formats for lists of approved patches and rejected patches, see About package name formats for approved and rejected patch lists in the Amazon Web Services Systems Manager User Guide."];
+          "A list of explicitly approved patches for the baseline. For information about accepted formats for lists of approved patches and rejected patches, see Package name formats for approved and rejected patch lists in the Amazon Web Services Systems Manager User Guide."];
       approvedPatchesComplianceLevel: PatchComplianceLevel.t option
         [@ocaml.doc
           "Assigns a new compliance severity level to an existing patch baseline."];
@@ -27609,15 +31244,19 @@ module UpdatePatchBaselineRequest =
           "Indicates whether the list of approved patches includes non-security updates that should be applied to the managed nodes. The default value is false. Applies to Linux managed nodes only."];
       rejectedPatches: PatchIdList.t option
         [@ocaml.doc
-          "A list of explicitly rejected patches for the baseline. For information about accepted formats for lists of approved patches and rejected patches, see About package name formats for approved and rejected patch lists in the Amazon Web Services Systems Manager User Guide."];
+          "A list of explicitly rejected patches for the baseline. For information about accepted formats for lists of approved patches and rejected patches, see Package name formats for approved and rejected patch lists in the Amazon Web Services Systems Manager User Guide."];
       rejectedPatchesAction: PatchAction.t option
         [@ocaml.doc
-          "The action for Patch Manager to take on patches included in the RejectedPackages list. ALLOW_AS_DEPENDENCY : A package in the Rejected patches list is installed only if it is a dependency of another package. It is considered compliant with the patch baseline, and its status is reported as InstalledOther. This is the default action if no option is specified. BLOCK : Packages in the RejectedPatches list, and packages that include them as dependencies, aren't installed under any circumstances. If a package was installed before it was added to the Rejected patches list, it is considered non-compliant with the patch baseline, and its status is reported as InstalledRejected."];
+          "The action for Patch Manager to take on patches included in the RejectedPackages list. ALLOW_AS_DEPENDENCY Linux and macOS: A package in the rejected patches list is installed only if it is a dependency of another package. It is considered compliant with the patch baseline, and its status is reported as INSTALLED_OTHER. This is the default action if no option is specified. Windows Server: Windows Server doesn't support the concept of package dependencies. If a package in the rejected patches list and already installed on the node, its status is reported as INSTALLED_OTHER. Any package not already installed on the node is skipped. This is the default action if no option is specified. BLOCK All OSs: Packages in the rejected patches list, and packages that include them as dependencies, aren't installed by Patch Manager under any circumstances. State value assignment for patch compliance: If a package was installed before it was added to the rejected patches list, or is installed outside of Patch Manager afterward, it's considered noncompliant with the patch baseline and its status is reported as INSTALLED_REJECTED. If an update attempts to install a dependency package that is now rejected by the baseline, when previous versions of the package were not rejected, the package being updated is reported as MISSING for SCAN operations and as FAILED for INSTALL operations."];
       description: BaselineDescription.t option
         [@ocaml.doc "A description of the patch baseline."];
       sources: PatchSourceList.t option
         [@ocaml.doc
           "Information about the patches to use to update the managed nodes, including target operating systems and source repositories. Applies to Linux managed nodes only."];
+      availableSecurityUpdatesComplianceStatus:
+        PatchComplianceStatus.t option
+        [@ocaml.doc
+          "Indicates the status to be assigned to security patches that are available but not approved because they don't meet the installation criteria specified in the patch baseline. Example scenario: Security patches that you might want installed can be skipped if you have specified a long period to wait after a patch is released before installation. If an update to the patch is released during your specified waiting period, the waiting period for installing the patch starts over. If the waiting period is too long, multiple versions of the patch could be released but never installed. Supported for Windows Server managed nodes only."];
       replace: Boolean.t option
         [@ocaml.doc
           "If True, then all fields that are required by the CreatePatchBaseline operation are also required for this API request. Optional fields that aren't specified are set to null."]}
@@ -27632,23 +31271,25 @@ module UpdatePatchBaselineRequest =
                   fun ?rejectedPatchesAction ->
                     fun ?description ->
                       fun ?sources ->
-                        fun ?replace ->
-                          fun ~baselineId ->
-                            fun () ->
-                              {
-                                name;
-                                globalFilters;
-                                approvalRules;
-                                approvedPatches;
-                                approvedPatchesComplianceLevel;
-                                approvedPatchesEnableNonSecurity;
-                                rejectedPatches;
-                                rejectedPatchesAction;
-                                description;
-                                sources;
-                                replace;
-                                baselineId
-                              }
+                        fun ?availableSecurityUpdatesComplianceStatus ->
+                          fun ?replace ->
+                            fun ~baselineId ->
+                              fun () ->
+                                {
+                                  name;
+                                  globalFilters;
+                                  approvalRules;
+                                  approvedPatches;
+                                  approvedPatchesComplianceLevel;
+                                  approvedPatchesEnableNonSecurity;
+                                  rejectedPatches;
+                                  rejectedPatchesAction;
+                                  description;
+                                  sources;
+                                  availableSecurityUpdatesComplianceStatus;
+                                  replace;
+                                  baselineId
+                                }
     let to_value x =
       structure_to_value
         [("BaselineId", (Some (BaselineId.to_value x.baselineId)));
@@ -27671,11 +31312,17 @@ module UpdatePatchBaselineRequest =
         ("Description",
           (Option.map x.description ~f:BaselineDescription.to_value));
         ("Sources", (Option.map x.sources ~f:PatchSourceList.to_value));
+        ("AvailableSecurityUpdatesComplianceStatus",
+          (Option.map x.availableSecurityUpdatesComplianceStatus
+             ~f:PatchComplianceStatus.to_value));
         ("Replace", (Option.map x.replace ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let replace =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Replace") in
+      let availableSecurityUpdatesComplianceStatus =
+        (Option.map ~f:PatchComplianceStatus.of_xml)
+          (Xml.child xml_arg0 "AvailableSecurityUpdatesComplianceStatus") in
       let sources =
         (Option.map ~f:PatchSourceList.of_xml) (Xml.child xml_arg0 "Sources") in
       let description =
@@ -27707,37 +31354,40 @@ module UpdatePatchBaselineRequest =
       let baselineId =
         BaselineId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BaselineId") in
-      make ?replace ?sources ?description ?rejectedPatchesAction
-        ?rejectedPatches ?approvedPatchesEnableNonSecurity
-        ?approvedPatchesComplianceLevel ?approvedPatches ?approvalRules
-        ?globalFilters ?name ~baselineId ()
+      make ?replace ?availableSecurityUpdatesComplianceStatus ?sources
+        ?description ?rejectedPatchesAction ?rejectedPatches
+        ?approvedPatchesEnableNonSecurity ?approvedPatchesComplianceLevel
+        ?approvedPatches ?approvalRules ?globalFilters ?name ~baselineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let replace = field_map json "Replace" Boolean.of_json in
-      let sources = field_map json "Sources" PatchSourceList.of_json in
+    let of_json json__ =
+      let replace = field_map json__ "Replace" Boolean.of_json in
+      let availableSecurityUpdatesComplianceStatus =
+        field_map json__ "AvailableSecurityUpdatesComplianceStatus"
+          PatchComplianceStatus.of_json in
+      let sources = field_map json__ "Sources" PatchSourceList.of_json in
       let description =
-        field_map json "Description" BaselineDescription.of_json in
+        field_map json__ "Description" BaselineDescription.of_json in
       let rejectedPatchesAction =
-        field_map json "RejectedPatchesAction" PatchAction.of_json in
+        field_map json__ "RejectedPatchesAction" PatchAction.of_json in
       let rejectedPatches =
-        field_map json "RejectedPatches" PatchIdList.of_json in
+        field_map json__ "RejectedPatches" PatchIdList.of_json in
       let approvedPatchesEnableNonSecurity =
-        field_map json "ApprovedPatchesEnableNonSecurity" Boolean.of_json in
+        field_map json__ "ApprovedPatchesEnableNonSecurity" Boolean.of_json in
       let approvedPatchesComplianceLevel =
-        field_map json "ApprovedPatchesComplianceLevel"
+        field_map json__ "ApprovedPatchesComplianceLevel"
           PatchComplianceLevel.of_json in
       let approvedPatches =
-        field_map json "ApprovedPatches" PatchIdList.of_json in
+        field_map json__ "ApprovedPatches" PatchIdList.of_json in
       let approvalRules =
-        field_map json "ApprovalRules" PatchRuleGroup.of_json in
+        field_map json__ "ApprovalRules" PatchRuleGroup.of_json in
       let globalFilters =
-        field_map json "GlobalFilters" PatchFilterGroup.of_json in
-      let name = field_map json "Name" BaselineName.of_json in
-      let baselineId = field_map_exn json "BaselineId" BaselineId.of_json in
-      make ?replace ?sources ?description ?rejectedPatchesAction
-        ?rejectedPatches ?approvedPatchesEnableNonSecurity
-        ?approvedPatchesComplianceLevel ?approvedPatches ?approvalRules
-        ?globalFilters ?name ~baselineId ()
+        field_map json__ "GlobalFilters" PatchFilterGroup.of_json in
+      let name = field_map json__ "Name" BaselineName.of_json in
+      let baselineId = field_map_exn json__ "BaselineId" BaselineId.of_json in
+      make ?replace ?availableSecurityUpdatesComplianceStatus ?sources
+        ?description ?rejectedPatchesAction ?rejectedPatches
+        ?approvedPatchesEnableNonSecurity ?approvedPatchesComplianceLevel
+        ?approvedPatches ?approvalRules ?globalFilters ?name ~baselineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Modifies an existing patch baseline. Fields not specified in the request are left unchanged. For information about valid key-value pairs in PatchFilters for each supported operating system type, see PatchFilter."]
@@ -27781,7 +31431,11 @@ module UpdatePatchBaselineResult =
         [@ocaml.doc "A description of the patch baseline."];
       sources: PatchSourceList.t option
         [@ocaml.doc
-          "Information about the patches to use to update the managed nodes, including target operating systems and source repositories. Applies to Linux managed nodes only."]}
+          "Information about the patches to use to update the managed nodes, including target operating systems and source repositories. Applies to Linux managed nodes only."];
+      availableSecurityUpdatesComplianceStatus:
+        PatchComplianceStatus.t option
+        [@ocaml.doc
+          "Indicates the compliance status of managed nodes for which security-related patches are available but were not approved. This preference is specified when the CreatePatchBaseline or UpdatePatchBaseline commands are run. Applies to Windows Server managed nodes only."]}
     type nonrec error =
       [ `DoesNotExistException of DoesNotExistException.t 
       | `InternalServerError of InternalServerError.t 
@@ -27800,23 +31454,26 @@ module UpdatePatchBaselineResult =
                           fun ?modifiedDate ->
                             fun ?description ->
                               fun ?sources ->
-                                fun () ->
-                                  {
-                                    baselineId;
-                                    name;
-                                    operatingSystem;
-                                    globalFilters;
-                                    approvalRules;
-                                    approvedPatches;
-                                    approvedPatchesComplianceLevel;
-                                    approvedPatchesEnableNonSecurity;
-                                    rejectedPatches;
-                                    rejectedPatchesAction;
-                                    createdDate;
-                                    modifiedDate;
-                                    description;
-                                    sources
-                                  }
+                                fun ?availableSecurityUpdatesComplianceStatus
+                                  ->
+                                  fun () ->
+                                    {
+                                      baselineId;
+                                      name;
+                                      operatingSystem;
+                                      globalFilters;
+                                      approvalRules;
+                                      approvedPatches;
+                                      approvedPatchesComplianceLevel;
+                                      approvedPatchesEnableNonSecurity;
+                                      rejectedPatches;
+                                      rejectedPatchesAction;
+                                      createdDate;
+                                      modifiedDate;
+                                      description;
+                                      sources;
+                                      availableSecurityUpdatesComplianceStatus
+                                    }
     let error_of_json name json =
       match name with
       | "DoesNotExistException" ->
@@ -27874,9 +31531,15 @@ module UpdatePatchBaselineResult =
         ("ModifiedDate", (Option.map x.modifiedDate ~f:DateTime.to_value));
         ("Description",
           (Option.map x.description ~f:BaselineDescription.to_value));
-        ("Sources", (Option.map x.sources ~f:PatchSourceList.to_value))]
+        ("Sources", (Option.map x.sources ~f:PatchSourceList.to_value));
+        ("AvailableSecurityUpdatesComplianceStatus",
+          (Option.map x.availableSecurityUpdatesComplianceStatus
+             ~f:PatchComplianceStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let availableSecurityUpdatesComplianceStatus =
+        (Option.map ~f:PatchComplianceStatus.of_xml)
+          (Xml.child xml_arg0 "AvailableSecurityUpdatesComplianceStatus") in
       let sources =
         (Option.map ~f:PatchSourceList.of_xml) (Xml.child xml_arg0 "Sources") in
       let description =
@@ -27914,39 +31577,42 @@ module UpdatePatchBaselineResult =
         (Option.map ~f:BaselineName.of_xml) (Xml.child xml_arg0 "Name") in
       let baselineId =
         (Option.map ~f:BaselineId.of_xml) (Xml.child xml_arg0 "BaselineId") in
-      make ?sources ?description ?modifiedDate ?createdDate
-        ?rejectedPatchesAction ?rejectedPatches
+      make ?availableSecurityUpdatesComplianceStatus ?sources ?description
+        ?modifiedDate ?createdDate ?rejectedPatchesAction ?rejectedPatches
         ?approvedPatchesEnableNonSecurity ?approvedPatchesComplianceLevel
         ?approvedPatches ?approvalRules ?globalFilters ?operatingSystem ?name
         ?baselineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sources = field_map json "Sources" PatchSourceList.of_json in
+    let of_json json__ =
+      let availableSecurityUpdatesComplianceStatus =
+        field_map json__ "AvailableSecurityUpdatesComplianceStatus"
+          PatchComplianceStatus.of_json in
+      let sources = field_map json__ "Sources" PatchSourceList.of_json in
       let description =
-        field_map json "Description" BaselineDescription.of_json in
-      let modifiedDate = field_map json "ModifiedDate" DateTime.of_json in
-      let createdDate = field_map json "CreatedDate" DateTime.of_json in
+        field_map json__ "Description" BaselineDescription.of_json in
+      let modifiedDate = field_map json__ "ModifiedDate" DateTime.of_json in
+      let createdDate = field_map json__ "CreatedDate" DateTime.of_json in
       let rejectedPatchesAction =
-        field_map json "RejectedPatchesAction" PatchAction.of_json in
+        field_map json__ "RejectedPatchesAction" PatchAction.of_json in
       let rejectedPatches =
-        field_map json "RejectedPatches" PatchIdList.of_json in
+        field_map json__ "RejectedPatches" PatchIdList.of_json in
       let approvedPatchesEnableNonSecurity =
-        field_map json "ApprovedPatchesEnableNonSecurity" Boolean.of_json in
+        field_map json__ "ApprovedPatchesEnableNonSecurity" Boolean.of_json in
       let approvedPatchesComplianceLevel =
-        field_map json "ApprovedPatchesComplianceLevel"
+        field_map json__ "ApprovedPatchesComplianceLevel"
           PatchComplianceLevel.of_json in
       let approvedPatches =
-        field_map json "ApprovedPatches" PatchIdList.of_json in
+        field_map json__ "ApprovedPatches" PatchIdList.of_json in
       let approvalRules =
-        field_map json "ApprovalRules" PatchRuleGroup.of_json in
+        field_map json__ "ApprovalRules" PatchRuleGroup.of_json in
       let globalFilters =
-        field_map json "GlobalFilters" PatchFilterGroup.of_json in
+        field_map json__ "GlobalFilters" PatchFilterGroup.of_json in
       let operatingSystem =
-        field_map json "OperatingSystem" OperatingSystem.of_json in
-      let name = field_map json "Name" BaselineName.of_json in
-      let baselineId = field_map json "BaselineId" BaselineId.of_json in
-      make ?sources ?description ?modifiedDate ?createdDate
-        ?rejectedPatchesAction ?rejectedPatches
+        field_map json__ "OperatingSystem" OperatingSystem.of_json in
+      let name = field_map json__ "Name" BaselineName.of_json in
+      let baselineId = field_map json__ "BaselineId" BaselineId.of_json in
+      make ?availableSecurityUpdatesComplianceStatus ?sources ?description
+        ?modifiedDate ?createdDate ?rejectedPatchesAction ?rejectedPatches
         ?approvedPatchesEnableNonSecurity ?approvedPatchesComplianceLevel
         ?approvedPatches ?approvalRules ?globalFilters ?operatingSystem ?name
         ?baselineId ()
@@ -27987,13 +31653,13 @@ module UpdateResourceDataSyncRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SyncName") in
       make ~syncSource ~syncType ~syncName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let syncSource =
-        field_map_exn json "SyncSource" ResourceDataSyncSource.of_json in
+        field_map_exn json__ "SyncSource" ResourceDataSyncSource.of_json in
       let syncType =
-        field_map_exn json "SyncType" ResourceDataSyncType.of_json in
+        field_map_exn json__ "SyncType" ResourceDataSyncType.of_json in
       let syncName =
-        field_map_exn json "SyncName" ResourceDataSyncName.of_json in
+        field_map_exn json__ "SyncName" ResourceDataSyncName.of_json in
       make ~syncSource ~syncType ~syncName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -28082,10 +31748,10 @@ module UpdateServiceSettingRequest =
       {
       settingId: ServiceSettingId.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the service setting to reset. For example, arn:aws:ssm:us-east-1:111122223333:servicesetting/ssm/parameter-store/high-throughput-enabled. The setting ID can be one of the following. /ssm/automation/customer-script-log-destination /ssm/automation/customer-script-log-group-name /ssm/documents/console/public-sharing-permission /ssm/parameter-store/default-parameter-tier /ssm/parameter-store/high-throughput-enabled /ssm/managed-instance/activation-tier"];
+          "The Amazon Resource Name (ARN) of the service setting to update. For example, arn:aws:ssm:us-east-1:111122223333:servicesetting/ssm/parameter-store/high-throughput-enabled. The setting ID can be one of the following. /ssm/appmanager/appmanager-enabled /ssm/automation/customer-script-log-destination /ssm/automation/customer-script-log-group-name /ssm/automation/enable-adaptive-concurrency /ssm/documents/console/public-sharing-permission /ssm/managed-instance/activation-tier /ssm/managed-instance/default-ec2-instance-management-role /ssm/opsinsights/opscenter /ssm/parameter-store/default-parameter-tier /ssm/parameter-store/high-throughput-enabled Permissions to update the /ssm/managed-instance/default-ec2-instance-management-role setting should only be provided to administrators. Implement least privilege access when allowing individuals to configure or modify the Default Host Management Configuration."];
       settingValue: ServiceSettingValue.t
         [@ocaml.doc
-          "The new value to specify for the service setting. The following list specifies the available values for each setting. /ssm/parameter-store/default-parameter-tier: Standard, Advanced, Intelligent-Tiering /ssm/parameter-store/high-throughput-enabled: true or false /ssm/managed-instance/activation-tier: true or false /ssm/automation/customer-script-log-destination: CloudWatch /ssm/automation/customer-script-log-group-name: the name of an Amazon CloudWatch Logs log group /ssm/documents/console/public-sharing-permission: Enable or Disable /ssm/managed-instance/activation-tier: standard or advanced"]}
+          "The new value to specify for the service setting. The following list specifies the available values for each setting. For /ssm/appmanager/appmanager-enabled, enter True or False. For /ssm/automation/customer-script-log-destination, enter CloudWatch. For /ssm/automation/customer-script-log-group-name, enter the name of an Amazon CloudWatch Logs log group. For /ssm/documents/console/public-sharing-permission, enter Enable or Disable. For /ssm/managed-instance/activation-tier, enter standard or advanced. For /ssm/managed-instance/default-ec2-instance-management-role, enter the name of an IAM role. For /ssm/opsinsights/opscenter, enter Enabled or Disabled. For /ssm/parameter-store/default-parameter-tier, enter Standard, Advanced, or Intelligent-Tiering For /ssm/parameter-store/high-throughput-enabled, enter true or false."]}
     let context_ = "UpdateServiceSettingRequest"
     let make ~settingId =
       fun ~settingValue -> fun () -> { settingId; settingValue }
@@ -28104,10 +31770,11 @@ module UpdateServiceSettingRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SettingId") in
       make ~settingValue ~settingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let settingValue =
-        field_map_exn json "SettingValue" ServiceSettingValue.of_json in
-      let settingId = field_map_exn json "SettingId" ServiceSettingId.of_json in
+        field_map_exn json__ "SettingValue" ServiceSettingValue.of_json in
+      let settingId =
+        field_map_exn json__ "SettingId" ServiceSettingId.of_json in
       make ~settingValue ~settingId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

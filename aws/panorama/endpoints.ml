@@ -77,6 +77,10 @@ type ('i, 'o, 'e) t =
   | RemoveApplicationInstance: (RemoveApplicationInstanceRequest.t,
   RemoveApplicationInstanceResponse.t,
   RemoveApplicationInstanceResponse.error) t 
+  | SignalApplicationInstanceNodeInstances:
+  (SignalApplicationInstanceNodeInstancesRequest.t,
+  SignalApplicationInstanceNodeInstancesResponse.t,
+  SignalApplicationInstanceNodeInstancesResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
@@ -115,6 +119,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ProvisionDevice -> `POST
   | RegisterPackageVersion -> `PUT
   | RemoveApplicationInstance -> `DELETE
+  | SignalApplicationInstanceNodeInstances -> `PUT
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdateDeviceMetadata -> `PUT
@@ -256,11 +261,25 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           Uri.add_query_params' ((Format.kasprintf Uri.of_string) "/devices")
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("MaxResults", (MaxSize25.to_header v)))
-                  x.maxResults;
+                  ~f:(fun v ->
+                        ("DeviceAggregatedStatusFilter",
+                          (DeviceAggregatedStatus.to_header v)))
+                  x.deviceAggregatedStatusFilter;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxSize25.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("NameFilter", (NameFilter.to_header v)))
+                 x.nameFilter;
                Option.map
                  ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
-                 x.nextToken])
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("SortBy", (ListDevicesSortBy.to_header v)))
+                 x.sortBy;
+               Option.map
+                 ~f:(fun v -> ("SortOrder", (SortOrder.to_header v)))
+                 x.sortOrder])
       | ListDevicesJobs ->
           Uri.add_query_params' ((Format.kasprintf Uri.of_string) "/jobs")
             (List.filter_opt
@@ -345,6 +364,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/application-instances/%s"
             (ApplicationInstanceId.to_header
                x.RemoveApplicationInstanceRequest.applicationInstanceId)
+      | SignalApplicationInstanceNodeInstances ->
+          (Format.kasprintf Uri.of_string)
+            "/application-instances/%s/node-signals"
+            (ApplicationInstanceId.to_header
+               x.SignalApplicationInstanceNodeInstancesRequest.applicationInstanceId)
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (ResourceArn.to_header x.TagResourceRequest.resourceArn)
@@ -421,10 +445,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("DeviceIds",
                            (DeviceIdList.to_value
                               req.CreateJobForDevicesRequest.deviceIds));
-                      Some
-                        ("DeviceJobConfig",
-                          (DeviceJobConfig.to_value
-                             req.CreateJobForDevicesRequest.deviceJobConfig));
+                      Option.map
+                        req.CreateJobForDevicesRequest.deviceJobConfig
+                        ~f:(fun x ->
+                              ("DeviceJobConfig",
+                                (DeviceJobConfig.to_value x)));
                       Some
                         ("JobType",
                           (JobType.to_value
@@ -629,6 +654,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | RegisterPackageVersion ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | RemoveApplicationInstance ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | SignalApplicationInstanceNodeInstances ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | TagResource ->
       let (headers, body) =
@@ -914,6 +941,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some RemoveApplicationInstanceResponse.error_of_json))
+  | SignalApplicationInstanceNodeInstances ->
+      if is_success
+      then
+        Ok
+          (SignalApplicationInstanceNodeInstancesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                SignalApplicationInstanceNodeInstancesResponse.error_of_json))
   | TagResource ->
       if is_success
       then

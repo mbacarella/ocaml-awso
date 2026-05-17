@@ -10,17 +10,27 @@ type ('i, 'o, 'e) t =
   AssociatePersonasToEntitiesResponse.error) t 
   | BatchDeleteDocument: (BatchDeleteDocumentRequest.t,
   BatchDeleteDocumentResponse.t, BatchDeleteDocumentResponse.error) t 
+  | BatchDeleteFeaturedResultsSet: (BatchDeleteFeaturedResultsSetRequest.t,
+  BatchDeleteFeaturedResultsSetResponse.t,
+  BatchDeleteFeaturedResultsSetResponse.error) t 
   | BatchGetDocumentStatus: (BatchGetDocumentStatusRequest.t,
   BatchGetDocumentStatusResponse.t, BatchGetDocumentStatusResponse.error) t 
   | BatchPutDocument: (BatchPutDocumentRequest.t, BatchPutDocumentResponse.t,
   BatchPutDocumentResponse.error) t 
   | ClearQuerySuggestions: (ClearQuerySuggestionsRequest.t, unit, unit) t 
+  | CreateAccessControlConfiguration:
+  (CreateAccessControlConfigurationRequest.t,
+  CreateAccessControlConfigurationResponse.t,
+  CreateAccessControlConfigurationResponse.error) t 
   | CreateDataSource: (CreateDataSourceRequest.t, CreateDataSourceResponse.t,
   CreateDataSourceResponse.error) t 
   | CreateExperience: (CreateExperienceRequest.t, CreateExperienceResponse.t,
   CreateExperienceResponse.error) t 
   | CreateFaq: (CreateFaqRequest.t, CreateFaqResponse.t,
   CreateFaqResponse.error) t 
+  | CreateFeaturedResultsSet: (CreateFeaturedResultsSetRequest.t,
+  CreateFeaturedResultsSetResponse.t, CreateFeaturedResultsSetResponse.error)
+  t 
   | CreateIndex: (CreateIndexRequest.t, CreateIndexResponse.t,
   CreateIndexResponse.error) t 
   | CreateQuerySuggestionsBlockList:
@@ -29,6 +39,10 @@ type ('i, 'o, 'e) t =
   CreateQuerySuggestionsBlockListResponse.error) t 
   | CreateThesaurus: (CreateThesaurusRequest.t, CreateThesaurusResponse.t,
   CreateThesaurusResponse.error) t 
+  | DeleteAccessControlConfiguration:
+  (DeleteAccessControlConfigurationRequest.t,
+  DeleteAccessControlConfigurationResponse.t,
+  DeleteAccessControlConfigurationResponse.error) t 
   | DeleteDataSource: (DeleteDataSourceRequest.t, unit, unit) t 
   | DeleteExperience: (DeleteExperienceRequest.t, DeleteExperienceResponse.t,
   DeleteExperienceResponse.error) t 
@@ -38,12 +52,19 @@ type ('i, 'o, 'e) t =
   | DeleteQuerySuggestionsBlockList:
   (DeleteQuerySuggestionsBlockListRequest.t, unit, unit) t 
   | DeleteThesaurus: (DeleteThesaurusRequest.t, unit, unit) t 
+  | DescribeAccessControlConfiguration:
+  (DescribeAccessControlConfigurationRequest.t,
+  DescribeAccessControlConfigurationResponse.t,
+  DescribeAccessControlConfigurationResponse.error) t 
   | DescribeDataSource: (DescribeDataSourceRequest.t,
   DescribeDataSourceResponse.t, DescribeDataSourceResponse.error) t 
   | DescribeExperience: (DescribeExperienceRequest.t,
   DescribeExperienceResponse.t, DescribeExperienceResponse.error) t 
   | DescribeFaq: (DescribeFaqRequest.t, DescribeFaqResponse.t,
   DescribeFaqResponse.error) t 
+  | DescribeFeaturedResultsSet: (DescribeFeaturedResultsSetRequest.t,
+  DescribeFeaturedResultsSetResponse.t,
+  DescribeFeaturedResultsSetResponse.error) t 
   | DescribeIndex: (DescribeIndexRequest.t, DescribeIndexResponse.t,
   DescribeIndexResponse.error) t 
   | DescribePrincipalMapping: (DescribePrincipalMappingRequest.t,
@@ -70,6 +91,10 @@ type ('i, 'o, 'e) t =
   GetQuerySuggestionsResponse.t, GetQuerySuggestionsResponse.error) t 
   | GetSnapshots: (GetSnapshotsRequest.t, GetSnapshotsResponse.t,
   GetSnapshotsResponse.error) t 
+  | ListAccessControlConfigurations:
+  (ListAccessControlConfigurationsRequest.t,
+  ListAccessControlConfigurationsResponse.t,
+  ListAccessControlConfigurationsResponse.error) t 
   | ListDataSourceSyncJobs: (ListDataSourceSyncJobsRequest.t,
   ListDataSourceSyncJobsResponse.t, ListDataSourceSyncJobsResponse.error) t 
   | ListDataSources: (ListDataSourcesRequest.t, ListDataSourcesResponse.t,
@@ -82,6 +107,9 @@ type ('i, 'o, 'e) t =
   ListExperiencesResponse.error) t 
   | ListFaqs: (ListFaqsRequest.t, ListFaqsResponse.t, ListFaqsResponse.error)
   t 
+  | ListFeaturedResultsSets: (ListFeaturedResultsSetsRequest.t,
+  ListFeaturedResultsSetsResponse.t, ListFeaturedResultsSetsResponse.error) t
+  
   | ListGroupsOlderThanOrderingId: (ListGroupsOlderThanOrderingIdRequest.t,
   ListGroupsOlderThanOrderingIdResponse.t,
   ListGroupsOlderThanOrderingIdResponse.error) t 
@@ -96,6 +124,7 @@ type ('i, 'o, 'e) t =
   ListThesauriResponse.error) t 
   | PutPrincipalMapping: (PutPrincipalMappingRequest.t, unit, unit) t 
   | Query: (QueryRequest.t, QueryResult.t, QueryResult.error) t 
+  | Retrieve: (RetrieveRequest.t, RetrieveResult.t, RetrieveResult.error) t 
   | StartDataSourceSyncJob: (StartDataSourceSyncJobRequest.t,
   StartDataSourceSyncJobResponse.t, StartDataSourceSyncJobResponse.error) t 
   | StopDataSourceSyncJob: (StopDataSourceSyncJobRequest.t, unit, unit) t 
@@ -104,8 +133,15 @@ type ('i, 'o, 'e) t =
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateAccessControlConfiguration:
+  (UpdateAccessControlConfigurationRequest.t,
+  UpdateAccessControlConfigurationResponse.t,
+  UpdateAccessControlConfigurationResponse.error) t 
   | UpdateDataSource: (UpdateDataSourceRequest.t, unit, unit) t 
   | UpdateExperience: (UpdateExperienceRequest.t, unit, unit) t 
+  | UpdateFeaturedResultsSet: (UpdateFeaturedResultsSetRequest.t,
+  UpdateFeaturedResultsSetResponse.t, UpdateFeaturedResultsSetResponse.error)
+  t 
   | UpdateIndex: (UpdateIndexRequest.t, unit, unit) t 
   | UpdateQuerySuggestionsBlockList:
   (UpdateQuerySuggestionsBlockListRequest.t, unit, unit) t 
@@ -117,15 +153,19 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | AssociateEntitiesToExperience -> `POST
   | AssociatePersonasToEntities -> `POST
   | BatchDeleteDocument -> `POST
+  | BatchDeleteFeaturedResultsSet -> `POST
   | BatchGetDocumentStatus -> `POST
   | BatchPutDocument -> `POST
   | ClearQuerySuggestions -> `POST
+  | CreateAccessControlConfiguration -> `POST
   | CreateDataSource -> `POST
   | CreateExperience -> `POST
   | CreateFaq -> `POST
+  | CreateFeaturedResultsSet -> `POST
   | CreateIndex -> `POST
   | CreateQuerySuggestionsBlockList -> `POST
   | CreateThesaurus -> `POST
+  | DeleteAccessControlConfiguration -> `POST
   | DeleteDataSource -> `POST
   | DeleteExperience -> `POST
   | DeleteFaq -> `POST
@@ -133,9 +173,11 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeletePrincipalMapping -> `POST
   | DeleteQuerySuggestionsBlockList -> `POST
   | DeleteThesaurus -> `POST
+  | DescribeAccessControlConfiguration -> `POST
   | DescribeDataSource -> `POST
   | DescribeExperience -> `POST
   | DescribeFaq -> `POST
+  | DescribeFeaturedResultsSet -> `POST
   | DescribeIndex -> `POST
   | DescribePrincipalMapping -> `POST
   | DescribeQuerySuggestionsBlockList -> `POST
@@ -145,12 +187,14 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DisassociatePersonasFromEntities -> `POST
   | GetQuerySuggestions -> `POST
   | GetSnapshots -> `POST
+  | ListAccessControlConfigurations -> `POST
   | ListDataSourceSyncJobs -> `POST
   | ListDataSources -> `POST
   | ListEntityPersonas -> `POST
   | ListExperienceEntities -> `POST
   | ListExperiences -> `POST
   | ListFaqs -> `POST
+  | ListFeaturedResultsSets -> `POST
   | ListGroupsOlderThanOrderingId -> `POST
   | ListIndices -> `POST
   | ListQuerySuggestionsBlockLists -> `POST
@@ -158,13 +202,16 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListThesauri -> `POST
   | PutPrincipalMapping -> `POST
   | Query -> `POST
+  | Retrieve -> `POST
   | StartDataSourceSyncJob -> `POST
   | StopDataSourceSyncJob -> `POST
   | SubmitFeedback -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
+  | UpdateAccessControlConfiguration -> `POST
   | UpdateDataSource -> `POST
   | UpdateExperience -> `POST
+  | UpdateFeaturedResultsSet -> `POST
   | UpdateIndex -> `POST
   | UpdateQuerySuggestionsBlockList -> `POST
   | UpdateQuerySuggestionsConfig -> `POST
@@ -175,16 +222,22 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | AssociateEntitiesToExperience -> (Format.kasprintf Uri.of_string) "/"
       | AssociatePersonasToEntities -> (Format.kasprintf Uri.of_string) "/"
       | BatchDeleteDocument -> (Format.kasprintf Uri.of_string) "/"
+      | BatchDeleteFeaturedResultsSet -> (Format.kasprintf Uri.of_string) "/"
       | BatchGetDocumentStatus -> (Format.kasprintf Uri.of_string) "/"
       | BatchPutDocument -> (Format.kasprintf Uri.of_string) "/"
       | ClearQuerySuggestions -> (Format.kasprintf Uri.of_string) "/"
+      | CreateAccessControlConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
       | CreateDataSource -> (Format.kasprintf Uri.of_string) "/"
       | CreateExperience -> (Format.kasprintf Uri.of_string) "/"
       | CreateFaq -> (Format.kasprintf Uri.of_string) "/"
+      | CreateFeaturedResultsSet -> (Format.kasprintf Uri.of_string) "/"
       | CreateIndex -> (Format.kasprintf Uri.of_string) "/"
       | CreateQuerySuggestionsBlockList ->
           (Format.kasprintf Uri.of_string) "/"
       | CreateThesaurus -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteAccessControlConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
       | DeleteDataSource -> (Format.kasprintf Uri.of_string) "/"
       | DeleteExperience -> (Format.kasprintf Uri.of_string) "/"
       | DeleteFaq -> (Format.kasprintf Uri.of_string) "/"
@@ -193,9 +246,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteQuerySuggestionsBlockList ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteThesaurus -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeAccessControlConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeDataSource -> (Format.kasprintf Uri.of_string) "/"
       | DescribeExperience -> (Format.kasprintf Uri.of_string) "/"
       | DescribeFaq -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeFeaturedResultsSet -> (Format.kasprintf Uri.of_string) "/"
       | DescribeIndex -> (Format.kasprintf Uri.of_string) "/"
       | DescribePrincipalMapping -> (Format.kasprintf Uri.of_string) "/"
       | DescribeQuerySuggestionsBlockList ->
@@ -209,12 +265,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | GetQuerySuggestions -> (Format.kasprintf Uri.of_string) "/"
       | GetSnapshots -> (Format.kasprintf Uri.of_string) "/"
+      | ListAccessControlConfigurations ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListDataSourceSyncJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListDataSources -> (Format.kasprintf Uri.of_string) "/"
       | ListEntityPersonas -> (Format.kasprintf Uri.of_string) "/"
       | ListExperienceEntities -> (Format.kasprintf Uri.of_string) "/"
       | ListExperiences -> (Format.kasprintf Uri.of_string) "/"
       | ListFaqs -> (Format.kasprintf Uri.of_string) "/"
+      | ListFeaturedResultsSets -> (Format.kasprintf Uri.of_string) "/"
       | ListGroupsOlderThanOrderingId -> (Format.kasprintf Uri.of_string) "/"
       | ListIndices -> (Format.kasprintf Uri.of_string) "/"
       | ListQuerySuggestionsBlockLists ->
@@ -223,13 +282,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListThesauri -> (Format.kasprintf Uri.of_string) "/"
       | PutPrincipalMapping -> (Format.kasprintf Uri.of_string) "/"
       | Query -> (Format.kasprintf Uri.of_string) "/"
+      | Retrieve -> (Format.kasprintf Uri.of_string) "/"
       | StartDataSourceSyncJob -> (Format.kasprintf Uri.of_string) "/"
       | StopDataSourceSyncJob -> (Format.kasprintf Uri.of_string) "/"
       | SubmitFeedback -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateAccessControlConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
       | UpdateDataSource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateExperience -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateFeaturedResultsSet -> (Format.kasprintf Uri.of_string) "/"
       | UpdateIndex -> (Format.kasprintf Uri.of_string) "/"
       | UpdateQuerySuggestionsBlockList ->
           (Format.kasprintf Uri.of_string) "/"
@@ -264,6 +327,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSKendraFrontendService.BatchDeleteDocument")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | BatchDeleteFeaturedResultsSet ->
+      let json = BatchDeleteFeaturedResultsSetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSKendraFrontendService.BatchDeleteFeaturedResultsSet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | BatchGetDocumentStatus ->
       let json = BatchGetDocumentStatusRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -287,6 +359,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSKendraFrontendService.ClearQuerySuggestions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateAccessControlConfiguration ->
+      let json = CreateAccessControlConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSKendraFrontendService.CreateAccessControlConfiguration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateDataSource ->
       let json = CreateDataSourceRequest.to_json req in
@@ -312,6 +393,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSKendraFrontendService.CreateFaq")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateFeaturedResultsSet ->
+      let json = CreateFeaturedResultsSetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSKendraFrontendService.CreateFeaturedResultsSet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateIndex ->
       let json = CreateIndexRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -336,6 +426,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSKendraFrontendService.CreateThesaurus")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteAccessControlConfiguration ->
+      let json = DeleteAccessControlConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSKendraFrontendService.DeleteAccessControlConfiguration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteDataSource ->
       let json = DeleteDataSourceRequest.to_json req in
@@ -394,6 +493,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSKendraFrontendService.DeleteThesaurus")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeAccessControlConfiguration ->
+      let json = DescribeAccessControlConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSKendraFrontendService.DescribeAccessControlConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeDataSource ->
       let json = DescribeDataSourceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -417,6 +525,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSKendraFrontendService.DescribeFaq")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeFeaturedResultsSet ->
+      let json = DescribeFeaturedResultsSetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSKendraFrontendService.DescribeFeaturedResultsSet")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeIndex ->
       let json = DescribeIndexRequest.to_json req in
@@ -495,6 +612,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSKendraFrontendService.GetSnapshots")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAccessControlConfigurations ->
+      let json = ListAccessControlConfigurationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSKendraFrontendService.ListAccessControlConfigurations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListDataSourceSyncJobs ->
       let json = ListDataSourceSyncJobsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -542,6 +668,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSKendraFrontendService.ListFaqs")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListFeaturedResultsSets ->
+      let json = ListFeaturedResultsSetsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSKendraFrontendService.ListFeaturedResultsSets")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListGroupsOlderThanOrderingId ->
       let json = ListGroupsOlderThanOrderingIdRequest.to_json req in
@@ -601,6 +736,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSKendraFrontendService.Query")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | Retrieve ->
+      let json = RetrieveRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSKendraFrontendService.Retrieve")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartDataSourceSyncJob ->
       let json = StartDataSourceSyncJobRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -641,6 +784,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSKendraFrontendService.UntagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateAccessControlConfiguration ->
+      let json = UpdateAccessControlConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSKendraFrontendService.UpdateAccessControlConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateDataSource ->
       let json = UpdateDataSourceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -656,6 +808,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSKendraFrontendService.UpdateExperience")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateFeaturedResultsSet ->
+      let json = UpdateFeaturedResultsSetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSKendraFrontendService.UpdateFeaturedResultsSet")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateIndex ->
       let json = UpdateIndexRequest.to_json req in
@@ -740,6 +901,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some BatchDeleteDocumentResponse.error_of_json))
+  | BatchDeleteFeaturedResultsSet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchDeleteFeaturedResultsSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDeleteFeaturedResultsSetResponse.error_of_json))
   | BatchGetDocumentStatus ->
       if is_success
       then
@@ -758,6 +928,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error (parse_aws_error (Some BatchPutDocumentResponse.error_of_json))
   | ClearQuerySuggestions ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | CreateAccessControlConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateAccessControlConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAccessControlConfigurationResponse.error_of_json))
   | CreateDataSource ->
       if is_success
       then
@@ -778,6 +957,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateFaqResponse.of_json json)
       else Error (parse_aws_error (Some CreateFaqResponse.error_of_json))
+  | CreateFeaturedResultsSet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateFeaturedResultsSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateFeaturedResultsSetResponse.error_of_json))
   | CreateIndex ->
       if is_success
       then
@@ -800,6 +988,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateThesaurusResponse.of_json json)
       else
         Error (parse_aws_error (Some CreateThesaurusResponse.error_of_json))
+  | DeleteAccessControlConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteAccessControlConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteAccessControlConfigurationResponse.error_of_json))
   | DeleteDataSource ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteExperience ->
@@ -817,6 +1014,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteThesaurus ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DescribeAccessControlConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAccessControlConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAccessControlConfigurationResponse.error_of_json))
   | DescribeDataSource ->
       if is_success
       then
@@ -839,6 +1045,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribeFaqResponse.of_json json)
       else Error (parse_aws_error (Some DescribeFaqResponse.error_of_json))
+  | DescribeFeaturedResultsSet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeFeaturedResultsSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeFeaturedResultsSetResponse.error_of_json))
   | DescribeIndex ->
       if is_success
       then
@@ -912,6 +1127,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetSnapshotsResponse.of_json json)
       else Error (parse_aws_error (Some GetSnapshotsResponse.error_of_json))
+  | ListAccessControlConfigurations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAccessControlConfigurationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAccessControlConfigurationsResponse.error_of_json))
   | ListDataSourceSyncJobs ->
       if is_success
       then
@@ -958,6 +1182,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListFaqsResponse.of_json json)
       else Error (parse_aws_error (Some ListFaqsResponse.error_of_json))
+  | ListFeaturedResultsSets ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListFeaturedResultsSetsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListFeaturedResultsSetsResponse.error_of_json))
   | ListGroupsOlderThanOrderingId ->
       if is_success
       then
@@ -1004,6 +1237,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (QueryResult.of_json json)
       else Error (parse_aws_error (Some QueryResult.error_of_json))
+  | Retrieve ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RetrieveResult.of_json json)
+      else Error (parse_aws_error (Some RetrieveResult.error_of_json))
   | StartDataSourceSyncJob ->
       if is_success
       then
@@ -1029,10 +1268,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UntagResourceResponse.of_json json)
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateAccessControlConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateAccessControlConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAccessControlConfigurationResponse.error_of_json))
   | UpdateDataSource ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateExperience ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateFeaturedResultsSet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateFeaturedResultsSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateFeaturedResultsSetResponse.error_of_json))
   | UpdateIndex -> if is_success then Ok () else Error (parse_aws_error None)
   | UpdateQuerySuggestionsBlockList ->
       if is_success then Ok () else Error (parse_aws_error None)

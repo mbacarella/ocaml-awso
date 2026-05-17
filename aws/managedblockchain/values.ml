@@ -84,8 +84,8 @@ module LogConfiguration =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "Enabled" Enabled.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "Enabled" Enabled.of_json in
       make ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A configuration for logging events."]
@@ -237,7 +237,7 @@ module InviteAction =
     type nonrec t =
       {
       principal: PrincipalString.t
-        [@ocaml.doc "The AWS account ID to invite."]}
+        [@ocaml.doc "The Amazon Web Services account ID to invite."]}
     let context_ = "InviteAction"
     let make ~principal = fun () -> { principal }
     let to_value x =
@@ -250,12 +250,13 @@ module InviteAction =
           (Xml.child_exn ~context:context_ xml_arg0 "Principal") in
       make ~principal ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let principal = field_map_exn json "Principal" PrincipalString.of_json in
+    let of_json json__ =
+      let principal =
+        field_map_exn json__ "Principal" PrincipalString.of_json in
       make ~principal ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An action to invite a specific AWS account to create a member and join the network. The InviteAction is carried out when a Proposal is APPROVED. Applies only to Hyperledger Fabric."]
+       "An action to invite a specific Amazon Web Services account to create a member and join the network. The InviteAction is carried out when a Proposal is APPROVED. Applies only to Hyperledger Fabric."]
 module RemoveAction =
   struct
     type nonrec t =
@@ -274,8 +275,8 @@ module RemoveAction =
           (Xml.child_exn ~context:context_ xml_arg0 "MemberId") in
       make ~memberId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let memberId = field_map_exn json "MemberId" ResourceIdString.of_json in
+    let of_json json__ =
+      let memberId = field_map_exn json__ "MemberId" ResourceIdString.of_json in
       make ~memberId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -312,8 +313,8 @@ module LogConfigurations =
           (Xml.child xml_arg0 "Cloudwatch") in
       make ?cloudwatch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cloudwatch = field_map json "Cloudwatch" LogConfiguration.of_json in
+    let of_json json__ =
+      let cloudwatch = field_map json__ "Cloudwatch" LogConfiguration.of_json in
       make ?cloudwatch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A collection of log configurations."]
@@ -701,7 +702,7 @@ module NetworkSummary =
         [@ocaml.doc "The date and time that the network was created."];
       arn: ArnString.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the network. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the AWS General Reference."]}
+          "The Amazon Resource Name (ARN) of the network. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."]}
     let make ?id =
       fun ?name ->
         fun ?description ->
@@ -755,21 +756,102 @@ module NetworkSummary =
       make ?arn ?creationDate ?status ?frameworkVersion ?framework
         ?description ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" ArnString.of_json in
-      let creationDate = field_map json "CreationDate" Timestamp.of_json in
-      let status = field_map json "Status" NetworkStatus.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" ArnString.of_json in
+      let creationDate = field_map json__ "CreationDate" Timestamp.of_json in
+      let status = field_map json__ "Status" NetworkStatus.of_json in
       let frameworkVersion =
-        field_map json "FrameworkVersion" FrameworkVersionString.of_json in
-      let framework = field_map json "Framework" Framework.of_json in
+        field_map json__ "FrameworkVersion" FrameworkVersionString.of_json in
+      let framework = field_map json__ "Framework" Framework.of_json in
       let description =
-        field_map json "Description" DescriptionString.of_json in
-      let name = field_map json "Name" NameString.of_json in
-      let id = field_map json "Id" ResourceIdString.of_json in
+        field_map json__ "Description" DescriptionString.of_json in
+      let name = field_map json__ "Name" NameString.of_json in
+      let id = field_map json__ "Id" ResourceIdString.of_json in
       make ?arn ?creationDate ?status ?frameworkVersion ?framework
         ?description ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A summary of network configuration properties."]
+module AccessorNetworkType =
+  struct
+    type nonrec t =
+      | ETHEREUM_GOERLI 
+      | ETHEREUM_MAINNET 
+      | ETHEREUM_MAINNET_AND_GOERLI 
+      | POLYGON_MAINNET 
+      | POLYGON_MUMBAI 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ETHEREUM_GOERLI -> "ETHEREUM_GOERLI"
+      | ETHEREUM_MAINNET -> "ETHEREUM_MAINNET"
+      | ETHEREUM_MAINNET_AND_GOERLI -> "ETHEREUM_MAINNET_AND_GOERLI"
+      | POLYGON_MAINNET -> "POLYGON_MAINNET"
+      | POLYGON_MUMBAI -> "POLYGON_MUMBAI"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ETHEREUM_GOERLI" -> ETHEREUM_GOERLI
+      | "ETHEREUM_MAINNET" -> ETHEREUM_MAINNET
+      | "ETHEREUM_MAINNET_AND_GOERLI" -> ETHEREUM_MAINNET_AND_GOERLI
+      | "POLYGON_MAINNET" -> POLYGON_MAINNET
+      | "POLYGON_MUMBAI" -> POLYGON_MUMBAI
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AccessorNetworkType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AccessorNetworkType" j)
+    let to_json = simple_to_json to_value
+  end
+module AccessorStatus =
+  struct
+    type nonrec t =
+      | AVAILABLE 
+      | PENDING_DELETION 
+      | DELETED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AVAILABLE -> "AVAILABLE"
+      | PENDING_DELETION -> "PENDING_DELETION"
+      | DELETED -> "DELETED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AVAILABLE" -> AVAILABLE
+      | "PENDING_DELETION" -> PENDING_DELETION
+      | "DELETED" -> DELETED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AccessorStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AccessorStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module AccessorType =
+  struct
+    type nonrec t =
+      | BILLING_TOKEN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | BILLING_TOKEN -> "BILLING_TOKEN" | Non_static_id s -> s
+    let of_string =
+      function | "BILLING_TOKEN" -> BILLING_TOKEN | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AccessorType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AccessorType" j)
+    let to_json = simple_to_json to_value
+  end
 module TagKey =
   struct
     type nonrec t = string
@@ -810,6 +892,9 @@ module InviteActionList =
   struct
     type nonrec t = InviteAction.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InviteAction.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -834,6 +919,9 @@ module RemoveActionList =
   struct
     type nonrec t = RemoveAction.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RemoveAction.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -860,10 +948,10 @@ module NodeEthereumAttributes =
       {
       httpEndpoint: String_.t option
         [@ocaml.doc
-          "The endpoint on which the Ethereum node listens to run Ethereum JSON-RPC methods over HTTP connections from a client. Use this endpoint in client code for smart contracts when using an HTTP connection. Connections to this endpoint are authenticated using Signature Version 4."];
+          "The endpoint on which the Ethereum node listens to run Ethereum API methods over HTTP connections from a client. Use this endpoint in client code for smart contracts when using an HTTP connection. Connections to this endpoint are authenticated using Signature Version 4."];
       webSocketEndpoint: String_.t option
         [@ocaml.doc
-          "The endpoint on which the Ethereum node listens to run Ethereum JSON-RPC methods over WebSockets connections from a client. Use this endpoint in client code for smart contracts when using a WebSockets connection. Connections to this endpoint are authenticated using Signature Version 4."]}
+          "The endpoint on which the Ethereum node listens to run Ethereum JSON-RPC methods over WebSocket connections from a client. Use this endpoint in client code for smart contracts when using a WebSocket connection. Connections to this endpoint are authenticated using Signature Version 4."]}
     let make ?httpEndpoint =
       fun ?webSocketEndpoint -> fun () -> { httpEndpoint; webSocketEndpoint }
     let to_value x =
@@ -880,10 +968,10 @@ module NodeEthereumAttributes =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "HttpEndpoint") in
       make ?webSocketEndpoint ?httpEndpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let webSocketEndpoint =
-        field_map json "WebSocketEndpoint" String_.of_json in
-      let httpEndpoint = field_map json "HttpEndpoint" String_.of_json in
+        field_map json__ "WebSocketEndpoint" String_.of_json in
+      let httpEndpoint = field_map json__ "HttpEndpoint" String_.of_json in
       make ?webSocketEndpoint ?httpEndpoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Attributes of an Ethereum node."]
@@ -913,10 +1001,10 @@ module NodeFabricAttributes =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PeerEndpoint") in
       make ?peerEventEndpoint ?peerEndpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let peerEventEndpoint =
-        field_map json "PeerEventEndpoint" String_.of_json in
-      let peerEndpoint = field_map json "PeerEndpoint" String_.of_json in
+        field_map json__ "PeerEventEndpoint" String_.of_json in
+      let peerEndpoint = field_map json__ "PeerEndpoint" String_.of_json in
       make ?peerEventEndpoint ?peerEndpoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -948,10 +1036,10 @@ module NodeFabricLogPublishingConfiguration =
           (Xml.child xml_arg0 "ChaincodeLogs") in
       make ?peerLogs ?chaincodeLogs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let peerLogs = field_map json "PeerLogs" LogConfigurations.of_json in
+    let of_json json__ =
+      let peerLogs = field_map json__ "PeerLogs" LogConfigurations.of_json in
       let chaincodeLogs =
-        field_map json "ChaincodeLogs" LogConfigurations.of_json in
+        field_map json__ "ChaincodeLogs" LogConfigurations.of_json in
       make ?peerLogs ?chaincodeLogs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -962,7 +1050,7 @@ module NetworkEthereumAttributes =
       {
       chainId: String_.t option
         [@ocaml.doc
-          "The Ethereum CHAIN_ID associated with the Ethereum network. Chain IDs are as follows: mainnet = 1 rinkeby = 4 ropsten = 3"]}
+          "The Ethereum CHAIN_ID associated with the Ethereum network. Chain IDs are as follows: mainnet = 1"]}
     let make ?chainId = fun () -> { chainId }
     let to_value x =
       structure_to_value
@@ -973,8 +1061,8 @@ module NetworkEthereumAttributes =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ChainId") in
       make ?chainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chainId = field_map json "ChainId" String_.of_json in
+    let of_json json__ =
+      let chainId = field_map json__ "ChainId" String_.of_json in
       make ?chainId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Attributes of Ethereum for a network."]
@@ -1003,10 +1091,10 @@ module NetworkFabricAttributes =
           (Xml.child xml_arg0 "OrderingServiceEndpoint") in
       make ?edition ?orderingServiceEndpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let edition = field_map json "Edition" Edition.of_json in
+    let of_json json__ =
+      let edition = field_map json__ "Edition" Edition.of_json in
       let orderingServiceEndpoint =
-        field_map json "OrderingServiceEndpoint" String_.of_json in
+        field_map json__ "OrderingServiceEndpoint" String_.of_json in
       make ?edition ?orderingServiceEndpoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Attributes of Hyperledger Fabric for a network."]
@@ -1019,10 +1107,10 @@ module ApprovalThresholdPolicy =
           "The percentage of votes among all members that must be YES for a proposal to be approved. For example, a ThresholdPercentage value of 50 indicates 50%. The ThresholdComparator determines the precise comparison. If a ThresholdPercentage value of 50 is specified on a network with 10 members, along with a ThresholdComparator value of GREATER_THAN, this indicates that 6 YES votes are required for the proposal to be approved."];
       proposalDurationInHours: ProposalDurationInt.t option
         [@ocaml.doc
-          "The duration from the time that a proposal is created until it expires. If members cast neither the required number of YES votes to approve the proposal nor the number of NO votes required to reject it before the duration expires, the proposal is EXPIRED and ProposalActions are not carried out."];
+          "The duration from the time that a proposal is created until it expires. If members cast neither the required number of YES votes to approve the proposal nor the number of NO votes required to reject it before the duration expires, the proposal is EXPIRED and ProposalActions aren't carried out."];
       thresholdComparator: ThresholdComparator.t option
         [@ocaml.doc
-          "Determines whether the vote percentage must be greater than the ThresholdPercentage or must be greater than or equal to the ThreholdPercentage to be approved."]}
+          "Determines whether the vote percentage must be greater than the ThresholdPercentage or must be greater than or equal to the ThresholdPercentage to be approved."]}
     let make ?thresholdPercentage =
       fun ?proposalDurationInHours ->
         fun ?thresholdComparator ->
@@ -1056,13 +1144,14 @@ module ApprovalThresholdPolicy =
       make ?thresholdComparator ?proposalDurationInHours ?thresholdPercentage
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let thresholdComparator =
-        field_map json "ThresholdComparator" ThresholdComparator.of_json in
+        field_map json__ "ThresholdComparator" ThresholdComparator.of_json in
       let proposalDurationInHours =
-        field_map json "ProposalDurationInHours" ProposalDurationInt.of_json in
+        field_map json__ "ProposalDurationInHours"
+          ProposalDurationInt.of_json in
       let thresholdPercentage =
-        field_map json "ThresholdPercentage" ThresholdPercentageInt.of_json in
+        field_map json__ "ThresholdPercentage" ThresholdPercentageInt.of_json in
       make ?thresholdComparator ?proposalDurationInHours ?thresholdPercentage
         ()
     let to_json v = composed_to_json to_value v
@@ -1094,10 +1183,10 @@ module MemberFabricAttributes =
           (Xml.child xml_arg0 "AdminUsername") in
       make ?caEndpoint ?adminUsername ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let caEndpoint = field_map json "CaEndpoint" String_.of_json in
+    let of_json json__ =
+      let caEndpoint = field_map json__ "CaEndpoint" String_.of_json in
       let adminUsername =
-        field_map json "AdminUsername" UsernameString.of_json in
+        field_map json__ "AdminUsername" UsernameString.of_json in
       make ?caEndpoint ?adminUsername ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1120,8 +1209,8 @@ module MemberFabricLogPublishingConfiguration =
           (Xml.child xml_arg0 "CaLogs") in
       make ?caLogs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let caLogs = field_map json "CaLogs" LogConfigurations.of_json in
+    let of_json json__ =
+      let caLogs = field_map json__ "CaLogs" LogConfigurations.of_json in
       make ?caLogs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1135,7 +1224,7 @@ module MemberFabricConfiguration =
           "The user name for the member's initial administrative user."];
       adminPassword: PasswordString.t
         [@ocaml.doc
-          "The password for the member's initial administrative user. The AdminPassword must be at least eight characters long and no more than 32 characters. It must contain at least one uppercase letter, one lowercase letter, and one digit. It cannot have a single quotation mark (\226\128\152), a double quotation marks (\226\128\156), a forward slash(/), a backward slash(\\), \\@, or a space."]}
+          "The password for the member's initial administrative user. The AdminPassword must be at least 8 characters long and no more than 32 characters. It must contain at least one uppercase letter, one lowercase letter, and one digit. It cannot have a single quotation mark (\226\128\152), a double quotation marks (\226\128\156), a forward slash(/), a backward slash(\\), \\@, or a space."]}
     let context_ = "MemberFabricConfiguration"
     let make ~adminUsername =
       fun ~adminPassword -> fun () -> { adminUsername; adminPassword }
@@ -1153,15 +1242,15 @@ module MemberFabricConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "AdminUsername") in
       make ~adminPassword ~adminUsername ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let adminPassword =
-        field_map_exn json "AdminPassword" PasswordString.of_json in
+        field_map_exn json__ "AdminPassword" PasswordString.of_json in
       let adminUsername =
-        field_map_exn json "AdminUsername" UsernameString.of_json in
+        field_map_exn json__ "AdminUsername" UsernameString.of_json in
       make ~adminPassword ~adminUsername ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configuration properties for Hyperledger Fabric for a member in a Managed Blockchain network using the Hyperledger Fabric framework."]
+       "Configuration properties for Hyperledger Fabric for a member in a Managed Blockchain network that is using the Hyperledger Fabric framework."]
 module ExceptionMessage =
   struct
     type nonrec t = string
@@ -1190,15 +1279,15 @@ module ProposalSummary =
         [@ocaml.doc "The name of the member that created the proposal."];
       status: ProposalStatus.t option
         [@ocaml.doc
-          "The status of the proposal. Values are as follows: IN_PROGRESS - The proposal is active and open for member voting. APPROVED - The proposal was approved with sufficient YES votes among members according to the VotingPolicy specified for the Network. The specified proposal actions are carried out. REJECTED - The proposal was rejected with insufficient YES votes among members according to the VotingPolicy specified for the Network. The specified ProposalActions are not carried out. EXPIRED - Members did not cast the number of votes required to determine the proposal outcome before the proposal expired. The specified ProposalActions are not carried out. ACTION_FAILED - One or more of the specified ProposalActions in a proposal that was approved could not be completed because of an error."];
+          "The status of the proposal. Values are as follows: IN_PROGRESS - The proposal is active and open for member voting. APPROVED - The proposal was approved with sufficient YES votes among members according to the VotingPolicy specified for the Network. The specified proposal actions are carried out. REJECTED - The proposal was rejected with insufficient YES votes among members according to the VotingPolicy specified for the Network. The specified ProposalActions aren't carried out. EXPIRED - Members didn't cast the number of votes required to determine the proposal outcome before the proposal expired. The specified ProposalActions aren't carried out. ACTION_FAILED - One or more of the specified ProposalActions in a proposal that was approved couldn't be completed because of an error."];
       creationDate: Timestamp.t option
         [@ocaml.doc "The date and time that the proposal was created."];
       expirationDate: Timestamp.t option
         [@ocaml.doc
-          "The date and time that the proposal expires. This is the CreationDate plus the ProposalDurationInHours that is specified in the ProposalThresholdPolicy. After this date and time, if members have not cast enough votes to determine the outcome according to the voting policy, the proposal is EXPIRED and Actions are not carried out."];
+          "The date and time that the proposal expires. This is the CreationDate plus the ProposalDurationInHours that is specified in the ProposalThresholdPolicy. After this date and time, if members haven't cast enough votes to determine the outcome according to the voting policy, the proposal is EXPIRED and Actions aren't carried out."];
       arn: ArnString.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the proposal. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the AWS General Reference."]}
+          "The Amazon Resource Name (ARN) of the proposal. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."]}
     let make ?proposalId =
       fun ?description ->
         fun ?proposedByMemberId ->
@@ -1259,18 +1348,20 @@ module ProposalSummary =
       make ?arn ?expirationDate ?creationDate ?status ?proposedByMemberName
         ?proposedByMemberId ?description ?proposalId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" ArnString.of_json in
-      let expirationDate = field_map json "ExpirationDate" Timestamp.of_json in
-      let creationDate = field_map json "CreationDate" Timestamp.of_json in
-      let status = field_map json "Status" ProposalStatus.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" ArnString.of_json in
+      let expirationDate =
+        field_map json__ "ExpirationDate" Timestamp.of_json in
+      let creationDate = field_map json__ "CreationDate" Timestamp.of_json in
+      let status = field_map json__ "Status" ProposalStatus.of_json in
       let proposedByMemberName =
-        field_map json "ProposedByMemberName" NetworkMemberNameString.of_json in
+        field_map json__ "ProposedByMemberName"
+          NetworkMemberNameString.of_json in
       let proposedByMemberId =
-        field_map json "ProposedByMemberId" ResourceIdString.of_json in
+        field_map json__ "ProposedByMemberId" ResourceIdString.of_json in
       let description =
-        field_map json "Description" DescriptionString.of_json in
-      let proposalId = field_map json "ProposalId" ResourceIdString.of_json in
+        field_map json__ "Description" DescriptionString.of_json in
+      let proposalId = field_map json__ "ProposalId" ResourceIdString.of_json in
       make ?arn ?expirationDate ?creationDate ?status ?proposedByMemberName
         ?proposedByMemberId ?description ?proposalId ()
     let to_json v = composed_to_json to_value v
@@ -1307,11 +1398,11 @@ module VoteSummary =
       let vote = (Option.map ~f:VoteValue.of_xml) (Xml.child xml_arg0 "Vote") in
       make ?memberId ?memberName ?vote ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let memberId = field_map json "MemberId" ResourceIdString.of_json in
+    let of_json json__ =
+      let memberId = field_map json__ "MemberId" ResourceIdString.of_json in
       let memberName =
-        field_map json "MemberName" NetworkMemberNameString.of_json in
-      let vote = field_map json "Vote" VoteValue.of_json in
+        field_map json__ "MemberName" NetworkMemberNameString.of_json in
+      let vote = field_map json__ "Vote" VoteValue.of_json in
       make ?memberId ?memberName ?vote ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1331,7 +1422,7 @@ module NodeSummary =
         [@ocaml.doc "The EC2 instance type for the node."];
       arn: ArnString.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the node. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the AWS General Reference."]}
+          "The Amazon Resource Name (ARN) of the node. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."]}
     let make ?id =
       fun ?status ->
         fun ?creationDate ->
@@ -1374,15 +1465,15 @@ module NodeSummary =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "Id") in
       make ?arn ?instanceType ?availabilityZone ?creationDate ?status ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" ArnString.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" ArnString.of_json in
       let instanceType =
-        field_map json "InstanceType" InstanceTypeString.of_json in
+        field_map json__ "InstanceType" InstanceTypeString.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" AvailabilityZoneString.of_json in
-      let creationDate = field_map json "CreationDate" Timestamp.of_json in
-      let status = field_map json "Status" NodeStatus.of_json in
-      let id = field_map json "Id" ResourceIdString.of_json in
+        field_map json__ "AvailabilityZone" AvailabilityZoneString.of_json in
+      let creationDate = field_map json__ "CreationDate" Timestamp.of_json in
+      let status = field_map json__ "Status" NodeStatus.of_json in
+      let id = field_map json__ "Id" ResourceIdString.of_json in
       make ?arn ?instanceType ?availabilityZone ?creationDate ?status ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A summary of configuration properties for a node."]
@@ -1398,15 +1489,15 @@ module MemberSummary =
         [@ocaml.doc "An optional description of the member."];
       status: MemberStatus.t option
         [@ocaml.doc
-          "The status of the member. CREATING - The AWS account is in the process of creating a member. AVAILABLE - The member has been created and can participate in the network. CREATE_FAILED - The AWS account attempted to create a member and creation failed. UPDATING - The member is in the process of being updated. DELETING - The member and all associated resources are in the process of being deleted. Either the AWS account that owns the member deleted it, or the member is being deleted as the result of an APPROVED PROPOSAL to remove the member. DELETED - The member can no longer participate on the network and all associated resources are deleted. Either the AWS account that owns the member deleted it, or the member is being deleted as the result of an APPROVED PROPOSAL to remove the member. INACCESSIBLE_ENCRYPTION_KEY - The member is impaired and might not function as expected because it cannot access the specified customer managed key in AWS Key Management Service (AWS KMS) for encryption at rest. Either the KMS key was disabled or deleted, or the grants on the key were revoked. The effect of disabling or deleting a key, or revoking a grant is not immediate. The member resource might take some time to find that the key is inaccessible. When a resource is in this state, we recommend deleting and recreating the resource."];
+          "The status of the member. CREATING - The Amazon Web Services account is in the process of creating a member. AVAILABLE - The member has been created and can participate in the network. CREATE_FAILED - The Amazon Web Services account attempted to create a member and creation failed. UPDATING - The member is in the process of being updated. DELETING - The member and all associated resources are in the process of being deleted. Either the Amazon Web Services account that owns the member deleted it, or the member is being deleted as the result of an APPROVED PROPOSAL to remove the member. DELETED - The member can no longer participate on the network and all associated resources are deleted. Either the Amazon Web Services account that owns the member deleted it, or the member is being deleted as the result of an APPROVED PROPOSAL to remove the member. INACCESSIBLE_ENCRYPTION_KEY - The member is impaired and might not function as expected because it cannot access the specified customer managed key in Key Management Service (KMS) for encryption at rest. Either the KMS key was disabled or deleted, or the grants on the key were revoked. The effect of disabling or deleting a key or of revoking a grant isn't immediate. It might take some time for the member resource to discover that the key is inaccessible. When a resource is in this state, we recommend deleting and recreating the resource."];
       creationDate: Timestamp.t option
         [@ocaml.doc "The date and time that the member was created."];
       isOwned: IsOwned.t option
         [@ocaml.doc
-          "An indicator of whether the member is owned by your AWS account or a different AWS account."];
+          "An indicator of whether the member is owned by your Amazon Web Services account or a different Amazon Web Services account."];
       arn: ArnString.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the member. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the AWS General Reference."]}
+          "The Amazon Resource Name (ARN) of the member. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."]}
     let make ?id =
       fun ?name ->
         fun ?description ->
@@ -1453,15 +1544,15 @@ module MemberSummary =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "Id") in
       make ?arn ?isOwned ?creationDate ?status ?description ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" ArnString.of_json in
-      let isOwned = field_map json "IsOwned" IsOwned.of_json in
-      let creationDate = field_map json "CreationDate" Timestamp.of_json in
-      let status = field_map json "Status" MemberStatus.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" ArnString.of_json in
+      let isOwned = field_map json__ "IsOwned" IsOwned.of_json in
+      let creationDate = field_map json__ "CreationDate" Timestamp.of_json in
+      let status = field_map json__ "Status" MemberStatus.of_json in
       let description =
-        field_map json "Description" DescriptionString.of_json in
-      let name = field_map json "Name" NetworkMemberNameString.of_json in
-      let id = field_map json "Id" ResourceIdString.of_json in
+        field_map json__ "Description" DescriptionString.of_json in
+      let name = field_map json__ "Name" NetworkMemberNameString.of_json in
+      let id = field_map json__ "Id" ResourceIdString.of_json in
       make ?arn ?isOwned ?creationDate ?status ?description ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1479,11 +1570,11 @@ module Invitation =
           "The date and time that the invitation expires. This is the CreationDate plus the ProposalDurationInHours that is specified in the ProposalThresholdPolicy. After this date and time, the invitee can no longer create a member and join the network using this InvitationId."];
       status: InvitationStatus.t option
         [@ocaml.doc
-          "The status of the invitation: PENDING - The invitee has not created a member to join the network, and the invitation has not yet expired. ACCEPTING - The invitee has begun creating a member, and creation has not yet completed. ACCEPTED - The invitee created a member and joined the network using the InvitationID. REJECTED - The invitee rejected the invitation. EXPIRED - The invitee neither created a member nor rejected the invitation before the ExpirationDate."];
+          "The status of the invitation: PENDING - The invitee hasn't created a member to join the network, and the invitation hasn't yet expired. ACCEPTING - The invitee has begun creating a member, and creation hasn't yet completed. ACCEPTED - The invitee created a member and joined the network using the InvitationID. REJECTED - The invitee rejected the invitation. EXPIRED - The invitee neither created a member nor rejected the invitation before the ExpirationDate."];
       networkSummary: NetworkSummary.t option ;
       arn: ArnString.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the invitation. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the AWS General Reference."]}
+          "The Amazon Resource Name (ARN) of the invitation. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."]}
     let make ?invitationId =
       fun ?creationDate ->
         fun ?expirationDate ->
@@ -1529,20 +1620,84 @@ module Invitation =
       make ?arn ?networkSummary ?status ?expirationDate ?creationDate
         ?invitationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" ArnString.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" ArnString.of_json in
       let networkSummary =
-        field_map json "NetworkSummary" NetworkSummary.of_json in
-      let status = field_map json "Status" InvitationStatus.of_json in
-      let expirationDate = field_map json "ExpirationDate" Timestamp.of_json in
-      let creationDate = field_map json "CreationDate" Timestamp.of_json in
+        field_map json__ "NetworkSummary" NetworkSummary.of_json in
+      let status = field_map json__ "Status" InvitationStatus.of_json in
+      let expirationDate =
+        field_map json__ "ExpirationDate" Timestamp.of_json in
+      let creationDate = field_map json__ "CreationDate" Timestamp.of_json in
       let invitationId =
-        field_map json "InvitationId" ResourceIdString.of_json in
+        field_map json__ "InvitationId" ResourceIdString.of_json in
       make ?arn ?networkSummary ?status ?expirationDate ?creationDate
         ?invitationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An invitation to an AWS account to create a member and join the network. Applies only to Hyperledger Fabric."]
+       "An invitation to an Amazon Web Services account to create a member and join the network. Applies only to Hyperledger Fabric."]
+module AccessorSummary =
+  struct
+    type nonrec t =
+      {
+      id: ResourceIdString.t option
+        [@ocaml.doc "The unique identifier of the accessor."];
+      type_: AccessorType.t option
+        [@ocaml.doc
+          "The type of the accessor. Currently accessor type is restricted to BILLING_TOKEN."];
+      status: AccessorStatus.t option
+        [@ocaml.doc "The current status of the accessor."];
+      creationDate: Timestamp.t option
+        [@ocaml.doc "The creation date and time of the accessor."];
+      arn: ArnString.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the accessor. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."];
+      networkType: AccessorNetworkType.t option
+        [@ocaml.doc
+          "The blockchain network that the Accessor token is created for."]}
+    let make ?id =
+      fun ?type_ ->
+        fun ?status ->
+          fun ?creationDate ->
+            fun ?arn ->
+              fun ?networkType ->
+                fun () ->
+                  { id; type_; status; creationDate; arn; networkType }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:ResourceIdString.to_value));
+        ("Type", (Option.map x.type_ ~f:AccessorType.to_value));
+        ("Status", (Option.map x.status ~f:AccessorStatus.to_value));
+        ("CreationDate", (Option.map x.creationDate ~f:Timestamp.to_value));
+        ("Arn", (Option.map x.arn ~f:ArnString.to_value));
+        ("NetworkType",
+          (Option.map x.networkType ~f:AccessorNetworkType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:AccessorNetworkType.of_xml)
+          (Xml.child xml_arg0 "NetworkType") in
+      let arn = (Option.map ~f:ArnString.of_xml) (Xml.child xml_arg0 "Arn") in
+      let creationDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationDate") in
+      let status =
+        (Option.map ~f:AccessorStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let type_ =
+        (Option.map ~f:AccessorType.of_xml) (Xml.child xml_arg0 "Type") in
+      let id =
+        (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?networkType ?arn ?creationDate ?status ?type_ ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkType =
+        field_map json__ "NetworkType" AccessorNetworkType.of_json in
+      let arn = field_map json__ "Arn" ArnString.of_json in
+      let creationDate = field_map json__ "CreationDate" Timestamp.of_json in
+      let status = field_map json__ "Status" AccessorStatus.of_json in
+      let type_ = field_map json__ "Type" AccessorType.of_json in
+      let id = field_map json__ "Id" ResourceIdString.of_json in
+      make ?networkType ?arn ?creationDate ?status ?type_ ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A summary of accessor properties."]
 module OutputTagMap =
   struct
     type nonrec t = (TagKey.t * TagValue.t) list
@@ -1569,6 +1724,8 @@ module OutputTagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1582,7 +1739,7 @@ module ProposalActions =
       {
       invitations: InviteActionList.t option
         [@ocaml.doc
-          "The actions to perform for an APPROVED proposal to invite an AWS account to create a member and join the network."];
+          "The actions to perform for an APPROVED proposal to invite an Amazon Web Services account to create a member and join the network."];
       removals: RemoveActionList.t option
         [@ocaml.doc
           "The actions to perform for an APPROVED proposal to remove a member from the network, which deletes the member and all associated member resources from the network."]}
@@ -1603,9 +1760,10 @@ module ProposalActions =
           (Xml.child xml_arg0 "Invitations") in
       make ?removals ?invitations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let removals = field_map json "Removals" RemoveActionList.of_json in
-      let invitations = field_map json "Invitations" InviteActionList.of_json in
+    let of_json json__ =
+      let removals = field_map json__ "Removals" RemoveActionList.of_json in
+      let invitations =
+        field_map json__ "Invitations" InviteActionList.of_json in
       make ?removals ?invitations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1649,9 +1807,10 @@ module NodeFrameworkAttributes =
           (Xml.child xml_arg0 "Fabric") in
       make ?ethereum ?fabric ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ethereum = field_map json "Ethereum" NodeEthereumAttributes.of_json in
-      let fabric = field_map json "Fabric" NodeFabricAttributes.of_json in
+    let of_json json__ =
+      let ethereum =
+        field_map json__ "Ethereum" NodeEthereumAttributes.of_json in
+      let fabric = field_map json__ "Fabric" NodeFabricAttributes.of_json in
       make ?ethereum ?fabric ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1676,9 +1835,10 @@ module NodeLogPublishingConfiguration =
           (Xml.child xml_arg0 "Fabric") in
       make ?fabric ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fabric =
-        field_map json "Fabric" NodeFabricLogPublishingConfiguration.of_json in
+        field_map json__ "Fabric"
+          NodeFabricLogPublishingConfiguration.of_json in
       make ?fabric ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1735,10 +1895,10 @@ module NetworkFrameworkAttributes =
           (Xml.child xml_arg0 "Fabric") in
       make ?ethereum ?fabric ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ethereum =
-        field_map json "Ethereum" NetworkEthereumAttributes.of_json in
-      let fabric = field_map json "Fabric" NetworkFabricAttributes.of_json in
+        field_map json__ "Ethereum" NetworkEthereumAttributes.of_json in
+      let fabric = field_map json__ "Fabric" NetworkFabricAttributes.of_json in
       make ?ethereum ?fabric ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1763,9 +1923,9 @@ module VotingPolicy =
           (Xml.child xml_arg0 "ApprovalThresholdPolicy") in
       make ?approvalThresholdPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalThresholdPolicy =
-        field_map json "ApprovalThresholdPolicy"
+        field_map json__ "ApprovalThresholdPolicy"
           ApprovalThresholdPolicy.of_json in
       make ?approvalThresholdPolicy ()
     let to_json v = composed_to_json to_value v
@@ -1789,8 +1949,8 @@ module MemberFrameworkAttributes =
           (Xml.child xml_arg0 "Fabric") in
       make ?fabric ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fabric = field_map json "Fabric" MemberFabricAttributes.of_json in
+    let of_json json__ =
+      let fabric = field_map json__ "Fabric" MemberFabricAttributes.of_json in
       make ?fabric ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1815,14 +1975,32 @@ module MemberLogPublishingConfiguration =
           (Xml.child xml_arg0 "Fabric") in
       make ?fabric ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fabric =
-        field_map json "Fabric"
+        field_map json__ "Fabric"
           MemberFabricLogPublishingConfiguration.of_json in
       make ?fabric ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Configuration properties for logging events associated with a member of a Managed Blockchain network."]
+module AccessorBillingTokenString =
+  struct
+    type nonrec t = string
+    let context_ = "AccessorBillingTokenString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:42) >>=
+             (fun () -> check_string_min i ~min:42));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AccessorBillingTokenString" j
+    let to_json = simple_to_json to_value
+  end
 module InputTagMap =
   struct
     type nonrec t = (TagKey.t * TagValue.t) list
@@ -1848,6 +2026,8 @@ module InputTagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1874,8 +2054,9 @@ module MemberFrameworkConfiguration =
           (Xml.child xml_arg0 "Fabric") in
       make ?fabric ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fabric = field_map json "Fabric" MemberFabricConfiguration.of_json in
+    let of_json json__ =
+      let fabric =
+        field_map json__ "Fabric" MemberFabricConfiguration.of_json in
       make ?fabric ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1897,8 +2078,8 @@ module NetworkFabricConfiguration =
         Edition.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Edition") in
       make ~edition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let edition = field_map_exn json "Edition" Edition.of_json in
+    let of_json json__ =
+      let edition = field_map_exn json__ "Edition" Edition.of_json in
       make ~edition ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1917,12 +2098,11 @@ module AccessDeniedException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "You do not have sufficient access to perform this action."]
+  end[@@ocaml.doc "You don't have sufficient access to perform this action."]
 module IllegalActionException =
   struct
     type nonrec t = {
@@ -1937,8 +2117,8 @@ module IllegalActionException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end
@@ -1969,8 +2149,8 @@ module InvalidRequestException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1982,7 +2162,7 @@ module ResourceNotFoundException =
       message: String_.t option ;
       resourceName: ArnString.t option
         [@ocaml.doc
-          "A requested resource does not exist. It may have been deleted or referenced inaccurately."]}
+          "A requested resource doesn't exist. It may have been deleted or referenced inaccurately."]}
     let make ?message =
       fun ?resourceName -> fun () -> { message; resourceName }
     let to_value x =
@@ -1997,13 +2177,13 @@ module ResourceNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "ResourceName" ArnString.of_json in
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "ResourceName" ArnString.of_json in
+      let message = field_map json__ "Message" String_.of_json in
       make ?resourceName ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A requested resource does not exist. It may have been deleted or referenced inaccurately."]
+       "A requested resource doesn't exist. It may have been deleted or referenced incorrectly."]
 module ThrottlingException =
   struct
     type nonrec t = unit
@@ -2016,7 +2196,7 @@ module ThrottlingException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The request or operation could not be performed because a service is throttling requests. The most common source of throttling errors is launching EC2 instances such that your service limit for EC2 instances is exceeded. Request a limit increase or delete unused resources if possible."]
+       "The request or operation couldn't be performed because a service is throttling requests. The most common source of throttling errors is creating resources that exceed your service limit for this resource type. Request a limit increase or delete unused resources if possible."]
 module ResourceNotReadyException =
   struct
     type nonrec t = {
@@ -2031,12 +2211,12 @@ module ResourceNotReadyException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The requested resource exists but is not in a status that can complete the operation."]
+       "The requested resource exists but isn't in a status that can complete the operation."]
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
@@ -2046,6 +2226,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2086,9 +2269,9 @@ module TooManyTagsException =
           (Xml.child xml_arg0 "Message") in
       make ?resourceName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "ResourceName" ArnString.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "ResourceName" ArnString.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?resourceName ?message ()
     let to_json v = composed_to_json to_value v
   end
@@ -2110,6 +2293,9 @@ module ProposalSummaryList =
   struct
     type nonrec t = ProposalSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProposalSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2153,6 +2339,9 @@ module ProposalVoteList =
   struct
     type nonrec t = VoteSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VoteSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2177,6 +2366,9 @@ module NodeSummaryList =
   struct
     type nonrec t = NodeSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NodeSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2219,6 +2411,9 @@ module NetworkSummaryList =
   struct
     type nonrec t = NetworkSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2262,6 +2457,9 @@ module MemberSummaryList =
   struct
     type nonrec t = MemberSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MemberSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2304,6 +2502,9 @@ module InvitationList =
   struct
     type nonrec t = Invitation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Invitation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2338,12 +2539,58 @@ module ResourceLimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The maximum number of resources of that type already exist. Ensure the resources requested are within the boundaries of the service edition and your account limits."]
+module AccessorSummaryList =
+  struct
+    type nonrec t = AccessorSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AccessorSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AccessorSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AccessorSummaryList"
+        ~of_json:AccessorSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AccessorListMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for AccessorListMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module Proposal =
   struct
     type nonrec t =
@@ -2365,12 +2612,12 @@ module Proposal =
         [@ocaml.doc "The name of the member that created the proposal."];
       status: ProposalStatus.t option
         [@ocaml.doc
-          "The status of the proposal. Values are as follows: IN_PROGRESS - The proposal is active and open for member voting. APPROVED - The proposal was approved with sufficient YES votes among members according to the VotingPolicy specified for the Network. The specified proposal actions are carried out. REJECTED - The proposal was rejected with insufficient YES votes among members according to the VotingPolicy specified for the Network. The specified ProposalActions are not carried out. EXPIRED - Members did not cast the number of votes required to determine the proposal outcome before the proposal expired. The specified ProposalActions are not carried out. ACTION_FAILED - One or more of the specified ProposalActions in a proposal that was approved could not be completed because of an error. The ACTION_FAILED status occurs even if only one ProposalAction fails and other actions are successful."];
+          "The status of the proposal. Values are as follows: IN_PROGRESS - The proposal is active and open for member voting. APPROVED - The proposal was approved with sufficient YES votes among members according to the VotingPolicy specified for the Network. The specified proposal actions are carried out. REJECTED - The proposal was rejected with insufficient YES votes among members according to the VotingPolicy specified for the Network. The specified ProposalActions aren't carried out. EXPIRED - Members didn't cast the number of votes required to determine the proposal outcome before the proposal expired. The specified ProposalActions aren't carried out. ACTION_FAILED - One or more of the specified ProposalActions in a proposal that was approved couldn't be completed because of an error. The ACTION_FAILED status occurs even if only one ProposalAction fails and other actions are successful."];
       creationDate: Timestamp.t option
         [@ocaml.doc "The date and time that the proposal was created."];
       expirationDate: Timestamp.t option
         [@ocaml.doc
-          "The date and time that the proposal expires. This is the CreationDate plus the ProposalDurationInHours that is specified in the ProposalThresholdPolicy. After this date and time, if members have not cast enough votes to determine the outcome according to the voting policy, the proposal is EXPIRED and Actions are not carried out."];
+          "The date and time that the proposal expires. This is the CreationDate plus the ProposalDurationInHours that is specified in the ProposalThresholdPolicy. After this date and time, if members haven't cast enough votes to determine the outcome according to the voting policy, the proposal is EXPIRED and Actions aren't carried out."];
       yesVoteCount: VoteCount.t option
         [@ocaml.doc
           "The current total of YES votes cast on the proposal by members."];
@@ -2385,7 +2632,7 @@ module Proposal =
           "Tags assigned to the proposal. Each tag consists of a key and optional value. For more information about tags, see Tagging Resources in the Amazon Managed Blockchain Ethereum Developer Guide, or Tagging Resources in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide."];
       arn: ArnString.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the proposal. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the AWS General Reference."]}
+          "The Amazon Resource Name (ARN) of the proposal. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."]}
     let make ?proposalId =
       fun ?networkId ->
         fun ?description ->
@@ -2480,25 +2727,27 @@ module Proposal =
         ?expirationDate ?creationDate ?status ?proposedByMemberName
         ?proposedByMemberId ?actions ?description ?networkId ?proposalId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" ArnString.of_json in
-      let tags = field_map json "Tags" OutputTagMap.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" ArnString.of_json in
+      let tags = field_map json__ "Tags" OutputTagMap.of_json in
       let outstandingVoteCount =
-        field_map json "OutstandingVoteCount" VoteCount.of_json in
-      let noVoteCount = field_map json "NoVoteCount" VoteCount.of_json in
-      let yesVoteCount = field_map json "YesVoteCount" VoteCount.of_json in
-      let expirationDate = field_map json "ExpirationDate" Timestamp.of_json in
-      let creationDate = field_map json "CreationDate" Timestamp.of_json in
-      let status = field_map json "Status" ProposalStatus.of_json in
+        field_map json__ "OutstandingVoteCount" VoteCount.of_json in
+      let noVoteCount = field_map json__ "NoVoteCount" VoteCount.of_json in
+      let yesVoteCount = field_map json__ "YesVoteCount" VoteCount.of_json in
+      let expirationDate =
+        field_map json__ "ExpirationDate" Timestamp.of_json in
+      let creationDate = field_map json__ "CreationDate" Timestamp.of_json in
+      let status = field_map json__ "Status" ProposalStatus.of_json in
       let proposedByMemberName =
-        field_map json "ProposedByMemberName" NetworkMemberNameString.of_json in
+        field_map json__ "ProposedByMemberName"
+          NetworkMemberNameString.of_json in
       let proposedByMemberId =
-        field_map json "ProposedByMemberId" ResourceIdString.of_json in
-      let actions = field_map json "Actions" ProposalActions.of_json in
+        field_map json__ "ProposedByMemberId" ResourceIdString.of_json in
+      let actions = field_map json__ "Actions" ProposalActions.of_json in
       let description =
-        field_map json "Description" DescriptionString.of_json in
-      let networkId = field_map json "NetworkId" ResourceIdString.of_json in
-      let proposalId = field_map json "ProposalId" ResourceIdString.of_json in
+        field_map json__ "Description" DescriptionString.of_json in
+      let networkId = field_map json__ "NetworkId" ResourceIdString.of_json in
+      let proposalId = field_map json__ "ProposalId" ResourceIdString.of_json in
       make ?arn ?tags ?outstandingVoteCount ?noVoteCount ?yesVoteCount
         ?expirationDate ?creationDate ?status ?proposedByMemberName
         ?proposedByMemberId ?actions ?description ?networkId ?proposalId ()
@@ -2532,7 +2781,7 @@ module Node =
           "The state database that the node uses. Values are LevelDB or CouchDB. Applies only to Hyperledger Fabric."];
       status: NodeStatus.t option
         [@ocaml.doc
-          "The status of the node. CREATING - The AWS account is in the process of creating a node. AVAILABLE - The node has been created and can participate in the network. UNHEALTHY - The node is impaired and might not function as expected. Amazon Managed Blockchain automatically finds nodes in this state and tries to recover them. If a node is recoverable, it returns to AVAILABLE. Otherwise, it moves to FAILED status. CREATE_FAILED - The AWS account attempted to create a node and creation failed. UPDATING - The node is in the process of being updated. DELETING - The node is in the process of being deleted. DELETED - The node can no longer participate on the network. FAILED - The node is no longer functional, cannot be recovered, and must be deleted. INACCESSIBLE_ENCRYPTION_KEY - The node is impaired and might not function as expected because it cannot access the specified customer managed key in AWS KMS for encryption at rest. Either the KMS key was disabled or deleted, or the grants on the key were revoked. The effect of disabling or deleting a key, or revoking a grant is not immediate. The node resource might take some time to find that the key is inaccessible. When a resource is in this state, we recommend deleting and recreating the resource."];
+          "The status of the node. CREATING - The Amazon Web Services account is in the process of creating a node. AVAILABLE - The node has been created and can participate in the network. UNHEALTHY - The node is impaired and might not function as expected. Amazon Managed Blockchain automatically finds nodes in this state and tries to recover them. If a node is recoverable, it returns to AVAILABLE. Otherwise, it moves to FAILED status. CREATE_FAILED - The Amazon Web Services account attempted to create a node and creation failed. UPDATING - The node is in the process of being updated. DELETING - The node is in the process of being deleted. DELETED - The node can no longer participate on the network. FAILED - The node is no longer functional, cannot be recovered, and must be deleted. INACCESSIBLE_ENCRYPTION_KEY - The node is impaired and might not function as expected because it cannot access the specified customer managed key in KMS for encryption at rest. Either the KMS key was disabled or deleted, or the grants on the key were revoked. The effect of disabling or deleting a key or of revoking a grant isn't immediate. It might take some time for the node resource to discover that the key is inaccessible. When a resource is in this state, we recommend deleting and recreating the resource."];
       creationDate: Timestamp.t option
         [@ocaml.doc "The date and time that the node was created."];
       tags: OutputTagMap.t option
@@ -2540,10 +2789,10 @@ module Node =
           "Tags assigned to the node. Each tag consists of a key and optional value. For more information about tags, see Tagging Resources in the Amazon Managed Blockchain Ethereum Developer Guide, or Tagging Resources in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide."];
       arn: ArnString.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the node. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "The Amazon Resource Name (ARN) of the node. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."];
       kmsKeyArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the customer managed key in AWS Key Management Service (AWS KMS) that the node uses for encryption at rest. If the value of this parameter is \"AWS Owned KMS Key\", the node uses an AWS owned KMS key for encryption. The node inherits this parameter from the member that it belongs to. Applies only to Hyperledger Fabric."]}
+          "The Amazon Resource Name (ARN) of the customer managed key in Key Management Service (KMS) that the node uses for encryption at rest. If the value of this parameter is \"AWS Owned KMS Key\", the node uses an Amazon Web Services owned KMS key for encryption. The node inherits this parameter from the member that it belongs to. For more information, see Encryption at Rest in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide. Applies only to Hyperledger Fabric."]}
     let make ?networkId =
       fun ?memberId ->
         fun ?id ->
@@ -2631,25 +2880,26 @@ module Node =
         ?logPublishingConfiguration ?frameworkAttributes ?availabilityZone
         ?instanceType ?id ?memberId ?networkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyArn = field_map json "KmsKeyArn" String_.of_json in
-      let arn = field_map json "Arn" ArnString.of_json in
-      let tags = field_map json "Tags" OutputTagMap.of_json in
-      let creationDate = field_map json "CreationDate" Timestamp.of_json in
-      let status = field_map json "Status" NodeStatus.of_json in
-      let stateDB = field_map json "StateDB" StateDBType.of_json in
+    let of_json json__ =
+      let kmsKeyArn = field_map json__ "KmsKeyArn" String_.of_json in
+      let arn = field_map json__ "Arn" ArnString.of_json in
+      let tags = field_map json__ "Tags" OutputTagMap.of_json in
+      let creationDate = field_map json__ "CreationDate" Timestamp.of_json in
+      let status = field_map json__ "Status" NodeStatus.of_json in
+      let stateDB = field_map json__ "StateDB" StateDBType.of_json in
       let logPublishingConfiguration =
-        field_map json "LogPublishingConfiguration"
+        field_map json__ "LogPublishingConfiguration"
           NodeLogPublishingConfiguration.of_json in
       let frameworkAttributes =
-        field_map json "FrameworkAttributes" NodeFrameworkAttributes.of_json in
+        field_map json__ "FrameworkAttributes"
+          NodeFrameworkAttributes.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" AvailabilityZoneString.of_json in
+        field_map json__ "AvailabilityZone" AvailabilityZoneString.of_json in
       let instanceType =
-        field_map json "InstanceType" InstanceTypeString.of_json in
-      let id = field_map json "Id" ResourceIdString.of_json in
-      let memberId = field_map json "MemberId" ResourceIdString.of_json in
-      let networkId = field_map json "NetworkId" ResourceIdString.of_json in
+        field_map json__ "InstanceType" InstanceTypeString.of_json in
+      let id = field_map json__ "Id" ResourceIdString.of_json in
+      let memberId = field_map json__ "MemberId" ResourceIdString.of_json in
+      let networkId = field_map json__ "NetworkId" ResourceIdString.of_json in
       make ?kmsKeyArn ?arn ?tags ?creationDate ?status ?stateDB
         ?logPublishingConfiguration ?frameworkAttributes ?availabilityZone
         ?instanceType ?id ?memberId ?networkId ()
@@ -2678,7 +2928,7 @@ module Network =
           "The VPC endpoint service name of the VPC endpoint service of the network. Members use the VPC endpoint service name to create a VPC endpoint to access network resources."];
       votingPolicy: VotingPolicy.t option
         [@ocaml.doc
-          "The voting rules for the network to decide if a proposal is accepted."];
+          "The voting rules that the network uses to decide if a proposal is accepted."];
       status: NetworkStatus.t option
         [@ocaml.doc "The current status of the network."];
       creationDate: Timestamp.t option
@@ -2688,7 +2938,7 @@ module Network =
           "Tags assigned to the network. Each tag consists of a key and optional value. For more information about tags, see Tagging Resources in the Amazon Managed Blockchain Ethereum Developer Guide, or Tagging Resources in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide."];
       arn: ArnString.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the network. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the AWS General Reference."]}
+          "The Amazon Resource Name (ARN) of the network. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."]}
     let make ?id =
       fun ?name ->
         fun ?description ->
@@ -2770,24 +3020,24 @@ module Network =
         ?vpcEndpointServiceName ?frameworkAttributes ?frameworkVersion
         ?framework ?description ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" ArnString.of_json in
-      let tags = field_map json "Tags" OutputTagMap.of_json in
-      let creationDate = field_map json "CreationDate" Timestamp.of_json in
-      let status = field_map json "Status" NetworkStatus.of_json in
-      let votingPolicy = field_map json "VotingPolicy" VotingPolicy.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" ArnString.of_json in
+      let tags = field_map json__ "Tags" OutputTagMap.of_json in
+      let creationDate = field_map json__ "CreationDate" Timestamp.of_json in
+      let status = field_map json__ "Status" NetworkStatus.of_json in
+      let votingPolicy = field_map json__ "VotingPolicy" VotingPolicy.of_json in
       let vpcEndpointServiceName =
-        field_map json "VpcEndpointServiceName" String_.of_json in
+        field_map json__ "VpcEndpointServiceName" String_.of_json in
       let frameworkAttributes =
-        field_map json "FrameworkAttributes"
+        field_map json__ "FrameworkAttributes"
           NetworkFrameworkAttributes.of_json in
       let frameworkVersion =
-        field_map json "FrameworkVersion" FrameworkVersionString.of_json in
-      let framework = field_map json "Framework" Framework.of_json in
+        field_map json__ "FrameworkVersion" FrameworkVersionString.of_json in
+      let framework = field_map json__ "Framework" Framework.of_json in
       let description =
-        field_map json "Description" DescriptionString.of_json in
-      let name = field_map json "Name" NameString.of_json in
-      let id = field_map json "Id" ResourceIdString.of_json in
+        field_map json__ "Description" DescriptionString.of_json in
+      let name = field_map json__ "Name" NameString.of_json in
+      let id = field_map json__ "Id" ResourceIdString.of_json in
       make ?arn ?tags ?creationDate ?status ?votingPolicy
         ?vpcEndpointServiceName ?frameworkAttributes ?frameworkVersion
         ?framework ?description ?name ?id ()
@@ -2814,18 +3064,18 @@ module Member =
           "Configuration properties for logging events associated with a member."];
       status: MemberStatus.t option
         [@ocaml.doc
-          "The status of a member. CREATING - The AWS account is in the process of creating a member. AVAILABLE - The member has been created and can participate in the network. CREATE_FAILED - The AWS account attempted to create a member and creation failed. UPDATING - The member is in the process of being updated. DELETING - The member and all associated resources are in the process of being deleted. Either the AWS account that owns the member deleted it, or the member is being deleted as the result of an APPROVED PROPOSAL to remove the member. DELETED - The member can no longer participate on the network and all associated resources are deleted. Either the AWS account that owns the member deleted it, or the member is being deleted as the result of an APPROVED PROPOSAL to remove the member. INACCESSIBLE_ENCRYPTION_KEY - The member is impaired and might not function as expected because it cannot access the specified customer managed key in AWS KMS for encryption at rest. Either the KMS key was disabled or deleted, or the grants on the key were revoked. The effect of disabling or deleting a key, or revoking a grant is not immediate. The member resource might take some time to find that the key is inaccessible. When a resource is in this state, we recommend deleting and recreating the resource."];
+          "The status of a member. CREATING - The Amazon Web Services account is in the process of creating a member. AVAILABLE - The member has been created and can participate in the network. CREATE_FAILED - The Amazon Web Services account attempted to create a member and creation failed. UPDATING - The member is in the process of being updated. DELETING - The member and all associated resources are in the process of being deleted. Either the Amazon Web Services account that owns the member deleted it, or the member is being deleted as the result of an APPROVED PROPOSAL to remove the member. DELETED - The member can no longer participate on the network and all associated resources are deleted. Either the Amazon Web Services account that owns the member deleted it, or the member is being deleted as the result of an APPROVED PROPOSAL to remove the member. INACCESSIBLE_ENCRYPTION_KEY - The member is impaired and might not function as expected because it cannot access the specified customer managed key in KMS for encryption at rest. Either the KMS key was disabled or deleted, or the grants on the key were revoked. The effect of disabling or deleting a key or of revoking a grant isn't immediate. It might take some time for the member resource to discover that the key is inaccessible. When a resource is in this state, we recommend deleting and recreating the resource."];
       creationDate: Timestamp.t option
         [@ocaml.doc "The date and time that the member was created."];
       tags: OutputTagMap.t option
         [@ocaml.doc
-          "Tags assigned to the member. Tags consist of a key and optional value. For more information about tags, see Tagging Resources in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide."];
+          "Tags assigned to the member. Tags consist of a key and optional value. For more information about tags, see Tagging Resources in the Amazon Managed Blockchain Ethereum Developer Guide, or Tagging Resources in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide."];
       arn: ArnString.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the member. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "The Amazon Resource Name (ARN) of the member. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."];
       kmsKeyArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the customer managed key in AWS Key Management Service (AWS KMS) that the member uses for encryption at rest. If the value of this parameter is \"AWS Owned KMS Key\", the member uses an AWS owned KMS key for encryption. This parameter is inherited by the nodes that this member owns."]}
+          "The Amazon Resource Name (ARN) of the customer managed key in Key Management Service (KMS) that the member uses for encryption at rest. If the value of this parameter is \"AWS Owned KMS Key\", the member uses an Amazon Web Services owned KMS key for encryption. This parameter is inherited by the nodes that this member owns. For more information, see Encryption at Rest in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide."]}
     let make ?networkId =
       fun ?id ->
         fun ?name ->
@@ -2901,29 +3151,122 @@ module Member =
         ?logPublishingConfiguration ?frameworkAttributes ?description ?name
         ?id ?networkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyArn = field_map json "KmsKeyArn" String_.of_json in
-      let arn = field_map json "Arn" ArnString.of_json in
-      let tags = field_map json "Tags" OutputTagMap.of_json in
-      let creationDate = field_map json "CreationDate" Timestamp.of_json in
-      let status = field_map json "Status" MemberStatus.of_json in
+    let of_json json__ =
+      let kmsKeyArn = field_map json__ "KmsKeyArn" String_.of_json in
+      let arn = field_map json__ "Arn" ArnString.of_json in
+      let tags = field_map json__ "Tags" OutputTagMap.of_json in
+      let creationDate = field_map json__ "CreationDate" Timestamp.of_json in
+      let status = field_map json__ "Status" MemberStatus.of_json in
       let logPublishingConfiguration =
-        field_map json "LogPublishingConfiguration"
+        field_map json__ "LogPublishingConfiguration"
           MemberLogPublishingConfiguration.of_json in
       let frameworkAttributes =
-        field_map json "FrameworkAttributes"
+        field_map json__ "FrameworkAttributes"
           MemberFrameworkAttributes.of_json in
       let description =
-        field_map json "Description" DescriptionString.of_json in
-      let name = field_map json "Name" NetworkMemberNameString.of_json in
-      let id = field_map json "Id" ResourceIdString.of_json in
-      let networkId = field_map json "NetworkId" ResourceIdString.of_json in
+        field_map json__ "Description" DescriptionString.of_json in
+      let name = field_map json__ "Name" NetworkMemberNameString.of_json in
+      let id = field_map json__ "Id" ResourceIdString.of_json in
+      let networkId = field_map json__ "NetworkId" ResourceIdString.of_json in
       make ?kmsKeyArn ?arn ?tags ?creationDate ?status
         ?logPublishingConfiguration ?frameworkAttributes ?description ?name
         ?id ?networkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Member configuration properties. Applies only to Hyperledger Fabric."]
+module Accessor =
+  struct
+    type nonrec t =
+      {
+      id: ResourceIdString.t option
+        [@ocaml.doc "The unique identifier of the accessor."];
+      type_: AccessorType.t option
+        [@ocaml.doc
+          "The type of the accessor. Currently, accessor type is restricted to BILLING_TOKEN."];
+      billingToken: AccessorBillingTokenString.t option
+        [@ocaml.doc
+          "The billing token is a property of the Accessor. Use this token to when making calls to the blockchain network. The billing token is used to track your accessor token for billing requests."];
+      status: AccessorStatus.t option
+        [@ocaml.doc "The current status of the accessor."];
+      creationDate: Timestamp.t option
+        [@ocaml.doc "The creation date and time of the accessor."];
+      arn: ArnString.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the accessor. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."];
+      tags: OutputTagMap.t option
+        [@ocaml.doc
+          "The tags assigned to the Accessor. For more information about tags, see Tagging Resources in the Amazon Managed Blockchain Ethereum Developer Guide, or Tagging Resources in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide."];
+      networkType: AccessorNetworkType.t option
+        [@ocaml.doc
+          "The blockchain network that the Accessor token is created for."]}
+    let make ?id =
+      fun ?type_ ->
+        fun ?billingToken ->
+          fun ?status ->
+            fun ?creationDate ->
+              fun ?arn ->
+                fun ?tags ->
+                  fun ?networkType ->
+                    fun () ->
+                      {
+                        id;
+                        type_;
+                        billingToken;
+                        status;
+                        creationDate;
+                        arn;
+                        tags;
+                        networkType
+                      }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:ResourceIdString.to_value));
+        ("Type", (Option.map x.type_ ~f:AccessorType.to_value));
+        ("BillingToken",
+          (Option.map x.billingToken ~f:AccessorBillingTokenString.to_value));
+        ("Status", (Option.map x.status ~f:AccessorStatus.to_value));
+        ("CreationDate", (Option.map x.creationDate ~f:Timestamp.to_value));
+        ("Arn", (Option.map x.arn ~f:ArnString.to_value));
+        ("Tags", (Option.map x.tags ~f:OutputTagMap.to_value));
+        ("NetworkType",
+          (Option.map x.networkType ~f:AccessorNetworkType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:AccessorNetworkType.of_xml)
+          (Xml.child xml_arg0 "NetworkType") in
+      let tags =
+        (Option.map ~f:OutputTagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let arn = (Option.map ~f:ArnString.of_xml) (Xml.child xml_arg0 "Arn") in
+      let creationDate =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationDate") in
+      let status =
+        (Option.map ~f:AccessorStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let billingToken =
+        (Option.map ~f:AccessorBillingTokenString.of_xml)
+          (Xml.child xml_arg0 "BillingToken") in
+      let type_ =
+        (Option.map ~f:AccessorType.of_xml) (Xml.child xml_arg0 "Type") in
+      let id =
+        (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?networkType ?tags ?arn ?creationDate ?status ?billingToken ?type_
+        ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkType =
+        field_map json__ "NetworkType" AccessorNetworkType.of_json in
+      let tags = field_map json__ "Tags" OutputTagMap.of_json in
+      let arn = field_map json__ "Arn" ArnString.of_json in
+      let creationDate = field_map json__ "CreationDate" Timestamp.of_json in
+      let status = field_map json__ "Status" AccessorStatus.of_json in
+      let billingToken =
+        field_map json__ "BillingToken" AccessorBillingTokenString.of_json in
+      let type_ = field_map json__ "Type" AccessorType.of_json in
+      let id = field_map json__ "Id" ResourceIdString.of_json in
+      make ?networkType ?tags ?arn ?creationDate ?status ?billingToken ?type_
+        ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The properties of the Accessor."]
 module ClientRequestTokenString =
   struct
     type nonrec t = string
@@ -2956,8 +3299,8 @@ module ResourceAlreadyExistsException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3016,15 +3359,15 @@ module NodeConfiguration =
       make ?stateDB ?logPublishingConfiguration ?availabilityZone
         ~instanceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stateDB = field_map json "StateDB" StateDBType.of_json in
+    let of_json json__ =
+      let stateDB = field_map json__ "StateDB" StateDBType.of_json in
       let logPublishingConfiguration =
-        field_map json "LogPublishingConfiguration"
+        field_map json__ "LogPublishingConfiguration"
           NodeLogPublishingConfiguration.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" AvailabilityZoneString.of_json in
+        field_map json__ "AvailabilityZone" AvailabilityZoneString.of_json in
       let instanceType =
-        field_map_exn json "InstanceType" InstanceTypeString.of_json in
+        field_map_exn json__ "InstanceType" InstanceTypeString.of_json in
       make ?stateDB ?logPublishingConfiguration ?availabilityZone
         ~instanceType ()
     let to_json v = composed_to_json to_value v
@@ -3044,10 +3387,10 @@ module MemberConfiguration =
           "Configuration properties for logging events associated with a member of a Managed Blockchain network."];
       tags: InputTagMap.t option
         [@ocaml.doc
-          "Tags assigned to the member. Tags consist of a key and optional value. For more information about tags, see Tagging Resources in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide. When specifying tags during creation, you can specify multiple key-value pairs in a single request, with an overall maximum of 50 tags added to each resource."];
+          "Tags assigned to the member. Tags consist of a key and optional value. When specifying tags during creation, you can specify multiple key-value pairs in a single request, with an overall maximum of 50 tags added to each resource. For more information about tags, see Tagging Resources in the Amazon Managed Blockchain Ethereum Developer Guide, or Tagging Resources in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide."];
       kmsKeyArn: ArnString.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the customer managed key in AWS Key Management Service (AWS KMS) to use for encryption at rest in the member. This parameter is inherited by any nodes that this member creates. Use one of the following options to specify this parameter: Undefined or empty string - The member uses an AWS owned KMS key for encryption by default. A valid symmetric customer managed KMS key - The member uses the specified key for encryption. Amazon Managed Blockchain doesn't support asymmetric keys. For more information, see Using symmetric and asymmetric keys in the AWS Key Management Service Developer Guide. The following is an example of a KMS key ARN: arn:aws:kms:us-east-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab"]}
+          "The Amazon Resource Name (ARN) of the customer managed key in Key Management Service (KMS) to use for encryption at rest in the member. This parameter is inherited by any nodes that this member creates. For more information, see Encryption at Rest in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide. Use one of the following options to specify this parameter: Undefined or empty string - By default, use an KMS key that is owned and managed by Amazon Web Services on your behalf. A valid symmetric customer managed KMS key - Use the specified KMS key in your account that you create, own, and manage. Amazon Managed Blockchain doesn't support asymmetric keys. For more information, see Using symmetric and asymmetric keys in the Key Management Service Developer Guide. The following is an example of a KMS key ARN: arn:aws:kms:us-east-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab"]}
     let context_ = "MemberConfiguration"
     let make ?description =
       fun ?logPublishingConfiguration ->
@@ -3098,18 +3441,18 @@ module MemberConfiguration =
       make ?kmsKeyArn ?tags ?logPublishingConfiguration
         ~frameworkConfiguration ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyArn = field_map json "KmsKeyArn" ArnString.of_json in
-      let tags = field_map json "Tags" InputTagMap.of_json in
+    let of_json json__ =
+      let kmsKeyArn = field_map json__ "KmsKeyArn" ArnString.of_json in
+      let tags = field_map json__ "Tags" InputTagMap.of_json in
       let logPublishingConfiguration =
-        field_map json "LogPublishingConfiguration"
+        field_map json__ "LogPublishingConfiguration"
           MemberLogPublishingConfiguration.of_json in
       let frameworkConfiguration =
-        field_map_exn json "FrameworkConfiguration"
+        field_map_exn json__ "FrameworkConfiguration"
           MemberFrameworkConfiguration.of_json in
       let description =
-        field_map json "Description" DescriptionString.of_json in
-      let name = field_map_exn json "Name" NetworkMemberNameString.of_json in
+        field_map json__ "Description" DescriptionString.of_json in
+      let name = field_map_exn json__ "Name" NetworkMemberNameString.of_json in
       make ?kmsKeyArn ?tags ?logPublishingConfiguration
         ~frameworkConfiguration ?description ~name ()
     let to_json v = composed_to_json to_value v
@@ -3134,8 +3477,9 @@ module NetworkFrameworkConfiguration =
           (Xml.child xml_arg0 "Fabric") in
       make ?fabric ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fabric = field_map json "Fabric" NetworkFabricConfiguration.of_json in
+    let of_json json__ =
+      let fabric =
+        field_map json__ "Fabric" NetworkFabricConfiguration.of_json in
       make ?fabric ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3226,7 +3570,7 @@ module VoteOnProposalOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Casts a vote for a specified ProposalId on behalf of a member. The member to vote as, specified by VoterMemberId, must be in the same AWS account as the principal that calls the action. Applies only to Hyperledger Fabric."]
+       "Casts a vote for a specified ProposalId on behalf of a member. The member to vote as, specified by VoterMemberId, must be in the same Amazon Web Services account as the principal that calls the action. Applies only to Hyperledger Fabric."]
 module VoteOnProposalInput =
   struct
     type nonrec t =
@@ -3265,17 +3609,18 @@ module VoteOnProposalInput =
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ~vote ~voterMemberId ~proposalId ~networkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vote = field_map_exn json "Vote" VoteValue.of_json in
+    let of_json json__ =
+      let vote = field_map_exn json__ "Vote" VoteValue.of_json in
       let voterMemberId =
-        field_map_exn json "VoterMemberId" ResourceIdString.of_json in
+        field_map_exn json__ "VoterMemberId" ResourceIdString.of_json in
       let proposalId =
-        field_map_exn json "ProposalId" ResourceIdString.of_json in
-      let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
+        field_map_exn json__ "ProposalId" ResourceIdString.of_json in
+      let networkId =
+        field_map_exn json__ "NetworkId" ResourceIdString.of_json in
       make ~vote ~voterMemberId ~proposalId ~networkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Casts a vote for a specified ProposalId on behalf of a member. The member to vote as, specified by VoterMemberId, must be in the same AWS account as the principal that calls the action. Applies only to Hyperledger Fabric."]
+       "Casts a vote for a specified ProposalId on behalf of a member. The member to vote as, specified by VoterMemberId, must be in the same Amazon Web Services account as the principal that calls the action. Applies only to Hyperledger Fabric."]
 module UpdateNodeOutput =
   struct
     type nonrec t = unit
@@ -3400,13 +3745,14 @@ module UpdateNodeInput =
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ?logPublishingConfiguration ~nodeId ?memberId ~networkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let logPublishingConfiguration =
-        field_map json "LogPublishingConfiguration"
+        field_map json__ "LogPublishingConfiguration"
           NodeLogPublishingConfiguration.of_json in
-      let nodeId = field_map_exn json "NodeId" ResourceIdString.of_json in
-      let memberId = field_map json "MemberId" ResourceIdString.of_json in
-      let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
+      let nodeId = field_map_exn json__ "NodeId" ResourceIdString.of_json in
+      let memberId = field_map json__ "MemberId" ResourceIdString.of_json in
+      let networkId =
+        field_map_exn json__ "NetworkId" ResourceIdString.of_json in
       make ?logPublishingConfiguration ~nodeId ?memberId ~networkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3526,12 +3872,13 @@ module UpdateMemberInput =
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ?logPublishingConfiguration ~memberId ~networkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let logPublishingConfiguration =
-        field_map json "LogPublishingConfiguration"
+        field_map json__ "LogPublishingConfiguration"
           MemberLogPublishingConfiguration.of_json in
-      let memberId = field_map_exn json "MemberId" ResourceIdString.of_json in
-      let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
+      let memberId = field_map_exn json__ "MemberId" ResourceIdString.of_json in
+      let networkId =
+        field_map_exn json__ "NetworkId" ResourceIdString.of_json in
       make ?logPublishingConfiguration ~memberId ~networkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3611,7 +3958,7 @@ module UntagResourceRequest =
       {
       resourceArn: ArnString.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "The Amazon Resource Name (ARN) of the resource. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."];
       tagKeys: TagKeyList.t [@ocaml.doc "The tag keys."]}
     let context_ = "UntagResourceRequest"
     let make ~resourceArn =
@@ -3630,9 +3977,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" ArnString.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" ArnString.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3721,7 +4068,7 @@ module TagResourceRequest =
       {
       resourceArn: ArnString.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the AWS General Reference."];
+          "The Amazon Resource Name (ARN) of the resource. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."];
       tags: InputTagMap.t
         [@ocaml.doc
           "The tags to assign to the specified resource. Tag values can be empty, for example, \"MyTagKey\" : \"\". You can specify multiple key-value pairs in a single request, with an overall maximum of 50 tags added to each resource."]}
@@ -3740,9 +4087,9 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" InputTagMap.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" ArnString.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" InputTagMap.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" ArnString.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3833,7 +4180,7 @@ module RejectInvitationOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Rejects an invitation to join a network. This action can be called by a principal in an AWS account that has received an invitation to create a member and join a network. Applies only to Hyperledger Fabric."]
+       "Rejects an invitation to join a network. This action can be called by a principal in an Amazon Web Services account that has received an invitation to create a member and join a network. Applies only to Hyperledger Fabric."]
 module RejectInvitationInput =
   struct
     type nonrec t =
@@ -3852,13 +4199,13 @@ module RejectInvitationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "invitationId") in
       make ~invitationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let invitationId =
-        field_map_exn json "InvitationId" ResourceIdString.of_json in
+        field_map_exn json__ "InvitationId" ResourceIdString.of_json in
       make ~invitationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Rejects an invitation to join a network. This action can be called by a principal in an AWS account that has received an invitation to create a member and join a network. Applies only to Hyperledger Fabric."]
+       "Rejects an invitation to join a network. This action can be called by a principal in an Amazon Web Services account that has received an invitation to create a member and join a network. Applies only to Hyperledger Fabric."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -3931,8 +4278,9 @@ module ListTagsForResourceResponse =
         (Option.map ~f:OutputTagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" OutputTagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" OutputTagMap.of_json in
+      make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of tags for the specified resource. Each tag consists of a key and optional value. For more information about tags, see Tagging Resources in the Amazon Managed Blockchain Ethereum Developer Guide, or Tagging Resources in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide."]
@@ -3942,7 +4290,7 @@ module ListTagsForResourceRequest =
       {
       resourceArn: ArnString.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the AWS General Reference."]}
+          "The Amazon Resource Name (ARN) of the resource. For more information about ARNs and their format, see Amazon Resource Names (ARNs) in the Amazon Web Services General Reference."]}
     let context_ = "ListTagsForResourceRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
@@ -3955,8 +4303,8 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" ArnString.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" ArnString.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4052,9 +4400,10 @@ module ListProposalsOutput =
           (Xml.child xml_arg0 "Proposals") in
       make ?nextToken ?proposals ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let proposals = field_map json "Proposals" ProposalSummaryList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let proposals =
+        field_map json__ "Proposals" ProposalSummaryList.of_json in
       make ?nextToken ?proposals ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4093,11 +4442,12 @@ module ListProposalsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ?nextToken ?maxResults ~networkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "MaxResults" ProposalListMaxResults.of_json in
-      let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
+        field_map json__ "MaxResults" ProposalListMaxResults.of_json in
+      let networkId =
+        field_map_exn json__ "NetworkId" ResourceIdString.of_json in
       make ?nextToken ?maxResults ~networkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4184,10 +4534,10 @@ module ListProposalVotesOutput =
           (Xml.child xml_arg0 "ProposalVotes") in
       make ?nextToken ?proposalVotes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let proposalVotes =
-        field_map json "ProposalVotes" ProposalVoteList.of_json in
+        field_map json__ "ProposalVotes" ProposalVoteList.of_json in
       make ?nextToken ?proposalVotes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4234,13 +4584,14 @@ module ListProposalVotesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ?nextToken ?maxResults ~proposalId ~networkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "MaxResults" ProposalListMaxResults.of_json in
+        field_map json__ "MaxResults" ProposalListMaxResults.of_json in
       let proposalId =
-        field_map_exn json "ProposalId" ResourceIdString.of_json in
-      let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
+        field_map_exn json__ "ProposalId" ResourceIdString.of_json in
+      let networkId =
+        field_map_exn json__ "NetworkId" ResourceIdString.of_json in
       make ?nextToken ?maxResults ~proposalId ~networkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4325,9 +4676,9 @@ module ListNodesOutput =
         (Option.map ~f:NodeSummaryList.of_xml) (Xml.child xml_arg0 "Nodes") in
       make ?nextToken ?nodes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let nodes = field_map json "Nodes" NodeSummaryList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let nodes = field_map json__ "Nodes" NodeSummaryList.of_json in
       make ?nextToken ?nodes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4384,12 +4735,14 @@ module ListNodesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ?nextToken ?maxResults ?status ?memberId ~networkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" NodeListMaxResults.of_json in
-      let status = field_map json "Status" NodeStatus.of_json in
-      let memberId = field_map json "MemberId" ResourceIdString.of_json in
-      let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" NodeListMaxResults.of_json in
+      let status = field_map json__ "Status" NodeStatus.of_json in
+      let memberId = field_map json__ "MemberId" ResourceIdString.of_json in
+      let networkId =
+        field_map_exn json__ "NetworkId" ResourceIdString.of_json in
       make ?nextToken ?maxResults ?status ?memberId ~networkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4475,13 +4828,13 @@ module ListNetworksOutput =
           (Xml.child xml_arg0 "Networks") in
       make ?nextToken ?networks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let networks = field_map json "Networks" NetworkSummaryList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let networks = field_map json__ "Networks" NetworkSummaryList.of_json in
       make ?nextToken ?networks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about the networks in which the current AWS account participates. Applies to Hyperledger Fabric and Ethereum."]
+       "Returns information about the networks in which the current Amazon Web Services account participates. Applies to Hyperledger Fabric and Ethereum."]
 module ListNetworksInput =
   struct
     type nonrec t =
@@ -4527,17 +4880,17 @@ module ListNetworksInput =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?nextToken ?maxResults ?status ?framework ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "MaxResults" NetworkListMaxResults.of_json in
-      let status = field_map json "Status" NetworkStatus.of_json in
-      let framework = field_map json "Framework" Framework.of_json in
-      let name = field_map json "Name" String_.of_json in
+        field_map json__ "MaxResults" NetworkListMaxResults.of_json in
+      let status = field_map json__ "Status" NetworkStatus.of_json in
+      let framework = field_map json__ "Framework" Framework.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?nextToken ?maxResults ?status ?framework ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about the networks in which the current AWS account participates. Applies to Hyperledger Fabric and Ethereum."]
+       "Returns information about the networks in which the current Amazon Web Services account participates. Applies to Hyperledger Fabric and Ethereum."]
 module ListMembersOutput =
   struct
     type nonrec t =
@@ -4619,9 +4972,9 @@ module ListMembersOutput =
           (Xml.child xml_arg0 "Members") in
       make ?nextToken ?members ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let members = field_map json "Members" MemberSummaryList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let members = field_map json__ "Members" MemberSummaryList.of_json in
       make ?nextToken ?members ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4640,7 +4993,7 @@ module ListMembersInput =
           "An optional status specifier. If provided, only members currently in this status are listed."];
       isOwned: IsOwned.t option
         [@ocaml.doc
-          "An optional Boolean value. If provided, the request is limited either to members that the current AWS account owns (true) or that other AWS accounts own (false). If omitted, all members are listed."];
+          "An optional Boolean value. If provided, the request is limited either to members that the current Amazon Web Services account owns (true) or that other Amazon Web Services accountsn own (false). If omitted, all members are listed."];
       maxResults: MemberListMaxResults.t option
         [@ocaml.doc
           "The maximum number of members to return in the request."];
@@ -4683,14 +5036,15 @@ module ListMembersInput =
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ?nextToken ?maxResults ?isOwned ?status ?name ~networkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "MaxResults" MemberListMaxResults.of_json in
-      let isOwned = field_map json "IsOwned" IsOwned.of_json in
-      let status = field_map json "Status" MemberStatus.of_json in
-      let name = field_map json "Name" String_.of_json in
-      let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
+        field_map json__ "MaxResults" MemberListMaxResults.of_json in
+      let isOwned = field_map json__ "IsOwned" IsOwned.of_json in
+      let status = field_map json__ "Status" MemberStatus.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let networkId =
+        field_map_exn json__ "NetworkId" ResourceIdString.of_json in
       make ?nextToken ?maxResults ?isOwned ?status ?name ~networkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4797,13 +5151,13 @@ module ListInvitationsOutput =
           (Xml.child xml_arg0 "Invitations") in
       make ?nextToken ?invitations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let invitations = field_map json "Invitations" InvitationList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let invitations = field_map json__ "Invitations" InvitationList.of_json in
       make ?nextToken ?invitations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of all invitations for the current AWS account. Applies only to Hyperledger Fabric."]
+       "Returns a list of all invitations for the current Amazon Web Services account. Applies only to Hyperledger Fabric."]
 module ListInvitationsInput =
   struct
     type nonrec t =
@@ -4830,14 +5184,150 @@ module ListInvitationsInput =
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "MaxResults" ProposalListMaxResults.of_json in
+        field_map json__ "MaxResults" ProposalListMaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of all invitations for the current AWS account. Applies only to Hyperledger Fabric."]
+       "Returns a list of all invitations for the current Amazon Web Services account. Applies only to Hyperledger Fabric."]
+module ListAccessorsOutput =
+  struct
+    type nonrec t =
+      {
+      accessors: AccessorSummaryList.t option
+        [@ocaml.doc
+          "An array of AccessorSummary objects that contain configuration properties for each accessor."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The pagination token that indicates the next set of results to retrieve."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accessors =
+      fun ?nextToken -> fun () -> { accessors; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Accessors",
+           (Option.map x.accessors ~f:AccessorSummaryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let accessors =
+        (Option.map ~f:AccessorSummaryList.of_xml)
+          (Xml.child xml_arg0 "Accessors") in
+      make ?nextToken ?accessors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let accessors =
+        field_map json__ "Accessors" AccessorSummaryList.of_json in
+      make ?nextToken ?accessors ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of the accessors and their properties. Accessor objects are containers that have the information required for token based access to your Ethereum nodes."]
+module ListAccessorsInput =
+  struct
+    type nonrec t =
+      {
+      maxResults: AccessorListMaxResults.t option
+        [@ocaml.doc "The maximum number of accessors to list."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The pagination token that indicates the next set of results to retrieve."];
+      networkType: AccessorNetworkType.t option
+        [@ocaml.doc
+          "The blockchain network that the Accessor token is created for. Use the value ETHEREUM_MAINNET_AND_GOERLI for all existing Accessors tokens that were created before the networkType property was introduced."]}
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ?networkType -> fun () -> { maxResults; nextToken; networkType }
+    let to_value x =
+      structure_to_value
+        [("maxResults",
+           (Option.map x.maxResults ~f:AccessorListMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("networkType",
+          (Option.map x.networkType ~f:AccessorNetworkType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:AccessorNetworkType.of_xml)
+          (Xml.child xml_arg0 "networkType") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:AccessorListMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      make ?networkType ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkType =
+        field_map json__ "NetworkType" AccessorNetworkType.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" AccessorListMaxResults.of_json in
+      make ?networkType ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of the accessors and their properties. Accessor objects are containers that have the information required for token based access to your Ethereum nodes."]
 module GetProposalOutput =
   struct
     type nonrec t =
@@ -4919,8 +5409,8 @@ module GetProposalOutput =
         (Option.map ~f:Proposal.of_xml) (Xml.child xml_arg0 "Proposal") in
       make ?proposal ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let proposal = field_map json "Proposal" Proposal.of_json in
+    let of_json json__ =
+      let proposal = field_map json__ "Proposal" Proposal.of_json in
       make ?proposal ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4951,10 +5441,11 @@ module GetProposalInput =
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ~proposalId ~networkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let proposalId =
-        field_map_exn json "ProposalId" ResourceIdString.of_json in
-      let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
+        field_map_exn json__ "ProposalId" ResourceIdString.of_json in
+      let networkId =
+        field_map_exn json__ "NetworkId" ResourceIdString.of_json in
       make ~proposalId ~networkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5038,8 +5529,8 @@ module GetNodeOutput =
       let node = (Option.map ~f:Node.of_xml) (Xml.child xml_arg0 "Node") in
       make ?node ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let node = field_map json "Node" Node.of_json in make ?node ()
+    let of_json json__ =
+      let node = field_map json__ "Node" Node.of_json in make ?node ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns detailed information about a node. Applies to Hyperledger Fabric and Ethereum."]
@@ -5077,10 +5568,11 @@ module GetNodeInput =
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ~nodeId ?memberId ~networkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nodeId = field_map_exn json "NodeId" ResourceIdString.of_json in
-      let memberId = field_map json "MemberId" ResourceIdString.of_json in
-      let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
+    let of_json json__ =
+      let nodeId = field_map_exn json__ "NodeId" ResourceIdString.of_json in
+      let memberId = field_map json__ "MemberId" ResourceIdString.of_json in
+      let networkId =
+        field_map_exn json__ "NetworkId" ResourceIdString.of_json in
       make ~nodeId ?memberId ~networkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5166,8 +5658,8 @@ module GetNetworkOutput =
         (Option.map ~f:Network.of_xml) (Xml.child xml_arg0 "Network") in
       make ?network ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let network = field_map json "Network" Network.of_json in
+    let of_json json__ =
+      let network = field_map json__ "Network" Network.of_json in
       make ?network ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5191,8 +5683,9 @@ module GetNetworkInput =
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ~networkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
+    let of_json json__ =
+      let networkId =
+        field_map_exn json__ "NetworkId" ResourceIdString.of_json in
       make ~networkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5277,8 +5770,9 @@ module GetMemberOutput =
         (Option.map ~f:Member.of_xml) (Xml.child xml_arg0 "Member") in
       make ?member ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let member = field_map json "Member" Member.of_json in make ?member ()
+    let of_json json__ =
+      let member = field_map json__ "Member" Member.of_json in
+      make ?member ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns detailed information about a member. Applies only to Hyperledger Fabric."]
@@ -5307,13 +5801,126 @@ module GetMemberInput =
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ~memberId ~networkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let memberId = field_map_exn json "MemberId" ResourceIdString.of_json in
-      let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
+    let of_json json__ =
+      let memberId = field_map_exn json__ "MemberId" ResourceIdString.of_json in
+      let networkId =
+        field_map_exn json__ "NetworkId" ResourceIdString.of_json in
       make ~memberId ~networkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns detailed information about a member. Applies only to Hyperledger Fabric."]
+module GetAccessorOutput =
+  struct
+    type nonrec t =
+      {
+      accessor: Accessor.t option
+        [@ocaml.doc "The properties of the accessor."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accessor = fun () -> { accessor }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Accessor", (Option.map x.accessor ~f:Accessor.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accessor =
+        (Option.map ~f:Accessor.of_xml) (Xml.child xml_arg0 "Accessor") in
+      make ?accessor ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accessor = field_map json__ "Accessor" Accessor.of_json in
+      make ?accessor ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns detailed information about an accessor. An accessor object is a container that has the information required for token based access to your Ethereum nodes."]
+module GetAccessorInput =
+  struct
+    type nonrec t =
+      {
+      accessorId: ResourceIdString.t
+        [@ocaml.doc "The unique identifier of the accessor."]}
+    let context_ = "GetAccessorInput"
+    let make ~accessorId = fun () -> { accessorId }
+    let to_value x =
+      structure_to_value
+        [("AccessorId", (Some (ResourceIdString.to_value x.accessorId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accessorId =
+        ResourceIdString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccessorId") in
+      make ~accessorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accessorId =
+        field_map_exn json__ "AccessorId" ResourceIdString.of_json in
+      make ~accessorId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns detailed information about an accessor. An accessor object is a container that has the information required for token based access to your Ethereum nodes."]
 module DeleteNodeOutput =
   struct
     type nonrec t = unit
@@ -5400,14 +6007,14 @@ module DeleteNodeOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a node that your AWS account owns. All data on the node is lost and cannot be recovered. Applies to Hyperledger Fabric and Ethereum."]
+       "Deletes a node that your Amazon Web Services account owns. All data on the node is lost and cannot be recovered. Applies to Hyperledger Fabric and Ethereum."]
 module DeleteNodeInput =
   struct
     type nonrec t =
       {
       networkId: ResourceIdString.t
         [@ocaml.doc
-          "The unique identifier of the network that the node is on. Ethereum public networks have the following NetworkIds: n-ethereum-mainnet n-ethereum-rinkeby n-ethereum-ropsten"];
+          "The unique identifier of the network that the node is on. Ethereum public networks have the following NetworkIds: n-ethereum-mainnet"];
       memberId: ResourceIdString.t option
         [@ocaml.doc
           "The unique identifier of the member that owns this node. Applies only to Hyperledger Fabric and is required for Hyperledger Fabric."];
@@ -5435,14 +6042,15 @@ module DeleteNodeInput =
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ~nodeId ?memberId ~networkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nodeId = field_map_exn json "NodeId" ResourceIdString.of_json in
-      let memberId = field_map json "MemberId" ResourceIdString.of_json in
-      let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
+    let of_json json__ =
+      let nodeId = field_map_exn json__ "NodeId" ResourceIdString.of_json in
+      let memberId = field_map json__ "MemberId" ResourceIdString.of_json in
+      let networkId =
+        field_map_exn json__ "NetworkId" ResourceIdString.of_json in
       make ~nodeId ?memberId ~networkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a node that your AWS account owns. All data on the node is lost and cannot be recovered. Applies to Hyperledger Fabric and Ethereum."]
+       "Deletes a node that your Amazon Web Services account owns. All data on the node is lost and cannot be recovered. Applies to Hyperledger Fabric and Ethereum."]
 module DeleteMemberOutput =
   struct
     type nonrec t = unit
@@ -5529,7 +6137,7 @@ module DeleteMemberOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a member. Deleting a member removes the member and all associated resources from the network. DeleteMember can only be called for a specified MemberId if the principal performing the action is associated with the AWS account that owns the member. In all other cases, the DeleteMember action is carried out as the result of an approved proposal to remove a member. If MemberId is the last member in a network specified by the last AWS account, the network is deleted also. Applies only to Hyperledger Fabric."]
+       "Deletes a member. Deleting a member removes the member and all associated resources from the network. DeleteMember can only be called for a specified MemberId if the principal performing the action is associated with the Amazon Web Services account that owns the member. In all other cases, the DeleteMember action is carried out as the result of an approved proposal to remove a member. If MemberId is the last member in a network specified by the last Amazon Web Services account, the network is deleted also. Applies only to Hyperledger Fabric."]
 module DeleteMemberInput =
   struct
     type nonrec t =
@@ -5555,13 +6163,117 @@ module DeleteMemberInput =
           (Xml.child_exn ~context:context_ xml_arg0 "networkId") in
       make ~memberId ~networkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let memberId = field_map_exn json "MemberId" ResourceIdString.of_json in
-      let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
+    let of_json json__ =
+      let memberId = field_map_exn json__ "MemberId" ResourceIdString.of_json in
+      let networkId =
+        field_map_exn json__ "NetworkId" ResourceIdString.of_json in
       make ~memberId ~networkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a member. Deleting a member removes the member and all associated resources from the network. DeleteMember can only be called for a specified MemberId if the principal performing the action is associated with the AWS account that owns the member. In all other cases, the DeleteMember action is carried out as the result of an approved proposal to remove a member. If MemberId is the last member in a network specified by the last AWS account, the network is deleted also. Applies only to Hyperledger Fabric."]
+       "Deletes a member. Deleting a member removes the member and all associated resources from the network. DeleteMember can only be called for a specified MemberId if the principal performing the action is associated with the Amazon Web Services account that owns the member. In all other cases, the DeleteMember action is carried out as the result of an approved proposal to remove a member. If MemberId is the last member in a network specified by the last Amazon Web Services account, the network is deleted also. Applies only to Hyperledger Fabric."]
+module DeleteAccessorOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an accessor that your Amazon Web Services account owns. An accessor object is a container that has the information required for token based access to your Ethereum nodes including, the BILLING_TOKEN. After an accessor is deleted, the status of the accessor changes from AVAILABLE to PENDING_DELETION. An accessor in the PENDING_DELETION state can\226\128\153t be used for new WebSocket requests or HTTP requests. However, WebSocket connections that were initiated while the accessor was in the AVAILABLE state remain open until they expire (up to 2 hours)."]
+module DeleteAccessorInput =
+  struct
+    type nonrec t =
+      {
+      accessorId: ResourceIdString.t
+        [@ocaml.doc "The unique identifier of the accessor."]}
+    let context_ = "DeleteAccessorInput"
+    let make ~accessorId = fun () -> { accessorId }
+    let to_value x =
+      structure_to_value
+        [("AccessorId", (Some (ResourceIdString.to_value x.accessorId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accessorId =
+        ResourceIdString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccessorId") in
+      make ~accessorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accessorId =
+        field_map_exn json__ "AccessorId" ResourceIdString.of_json in
+      make ~accessorId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an accessor that your Amazon Web Services account owns. An accessor object is a container that has the information required for token based access to your Ethereum nodes including, the BILLING_TOKEN. After an accessor is deleted, the status of the accessor changes from AVAILABLE to PENDING_DELETION. An accessor in the PENDING_DELETION state can\226\128\153t be used for new WebSocket requests or HTTP requests. However, WebSocket connections that were initiated while the accessor was in the AVAILABLE state remain open until they expire (up to 2 hours)."]
 module CreateProposalOutput =
   struct
     type nonrec t =
@@ -5663,8 +6375,8 @@ module CreateProposalOutput =
           (Xml.child xml_arg0 "ProposalId") in
       make ?proposalId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let proposalId = field_map json "ProposalId" ResourceIdString.of_json in
+    let of_json json__ =
+      let proposalId = field_map json__ "ProposalId" ResourceIdString.of_json in
       make ?proposalId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5675,13 +6387,13 @@ module CreateProposalInput =
       {
       clientRequestToken: ClientRequestTokenString.t
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the operation. An idempotent operation completes no more than one time. This identifier is required only if you make a service request directly using an HTTP client. It is generated automatically if you use an AWS SDK or the AWS CLI."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the operation. An idempotent operation completes no more than one time. This identifier is required only if you make a service request directly using an HTTP client. It is generated automatically if you use an Amazon Web Services SDK or the CLI."];
       networkId: ResourceIdString.t
         [@ocaml.doc
           "The unique identifier of the network for which the proposal is made."];
       memberId: ResourceIdString.t
         [@ocaml.doc
-          "The unique identifier of the member that is creating the proposal. This identifier is especially useful for identifying the member making the proposal when multiple members exist in a single AWS account."];
+          "The unique identifier of the member that is creating the proposal. This identifier is especially useful for identifying the member making the proposal when multiple members exist in a single Amazon Web Services account."];
       actions: ProposalActions.t
         [@ocaml.doc
           "The type of actions proposed, such as inviting a member or removing a member. The types of Actions in a proposal are mutually exclusive. For example, a proposal with Invitations actions cannot also contain Removals actions."];
@@ -5690,7 +6402,7 @@ module CreateProposalInput =
           "A description for the proposal that is visible to voting members, for example, \"Proposal to add Example Corp. as member.\""];
       tags: InputTagMap.t option
         [@ocaml.doc
-          "Tags to assign to the proposal. Each tag consists of a key and optional value. When specifying tags during creation, you can specify multiple key-value pairs in a single request, with an overall maximum of 50 tags added to each resource. If the proposal is for a network invitation, the invitation inherits the tags added to the proposal. For more information about tags, see Tagging Resources in the Amazon Managed Blockchain Ethereum Developer Guide, or Tagging Resources in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide."]}
+          "Tags to assign to the proposal. Each tag consists of a key and an optional value. You can specify multiple key-value pairs in a single request with an overall maximum of 50 tags allowed per resource. For more information about tags, see Tagging Resources in the Amazon Managed Blockchain Ethereum Developer Guide, or Tagging Resources in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide."]}
     let context_ = "CreateProposalInput"
     let make ?description =
       fun ?tags ->
@@ -5739,15 +6451,16 @@ module CreateProposalInput =
       make ?tags ?description ~actions ~memberId ~networkId
         ~clientRequestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" InputTagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" InputTagMap.of_json in
       let description =
-        field_map json "Description" DescriptionString.of_json in
-      let actions = field_map_exn json "Actions" ProposalActions.of_json in
-      let memberId = field_map_exn json "MemberId" ResourceIdString.of_json in
-      let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
+        field_map json__ "Description" DescriptionString.of_json in
+      let actions = field_map_exn json__ "Actions" ProposalActions.of_json in
+      let memberId = field_map_exn json__ "MemberId" ResourceIdString.of_json in
+      let networkId =
+        field_map_exn json__ "NetworkId" ResourceIdString.of_json in
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken"
+        field_map_exn json__ "ClientRequestToken"
           ClientRequestTokenString.of_json in
       make ?tags ?description ~actions ~memberId ~networkId
         ~clientRequestToken ()
@@ -5875,8 +6588,8 @@ module CreateNodeOutput =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "NodeId") in
       make ?nodeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nodeId = field_map json "NodeId" ResourceIdString.of_json in
+    let of_json json__ =
+      let nodeId = field_map json__ "NodeId" ResourceIdString.of_json in
       make ?nodeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5887,10 +6600,10 @@ module CreateNodeInput =
       {
       clientRequestToken: ClientRequestTokenString.t
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the operation. An idempotent operation completes no more than one time. This identifier is required only if you make a service request directly using an HTTP client. It is generated automatically if you use an AWS SDK or the AWS CLI."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the operation. An idempotent operation completes no more than one time. This identifier is required only if you make a service request directly using an HTTP client. It is generated automatically if you use an Amazon Web Services SDK or the CLI."];
       networkId: ResourceIdString.t
         [@ocaml.doc
-          "The unique identifier of the network for the node. Ethereum public networks have the following NetworkIds: n-ethereum-mainnet n-ethereum-rinkeby n-ethereum-ropsten"];
+          "The unique identifier of the network for the node. Ethereum public networks have the following NetworkIds: n-ethereum-mainnet"];
       memberId: ResourceIdString.t option
         [@ocaml.doc
           "The unique identifier of the member that owns this node. Applies only to Hyperledger Fabric."];
@@ -5898,7 +6611,7 @@ module CreateNodeInput =
         [@ocaml.doc "The properties of a node configuration."];
       tags: InputTagMap.t option
         [@ocaml.doc
-          "Tags to assign to the node. Each tag consists of a key and optional value. When specifying tags during creation, you can specify multiple key-value pairs in a single request, with an overall maximum of 50 tags added to each resource. For more information about tags, see Tagging Resources in the Amazon Managed Blockchain Ethereum Developer Guide, or Tagging Resources in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide."]}
+          "Tags to assign to the node. Each tag consists of a key and an optional value. You can specify multiple key-value pairs in a single request with an overall maximum of 50 tags allowed per resource. For more information about tags, see Tagging Resources in the Amazon Managed Blockchain Ethereum Developer Guide, or Tagging Resources in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide."]}
     let context_ = "CreateNodeInput"
     let make ?memberId =
       fun ?tags ->
@@ -5941,14 +6654,15 @@ module CreateNodeInput =
       make ?tags ~nodeConfiguration ?memberId ~networkId ~clientRequestToken
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" InputTagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" InputTagMap.of_json in
       let nodeConfiguration =
-        field_map_exn json "NodeConfiguration" NodeConfiguration.of_json in
-      let memberId = field_map json "MemberId" ResourceIdString.of_json in
-      let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
+        field_map_exn json__ "NodeConfiguration" NodeConfiguration.of_json in
+      let memberId = field_map json__ "MemberId" ResourceIdString.of_json in
+      let networkId =
+        field_map_exn json__ "NetworkId" ResourceIdString.of_json in
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken"
+        field_map_exn json__ "ClientRequestToken"
           ClientRequestTokenString.of_json in
       make ?tags ~nodeConfiguration ?memberId ~networkId ~clientRequestToken
         ()
@@ -6066,9 +6780,9 @@ module CreateNetworkOutput =
           (Xml.child xml_arg0 "NetworkId") in
       make ?memberId ?networkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let memberId = field_map json "MemberId" ResourceIdString.of_json in
-      let networkId = field_map json "NetworkId" ResourceIdString.of_json in
+    let of_json json__ =
+      let memberId = field_map json__ "MemberId" ResourceIdString.of_json in
+      let networkId = field_map json__ "NetworkId" ResourceIdString.of_json in
       make ?memberId ?networkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6079,7 +6793,7 @@ module CreateNetworkInput =
       {
       clientRequestToken: ClientRequestTokenString.t
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the operation. An idempotent operation completes no more than one time. This identifier is required only if you make a service request directly using an HTTP client. It is generated automatically if you use an AWS SDK or the AWS CLI."];
+          "This is a unique, case-sensitive identifier that you provide to ensure the idempotency of the operation. An idempotent operation completes no more than once. This identifier is required only if you make a service request directly using an HTTP client. It is generated automatically if you use an Amazon Web Services SDK or the Amazon Web Services CLI."];
       name: NameString.t [@ocaml.doc "The name of the network."];
       description: DescriptionString.t option
         [@ocaml.doc "An optional description for the network."];
@@ -6099,7 +6813,7 @@ module CreateNetworkInput =
           "Configuration properties for the first member within the network."];
       tags: InputTagMap.t option
         [@ocaml.doc
-          "Tags to assign to the network. Each tag consists of a key and optional value. When specifying tags during creation, you can specify multiple key-value pairs in a single request, with an overall maximum of 50 tags added to each resource. For more information about tags, see Tagging Resources in the Amazon Managed Blockchain Ethereum Developer Guide, or Tagging Resources in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide."]}
+          "Tags to assign to the network. Each tag consists of a key and an optional value. You can specify multiple key-value pairs in a single request with an overall maximum of 50 tags allowed per resource. For more information about tags, see Tagging Resources in the Amazon Managed Blockchain Ethereum Developer Guide, or Tagging Resources in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide."]}
     let context_ = "CreateNetworkInput"
     let make ?description =
       fun ?frameworkConfiguration ->
@@ -6170,23 +6884,25 @@ module CreateNetworkInput =
         ~frameworkVersion ~framework ?description ~name ~clientRequestToken
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" InputTagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" InputTagMap.of_json in
       let memberConfiguration =
-        field_map_exn json "MemberConfiguration" MemberConfiguration.of_json in
+        field_map_exn json__ "MemberConfiguration"
+          MemberConfiguration.of_json in
       let votingPolicy =
-        field_map_exn json "VotingPolicy" VotingPolicy.of_json in
+        field_map_exn json__ "VotingPolicy" VotingPolicy.of_json in
       let frameworkConfiguration =
-        field_map json "FrameworkConfiguration"
+        field_map json__ "FrameworkConfiguration"
           NetworkFrameworkConfiguration.of_json in
       let frameworkVersion =
-        field_map_exn json "FrameworkVersion" FrameworkVersionString.of_json in
-      let framework = field_map_exn json "Framework" Framework.of_json in
+        field_map_exn json__ "FrameworkVersion"
+          FrameworkVersionString.of_json in
+      let framework = field_map_exn json__ "Framework" Framework.of_json in
       let description =
-        field_map json "Description" DescriptionString.of_json in
-      let name = field_map_exn json "Name" NameString.of_json in
+        field_map json__ "Description" DescriptionString.of_json in
+      let name = field_map_exn json__ "Name" NameString.of_json in
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken"
+        field_map_exn json__ "ClientRequestToken"
           ClientRequestTokenString.of_json in
       make ?tags ~memberConfiguration ~votingPolicy ?frameworkConfiguration
         ~frameworkVersion ~framework ?description ~name ~clientRequestToken
@@ -6316,8 +7032,8 @@ module CreateMemberOutput =
           (Xml.child xml_arg0 "MemberId") in
       make ?memberId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let memberId = field_map json "MemberId" ResourceIdString.of_json in
+    let of_json json__ =
+      let memberId = field_map json__ "MemberId" ResourceIdString.of_json in
       make ?memberId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6328,7 +7044,7 @@ module CreateMemberInput =
       {
       clientRequestToken: ClientRequestTokenString.t
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the operation. An idempotent operation completes no more than one time. This identifier is required only if you make a service request directly using an HTTP client. It is generated automatically if you use an AWS SDK or the AWS CLI."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the operation. An idempotent operation completes no more than one time. This identifier is required only if you make a service request directly using an HTTP client. It is generated automatically if you use an Amazon Web Services SDK or the CLI."];
       invitationId: ResourceIdString.t
         [@ocaml.doc
           "The unique identifier of the invitation that is sent to the member to join the network."];
@@ -6374,17 +7090,211 @@ module CreateMemberInput =
       make ~memberConfiguration ~networkId ~invitationId ~clientRequestToken
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let memberConfiguration =
-        field_map_exn json "MemberConfiguration" MemberConfiguration.of_json in
-      let networkId = field_map_exn json "NetworkId" ResourceIdString.of_json in
+        field_map_exn json__ "MemberConfiguration"
+          MemberConfiguration.of_json in
+      let networkId =
+        field_map_exn json__ "NetworkId" ResourceIdString.of_json in
       let invitationId =
-        field_map_exn json "InvitationId" ResourceIdString.of_json in
+        field_map_exn json__ "InvitationId" ResourceIdString.of_json in
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken"
+        field_map_exn json__ "ClientRequestToken"
           ClientRequestTokenString.of_json in
       make ~memberConfiguration ~networkId ~invitationId ~clientRequestToken
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a member within a Managed Blockchain network. Applies only to Hyperledger Fabric."]
+module CreateAccessorOutput =
+  struct
+    type nonrec t =
+      {
+      accessorId: ResourceIdString.t option
+        [@ocaml.doc "The unique identifier of the accessor."];
+      billingToken: AccessorBillingTokenString.t option
+        [@ocaml.doc
+          "The billing token is a property of the Accessor. Use this token to when making calls to the blockchain network. The billing token is used to track your accessor token for billing requests."];
+      networkType: AccessorNetworkType.t option
+        [@ocaml.doc
+          "The blockchain network that the accessor token is created for."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ResourceLimitExceededException of ResourceLimitExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `TooManyTagsException of TooManyTagsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accessorId =
+      fun ?billingToken ->
+        fun ?networkType ->
+          fun () -> { accessorId; billingToken; networkType }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ResourceLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceLimitExceededException"));
+            ("details", (ResourceLimitExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `TooManyTagsException e ->
+          `Assoc
+            [("error", (`String "TooManyTagsException"));
+            ("details", (TooManyTagsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AccessorId",
+           (Option.map x.accessorId ~f:ResourceIdString.to_value));
+        ("BillingToken",
+          (Option.map x.billingToken ~f:AccessorBillingTokenString.to_value));
+        ("NetworkType",
+          (Option.map x.networkType ~f:AccessorNetworkType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:AccessorNetworkType.of_xml)
+          (Xml.child xml_arg0 "NetworkType") in
+      let billingToken =
+        (Option.map ~f:AccessorBillingTokenString.of_xml)
+          (Xml.child xml_arg0 "BillingToken") in
+      let accessorId =
+        (Option.map ~f:ResourceIdString.of_xml)
+          (Xml.child xml_arg0 "AccessorId") in
+      make ?networkType ?billingToken ?accessorId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkType =
+        field_map json__ "NetworkType" AccessorNetworkType.of_json in
+      let billingToken =
+        field_map json__ "BillingToken" AccessorBillingTokenString.of_json in
+      let accessorId = field_map json__ "AccessorId" ResourceIdString.of_json in
+      make ?networkType ?billingToken ?accessorId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new accessor for use with Amazon Managed Blockchain service that supports token based access. The accessor contains information required for token based access."]
+module CreateAccessorInput =
+  struct
+    type nonrec t =
+      {
+      clientRequestToken: ClientRequestTokenString.t
+        [@ocaml.doc
+          "This is a unique, case-sensitive identifier that you provide to ensure the idempotency of the operation. An idempotent operation completes no more than once. This identifier is required only if you make a service request directly using an HTTP client. It is generated automatically if you use an Amazon Web Services SDK or the Amazon Web Services CLI."];
+      accessorType: AccessorType.t
+        [@ocaml.doc
+          "The type of accessor. Currently, accessor type is restricted to BILLING_TOKEN."];
+      tags: InputTagMap.t option
+        [@ocaml.doc
+          "Tags to assign to the Accessor. Each tag consists of a key and an optional value. You can specify multiple key-value pairs in a single request with an overall maximum of 50 tags allowed per resource. For more information about tags, see Tagging Resources in the Amazon Managed Blockchain Ethereum Developer Guide, or Tagging Resources in the Amazon Managed Blockchain Hyperledger Fabric Developer Guide."];
+      networkType: AccessorNetworkType.t option
+        [@ocaml.doc
+          "The blockchain network that the Accessor token is created for. Use the actual networkType value for the blockchain network that you are creating the Accessor token for. With the shut down of the Ethereum Goerli and Polygon Mumbai Testnet networks the following networkType values are no longer available for selection and use. ETHEREUM_MAINNET_AND_GOERLI ETHEREUM_GOERLI POLYGON_MUMBAI However, your existing Accessor tokens with these networkType values will remain unchanged."]}
+    let context_ = "CreateAccessorInput"
+    let make ?tags =
+      fun ?networkType ->
+        fun ~clientRequestToken ->
+          fun ~accessorType ->
+            fun () -> { tags; networkType; clientRequestToken; accessorType }
+    let to_value x =
+      structure_to_value
+        [("ClientRequestToken",
+           (Some (ClientRequestTokenString.to_value x.clientRequestToken)));
+        ("AccessorType", (Some (AccessorType.to_value x.accessorType)));
+        ("Tags", (Option.map x.tags ~f:InputTagMap.to_value));
+        ("NetworkType",
+          (Option.map x.networkType ~f:AccessorNetworkType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:AccessorNetworkType.of_xml)
+          (Xml.child xml_arg0 "NetworkType") in
+      let tags =
+        (Option.map ~f:InputTagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let accessorType =
+        AccessorType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccessorType") in
+      let clientRequestToken =
+        ClientRequestTokenString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientRequestToken") in
+      make ?networkType ?tags ~accessorType ~clientRequestToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkType =
+        field_map json__ "NetworkType" AccessorNetworkType.of_json in
+      let tags = field_map json__ "Tags" InputTagMap.of_json in
+      let accessorType =
+        field_map_exn json__ "AccessorType" AccessorType.of_json in
+      let clientRequestToken =
+        field_map_exn json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
+      make ?networkType ?tags ~accessorType ~clientRequestToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new accessor for use with Amazon Managed Blockchain service that supports token based access. The accessor contains information required for token based access."]

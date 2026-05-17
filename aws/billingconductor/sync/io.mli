@@ -77,6 +77,12 @@ val disassociate_pricing_rules :
       DisassociatePricingRulesInput.t ->
         (DisassociatePricingRulesOutput.t,
           DisassociatePricingRulesOutput.error) Result.t
+val get_billing_group_cost_report :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetBillingGroupCostReportInput.t ->
+        (GetBillingGroupCostReportOutput.t,
+          GetBillingGroupCostReportOutput.error) Result.t
 val list_account_associations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -94,6 +100,12 @@ val list_billing_groups :
     ?cfg:Awso.Cfg.t ->
       ListBillingGroupsInput.t ->
         (ListBillingGroupsOutput.t, ListBillingGroupsOutput.error) Result.t
+val list_custom_line_item_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCustomLineItemVersionsInput.t ->
+        (ListCustomLineItemVersionsOutput.t,
+          ListCustomLineItemVersionsOutput.error) Result.t
 val list_custom_line_items :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

@@ -31,9 +31,9 @@ type ('i, 'o, 'e) t =
   CopyDBSnapshotResult.error) t 
   | CopyOptionGroup: (CopyOptionGroupMessage.t, CopyOptionGroupResult.t,
   CopyOptionGroupResult.error) t 
-  | CreateCustomAvailabilityZone: (CreateCustomAvailabilityZoneMessage.t,
-  CreateCustomAvailabilityZoneResult.t,
-  CreateCustomAvailabilityZoneResult.error) t 
+  | CreateBlueGreenDeployment: (CreateBlueGreenDeploymentRequest.t,
+  CreateBlueGreenDeploymentResponse.t,
+  CreateBlueGreenDeploymentResponse.error) t 
   | CreateCustomDBEngineVersion: (CreateCustomDBEngineVersionMessage.t,
   DBEngineVersion.t, DBEngineVersion.error) t 
   | CreateDBCluster: (CreateDBClusterMessage.t, CreateDBClusterResult.t,
@@ -58,6 +58,8 @@ type ('i, 'o, 'e) t =
   CreateDBProxyEndpointResponse.t, CreateDBProxyEndpointResponse.error) t 
   | CreateDBSecurityGroup: (CreateDBSecurityGroupMessage.t,
   CreateDBSecurityGroupResult.t, CreateDBSecurityGroupResult.error) t 
+  | CreateDBShardGroup: (CreateDBShardGroupMessage.t, DBShardGroup.t,
+  DBShardGroup.error) t 
   | CreateDBSnapshot: (CreateDBSnapshotMessage.t, CreateDBSnapshotResult.t,
   CreateDBSnapshotResult.error) t 
   | CreateDBSubnetGroup: (CreateDBSubnetGroupMessage.t,
@@ -66,15 +68,22 @@ type ('i, 'o, 'e) t =
   CreateEventSubscriptionResult.t, CreateEventSubscriptionResult.error) t 
   | CreateGlobalCluster: (CreateGlobalClusterMessage.t,
   CreateGlobalClusterResult.t, CreateGlobalClusterResult.error) t 
+  | CreateIntegration: (CreateIntegrationMessage.t, Integration.t,
+  Integration.error) t 
   | CreateOptionGroup: (CreateOptionGroupMessage.t,
   CreateOptionGroupResult.t, CreateOptionGroupResult.error) t 
-  | DeleteCustomAvailabilityZone: (DeleteCustomAvailabilityZoneMessage.t,
-  DeleteCustomAvailabilityZoneResult.t,
-  DeleteCustomAvailabilityZoneResult.error) t 
+  | CreateTenantDatabase: (CreateTenantDatabaseMessage.t,
+  CreateTenantDatabaseResult.t, CreateTenantDatabaseResult.error) t 
+  | DeleteBlueGreenDeployment: (DeleteBlueGreenDeploymentRequest.t,
+  DeleteBlueGreenDeploymentResponse.t,
+  DeleteBlueGreenDeploymentResponse.error) t 
   | DeleteCustomDBEngineVersion: (DeleteCustomDBEngineVersionMessage.t,
   DBEngineVersion.t, DBEngineVersion.error) t 
   | DeleteDBCluster: (DeleteDBClusterMessage.t, DeleteDBClusterResult.t,
   DeleteDBClusterResult.error) t 
+  | DeleteDBClusterAutomatedBackup: (DeleteDBClusterAutomatedBackupMessage.t,
+  DeleteDBClusterAutomatedBackupResult.t,
+  DeleteDBClusterAutomatedBackupResult.error) t 
   | DeleteDBClusterEndpoint: (DeleteDBClusterEndpointMessage.t,
   DBClusterEndpoint.t, DBClusterEndpoint.error) t 
   | DeleteDBClusterParameterGroup: (DeleteDBClusterParameterGroupMessage.t,
@@ -93,6 +102,8 @@ type ('i, 'o, 'e) t =
   | DeleteDBProxyEndpoint: (DeleteDBProxyEndpointRequest.t,
   DeleteDBProxyEndpointResponse.t, DeleteDBProxyEndpointResponse.error) t 
   | DeleteDBSecurityGroup: (DeleteDBSecurityGroupMessage.t, unit, unit) t 
+  | DeleteDBShardGroup: (DeleteDBShardGroupMessage.t, DBShardGroup.t,
+  DBShardGroup.error) t 
   | DeleteDBSnapshot: (DeleteDBSnapshotMessage.t, DeleteDBSnapshotResult.t,
   DeleteDBSnapshotResult.error) t 
   | DeleteDBSubnetGroup: (DeleteDBSubnetGroupMessage.t, unit, unit) t 
@@ -100,19 +111,25 @@ type ('i, 'o, 'e) t =
   DeleteEventSubscriptionResult.t, DeleteEventSubscriptionResult.error) t 
   | DeleteGlobalCluster: (DeleteGlobalClusterMessage.t,
   DeleteGlobalClusterResult.t, DeleteGlobalClusterResult.error) t 
-  | DeleteInstallationMedia: (DeleteInstallationMediaMessage.t,
-  InstallationMedia.t, InstallationMedia.error) t 
+  | DeleteIntegration: (DeleteIntegrationMessage.t, Integration.t,
+  Integration.error) t 
   | DeleteOptionGroup: (DeleteOptionGroupMessage.t, unit, unit) t 
+  | DeleteTenantDatabase: (DeleteTenantDatabaseMessage.t,
+  DeleteTenantDatabaseResult.t, DeleteTenantDatabaseResult.error) t 
   | DeregisterDBProxyTargets: (DeregisterDBProxyTargetsRequest.t,
   DeregisterDBProxyTargetsResponse.t, DeregisterDBProxyTargetsResponse.error)
   t 
   | DescribeAccountAttributes: (DescribeAccountAttributesMessage.t,
   AccountAttributesMessage.t, AccountAttributesMessage.error) t 
+  | DescribeBlueGreenDeployments: (DescribeBlueGreenDeploymentsRequest.t,
+  DescribeBlueGreenDeploymentsResponse.t,
+  DescribeBlueGreenDeploymentsResponse.error) t 
   | DescribeCertificates: (DescribeCertificatesMessage.t,
   CertificateMessage.t, CertificateMessage.error) t 
-  | DescribeCustomAvailabilityZones:
-  (DescribeCustomAvailabilityZonesMessage.t, CustomAvailabilityZoneMessage.t,
-  CustomAvailabilityZoneMessage.error) t 
+  | DescribeDBClusterAutomatedBackups:
+  (DescribeDBClusterAutomatedBackupsMessage.t,
+  DBClusterAutomatedBackupMessage.t, DBClusterAutomatedBackupMessage.error) t
+  
   | DescribeDBClusterBacktracks: (DescribeDBClusterBacktracksMessage.t,
   DBClusterBacktrackMessage.t, DBClusterBacktrackMessage.error) t 
   | DescribeDBClusterEndpoints: (DescribeDBClusterEndpointsMessage.t,
@@ -141,6 +158,9 @@ type ('i, 'o, 'e) t =
   DBInstanceMessage.error) t 
   | DescribeDBLogFiles: (DescribeDBLogFilesMessage.t,
   DescribeDBLogFilesResponse.t, DescribeDBLogFilesResponse.error) t 
+  | DescribeDBMajorEngineVersions: (DescribeDBMajorEngineVersionsRequest.t,
+  DescribeDBMajorEngineVersionsResponse.t,
+  DescribeDBMajorEngineVersionsResponse.error) t 
   | DescribeDBParameterGroups: (DescribeDBParameterGroupsMessage.t,
   DBParameterGroupsMessage.t, DBParameterGroupsMessage.error) t 
   | DescribeDBParameters: (DescribeDBParametersMessage.t,
@@ -155,11 +175,19 @@ type ('i, 'o, 'e) t =
   DescribeDBProxyTargetGroupsResponse.error) t 
   | DescribeDBProxyTargets: (DescribeDBProxyTargetsRequest.t,
   DescribeDBProxyTargetsResponse.t, DescribeDBProxyTargetsResponse.error) t 
+  | DescribeDBRecommendations: (DescribeDBRecommendationsMessage.t,
+  DBRecommendationsMessage.t, DBRecommendationsMessage.error) t 
   | DescribeDBSecurityGroups: (DescribeDBSecurityGroupsMessage.t,
   DBSecurityGroupMessage.t, DBSecurityGroupMessage.error) t 
+  | DescribeDBShardGroups: (DescribeDBShardGroupsMessage.t,
+  DescribeDBShardGroupsResponse.t, DescribeDBShardGroupsResponse.error) t 
   | DescribeDBSnapshotAttributes: (DescribeDBSnapshotAttributesMessage.t,
   DescribeDBSnapshotAttributesResult.t,
   DescribeDBSnapshotAttributesResult.error) t 
+  | DescribeDBSnapshotTenantDatabases:
+  (DescribeDBSnapshotTenantDatabasesMessage.t,
+  DBSnapshotTenantDatabasesMessage.t, DBSnapshotTenantDatabasesMessage.error)
+  t 
   | DescribeDBSnapshots: (DescribeDBSnapshotsMessage.t, DBSnapshotMessage.t,
   DBSnapshotMessage.error) t 
   | DescribeDBSubnetGroups: (DescribeDBSubnetGroupsMessage.t,
@@ -182,8 +210,8 @@ type ('i, 'o, 'e) t =
   ExportTasksMessage.error) t 
   | DescribeGlobalClusters: (DescribeGlobalClustersMessage.t,
   GlobalClustersMessage.t, GlobalClustersMessage.error) t 
-  | DescribeInstallationMedia: (DescribeInstallationMediaMessage.t,
-  InstallationMediaMessage.t, InstallationMediaMessage.error) t 
+  | DescribeIntegrations: (DescribeIntegrationsMessage.t,
+  DescribeIntegrationsResponse.t, DescribeIntegrationsResponse.error) t 
   | DescribeOptionGroupOptions: (DescribeOptionGroupOptionsMessage.t,
   OptionGroupOptionsMessage.t, OptionGroupOptionsMessage.error) t 
   | DescribeOptionGroups: (DescribeOptionGroupsMessage.t, OptionGroups.t,
@@ -202,23 +230,33 @@ type ('i, 'o, 'e) t =
   (DescribeReservedDBInstancesOfferingsMessage.t,
   ReservedDBInstancesOfferingMessage.t,
   ReservedDBInstancesOfferingMessage.error) t 
+  | DescribeServerlessV2PlatformVersions:
+  (DescribeServerlessV2PlatformVersionsMessage.t,
+  ServerlessV2PlatformVersionsMessage.t,
+  ServerlessV2PlatformVersionsMessage.error) t 
   | DescribeSourceRegions: (DescribeSourceRegionsMessage.t,
   SourceRegionMessage.t, SourceRegionMessage.error) t 
+  | DescribeTenantDatabases: (DescribeTenantDatabasesMessage.t,
+  TenantDatabasesMessage.t, TenantDatabasesMessage.error) t 
   | DescribeValidDBInstanceModifications:
   (DescribeValidDBInstanceModificationsMessage.t,
   DescribeValidDBInstanceModificationsResult.t,
   DescribeValidDBInstanceModificationsResult.error) t 
+  | DisableHttpEndpoint: (DisableHttpEndpointRequest.t,
+  DisableHttpEndpointResponse.t, DisableHttpEndpointResponse.error) t 
   | DownloadDBLogFilePortion: (DownloadDBLogFilePortionMessage.t,
   DownloadDBLogFilePortionDetails.t, DownloadDBLogFilePortionDetails.error) t
   
+  | EnableHttpEndpoint: (EnableHttpEndpointRequest.t,
+  EnableHttpEndpointResponse.t, EnableHttpEndpointResponse.error) t 
   | FailoverDBCluster: (FailoverDBClusterMessage.t,
   FailoverDBClusterResult.t, FailoverDBClusterResult.error) t 
   | FailoverGlobalCluster: (FailoverGlobalClusterMessage.t,
   FailoverGlobalClusterResult.t, FailoverGlobalClusterResult.error) t 
-  | ImportInstallationMedia: (ImportInstallationMediaMessage.t,
-  InstallationMedia.t, InstallationMedia.error) t 
   | ListTagsForResource: (ListTagsForResourceMessage.t, TagListMessage.t,
   TagListMessage.error) t 
+  | ModifyActivityStream: (ModifyActivityStreamRequest.t,
+  ModifyActivityStreamResponse.t, ModifyActivityStreamResponse.error) t 
   | ModifyCertificates: (ModifyCertificatesMessage.t,
   ModifyCertificatesResult.t, ModifyCertificatesResult.error) t 
   | ModifyCurrentDBClusterCapacity: (ModifyCurrentDBClusterCapacityMessage.t,
@@ -247,6 +285,10 @@ type ('i, 'o, 'e) t =
   | ModifyDBProxyTargetGroup: (ModifyDBProxyTargetGroupRequest.t,
   ModifyDBProxyTargetGroupResponse.t, ModifyDBProxyTargetGroupResponse.error)
   t 
+  | ModifyDBRecommendation: (ModifyDBRecommendationMessage.t,
+  DBRecommendationMessage.t, DBRecommendationMessage.error) t 
+  | ModifyDBShardGroup: (ModifyDBShardGroupMessage.t, DBShardGroup.t,
+  DBShardGroup.error) t 
   | ModifyDBSnapshot: (ModifyDBSnapshotMessage.t, ModifyDBSnapshotResult.t,
   ModifyDBSnapshotResult.error) t 
   | ModifyDBSnapshotAttribute: (ModifyDBSnapshotAttributeMessage.t,
@@ -258,8 +300,12 @@ type ('i, 'o, 'e) t =
   ModifyEventSubscriptionResult.t, ModifyEventSubscriptionResult.error) t 
   | ModifyGlobalCluster: (ModifyGlobalClusterMessage.t,
   ModifyGlobalClusterResult.t, ModifyGlobalClusterResult.error) t 
+  | ModifyIntegration: (ModifyIntegrationMessage.t, Integration.t,
+  Integration.error) t 
   | ModifyOptionGroup: (ModifyOptionGroupMessage.t,
   ModifyOptionGroupResult.t, ModifyOptionGroupResult.error) t 
+  | ModifyTenantDatabase: (ModifyTenantDatabaseMessage.t,
+  ModifyTenantDatabaseResult.t, ModifyTenantDatabaseResult.error) t 
   | PromoteReadReplica: (PromoteReadReplicaMessage.t,
   PromoteReadReplicaResult.t, PromoteReadReplicaResult.error) t 
   | PromoteReadReplicaDBCluster: (PromoteReadReplicaDBClusterMessage.t,
@@ -273,6 +319,8 @@ type ('i, 'o, 'e) t =
   RebootDBClusterResult.error) t 
   | RebootDBInstance: (RebootDBInstanceMessage.t, RebootDBInstanceResult.t,
   RebootDBInstanceResult.error) t 
+  | RebootDBShardGroup: (RebootDBShardGroupMessage.t, DBShardGroup.t,
+  DBShardGroup.error) t 
   | RegisterDBProxyTargets: (RegisterDBProxyTargetsRequest.t,
   RegisterDBProxyTargetsResponse.t, RegisterDBProxyTargetsResponse.error) t 
   | RemoveFromGlobalCluster: (RemoveFromGlobalClusterMessage.t,
@@ -333,6 +381,13 @@ type ('i, 'o, 'e) t =
   (StopDBInstanceAutomatedBackupsReplicationMessage.t,
   StopDBInstanceAutomatedBackupsReplicationResult.t,
   StopDBInstanceAutomatedBackupsReplicationResult.error) t 
+  | SwitchoverBlueGreenDeployment: (SwitchoverBlueGreenDeploymentRequest.t,
+  SwitchoverBlueGreenDeploymentResponse.t,
+  SwitchoverBlueGreenDeploymentResponse.error) t 
+  | SwitchoverGlobalCluster: (SwitchoverGlobalClusterMessage.t,
+  SwitchoverGlobalClusterResult.t, SwitchoverGlobalClusterResult.error) t 
+  | SwitchoverReadReplica: (SwitchoverReadReplicaMessage.t,
+  SwitchoverReadReplicaResult.t, SwitchoverReadReplicaResult.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AddRoleToDBCluster -> `POST
@@ -348,7 +403,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CopyDBParameterGroup -> `POST
   | CopyDBSnapshot -> `POST
   | CopyOptionGroup -> `POST
-  | CreateCustomAvailabilityZone -> `POST
+  | CreateBlueGreenDeployment -> `POST
   | CreateCustomDBEngineVersion -> `POST
   | CreateDBCluster -> `POST
   | CreateDBClusterEndpoint -> `POST
@@ -360,14 +415,18 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateDBProxy -> `POST
   | CreateDBProxyEndpoint -> `POST
   | CreateDBSecurityGroup -> `POST
+  | CreateDBShardGroup -> `POST
   | CreateDBSnapshot -> `POST
   | CreateDBSubnetGroup -> `POST
   | CreateEventSubscription -> `POST
   | CreateGlobalCluster -> `POST
+  | CreateIntegration -> `POST
   | CreateOptionGroup -> `POST
-  | DeleteCustomAvailabilityZone -> `POST
+  | CreateTenantDatabase -> `POST
+  | DeleteBlueGreenDeployment -> `POST
   | DeleteCustomDBEngineVersion -> `POST
   | DeleteDBCluster -> `POST
+  | DeleteDBClusterAutomatedBackup -> `POST
   | DeleteDBClusterEndpoint -> `POST
   | DeleteDBClusterParameterGroup -> `POST
   | DeleteDBClusterSnapshot -> `POST
@@ -377,16 +436,19 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteDBProxy -> `POST
   | DeleteDBProxyEndpoint -> `POST
   | DeleteDBSecurityGroup -> `POST
+  | DeleteDBShardGroup -> `POST
   | DeleteDBSnapshot -> `POST
   | DeleteDBSubnetGroup -> `POST
   | DeleteEventSubscription -> `POST
   | DeleteGlobalCluster -> `POST
-  | DeleteInstallationMedia -> `POST
+  | DeleteIntegration -> `POST
   | DeleteOptionGroup -> `POST
+  | DeleteTenantDatabase -> `POST
   | DeregisterDBProxyTargets -> `POST
   | DescribeAccountAttributes -> `POST
+  | DescribeBlueGreenDeployments -> `POST
   | DescribeCertificates -> `POST
-  | DescribeCustomAvailabilityZones -> `POST
+  | DescribeDBClusterAutomatedBackups -> `POST
   | DescribeDBClusterBacktracks -> `POST
   | DescribeDBClusterEndpoints -> `POST
   | DescribeDBClusterParameterGroups -> `POST
@@ -398,14 +460,18 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeDBInstanceAutomatedBackups -> `POST
   | DescribeDBInstances -> `POST
   | DescribeDBLogFiles -> `POST
+  | DescribeDBMajorEngineVersions -> `POST
   | DescribeDBParameterGroups -> `POST
   | DescribeDBParameters -> `POST
   | DescribeDBProxies -> `POST
   | DescribeDBProxyEndpoints -> `POST
   | DescribeDBProxyTargetGroups -> `POST
   | DescribeDBProxyTargets -> `POST
+  | DescribeDBRecommendations -> `POST
   | DescribeDBSecurityGroups -> `POST
+  | DescribeDBShardGroups -> `POST
   | DescribeDBSnapshotAttributes -> `POST
+  | DescribeDBSnapshotTenantDatabases -> `POST
   | DescribeDBSnapshots -> `POST
   | DescribeDBSubnetGroups -> `POST
   | DescribeEngineDefaultClusterParameters -> `POST
@@ -415,20 +481,24 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeEvents -> `POST
   | DescribeExportTasks -> `POST
   | DescribeGlobalClusters -> `POST
-  | DescribeInstallationMedia -> `POST
+  | DescribeIntegrations -> `POST
   | DescribeOptionGroupOptions -> `POST
   | DescribeOptionGroups -> `POST
   | DescribeOrderableDBInstanceOptions -> `POST
   | DescribePendingMaintenanceActions -> `POST
   | DescribeReservedDBInstances -> `POST
   | DescribeReservedDBInstancesOfferings -> `POST
+  | DescribeServerlessV2PlatformVersions -> `POST
   | DescribeSourceRegions -> `POST
+  | DescribeTenantDatabases -> `POST
   | DescribeValidDBInstanceModifications -> `POST
+  | DisableHttpEndpoint -> `POST
   | DownloadDBLogFilePortion -> `POST
+  | EnableHttpEndpoint -> `POST
   | FailoverDBCluster -> `POST
   | FailoverGlobalCluster -> `POST
-  | ImportInstallationMedia -> `POST
   | ListTagsForResource -> `POST
+  | ModifyActivityStream -> `POST
   | ModifyCertificates -> `POST
   | ModifyCurrentDBClusterCapacity -> `POST
   | ModifyCustomDBEngineVersion -> `POST
@@ -441,17 +511,22 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ModifyDBProxy -> `POST
   | ModifyDBProxyEndpoint -> `POST
   | ModifyDBProxyTargetGroup -> `POST
+  | ModifyDBRecommendation -> `POST
+  | ModifyDBShardGroup -> `POST
   | ModifyDBSnapshot -> `POST
   | ModifyDBSnapshotAttribute -> `POST
   | ModifyDBSubnetGroup -> `POST
   | ModifyEventSubscription -> `POST
   | ModifyGlobalCluster -> `POST
+  | ModifyIntegration -> `POST
   | ModifyOptionGroup -> `POST
+  | ModifyTenantDatabase -> `POST
   | PromoteReadReplica -> `POST
   | PromoteReadReplicaDBCluster -> `POST
   | PurchaseReservedDBInstancesOffering -> `POST
   | RebootDBCluster -> `POST
   | RebootDBInstance -> `POST
+  | RebootDBShardGroup -> `POST
   | RegisterDBProxyTargets -> `POST
   | RemoveFromGlobalCluster -> `POST
   | RemoveRoleFromDBCluster -> `POST
@@ -476,6 +551,9 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | StopDBCluster -> `POST
   | StopDBInstance -> `POST
   | StopDBInstanceAutomatedBackupsReplication -> `POST
+  | SwitchoverBlueGreenDeployment -> `POST
+  | SwitchoverGlobalCluster -> `POST
+  | SwitchoverReadReplica -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -494,7 +572,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CopyDBParameterGroup -> (Format.kasprintf Uri.of_string) "/"
       | CopyDBSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | CopyOptionGroup -> (Format.kasprintf Uri.of_string) "/"
-      | CreateCustomAvailabilityZone -> (Format.kasprintf Uri.of_string) "/"
+      | CreateBlueGreenDeployment -> (Format.kasprintf Uri.of_string) "/"
       | CreateCustomDBEngineVersion -> (Format.kasprintf Uri.of_string) "/"
       | CreateDBCluster -> (Format.kasprintf Uri.of_string) "/"
       | CreateDBClusterEndpoint -> (Format.kasprintf Uri.of_string) "/"
@@ -506,14 +584,19 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateDBProxy -> (Format.kasprintf Uri.of_string) "/"
       | CreateDBProxyEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | CreateDBSecurityGroup -> (Format.kasprintf Uri.of_string) "/"
+      | CreateDBShardGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateDBSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | CreateDBSubnetGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateEventSubscription -> (Format.kasprintf Uri.of_string) "/"
       | CreateGlobalCluster -> (Format.kasprintf Uri.of_string) "/"
+      | CreateIntegration -> (Format.kasprintf Uri.of_string) "/"
       | CreateOptionGroup -> (Format.kasprintf Uri.of_string) "/"
-      | DeleteCustomAvailabilityZone -> (Format.kasprintf Uri.of_string) "/"
+      | CreateTenantDatabase -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteBlueGreenDeployment -> (Format.kasprintf Uri.of_string) "/"
       | DeleteCustomDBEngineVersion -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDBCluster -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteDBClusterAutomatedBackup ->
+          (Format.kasprintf Uri.of_string) "/"
       | DeleteDBClusterEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDBClusterParameterGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDBClusterSnapshot -> (Format.kasprintf Uri.of_string) "/"
@@ -524,16 +607,19 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteDBProxy -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDBProxyEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDBSecurityGroup -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteDBShardGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDBSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDBSubnetGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteEventSubscription -> (Format.kasprintf Uri.of_string) "/"
       | DeleteGlobalCluster -> (Format.kasprintf Uri.of_string) "/"
-      | DeleteInstallationMedia -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteIntegration -> (Format.kasprintf Uri.of_string) "/"
       | DeleteOptionGroup -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteTenantDatabase -> (Format.kasprintf Uri.of_string) "/"
       | DeregisterDBProxyTargets -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAccountAttributes -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeBlueGreenDeployments -> (Format.kasprintf Uri.of_string) "/"
       | DescribeCertificates -> (Format.kasprintf Uri.of_string) "/"
-      | DescribeCustomAvailabilityZones ->
+      | DescribeDBClusterAutomatedBackups ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeDBClusterBacktracks -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDBClusterEndpoints -> (Format.kasprintf Uri.of_string) "/"
@@ -549,14 +635,19 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | DescribeDBInstances -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDBLogFiles -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeDBMajorEngineVersions -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDBParameterGroups -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDBParameters -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDBProxies -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDBProxyEndpoints -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDBProxyTargetGroups -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDBProxyTargets -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeDBRecommendations -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDBSecurityGroups -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeDBShardGroups -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDBSnapshotAttributes -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeDBSnapshotTenantDatabases ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeDBSnapshots -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDBSubnetGroups -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEngineDefaultClusterParameters ->
@@ -568,7 +659,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeEvents -> (Format.kasprintf Uri.of_string) "/"
       | DescribeExportTasks -> (Format.kasprintf Uri.of_string) "/"
       | DescribeGlobalClusters -> (Format.kasprintf Uri.of_string) "/"
-      | DescribeInstallationMedia -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeIntegrations -> (Format.kasprintf Uri.of_string) "/"
       | DescribeOptionGroupOptions -> (Format.kasprintf Uri.of_string) "/"
       | DescribeOptionGroups -> (Format.kasprintf Uri.of_string) "/"
       | DescribeOrderableDBInstanceOptions ->
@@ -578,14 +669,19 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeReservedDBInstances -> (Format.kasprintf Uri.of_string) "/"
       | DescribeReservedDBInstancesOfferings ->
           (Format.kasprintf Uri.of_string) "/"
+      | DescribeServerlessV2PlatformVersions ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeSourceRegions -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeTenantDatabases -> (Format.kasprintf Uri.of_string) "/"
       | DescribeValidDBInstanceModifications ->
           (Format.kasprintf Uri.of_string) "/"
+      | DisableHttpEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | DownloadDBLogFilePortion -> (Format.kasprintf Uri.of_string) "/"
+      | EnableHttpEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | FailoverDBCluster -> (Format.kasprintf Uri.of_string) "/"
       | FailoverGlobalCluster -> (Format.kasprintf Uri.of_string) "/"
-      | ImportInstallationMedia -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyActivityStream -> (Format.kasprintf Uri.of_string) "/"
       | ModifyCertificates -> (Format.kasprintf Uri.of_string) "/"
       | ModifyCurrentDBClusterCapacity ->
           (Format.kasprintf Uri.of_string) "/"
@@ -600,18 +696,23 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ModifyDBProxy -> (Format.kasprintf Uri.of_string) "/"
       | ModifyDBProxyEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | ModifyDBProxyTargetGroup -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyDBRecommendation -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyDBShardGroup -> (Format.kasprintf Uri.of_string) "/"
       | ModifyDBSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | ModifyDBSnapshotAttribute -> (Format.kasprintf Uri.of_string) "/"
       | ModifyDBSubnetGroup -> (Format.kasprintf Uri.of_string) "/"
       | ModifyEventSubscription -> (Format.kasprintf Uri.of_string) "/"
       | ModifyGlobalCluster -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyIntegration -> (Format.kasprintf Uri.of_string) "/"
       | ModifyOptionGroup -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyTenantDatabase -> (Format.kasprintf Uri.of_string) "/"
       | PromoteReadReplica -> (Format.kasprintf Uri.of_string) "/"
       | PromoteReadReplicaDBCluster -> (Format.kasprintf Uri.of_string) "/"
       | PurchaseReservedDBInstancesOffering ->
           (Format.kasprintf Uri.of_string) "/"
       | RebootDBCluster -> (Format.kasprintf Uri.of_string) "/"
       | RebootDBInstance -> (Format.kasprintf Uri.of_string) "/"
+      | RebootDBShardGroup -> (Format.kasprintf Uri.of_string) "/"
       | RegisterDBProxyTargets -> (Format.kasprintf Uri.of_string) "/"
       | RemoveFromGlobalCluster -> (Format.kasprintf Uri.of_string) "/"
       | RemoveRoleFromDBCluster -> (Format.kasprintf Uri.of_string) "/"
@@ -640,7 +741,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | StopDBCluster -> (Format.kasprintf Uri.of_string) "/"
       | StopDBInstance -> (Format.kasprintf Uri.of_string) "/"
       | StopDBInstanceAutomatedBackupsReplication ->
-          (Format.kasprintf Uri.of_string) "/")
+          (Format.kasprintf Uri.of_string) "/"
+      | SwitchoverBlueGreenDeployment -> (Format.kasprintf Uri.of_string) "/"
+      | SwitchoverGlobalCluster -> (Format.kasprintf Uri.of_string) "/"
+      | SwitchoverReadReplica -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -814,17 +918,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (CopyOptionGroupMessage.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
-  | CreateCustomAvailabilityZone ->
+  | CreateBlueGreenDeployment ->
       let headers =
         Awso.Http.Headers.of_list
           [("content-type",
              "application/x-www-form-urlencoded; charset=utf-8")] in
       let body =
         let meta =
-          [("Action", ["CreateCustomAvailabilityZone"]);
+          [("Action", ["CreateBlueGreenDeployment"]);
           ("Version", [apiVersion])] in
         let query =
-          (CreateCustomAvailabilityZoneMessage.to_query req) |>
+          (CreateBlueGreenDeploymentRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -972,6 +1076,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateDBShardGroup ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateDBShardGroup"]); ("Version", [apiVersion])] in
+        let query =
+          (CreateDBShardGroupMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateDBSnapshot ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1024,6 +1141,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateIntegration ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateIntegration"]); ("Version", [apiVersion])] in
+        let query =
+          (CreateIntegrationMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateOptionGroup ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1036,17 +1165,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (CreateOptionGroupMessage.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
-  | DeleteCustomAvailabilityZone ->
+  | CreateTenantDatabase ->
       let headers =
         Awso.Http.Headers.of_list
           [("content-type",
              "application/x-www-form-urlencoded; charset=utf-8")] in
       let body =
         let meta =
-          [("Action", ["DeleteCustomAvailabilityZone"]);
+          [("Action", ["CreateTenantDatabase"]); ("Version", [apiVersion])] in
+        let query =
+          (CreateTenantDatabaseMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteBlueGreenDeployment ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteBlueGreenDeployment"]);
           ("Version", [apiVersion])] in
         let query =
-          (DeleteCustomAvailabilityZoneMessage.to_query req) |>
+          (DeleteBlueGreenDeploymentRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -1074,6 +1216,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DeleteDBCluster"]); ("Version", [apiVersion])] in
         let query =
           (DeleteDBClusterMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteDBClusterAutomatedBackup ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteDBClusterAutomatedBackup"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteDBClusterAutomatedBackupMessage.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteDBClusterEndpoint ->
@@ -1194,6 +1350,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteDBShardGroup ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteDBShardGroup"]); ("Version", [apiVersion])] in
+        let query =
+          (DeleteDBShardGroupMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteDBSnapshot ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1246,18 +1415,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
-  | DeleteInstallationMedia ->
+  | DeleteIntegration ->
       let headers =
         Awso.Http.Headers.of_list
           [("content-type",
              "application/x-www-form-urlencoded; charset=utf-8")] in
       let body =
         let meta =
-          [("Action", ["DeleteInstallationMedia"]);
-          ("Version", [apiVersion])] in
+          [("Action", ["DeleteIntegration"]); ("Version", [apiVersion])] in
         let query =
-          (DeleteInstallationMediaMessage.to_query req) |>
-            Awso.Client.Query.render in
+          (DeleteIntegrationMessage.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteOptionGroup ->
@@ -1270,6 +1437,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DeleteOptionGroup"]); ("Version", [apiVersion])] in
         let query =
           (DeleteOptionGroupMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteTenantDatabase ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteTenantDatabase"]); ("Version", [apiVersion])] in
+        let query =
+          (DeleteTenantDatabaseMessage.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeregisterDBProxyTargets ->
@@ -1300,6 +1480,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeBlueGreenDeployments ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeBlueGreenDeployments"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeBlueGreenDeploymentsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeCertificates ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1313,17 +1507,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
-  | DescribeCustomAvailabilityZones ->
+  | DescribeDBClusterAutomatedBackups ->
       let headers =
         Awso.Http.Headers.of_list
           [("content-type",
              "application/x-www-form-urlencoded; charset=utf-8")] in
       let body =
         let meta =
-          [("Action", ["DescribeCustomAvailabilityZones"]);
+          [("Action", ["DescribeDBClusterAutomatedBackups"]);
           ("Version", [apiVersion])] in
         let query =
-          (DescribeCustomAvailabilityZonesMessage.to_query req) |>
+          (DescribeDBClusterAutomatedBackupsMessage.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -1478,6 +1672,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeDBMajorEngineVersions ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeDBMajorEngineVersions"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeDBMajorEngineVersionsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeDBParameterGroups ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1558,6 +1766,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeDBRecommendations ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeDBRecommendations"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeDBRecommendationsMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeDBSecurityGroups ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1572,6 +1794,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeDBShardGroups ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeDBShardGroups"]); ("Version", [apiVersion])] in
+        let query =
+          (DescribeDBShardGroupsMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeDBSnapshotAttributes ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1583,6 +1818,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (DescribeDBSnapshotAttributesMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeDBSnapshotTenantDatabases ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeDBSnapshotTenantDatabases"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeDBSnapshotTenantDatabasesMessage.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -1706,17 +1955,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
-  | DescribeInstallationMedia ->
+  | DescribeIntegrations ->
       let headers =
         Awso.Http.Headers.of_list
           [("content-type",
              "application/x-www-form-urlencoded; charset=utf-8")] in
       let body =
         let meta =
-          [("Action", ["DescribeInstallationMedia"]);
-          ("Version", [apiVersion])] in
+          [("Action", ["DescribeIntegrations"]); ("Version", [apiVersion])] in
         let query =
-          (DescribeInstallationMediaMessage.to_query req) |>
+          (DescribeIntegrationsMessage.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -1803,6 +2051,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeServerlessV2PlatformVersions ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeServerlessV2PlatformVersions"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeServerlessV2PlatformVersionsMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeSourceRegions ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1813,6 +2075,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DescribeSourceRegions"]); ("Version", [apiVersion])] in
         let query =
           (DescribeSourceRegionsMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeTenantDatabases ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeTenantDatabases"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeTenantDatabasesMessage.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -1830,6 +2106,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisableHttpEndpoint ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisableHttpEndpoint"]); ("Version", [apiVersion])] in
+        let query =
+          (DisableHttpEndpointRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DownloadDBLogFilePortion ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1841,6 +2130,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (DownloadDBLogFilePortionMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | EnableHttpEndpoint ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["EnableHttpEndpoint"]); ("Version", [apiVersion])] in
+        let query =
+          (EnableHttpEndpointRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -1869,20 +2171,6 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
-  | ImportInstallationMedia ->
-      let headers =
-        Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta =
-          [("Action", ["ImportInstallationMedia"]);
-          ("Version", [apiVersion])] in
-        let query =
-          (ImportInstallationMediaMessage.to_query req) |>
-            Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ListTagsForResource ->
       let headers =
         Awso.Http.Headers.of_list
@@ -1893,6 +2181,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["ListTagsForResource"]); ("Version", [apiVersion])] in
         let query =
           (ListTagsForResourceMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyActivityStream ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyActivityStream"]); ("Version", [apiVersion])] in
+        let query =
+          (ModifyActivityStreamRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -2054,6 +2355,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyDBRecommendation ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyDBRecommendation"]); ("Version", [apiVersion])] in
+        let query =
+          (ModifyDBRecommendationMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyDBShardGroup ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyDBShardGroup"]); ("Version", [apiVersion])] in
+        let query =
+          (ModifyDBShardGroupMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ModifyDBSnapshot ->
       let headers =
         Awso.Http.Headers.of_list
@@ -2120,6 +2447,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyIntegration ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyIntegration"]); ("Version", [apiVersion])] in
+        let query =
+          (ModifyIntegrationMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ModifyOptionGroup ->
       let headers =
         Awso.Http.Headers.of_list
@@ -2130,6 +2469,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["ModifyOptionGroup"]); ("Version", [apiVersion])] in
         let query =
           (ModifyOptionGroupMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyTenantDatabase ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyTenantDatabase"]); ("Version", [apiVersion])] in
+        let query =
+          (ModifyTenantDatabaseMessage.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | PromoteReadReplica ->
@@ -2195,6 +2547,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["RebootDBInstance"]); ("Version", [apiVersion])] in
         let query =
           (RebootDBInstanceMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | RebootDBShardGroup ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["RebootDBShardGroup"]); ("Version", [apiVersion])] in
+        let query =
+          (RebootDBShardGroupMessage.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | RegisterDBProxyTargets ->
@@ -2516,6 +2881,47 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | SwitchoverBlueGreenDeployment ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["SwitchoverBlueGreenDeployment"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (SwitchoverBlueGreenDeploymentRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | SwitchoverGlobalCluster ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["SwitchoverGlobalCluster"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (SwitchoverGlobalClusterMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | SwitchoverReadReplica ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["SwitchoverReadReplica"]); ("Version", [apiVersion])] in
+        let query =
+          (SwitchoverReadReplicaMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -2629,15 +3035,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (CopyOptionGroupResult.of_xml xml)
       else Error (parse_aws_error (Some CopyOptionGroupResult.error_of_xml))
-  | CreateCustomAvailabilityZone ->
+  | CreateBlueGreenDeployment ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-        Ok (CreateCustomAvailabilityZoneResult.of_xml xml)
+        Ok (CreateBlueGreenDeploymentResponse.of_xml xml)
       else
         Error
           (parse_aws_error
-             (Some CreateCustomAvailabilityZoneResult.error_of_xml))
+             (Some CreateBlueGreenDeploymentResponse.error_of_xml))
   | CreateCustomDBEngineVersion ->
       if is_success
       then
@@ -2718,6 +3124,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateDBSecurityGroupResult.error_of_xml))
+  | CreateDBShardGroup ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBShardGroup.of_xml xml)
+      else Error (parse_aws_error (Some DBShardGroup.error_of_xml))
   | CreateDBSnapshot ->
       if is_success
       then
@@ -2746,6 +3158,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateGlobalClusterResult.of_xml xml)
       else
         Error (parse_aws_error (Some CreateGlobalClusterResult.error_of_xml))
+  | CreateIntegration ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (Integration.of_xml xml)
+      else Error (parse_aws_error (Some Integration.error_of_xml))
   | CreateOptionGroup ->
       if is_success
       then
@@ -2753,15 +3171,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateOptionGroupResult.of_xml xml)
       else
         Error (parse_aws_error (Some CreateOptionGroupResult.error_of_xml))
-  | DeleteCustomAvailabilityZone ->
+  | CreateTenantDatabase ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-        Ok (DeleteCustomAvailabilityZoneResult.of_xml xml)
+        Ok (CreateTenantDatabaseResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some CreateTenantDatabaseResult.error_of_xml))
+  | DeleteBlueGreenDeployment ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteBlueGreenDeploymentResponse.of_xml xml)
       else
         Error
           (parse_aws_error
-             (Some DeleteCustomAvailabilityZoneResult.error_of_xml))
+             (Some DeleteBlueGreenDeploymentResponse.error_of_xml))
   | DeleteCustomDBEngineVersion ->
       if is_success
       then
@@ -2774,6 +3200,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (DeleteDBClusterResult.of_xml xml)
       else Error (parse_aws_error (Some DeleteDBClusterResult.error_of_xml))
+  | DeleteDBClusterAutomatedBackup ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteDBClusterAutomatedBackupResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteDBClusterAutomatedBackupResult.error_of_xml))
   | DeleteDBClusterEndpoint ->
       if is_success
       then
@@ -2823,6 +3258,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error (Some DeleteDBProxyEndpointResponse.error_of_xml))
   | DeleteDBSecurityGroup ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteDBShardGroup ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBShardGroup.of_xml xml)
+      else Error (parse_aws_error (Some DBShardGroup.error_of_xml))
   | DeleteDBSnapshot ->
       if is_success
       then
@@ -2846,14 +3287,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeleteGlobalClusterResult.of_xml xml)
       else
         Error (parse_aws_error (Some DeleteGlobalClusterResult.error_of_xml))
-  | DeleteInstallationMedia ->
+  | DeleteIntegration ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-        Ok (InstallationMedia.of_xml xml)
-      else Error (parse_aws_error (Some InstallationMedia.error_of_xml))
+        Ok (Integration.of_xml xml)
+      else Error (parse_aws_error (Some Integration.error_of_xml))
   | DeleteOptionGroup ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteTenantDatabase ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DeleteTenantDatabaseResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DeleteTenantDatabaseResult.error_of_xml))
   | DeregisterDBProxyTargets ->
       if is_success
       then
@@ -2868,21 +3317,32 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (AccountAttributesMessage.of_xml xml)
-      else Error (parse_aws_error None)
+      else
+        Error (parse_aws_error (Some AccountAttributesMessage.error_of_xml))
+  | DescribeBlueGreenDeployments ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeBlueGreenDeploymentsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeBlueGreenDeploymentsResponse.error_of_xml))
   | DescribeCertificates ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (CertificateMessage.of_xml xml)
       else Error (parse_aws_error (Some CertificateMessage.error_of_xml))
-  | DescribeCustomAvailabilityZones ->
+  | DescribeDBClusterAutomatedBackups ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-        Ok (CustomAvailabilityZoneMessage.of_xml xml)
+        Ok (DBClusterAutomatedBackupMessage.of_xml xml)
       else
         Error
-          (parse_aws_error (Some CustomAvailabilityZoneMessage.error_of_xml))
+          (parse_aws_error
+             (Some DBClusterAutomatedBackupMessage.error_of_xml))
   | DescribeDBClusterBacktracks ->
       if is_success
       then
@@ -2941,7 +3401,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (DBEngineVersionMessage.of_xml xml)
-      else Error (parse_aws_error None)
+      else Error (parse_aws_error (Some DBEngineVersionMessage.error_of_xml))
   | DescribeDBInstanceAutomatedBackups ->
       if is_success
       then
@@ -2965,6 +3425,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeDBLogFilesResponse.error_of_xml))
+  | DescribeDBMajorEngineVersions ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeDBMajorEngineVersionsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDBMajorEngineVersionsResponse.error_of_xml))
   | DescribeDBParameterGroups ->
       if is_success
       then
@@ -3012,12 +3481,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeDBProxyTargetsResponse.error_of_xml))
+  | DescribeDBRecommendations ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBRecommendationsMessage.of_xml xml)
+      else
+        Error (parse_aws_error (Some DBRecommendationsMessage.error_of_xml))
   | DescribeDBSecurityGroups ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (DBSecurityGroupMessage.of_xml xml)
       else Error (parse_aws_error (Some DBSecurityGroupMessage.error_of_xml))
+  | DescribeDBShardGroups ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeDBShardGroupsResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DescribeDBShardGroupsResponse.error_of_xml))
   | DescribeDBSnapshotAttributes ->
       if is_success
       then
@@ -3027,6 +3511,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeDBSnapshotAttributesResult.error_of_xml))
+  | DescribeDBSnapshotTenantDatabases ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBSnapshotTenantDatabasesMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DBSnapshotTenantDatabasesMessage.error_of_xml))
   | DescribeDBSnapshots ->
       if is_success
       then
@@ -3044,19 +3537,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (DescribeEngineDefaultClusterParametersResult.of_xml xml)
-      else Error (parse_aws_error None)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeEngineDefaultClusterParametersResult.error_of_xml))
   | DescribeEngineDefaultParameters ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (DescribeEngineDefaultParametersResult.of_xml xml)
-      else Error (parse_aws_error None)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeEngineDefaultParametersResult.error_of_xml))
   | DescribeEventCategories ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (EventCategoriesMessage.of_xml xml)
-      else Error (parse_aws_error None)
+      else Error (parse_aws_error (Some EventCategoriesMessage.error_of_xml))
   | DescribeEventSubscriptions ->
       if is_success
       then
@@ -3069,7 +3568,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (EventsMessage.of_xml xml)
-      else Error (parse_aws_error None)
+      else Error (parse_aws_error (Some EventsMessage.error_of_xml))
   | DescribeExportTasks ->
       if is_success
       then
@@ -3082,19 +3581,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (GlobalClustersMessage.of_xml xml)
       else Error (parse_aws_error (Some GlobalClustersMessage.error_of_xml))
-  | DescribeInstallationMedia ->
+  | DescribeIntegrations ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-        Ok (InstallationMediaMessage.of_xml xml)
+        Ok (DescribeIntegrationsResponse.of_xml xml)
       else
-        Error (parse_aws_error (Some InstallationMediaMessage.error_of_xml))
+        Error
+          (parse_aws_error (Some DescribeIntegrationsResponse.error_of_xml))
   | DescribeOptionGroupOptions ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (OptionGroupOptionsMessage.of_xml xml)
-      else Error (parse_aws_error None)
+      else
+        Error (parse_aws_error (Some OptionGroupOptionsMessage.error_of_xml))
   | DescribeOptionGroups ->
       if is_success
       then
@@ -3106,7 +3607,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (OrderableDBInstanceOptionsMessage.of_xml xml)
-      else Error (parse_aws_error None)
+      else
+        Error
+          (parse_aws_error
+             (Some OrderableDBInstanceOptionsMessage.error_of_xml))
   | DescribePendingMaintenanceActions ->
       if is_success
       then
@@ -3132,12 +3636,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ReservedDBInstancesOfferingMessage.error_of_xml))
+  | DescribeServerlessV2PlatformVersions ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ServerlessV2PlatformVersionsMessage.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some ServerlessV2PlatformVersionsMessage.error_of_xml))
   | DescribeSourceRegions ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (SourceRegionMessage.of_xml xml)
-      else Error (parse_aws_error None)
+      else Error (parse_aws_error (Some SourceRegionMessage.error_of_xml))
+  | DescribeTenantDatabases ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (TenantDatabasesMessage.of_xml xml)
+      else Error (parse_aws_error (Some TenantDatabasesMessage.error_of_xml))
   | DescribeValidDBInstanceModifications ->
       if is_success
       then
@@ -3147,6 +3666,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeValidDBInstanceModificationsResult.error_of_xml))
+  | DisableHttpEndpoint ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DisableHttpEndpointResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some DisableHttpEndpointResponse.error_of_xml))
   | DownloadDBLogFilePortion ->
       if is_success
       then
@@ -3156,6 +3683,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DownloadDBLogFilePortionDetails.error_of_xml))
+  | EnableHttpEndpoint ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (EnableHttpEndpointResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some EnableHttpEndpointResponse.error_of_xml))
   | FailoverDBCluster ->
       if is_success
       then
@@ -3171,18 +3706,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some FailoverGlobalClusterResult.error_of_xml))
-  | ImportInstallationMedia ->
-      if is_success
-      then
-        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-        Ok (InstallationMedia.of_xml xml)
-      else Error (parse_aws_error (Some InstallationMedia.error_of_xml))
   | ListTagsForResource ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (TagListMessage.of_xml xml)
       else Error (parse_aws_error (Some TagListMessage.error_of_xml))
+  | ModifyActivityStream ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyActivityStreamResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ModifyActivityStreamResponse.error_of_xml))
   | ModifyCertificates ->
       if is_success
       then
@@ -3269,6 +3806,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ModifyDBProxyTargetGroupResponse.error_of_xml))
+  | ModifyDBRecommendation ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBRecommendationMessage.of_xml xml)
+      else
+        Error (parse_aws_error (Some DBRecommendationMessage.error_of_xml))
+  | ModifyDBShardGroup ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBShardGroup.of_xml xml)
+      else Error (parse_aws_error (Some DBShardGroup.error_of_xml))
   | ModifyDBSnapshot ->
       if is_success
       then
@@ -3306,6 +3856,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ModifyGlobalClusterResult.of_xml xml)
       else
         Error (parse_aws_error (Some ModifyGlobalClusterResult.error_of_xml))
+  | ModifyIntegration ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (Integration.of_xml xml)
+      else Error (parse_aws_error (Some Integration.error_of_xml))
   | ModifyOptionGroup ->
       if is_success
       then
@@ -3313,6 +3869,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ModifyOptionGroupResult.of_xml xml)
       else
         Error (parse_aws_error (Some ModifyOptionGroupResult.error_of_xml))
+  | ModifyTenantDatabase ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ModifyTenantDatabaseResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ModifyTenantDatabaseResult.error_of_xml))
   | PromoteReadReplica ->
       if is_success
       then
@@ -3350,6 +3914,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (RebootDBInstanceResult.of_xml xml)
       else Error (parse_aws_error (Some RebootDBInstanceResult.error_of_xml))
+  | RebootDBShardGroup ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DBShardGroup.of_xml xml)
+      else Error (parse_aws_error (Some DBShardGroup.error_of_xml))
   | RegisterDBProxyTargets ->
       if is_success
       then
@@ -3525,3 +4095,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 StopDBInstanceAutomatedBackupsReplicationResult.error_of_xml))
+  | SwitchoverBlueGreenDeployment ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SwitchoverBlueGreenDeploymentResponse.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some SwitchoverBlueGreenDeploymentResponse.error_of_xml))
+  | SwitchoverGlobalCluster ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SwitchoverGlobalClusterResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some SwitchoverGlobalClusterResult.error_of_xml))
+  | SwitchoverReadReplica ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SwitchoverReadReplicaResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some SwitchoverReadReplicaResult.error_of_xml))

@@ -42,6 +42,18 @@ val describe_scheduled_actions :
       DescribeScheduledActionsRequest.t ->
         (DescribeScheduledActionsResponse.t,
           DescribeScheduledActionsResponse.error) Result.t
+val get_predictive_scaling_forecast :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetPredictiveScalingForecastRequest.t ->
+        (GetPredictiveScalingForecastResponse.t,
+          GetPredictiveScalingForecastResponse.error) Result.t
+val list_tags_for_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListTagsForResourceRequest.t ->
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t
 val put_scaling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -59,3 +71,13 @@ val register_scalable_target :
       RegisterScalableTargetRequest.t ->
         (RegisterScalableTargetResponse.t,
           RegisterScalableTargetResponse.error) Result.t
+val tag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TagResourceRequest.t ->
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
+val untag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UntagResourceRequest.t ->
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t

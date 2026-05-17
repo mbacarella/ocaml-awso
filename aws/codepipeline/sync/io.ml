@@ -47,14 +47,22 @@ let list_action_executions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListActionExecutions input
 let list_action_types ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListActionTypes input
+let list_deploy_action_execution_targets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDeployActionExecutionTargets input
 let list_pipeline_executions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPipelineExecutions input
 let list_pipelines ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPipelines input
+let list_rule_executions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRuleExecutions input
+let list_rule_types ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRuleTypes input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let list_webhooks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListWebhooks input
+let override_stage_condition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.OverrideStageCondition input
 let poll_for_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PollForJobs input
 let poll_for_third_party_jobs ?endpoint_url ?cfg input =
@@ -77,6 +85,8 @@ let register_webhook_with_third_party ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterWebhookWithThirdParty input
 let retry_stage_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RetryStageExecution input
+let rollback_stage ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RollbackStage input
 let start_pipeline_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartPipelineExecution input
 let stop_pipeline_execution ?endpoint_url ?cfg input =

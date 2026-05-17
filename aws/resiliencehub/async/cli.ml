@@ -28,6 +28,29 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let accept_resource_grouping_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn"
+       and entries =
+         flag "entries" (required json_arg)
+           ~doc:"JSON AcceptGroupingRecommendationEntries" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.accept_resource_grouping_recommendations
+           (Values.AcceptResourceGroupingRecommendationsRequest.make ~appArn
+              ~entries:(Values.AcceptGroupingRecommendationEntries.of_json
+                          entries) ())
+           (Some Values.AcceptResourceGroupingRecommendationsResponse.to_json)
+           (Some
+              Values.AcceptResourceGroupingRecommendationsResponse.error_to_json)])
 let add_draft_app_version_resource_mappings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -51,6 +74,28 @@ let add_draft_app_version_resource_mappings =
            (Some Values.AddDraftAppVersionResourceMappingsResponse.to_json)
            (Some
               Values.AddDraftAppVersionResourceMappingsResponse.error_to_json)])
+let batch_update_recommendation_status =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn"
+       and requestEntries =
+         flag "request-entries" (required json_arg)
+           ~doc:"JSON UpdateRecommendationStatusRequestEntries" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_update_recommendation_status
+           (Values.BatchUpdateRecommendationStatusRequest.make ~appArn
+              ~requestEntries:(Values.UpdateRecommendationStatusRequestEntries.of_json
+                                 requestEntries) ())
+           (Some Values.BatchUpdateRecommendationStatusResponse.to_json)
+           (Some Values.BatchUpdateRecommendationStatusResponse.error_to_json)])
 let create_app =
   Command.async ~summary:""
     ([%map_open.Command
@@ -61,20 +106,115 @@ let create_app =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and assessmentSchedule =
+         flag "assessment-schedule" (optional json_arg)
+           ~doc:"JSON AppAssessmentScheduleType"
+       and awsApplicationArn =
+         flag "aws-application-arn" (optional string) ~doc:"STRING Arn"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and description =
          flag "description" (optional string) ~doc:"STRING EntityDescription"
+       and eventSubscriptions =
+         flag "event-subscriptions" (optional json_arg)
+           ~doc:"JSON EventSubscriptionList"
+       and permissionModel =
+         flag "permission-model" (optional json_arg)
+           ~doc:"JSON PermissionModel"
        and policyArn = flag "policy-arn" (optional string) ~doc:"STRING Arn"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and name = flag "name" (required string) ~doc:"STRING EntityName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_app
-           (Values.CreateAppRequest.make ?clientToken ?description ?policyArn
+           (Values.CreateAppRequest.make
+              ?assessmentSchedule:(Option.map
+                                     ~f:Values.AppAssessmentScheduleType.of_json
+                                     assessmentSchedule) ?awsApplicationArn
+              ?clientToken ?description
+              ?eventSubscriptions:(Option.map
+                                     ~f:Values.EventSubscriptionList.of_json
+                                     eventSubscriptions)
+              ?permissionModel:(Option.map ~f:Values.PermissionModel.of_json
+                                  permissionModel) ?policyArn
               ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~name ())
            (Some Values.CreateAppResponse.to_json)
            (Some Values.CreateAppResponse.error_to_json)])
+let create_app_version_app_component =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and additionalInfo =
+         flag "additional-info" (optional json_arg)
+           ~doc:"JSON AdditionalInfoMap"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and id = flag "id" (optional string) ~doc:"STRING String255"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn"
+       and name = flag "name" (required string) ~doc:"STRING String255"
+       and type_ = flag "type-" (required string) ~doc:"STRING String255" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_app_version_app_component
+           (Values.CreateAppVersionAppComponentRequest.make
+              ?additionalInfo:(Option.map ~f:Values.AdditionalInfoMap.of_json
+                                 additionalInfo) ?clientToken ?id ~appArn
+              ~name ~type_ ())
+           (Some Values.CreateAppVersionAppComponentResponse.to_json)
+           (Some Values.CreateAppVersionAppComponentResponse.error_to_json)])
+let create_app_version_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and additionalInfo =
+         flag "additional-info" (optional json_arg)
+           ~doc:"JSON AdditionalInfoMap"
+       and awsAccountId =
+         flag "aws-account-id" (optional string) ~doc:"STRING CustomerId"
+       and awsRegion =
+         flag "aws-region" (optional string) ~doc:"STRING AwsRegion"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and resourceName =
+         flag "resource-name" (optional string) ~doc:"STRING EntityName"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn"
+       and appComponents =
+         flag "app-components" (required json_arg)
+           ~doc:"JSON AppComponentNameList"
+       and logicalResourceId =
+         flag "logical-resource-id" (required json_arg)
+           ~doc:"JSON LogicalResourceId"
+       and physicalResourceId =
+         flag "physical-resource-id" (required string)
+           ~doc:"STRING String2048"
+       and resourceType =
+         flag "resource-type" (required string) ~doc:"STRING String255" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_app_version_resource
+           (Values.CreateAppVersionResourceRequest.make
+              ?additionalInfo:(Option.map ~f:Values.AdditionalInfoMap.of_json
+                                 additionalInfo) ?awsAccountId ?awsRegion
+              ?clientToken ?resourceName ~appArn
+              ~appComponents:(Values.AppComponentNameList.of_json
+                                appComponents)
+              ~logicalResourceId:(Values.LogicalResourceId.of_json
+                                    logicalResourceId) ~physicalResourceId
+              ~resourceType ())
+           (Some Values.CreateAppVersionResourceResponse.to_json)
+           (Some Values.CreateAppVersionResourceResponse.error_to_json)])
 let create_recommendation_template =
   Command.async ~summary:""
     ([%map_open.Command
@@ -197,6 +337,95 @@ let delete_app_assessment =
               ~assessmentArn ())
            (Some Values.DeleteAppAssessmentResponse.to_json)
            (Some Values.DeleteAppAssessmentResponse.error_to_json)])
+let delete_app_input_source =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and eksSourceClusterNamespace =
+         flag "eks-source-cluster-namespace" (optional json_arg)
+           ~doc:"JSON EksSourceClusterNamespace"
+       and sourceArn = flag "source-arn" (optional string) ~doc:"STRING Arn"
+       and terraformSource =
+         flag "terraform-source" (optional json_arg)
+           ~doc:"JSON TerraformSource"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_app_input_source
+           (Values.DeleteAppInputSourceRequest.make ?clientToken
+              ?eksSourceClusterNamespace:(Option.map
+                                            ~f:Values.EksSourceClusterNamespace.of_json
+                                            eksSourceClusterNamespace)
+              ?sourceArn
+              ?terraformSource:(Option.map ~f:Values.TerraformSource.of_json
+                                  terraformSource) ~appArn ())
+           (Some Values.DeleteAppInputSourceResponse.to_json)
+           (Some Values.DeleteAppInputSourceResponse.error_to_json)])
+let delete_app_version_app_component =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn"
+       and id = flag "id" (required string) ~doc:"STRING String255" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_app_version_app_component
+           (Values.DeleteAppVersionAppComponentRequest.make ?clientToken
+              ~appArn ~id ())
+           (Some Values.DeleteAppVersionAppComponentResponse.to_json)
+           (Some Values.DeleteAppVersionAppComponentResponse.error_to_json)])
+let delete_app_version_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and awsAccountId =
+         flag "aws-account-id" (optional string) ~doc:"STRING CustomerId"
+       and awsRegion =
+         flag "aws-region" (optional string) ~doc:"STRING AwsRegion"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and logicalResourceId =
+         flag "logical-resource-id" (optional json_arg)
+           ~doc:"JSON LogicalResourceId"
+       and physicalResourceId =
+         flag "physical-resource-id" (optional string)
+           ~doc:"STRING String2048"
+       and resourceName =
+         flag "resource-name" (optional string) ~doc:"STRING EntityName"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_app_version_resource
+           (Values.DeleteAppVersionResourceRequest.make ?awsAccountId
+              ?awsRegion ?clientToken
+              ?logicalResourceId:(Option.map
+                                    ~f:Values.LogicalResourceId.of_json
+                                    logicalResourceId) ?physicalResourceId
+              ?resourceName ~appArn ())
+           (Some Values.DeleteAppVersionResourceResponse.to_json)
+           (Some Values.DeleteAppVersionResourceResponse.error_to_json)])
 let delete_recommendation_template =
   Command.async ~summary:""
     ([%map_open.Command
@@ -272,6 +501,82 @@ let describe_app_assessment =
            (Values.DescribeAppAssessmentRequest.make ~assessmentArn ())
            (Some Values.DescribeAppAssessmentResponse.to_json)
            (Some Values.DescribeAppAssessmentResponse.error_to_json)])
+let describe_app_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn"
+       and appVersion =
+         flag "app-version" (required string) ~doc:"STRING EntityVersion" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_app_version
+           (Values.DescribeAppVersionRequest.make ~appArn ~appVersion ())
+           (Some Values.DescribeAppVersionResponse.to_json)
+           (Some Values.DescribeAppVersionResponse.error_to_json)])
+let describe_app_version_app_component =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn"
+       and appVersion =
+         flag "app-version" (required string) ~doc:"STRING EntityVersion"
+       and id = flag "id" (required string) ~doc:"STRING String255" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_app_version_app_component
+           (Values.DescribeAppVersionAppComponentRequest.make ~appArn
+              ~appVersion ~id ())
+           (Some Values.DescribeAppVersionAppComponentResponse.to_json)
+           (Some Values.DescribeAppVersionAppComponentResponse.error_to_json)])
+let describe_app_version_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and awsAccountId =
+         flag "aws-account-id" (optional string) ~doc:"STRING CustomerId"
+       and awsRegion =
+         flag "aws-region" (optional string) ~doc:"STRING AwsRegion"
+       and logicalResourceId =
+         flag "logical-resource-id" (optional json_arg)
+           ~doc:"JSON LogicalResourceId"
+       and physicalResourceId =
+         flag "physical-resource-id" (optional string)
+           ~doc:"STRING String2048"
+       and resourceName =
+         flag "resource-name" (optional string) ~doc:"STRING EntityName"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn"
+       and appVersion =
+         flag "app-version" (required string) ~doc:"STRING EntityVersion" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_app_version_resource
+           (Values.DescribeAppVersionResourceRequest.make ?awsAccountId
+              ?awsRegion
+              ?logicalResourceId:(Option.map
+                                    ~f:Values.LogicalResourceId.of_json
+                                    logicalResourceId) ?physicalResourceId
+              ?resourceName ~appArn ~appVersion ())
+           (Some Values.DescribeAppVersionResourceResponse.to_json)
+           (Some Values.DescribeAppVersionResourceResponse.error_to_json)])
 let describe_app_version_resources_resolution_status =
   Command.async ~summary:""
     ([%map_open.Command
@@ -335,6 +640,24 @@ let describe_draft_app_version_resources_import_status =
               Values.DescribeDraftAppVersionResourcesImportStatusResponse.to_json)
            (Some
               Values.DescribeDraftAppVersionResourcesImportStatusResponse.error_to_json)])
+let describe_metrics_export =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and metricsExportId =
+         flag "metrics-export-id" (required string) ~doc:"STRING String255" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_metrics_export
+           (Values.DescribeMetricsExportRequest.make ~metricsExportId ())
+           (Some Values.DescribeMetricsExportResponse.to_json)
+           (Some Values.DescribeMetricsExportResponse.error_to_json)])
 let describe_resiliency_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -352,6 +675,28 @@ let describe_resiliency_policy =
            (Values.DescribeResiliencyPolicyRequest.make ~policyArn ())
            (Some Values.DescribeResiliencyPolicyResponse.to_json)
            (Some Values.DescribeResiliencyPolicyResponse.error_to_json)])
+let describe_resource_grouping_recommendation_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and groupingId =
+         flag "grouping-id" (optional string) ~doc:"STRING String255"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_resource_grouping_recommendation_task
+           (Values.DescribeResourceGroupingRecommendationTaskRequest.make
+              ?groupingId ~appArn ())
+           (Some
+              Values.DescribeResourceGroupingRecommendationTaskResponse.to_json)
+           (Some
+              Values.DescribeResourceGroupingRecommendationTaskResponse.error_to_json)])
 let import_resources_to_draft_app_version =
   Command.async ~summary:""
     ([%map_open.Command
@@ -362,14 +707,30 @@ let import_resources_to_draft_app_version =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn"
+       and eksSources =
+         flag "eks-sources" (optional json_arg) ~doc:"JSON EksSourceList"
+       and importStrategy =
+         flag "import-strategy" (optional json_arg)
+           ~doc:"JSON ResourceImportStrategyType"
        and sourceArns =
-         flag "source-arns" (required json_arg) ~doc:"JSON ArnList" in
+         flag "source-arns" (optional json_arg) ~doc:"JSON ArnList"
+       and terraformSources =
+         flag "terraform-sources" (optional json_arg)
+           ~doc:"JSON TerraformSourceList"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.import_resources_to_draft_app_version
-           (Values.ImportResourcesToDraftAppVersionRequest.make ~appArn
-              ~sourceArns:(Values.ArnList.of_json sourceArns) ())
+           (Values.ImportResourcesToDraftAppVersionRequest.make
+              ?eksSources:(Option.map ~f:Values.EksSourceList.of_json
+                             eksSources)
+              ?importStrategy:(Option.map
+                                 ~f:Values.ResourceImportStrategyType.of_json
+                                 importStrategy)
+              ?sourceArns:(Option.map ~f:Values.ArnList.of_json sourceArns)
+              ?terraformSources:(Option.map
+                                   ~f:Values.TerraformSourceList.of_json
+                                   terraformSources) ~appArn ())
            (Some Values.ImportResourcesToDraftAppVersionResponse.to_json)
            (Some
               Values.ImportResourcesToDraftAppVersionResponse.error_to_json)])
@@ -396,6 +757,53 @@ let list_alarm_recommendations =
               ?nextToken ~assessmentArn ())
            (Some Values.ListAlarmRecommendationsResponse.to_json)
            (Some Values.ListAlarmRecommendationsResponse.error_to_json)])
+let list_app_assessment_compliance_drifts =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and assessmentArn =
+         flag "assessment-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_app_assessment_compliance_drifts
+           (Values.ListAppAssessmentComplianceDriftsRequest.make ?maxResults
+              ?nextToken ~assessmentArn ())
+           (Some Values.ListAppAssessmentComplianceDriftsResponse.to_json)
+           (Some
+              Values.ListAppAssessmentComplianceDriftsResponse.error_to_json)])
+let list_app_assessment_resource_drifts =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and assessmentArn =
+         flag "assessment-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_app_assessment_resource_drifts
+           (Values.ListAppAssessmentResourceDriftsRequest.make ?maxResults
+              ?nextToken ~assessmentArn ())
+           (Some Values.ListAppAssessmentResourceDriftsResponse.to_json)
+           (Some Values.ListAppAssessmentResourceDriftsResponse.error_to_json)])
 let list_app_assessments =
   Command.async ~summary:""
     ([%map_open.Command
@@ -483,6 +891,54 @@ let list_app_component_recommendations =
               ?nextToken ~assessmentArn ())
            (Some Values.ListAppComponentRecommendationsResponse.to_json)
            (Some Values.ListAppComponentRecommendationsResponse.error_to_json)])
+let list_app_input_sources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn"
+       and appVersion =
+         flag "app-version" (required string) ~doc:"STRING EntityVersion" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_app_input_sources
+           (Values.ListAppInputSourcesRequest.make ?maxResults ?nextToken
+              ~appArn ~appVersion ())
+           (Some Values.ListAppInputSourcesResponse.to_json)
+           (Some Values.ListAppInputSourcesResponse.error_to_json)])
+let list_app_version_app_components =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn"
+       and appVersion =
+         flag "app-version" (required string) ~doc:"STRING EntityVersion" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_app_version_app_components
+           (Values.ListAppVersionAppComponentsRequest.make ?maxResults
+              ?nextToken ~appArn ~appVersion ())
+           (Some Values.ListAppVersionAppComponentsResponse.to_json)
+           (Some Values.ListAppVersionAppComponentsResponse.error_to_json)])
 let list_app_version_resource_mappings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -543,16 +999,23 @@ let list_app_versions =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and endTime =
+         flag "end-time" (optional json_arg) ~doc:"JSON TimeStamp"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and startTime =
+         flag "start-time" (optional json_arg) ~doc:"JSON TimeStamp"
        and appArn = flag "app-arn" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_app_versions
-           (Values.ListAppVersionsRequest.make ?maxResults ?nextToken ~appArn
-              ()) (Some Values.ListAppVersionsResponse.to_json)
+           (Values.ListAppVersionsRequest.make
+              ?endTime:(Option.map ~f:Values.TimeStamp.of_json endTime)
+              ?maxResults ?nextToken
+              ?startTime:(Option.map ~f:Values.TimeStamp.of_json startTime)
+              ~appArn ()) (Some Values.ListAppVersionsResponse.to_json)
            (Some Values.ListAppVersionsResponse.error_to_json)])
 let list_apps =
   Command.async ~summary:""
@@ -565,17 +1028,63 @@ let list_apps =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and appArn = flag "app-arn" (optional string) ~doc:"STRING Arn"
+       and awsApplicationArn =
+         flag "aws-application-arn" (optional string) ~doc:"STRING Arn"
+       and fromLastAssessmentTime =
+         flag "from-last-assessment-time" (optional json_arg)
+           ~doc:"JSON TimeStamp"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and name = flag "name" (optional string) ~doc:"STRING EntityName"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and reverseOrder =
+         flag "reverse-order" (optional bool) ~doc:"BOOL BooleanOptional"
+       and toLastAssessmentTime =
+         flag "to-last-assessment-time" (optional json_arg)
+           ~doc:"JSON TimeStamp" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_apps
-           (Values.ListAppsRequest.make ?appArn ?maxResults ?name ?nextToken
-              ()) (Some Values.ListAppsResponse.to_json)
+           (Values.ListAppsRequest.make ?appArn ?awsApplicationArn
+              ?fromLastAssessmentTime:(Option.map ~f:Values.TimeStamp.of_json
+                                         fromLastAssessmentTime) ?maxResults
+              ?name ?nextToken ?reverseOrder
+              ?toLastAssessmentTime:(Option.map ~f:Values.TimeStamp.of_json
+                                       toLastAssessmentTime) ())
+           (Some Values.ListAppsResponse.to_json)
            (Some Values.ListAppsResponse.error_to_json)])
+let list_metrics =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and conditions =
+         flag "conditions" (optional json_arg) ~doc:"JSON ConditionList"
+       and dataSource =
+         flag "data-source" (optional string) ~doc:"STRING String255"
+       and fields = flag "fields" (optional json_arg) ~doc:"JSON FieldList"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and sorts = flag "sorts" (optional json_arg) ~doc:"JSON SortList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_metrics
+           (Values.ListMetricsRequest.make
+              ?conditions:(Option.map ~f:Values.ConditionList.of_json
+                             conditions) ?dataSource
+              ?fields:(Option.map ~f:Values.FieldList.of_json fields)
+              ?maxResults ?nextToken
+              ?sorts:(Option.map ~f:Values.SortList.of_json sorts) ())
+           (Some Values.ListMetricsResponse.to_json)
+           (Some Values.ListMetricsResponse.error_to_json)])
 let list_recommendation_templates =
   Command.async ~summary:""
     ([%map_open.Command
@@ -586,6 +1095,8 @@ let list_recommendation_templates =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and assessmentArn =
+         flag "assessment-arn" (optional string) ~doc:"STRING Arn"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and name = flag "name" (optional string) ~doc:"STRING EntityName"
@@ -598,17 +1109,16 @@ let list_recommendation_templates =
          flag "reverse-order" (optional bool) ~doc:"BOOL BooleanOptional"
        and status =
          flag "status" (optional json_arg)
-           ~doc:"JSON RecommendationTemplateStatusList"
-       and assessmentArn =
-         flag "assessment-arn" (required string) ~doc:"STRING Arn" in
+           ~doc:"JSON RecommendationTemplateStatusList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_recommendation_templates
-           (Values.ListRecommendationTemplatesRequest.make ?maxResults ?name
-              ?nextToken ?recommendationTemplateArn ?reverseOrder
+           (Values.ListRecommendationTemplatesRequest.make ?assessmentArn
+              ?maxResults ?name ?nextToken ?recommendationTemplateArn
+              ?reverseOrder
               ?status:(Option.map
                          ~f:Values.RecommendationTemplateStatusList.of_json
-                         status) ~assessmentArn ())
+                         status) ())
            (Some Values.ListRecommendationTemplatesResponse.to_json)
            (Some Values.ListRecommendationTemplatesResponse.error_to_json)])
 let list_resiliency_policies =
@@ -634,6 +1144,29 @@ let list_resiliency_policies =
               ?policyName ())
            (Some Values.ListResiliencyPoliciesResponse.to_json)
            (Some Values.ListResiliencyPoliciesResponse.error_to_json)])
+let list_resource_grouping_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appArn = flag "app-arn" (optional string) ~doc:"STRING Arn"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_resource_grouping_recommendations
+           (Values.ListResourceGroupingRecommendationsRequest.make ?appArn
+              ?maxResults ?nextToken ())
+           (Some Values.ListResourceGroupingRecommendationsResponse.to_json)
+           (Some
+              Values.ListResourceGroupingRecommendationsResponse.error_to_json)])
 let list_sop_recommendations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -756,11 +1289,13 @@ let publish_app_version =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and versionName =
+         flag "version-name" (optional string) ~doc:"STRING EntityVersion"
        and appArn = flag "app-arn" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.publish_app_version
-           (Values.PublishAppVersionRequest.make ~appArn ())
+           (Values.PublishAppVersionRequest.make ?versionName ~appArn ())
            (Some Values.PublishAppVersionResponse.to_json)
            (Some Values.PublishAppVersionResponse.error_to_json)])
 let put_draft_app_version_template =
@@ -784,6 +1319,29 @@ let put_draft_app_version_template =
               ~appTemplateBody ())
            (Some Values.PutDraftAppVersionTemplateResponse.to_json)
            (Some Values.PutDraftAppVersionTemplateResponse.error_to_json)])
+let reject_resource_grouping_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn"
+       and entries =
+         flag "entries" (required json_arg)
+           ~doc:"JSON RejectGroupingRecommendationEntries" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.reject_resource_grouping_recommendations
+           (Values.RejectResourceGroupingRecommendationsRequest.make ~appArn
+              ~entries:(Values.RejectGroupingRecommendationEntries.of_json
+                          entries) ())
+           (Some Values.RejectResourceGroupingRecommendationsResponse.to_json)
+           (Some
+              Values.RejectResourceGroupingRecommendationsResponse.error_to_json)])
 let remove_draft_app_version_resource_mappings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -797,6 +1355,9 @@ let remove_draft_app_version_resource_mappings =
        and appRegistryAppNames =
          flag "app-registry-app-names" (optional json_arg)
            ~doc:"JSON EntityNameList"
+       and eksSourceNames =
+         flag "eks-source-names" (optional json_arg)
+           ~doc:"JSON String255List"
        and logicalStackNames =
          flag "logical-stack-names" (optional json_arg)
            ~doc:"JSON String255List"
@@ -805,6 +1366,9 @@ let remove_draft_app_version_resource_mappings =
            ~doc:"JSON EntityNameList"
        and resourceNames =
          flag "resource-names" (optional json_arg) ~doc:"JSON EntityNameList"
+       and terraformSourceNames =
+         flag "terraform-source-names" (optional json_arg)
+           ~doc:"JSON String255List"
        and appArn = flag "app-arn" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -813,13 +1377,18 @@ let remove_draft_app_version_resource_mappings =
               ?appRegistryAppNames:(Option.map
                                       ~f:Values.EntityNameList.of_json
                                       appRegistryAppNames)
+              ?eksSourceNames:(Option.map ~f:Values.String255List.of_json
+                                 eksSourceNames)
               ?logicalStackNames:(Option.map ~f:Values.String255List.of_json
                                     logicalStackNames)
               ?resourceGroupNames:(Option.map
                                      ~f:Values.EntityNameList.of_json
                                      resourceGroupNames)
               ?resourceNames:(Option.map ~f:Values.EntityNameList.of_json
-                                resourceNames) ~appArn ())
+                                resourceNames)
+              ?terraformSourceNames:(Option.map
+                                       ~f:Values.String255List.of_json
+                                       terraformSourceNames) ~appArn ())
            (Some Values.RemoveDraftAppVersionResourceMappingsResponse.to_json)
            (Some
               Values.RemoveDraftAppVersionResourceMappingsResponse.error_to_json)])
@@ -868,6 +1437,46 @@ let start_app_assessment =
               ~appVersion ~assessmentName ())
            (Some Values.StartAppAssessmentResponse.to_json)
            (Some Values.StartAppAssessmentResponse.error_to_json)])
+let start_metrics_export =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and bucketName =
+         flag "bucket-name" (optional string) ~doc:"STRING EntityName"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_metrics_export
+           (Values.StartMetricsExportRequest.make ?bucketName ?clientToken ())
+           (Some Values.StartMetricsExportResponse.to_json)
+           (Some Values.StartMetricsExportResponse.error_to_json)])
+let start_resource_grouping_recommendation_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_resource_grouping_recommendation_task
+           (Values.StartResourceGroupingRecommendationTaskRequest.make
+              ~appArn ())
+           (Some
+              Values.StartResourceGroupingRecommendationTaskResponse.to_json)
+           (Some
+              Values.StartResourceGroupingRecommendationTaskResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -919,20 +1528,133 @@ let update_app =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and assessmentSchedule =
+         flag "assessment-schedule" (optional json_arg)
+           ~doc:"JSON AppAssessmentScheduleType"
        and clearResiliencyPolicyArn =
          flag "clear-resiliency-policy-arn" (optional bool)
            ~doc:"BOOL BooleanOptional"
        and description =
          flag "description" (optional string) ~doc:"STRING EntityDescription"
+       and eventSubscriptions =
+         flag "event-subscriptions" (optional json_arg)
+           ~doc:"JSON EventSubscriptionList"
+       and permissionModel =
+         flag "permission-model" (optional json_arg)
+           ~doc:"JSON PermissionModel"
        and policyArn = flag "policy-arn" (optional string) ~doc:"STRING Arn"
        and appArn = flag "app-arn" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_app
-           (Values.UpdateAppRequest.make ?clearResiliencyPolicyArn
-              ?description ?policyArn ~appArn ())
+           (Values.UpdateAppRequest.make
+              ?assessmentSchedule:(Option.map
+                                     ~f:Values.AppAssessmentScheduleType.of_json
+                                     assessmentSchedule)
+              ?clearResiliencyPolicyArn ?description
+              ?eventSubscriptions:(Option.map
+                                     ~f:Values.EventSubscriptionList.of_json
+                                     eventSubscriptions)
+              ?permissionModel:(Option.map ~f:Values.PermissionModel.of_json
+                                  permissionModel) ?policyArn ~appArn ())
            (Some Values.UpdateAppResponse.to_json)
            (Some Values.UpdateAppResponse.error_to_json)])
+let update_app_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and additionalInfo =
+         flag "additional-info" (optional json_arg)
+           ~doc:"JSON AdditionalInfoMap"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_app_version
+           (Values.UpdateAppVersionRequest.make
+              ?additionalInfo:(Option.map ~f:Values.AdditionalInfoMap.of_json
+                                 additionalInfo) ~appArn ())
+           (Some Values.UpdateAppVersionResponse.to_json)
+           (Some Values.UpdateAppVersionResponse.error_to_json)])
+let update_app_version_app_component =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and additionalInfo =
+         flag "additional-info" (optional json_arg)
+           ~doc:"JSON AdditionalInfoMap"
+       and name = flag "name" (optional string) ~doc:"STRING String255"
+       and type_ = flag "type-" (optional string) ~doc:"STRING String255"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn"
+       and id = flag "id" (required string) ~doc:"STRING String255" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_app_version_app_component
+           (Values.UpdateAppVersionAppComponentRequest.make
+              ?additionalInfo:(Option.map ~f:Values.AdditionalInfoMap.of_json
+                                 additionalInfo) ?name ?type_ ~appArn ~id ())
+           (Some Values.UpdateAppVersionAppComponentResponse.to_json)
+           (Some Values.UpdateAppVersionAppComponentResponse.error_to_json)])
+let update_app_version_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and additionalInfo =
+         flag "additional-info" (optional json_arg)
+           ~doc:"JSON AdditionalInfoMap"
+       and appComponents =
+         flag "app-components" (optional json_arg)
+           ~doc:"JSON AppComponentNameList"
+       and awsAccountId =
+         flag "aws-account-id" (optional string) ~doc:"STRING CustomerId"
+       and awsRegion =
+         flag "aws-region" (optional string) ~doc:"STRING AwsRegion"
+       and excluded =
+         flag "excluded" (optional bool) ~doc:"BOOL BooleanOptional"
+       and logicalResourceId =
+         flag "logical-resource-id" (optional json_arg)
+           ~doc:"JSON LogicalResourceId"
+       and physicalResourceId =
+         flag "physical-resource-id" (optional string)
+           ~doc:"STRING String2048"
+       and resourceName =
+         flag "resource-name" (optional string) ~doc:"STRING EntityName"
+       and resourceType =
+         flag "resource-type" (optional string) ~doc:"STRING String255"
+       and appArn = flag "app-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_app_version_resource
+           (Values.UpdateAppVersionResourceRequest.make
+              ?additionalInfo:(Option.map ~f:Values.AdditionalInfoMap.of_json
+                                 additionalInfo)
+              ?appComponents:(Option.map
+                                ~f:Values.AppComponentNameList.of_json
+                                appComponents) ?awsAccountId ?awsRegion
+              ?excluded
+              ?logicalResourceId:(Option.map
+                                    ~f:Values.LogicalResourceId.of_json
+                                    logicalResourceId) ?physicalResourceId
+              ?resourceName ?resourceType ~appArn ())
+           (Some Values.UpdateAppVersionResourceResponse.to_json)
+           (Some Values.UpdateAppVersionResourceResponse.error_to_json)])
 let update_resiliency_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -972,37 +1694,62 @@ let update_resiliency_policy =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("add-draft-app-version-resource-mappings",
-       add_draft_app_version_resource_mappings);
+    [("accept-resource-grouping-recommendations",
+       accept_resource_grouping_recommendations);
+    ("add-draft-app-version-resource-mappings",
+      add_draft_app_version_resource_mappings);
+    ("batch-update-recommendation-status",
+      batch_update_recommendation_status);
     ("create-app", create_app);
+    ("create-app-version-app-component", create_app_version_app_component);
+    ("create-app-version-resource", create_app_version_resource);
     ("create-recommendation-template", create_recommendation_template);
     ("create-resiliency-policy", create_resiliency_policy);
     ("delete-app", delete_app);
     ("delete-app-assessment", delete_app_assessment);
+    ("delete-app-input-source", delete_app_input_source);
+    ("delete-app-version-app-component", delete_app_version_app_component);
+    ("delete-app-version-resource", delete_app_version_resource);
     ("delete-recommendation-template", delete_recommendation_template);
     ("delete-resiliency-policy", delete_resiliency_policy);
     ("describe-app", describe_app);
     ("describe-app-assessment", describe_app_assessment);
+    ("describe-app-version", describe_app_version);
+    ("describe-app-version-app-component",
+      describe_app_version_app_component);
+    ("describe-app-version-resource", describe_app_version_resource);
     ("describe-app-version-resources-resolution-status",
       describe_app_version_resources_resolution_status);
     ("describe-app-version-template", describe_app_version_template);
     ("describe-draft-app-version-resources-import-status",
       describe_draft_app_version_resources_import_status);
+    ("describe-metrics-export", describe_metrics_export);
     ("describe-resiliency-policy", describe_resiliency_policy);
+    ("describe-resource-grouping-recommendation-task",
+      describe_resource_grouping_recommendation_task);
     ("import-resources-to-draft-app-version",
       import_resources_to_draft_app_version);
     ("list-alarm-recommendations", list_alarm_recommendations);
+    ("list-app-assessment-compliance-drifts",
+      list_app_assessment_compliance_drifts);
+    ("list-app-assessment-resource-drifts",
+      list_app_assessment_resource_drifts);
     ("list-app-assessments", list_app_assessments);
     ("list-app-component-compliances", list_app_component_compliances);
     ("list-app-component-recommendations",
       list_app_component_recommendations);
+    ("list-app-input-sources", list_app_input_sources);
+    ("list-app-version-app-components", list_app_version_app_components);
     ("list-app-version-resource-mappings",
       list_app_version_resource_mappings);
     ("list-app-version-resources", list_app_version_resources);
     ("list-app-versions", list_app_versions);
     ("list-apps", list_apps);
+    ("list-metrics", list_metrics);
     ("list-recommendation-templates", list_recommendation_templates);
     ("list-resiliency-policies", list_resiliency_policies);
+    ("list-resource-grouping-recommendations",
+      list_resource_grouping_recommendations);
     ("list-sop-recommendations", list_sop_recommendations);
     ("list-suggested-resiliency-policies",
       list_suggested_resiliency_policies);
@@ -1012,11 +1759,19 @@ let main =
       list_unsupported_app_version_resources);
     ("publish-app-version", publish_app_version);
     ("put-draft-app-version-template", put_draft_app_version_template);
+    ("reject-resource-grouping-recommendations",
+      reject_resource_grouping_recommendations);
     ("remove-draft-app-version-resource-mappings",
       remove_draft_app_version_resource_mappings);
     ("resolve-app-version-resources", resolve_app_version_resources);
     ("start-app-assessment", start_app_assessment);
+    ("start-metrics-export", start_metrics_export);
+    ("start-resource-grouping-recommendation-task",
+      start_resource_grouping_recommendation_task);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-app", update_app);
+    ("update-app-version", update_app_version);
+    ("update-app-version-app-component", update_app_version_app_component);
+    ("update-app-version-resource", update_app_version_resource);
     ("update-resiliency-policy", update_resiliency_policy)]

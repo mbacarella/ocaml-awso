@@ -143,6 +143,26 @@ let get_configuration_set_event_destinations =
            (Some Values.GetConfigurationSetEventDestinationsResponse.to_json)
            (Some
               Values.GetConfigurationSetEventDestinationsResponse.error_to_json)])
+let list_configuration_sets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string"
+       and pageSize =
+         flag "page-size" (optional string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_configuration_sets
+           (Values.ListConfigurationSetsRequest.make ?nextToken ?pageSize ())
+           (Some Values.ListConfigurationSetsResponse.to_json)
+           (Some Values.ListConfigurationSetsResponse.error_to_json)])
 let send_voice_message =
   Command.async ~summary:""
     ([%map_open.Command
@@ -217,6 +237,7 @@ let main =
       delete_configuration_set_event_destination);
     ("get-configuration-set-event-destinations",
       get_configuration_set_event_destinations);
+    ("list-configuration-sets", list_configuration_sets);
     ("send-voice-message", send_voice_message);
     ("update-configuration-set-event-destination",
       update_configuration_set_event_destination)]

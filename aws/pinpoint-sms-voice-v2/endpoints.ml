@@ -5,14 +5,46 @@ type ('i, 'o, 'e) t =
   | AssociateOriginationIdentity: (AssociateOriginationIdentityRequest.t,
   AssociateOriginationIdentityResult.t,
   AssociateOriginationIdentityResult.error) t 
+  | AssociateProtectConfiguration: (AssociateProtectConfigurationRequest.t,
+  AssociateProtectConfigurationResult.t,
+  AssociateProtectConfigurationResult.error) t 
+  | CarrierLookup: (CarrierLookupRequest.t, CarrierLookupResult.t,
+  CarrierLookupResult.error) t 
   | CreateConfigurationSet: (CreateConfigurationSetRequest.t,
   CreateConfigurationSetResult.t, CreateConfigurationSetResult.error) t 
   | CreateEventDestination: (CreateEventDestinationRequest.t,
   CreateEventDestinationResult.t, CreateEventDestinationResult.error) t 
+  | CreateNotifyConfiguration: (CreateNotifyConfigurationRequest.t,
+  CreateNotifyConfigurationResult.t, CreateNotifyConfigurationResult.error) t
+  
   | CreateOptOutList: (CreateOptOutListRequest.t, CreateOptOutListResult.t,
   CreateOptOutListResult.error) t 
   | CreatePool: (CreatePoolRequest.t, CreatePoolResult.t,
   CreatePoolResult.error) t 
+  | CreateProtectConfiguration: (CreateProtectConfigurationRequest.t,
+  CreateProtectConfigurationResult.t, CreateProtectConfigurationResult.error)
+  t 
+  | CreateRcsAgent: (CreateRcsAgentRequest.t, CreateRcsAgentResult.t,
+  CreateRcsAgentResult.error) t 
+  | CreateRegistration: (CreateRegistrationRequest.t,
+  CreateRegistrationResult.t, CreateRegistrationResult.error) t 
+  | CreateRegistrationAssociation: (CreateRegistrationAssociationRequest.t,
+  CreateRegistrationAssociationResult.t,
+  CreateRegistrationAssociationResult.error) t 
+  | CreateRegistrationAttachment: (CreateRegistrationAttachmentRequest.t,
+  CreateRegistrationAttachmentResult.t,
+  CreateRegistrationAttachmentResult.error) t 
+  | CreateRegistrationVersion: (CreateRegistrationVersionRequest.t,
+  CreateRegistrationVersionResult.t, CreateRegistrationVersionResult.error) t
+  
+  | CreateVerifiedDestinationNumber:
+  (CreateVerifiedDestinationNumberRequest.t,
+  CreateVerifiedDestinationNumberResult.t,
+  CreateVerifiedDestinationNumberResult.error) t 
+  | DeleteAccountDefaultProtectConfiguration:
+  (DeleteAccountDefaultProtectConfigurationRequest.t,
+  DeleteAccountDefaultProtectConfigurationResult.t,
+  DeleteAccountDefaultProtectConfigurationResult.error) t 
   | DeleteConfigurationSet: (DeleteConfigurationSetRequest.t,
   DeleteConfigurationSetResult.t, DeleteConfigurationSetResult.error) t 
   | DeleteDefaultMessageType: (DeleteDefaultMessageTypeRequest.t,
@@ -23,16 +55,50 @@ type ('i, 'o, 'e) t =
   DeleteEventDestinationResult.t, DeleteEventDestinationResult.error) t 
   | DeleteKeyword: (DeleteKeywordRequest.t, DeleteKeywordResult.t,
   DeleteKeywordResult.error) t 
+  | DeleteMediaMessageSpendLimitOverride:
+  (DeleteMediaMessageSpendLimitOverrideRequest.t,
+  DeleteMediaMessageSpendLimitOverrideResult.t,
+  DeleteMediaMessageSpendLimitOverrideResult.error) t 
+  | DeleteNotifyConfiguration: (DeleteNotifyConfigurationRequest.t,
+  DeleteNotifyConfigurationResult.t, DeleteNotifyConfigurationResult.error) t
+  
+  | DeleteNotifyMessageSpendLimitOverride:
+  (DeleteNotifyMessageSpendLimitOverrideRequest.t,
+  DeleteNotifyMessageSpendLimitOverrideResult.t,
+  DeleteNotifyMessageSpendLimitOverrideResult.error) t 
   | DeleteOptOutList: (DeleteOptOutListRequest.t, DeleteOptOutListResult.t,
   DeleteOptOutListResult.error) t 
   | DeleteOptedOutNumber: (DeleteOptedOutNumberRequest.t,
   DeleteOptedOutNumberResult.t, DeleteOptedOutNumberResult.error) t 
   | DeletePool: (DeletePoolRequest.t, DeletePoolResult.t,
   DeletePoolResult.error) t 
+  | DeleteProtectConfiguration: (DeleteProtectConfigurationRequest.t,
+  DeleteProtectConfigurationResult.t, DeleteProtectConfigurationResult.error)
+  t 
+  | DeleteProtectConfigurationRuleSetNumberOverride:
+  (DeleteProtectConfigurationRuleSetNumberOverrideRequest.t,
+  DeleteProtectConfigurationRuleSetNumberOverrideResult.t,
+  DeleteProtectConfigurationRuleSetNumberOverrideResult.error) t 
+  | DeleteRcsAgent: (DeleteRcsAgentRequest.t, DeleteRcsAgentResult.t,
+  DeleteRcsAgentResult.error) t 
+  | DeleteRegistration: (DeleteRegistrationRequest.t,
+  DeleteRegistrationResult.t, DeleteRegistrationResult.error) t 
+  | DeleteRegistrationAttachment: (DeleteRegistrationAttachmentRequest.t,
+  DeleteRegistrationAttachmentResult.t,
+  DeleteRegistrationAttachmentResult.error) t 
+  | DeleteRegistrationFieldValue: (DeleteRegistrationFieldValueRequest.t,
+  DeleteRegistrationFieldValueResult.t,
+  DeleteRegistrationFieldValueResult.error) t 
+  | DeleteResourcePolicy: (DeleteResourcePolicyRequest.t,
+  DeleteResourcePolicyResult.t, DeleteResourcePolicyResult.error) t 
   | DeleteTextMessageSpendLimitOverride:
   (DeleteTextMessageSpendLimitOverrideRequest.t,
   DeleteTextMessageSpendLimitOverrideResult.t,
   DeleteTextMessageSpendLimitOverrideResult.error) t 
+  | DeleteVerifiedDestinationNumber:
+  (DeleteVerifiedDestinationNumberRequest.t,
+  DeleteVerifiedDestinationNumberResult.t,
+  DeleteVerifiedDestinationNumberResult.error) t 
   | DeleteVoiceMessageSpendLimitOverride:
   (DeleteVoiceMessageSpendLimitOverrideRequest.t,
   DeleteVoiceMessageSpendLimitOverrideResult.t,
@@ -47,6 +113,11 @@ type ('i, 'o, 'e) t =
   
   | DescribeKeywords: (DescribeKeywordsRequest.t, DescribeKeywordsResult.t,
   DescribeKeywordsResult.error) t 
+  | DescribeNotifyConfigurations: (DescribeNotifyConfigurationsRequest.t,
+  DescribeNotifyConfigurationsResult.t,
+  DescribeNotifyConfigurationsResult.error) t 
+  | DescribeNotifyTemplates: (DescribeNotifyTemplatesRequest.t,
+  DescribeNotifyTemplatesResult.t, DescribeNotifyTemplatesResult.error) t 
   | DescribeOptOutLists: (DescribeOptOutListsRequest.t,
   DescribeOptOutListsResult.t, DescribeOptOutListsResult.error) t 
   | DescribeOptedOutNumbers: (DescribeOptedOutNumbersRequest.t,
@@ -55,35 +126,136 @@ type ('i, 'o, 'e) t =
   DescribePhoneNumbersResult.t, DescribePhoneNumbersResult.error) t 
   | DescribePools: (DescribePoolsRequest.t, DescribePoolsResult.t,
   DescribePoolsResult.error) t 
+  | DescribeProtectConfigurations: (DescribeProtectConfigurationsRequest.t,
+  DescribeProtectConfigurationsResult.t,
+  DescribeProtectConfigurationsResult.error) t 
+  | DescribeRcsAgentCountryLaunchStatus:
+  (DescribeRcsAgentCountryLaunchStatusRequest.t,
+  DescribeRcsAgentCountryLaunchStatusResult.t,
+  DescribeRcsAgentCountryLaunchStatusResult.error) t 
+  | DescribeRcsAgents: (DescribeRcsAgentsRequest.t,
+  DescribeRcsAgentsResult.t, DescribeRcsAgentsResult.error) t 
+  | DescribeRegistrationAttachments:
+  (DescribeRegistrationAttachmentsRequest.t,
+  DescribeRegistrationAttachmentsResult.t,
+  DescribeRegistrationAttachmentsResult.error) t 
+  | DescribeRegistrationFieldDefinitions:
+  (DescribeRegistrationFieldDefinitionsRequest.t,
+  DescribeRegistrationFieldDefinitionsResult.t,
+  DescribeRegistrationFieldDefinitionsResult.error) t 
+  | DescribeRegistrationFieldValues:
+  (DescribeRegistrationFieldValuesRequest.t,
+  DescribeRegistrationFieldValuesResult.t,
+  DescribeRegistrationFieldValuesResult.error) t 
+  | DescribeRegistrationSectionDefinitions:
+  (DescribeRegistrationSectionDefinitionsRequest.t,
+  DescribeRegistrationSectionDefinitionsResult.t,
+  DescribeRegistrationSectionDefinitionsResult.error) t 
+  | DescribeRegistrationTypeDefinitions:
+  (DescribeRegistrationTypeDefinitionsRequest.t,
+  DescribeRegistrationTypeDefinitionsResult.t,
+  DescribeRegistrationTypeDefinitionsResult.error) t 
+  | DescribeRegistrationVersions: (DescribeRegistrationVersionsRequest.t,
+  DescribeRegistrationVersionsResult.t,
+  DescribeRegistrationVersionsResult.error) t 
+  | DescribeRegistrations: (DescribeRegistrationsRequest.t,
+  DescribeRegistrationsResult.t, DescribeRegistrationsResult.error) t 
   | DescribeSenderIds: (DescribeSenderIdsRequest.t,
   DescribeSenderIdsResult.t, DescribeSenderIdsResult.error) t 
   | DescribeSpendLimits: (DescribeSpendLimitsRequest.t,
   DescribeSpendLimitsResult.t, DescribeSpendLimitsResult.error) t 
+  | DescribeVerifiedDestinationNumbers:
+  (DescribeVerifiedDestinationNumbersRequest.t,
+  DescribeVerifiedDestinationNumbersResult.t,
+  DescribeVerifiedDestinationNumbersResult.error) t 
   | DisassociateOriginationIdentity:
   (DisassociateOriginationIdentityRequest.t,
   DisassociateOriginationIdentityResult.t,
   DisassociateOriginationIdentityResult.error) t 
+  | DisassociateProtectConfiguration:
+  (DisassociateProtectConfigurationRequest.t,
+  DisassociateProtectConfigurationResult.t,
+  DisassociateProtectConfigurationResult.error) t 
+  | DiscardRegistrationVersion: (DiscardRegistrationVersionRequest.t,
+  DiscardRegistrationVersionResult.t, DiscardRegistrationVersionResult.error)
+  t 
+  | GetProtectConfigurationCountryRuleSet:
+  (GetProtectConfigurationCountryRuleSetRequest.t,
+  GetProtectConfigurationCountryRuleSetResult.t,
+  GetProtectConfigurationCountryRuleSetResult.error) t 
+  | GetResourcePolicy: (GetResourcePolicyRequest.t,
+  GetResourcePolicyResult.t, GetResourcePolicyResult.error) t 
+  | ListNotifyCountries: (ListNotifyCountriesRequest.t,
+  ListNotifyCountriesResult.t, ListNotifyCountriesResult.error) t 
   | ListPoolOriginationIdentities: (ListPoolOriginationIdentitiesRequest.t,
   ListPoolOriginationIdentitiesResult.t,
   ListPoolOriginationIdentitiesResult.error) t 
+  | ListProtectConfigurationRuleSetNumberOverrides:
+  (ListProtectConfigurationRuleSetNumberOverridesRequest.t,
+  ListProtectConfigurationRuleSetNumberOverridesResult.t,
+  ListProtectConfigurationRuleSetNumberOverridesResult.error) t 
+  | ListRegistrationAssociations: (ListRegistrationAssociationsRequest.t,
+  ListRegistrationAssociationsResult.t,
+  ListRegistrationAssociationsResult.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResult.t, ListTagsForResourceResult.error) t 
   | PutKeyword: (PutKeywordRequest.t, PutKeywordResult.t,
   PutKeywordResult.error) t 
+  | PutMessageFeedback: (PutMessageFeedbackRequest.t,
+  PutMessageFeedbackResult.t, PutMessageFeedbackResult.error) t 
   | PutOptedOutNumber: (PutOptedOutNumberRequest.t,
   PutOptedOutNumberResult.t, PutOptedOutNumberResult.error) t 
+  | PutProtectConfigurationRuleSetNumberOverride:
+  (PutProtectConfigurationRuleSetNumberOverrideRequest.t,
+  PutProtectConfigurationRuleSetNumberOverrideResult.t,
+  PutProtectConfigurationRuleSetNumberOverrideResult.error) t 
+  | PutRegistrationFieldValue: (PutRegistrationFieldValueRequest.t,
+  PutRegistrationFieldValueResult.t, PutRegistrationFieldValueResult.error) t
+  
+  | PutResourcePolicy: (PutResourcePolicyRequest.t,
+  PutResourcePolicyResult.t, PutResourcePolicyResult.error) t 
   | ReleasePhoneNumber: (ReleasePhoneNumberRequest.t,
   ReleasePhoneNumberResult.t, ReleasePhoneNumberResult.error) t 
+  | ReleaseSenderId: (ReleaseSenderIdRequest.t, ReleaseSenderIdResult.t,
+  ReleaseSenderIdResult.error) t 
   | RequestPhoneNumber: (RequestPhoneNumberRequest.t,
   RequestPhoneNumberResult.t, RequestPhoneNumberResult.error) t 
+  | RequestSenderId: (RequestSenderIdRequest.t, RequestSenderIdResult.t,
+  RequestSenderIdResult.error) t 
+  | SendDestinationNumberVerificationCode:
+  (SendDestinationNumberVerificationCodeRequest.t,
+  SendDestinationNumberVerificationCodeResult.t,
+  SendDestinationNumberVerificationCodeResult.error) t 
+  | SendMediaMessage: (SendMediaMessageRequest.t, SendMediaMessageResult.t,
+  SendMediaMessageResult.error) t 
+  | SendNotifyTextMessage: (SendNotifyTextMessageRequest.t,
+  SendNotifyTextMessageResult.t, SendNotifyTextMessageResult.error) t 
+  | SendNotifyVoiceMessage: (SendNotifyVoiceMessageRequest.t,
+  SendNotifyVoiceMessageResult.t, SendNotifyVoiceMessageResult.error) t 
   | SendTextMessage: (SendTextMessageRequest.t, SendTextMessageResult.t,
   SendTextMessageResult.error) t 
   | SendVoiceMessage: (SendVoiceMessageRequest.t, SendVoiceMessageResult.t,
   SendVoiceMessageResult.error) t 
+  | SetAccountDefaultProtectConfiguration:
+  (SetAccountDefaultProtectConfigurationRequest.t,
+  SetAccountDefaultProtectConfigurationResult.t,
+  SetAccountDefaultProtectConfigurationResult.error) t 
+  | SetDefaultMessageFeedbackEnabled:
+  (SetDefaultMessageFeedbackEnabledRequest.t,
+  SetDefaultMessageFeedbackEnabledResult.t,
+  SetDefaultMessageFeedbackEnabledResult.error) t 
   | SetDefaultMessageType: (SetDefaultMessageTypeRequest.t,
   SetDefaultMessageTypeResult.t, SetDefaultMessageTypeResult.error) t 
   | SetDefaultSenderId: (SetDefaultSenderIdRequest.t,
   SetDefaultSenderIdResult.t, SetDefaultSenderIdResult.error) t 
+  | SetMediaMessageSpendLimitOverride:
+  (SetMediaMessageSpendLimitOverrideRequest.t,
+  SetMediaMessageSpendLimitOverrideResult.t,
+  SetMediaMessageSpendLimitOverrideResult.error) t 
+  | SetNotifyMessageSpendLimitOverride:
+  (SetNotifyMessageSpendLimitOverrideRequest.t,
+  SetNotifyMessageSpendLimitOverrideResult.t,
+  SetNotifyMessageSpendLimitOverrideResult.error) t 
   | SetTextMessageSpendLimitOverride:
   (SetTextMessageSpendLimitOverrideRequest.t,
   SetTextMessageSpendLimitOverrideResult.t,
@@ -92,78 +264,188 @@ type ('i, 'o, 'e) t =
   (SetVoiceMessageSpendLimitOverrideRequest.t,
   SetVoiceMessageSpendLimitOverrideResult.t,
   SetVoiceMessageSpendLimitOverrideResult.error) t 
+  | SubmitRegistrationVersion: (SubmitRegistrationVersionRequest.t,
+  SubmitRegistrationVersionResult.t, SubmitRegistrationVersionResult.error) t
+  
   | TagResource: (TagResourceRequest.t, TagResourceResult.t,
   TagResourceResult.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResult.t,
   UntagResourceResult.error) t 
   | UpdateEventDestination: (UpdateEventDestinationRequest.t,
   UpdateEventDestinationResult.t, UpdateEventDestinationResult.error) t 
+  | UpdateNotifyConfiguration: (UpdateNotifyConfigurationRequest.t,
+  UpdateNotifyConfigurationResult.t, UpdateNotifyConfigurationResult.error) t
+  
   | UpdatePhoneNumber: (UpdatePhoneNumberRequest.t,
   UpdatePhoneNumberResult.t, UpdatePhoneNumberResult.error) t 
   | UpdatePool: (UpdatePoolRequest.t, UpdatePoolResult.t,
   UpdatePoolResult.error) t 
+  | UpdateProtectConfiguration: (UpdateProtectConfigurationRequest.t,
+  UpdateProtectConfigurationResult.t, UpdateProtectConfigurationResult.error)
+  t 
+  | UpdateProtectConfigurationCountryRuleSet:
+  (UpdateProtectConfigurationCountryRuleSetRequest.t,
+  UpdateProtectConfigurationCountryRuleSetResult.t,
+  UpdateProtectConfigurationCountryRuleSetResult.error) t 
+  | UpdateRcsAgent: (UpdateRcsAgentRequest.t, UpdateRcsAgentResult.t,
+  UpdateRcsAgentResult.error) t 
+  | UpdateSenderId: (UpdateSenderIdRequest.t, UpdateSenderIdResult.t,
+  UpdateSenderIdResult.error) t 
+  | VerifyDestinationNumber: (VerifyDestinationNumberRequest.t,
+  VerifyDestinationNumberResult.t, VerifyDestinationNumberResult.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AssociateOriginationIdentity -> `POST
+  | AssociateProtectConfiguration -> `POST
+  | CarrierLookup -> `POST
   | CreateConfigurationSet -> `POST
   | CreateEventDestination -> `POST
+  | CreateNotifyConfiguration -> `POST
   | CreateOptOutList -> `POST
   | CreatePool -> `POST
+  | CreateProtectConfiguration -> `POST
+  | CreateRcsAgent -> `POST
+  | CreateRegistration -> `POST
+  | CreateRegistrationAssociation -> `POST
+  | CreateRegistrationAttachment -> `POST
+  | CreateRegistrationVersion -> `POST
+  | CreateVerifiedDestinationNumber -> `POST
+  | DeleteAccountDefaultProtectConfiguration -> `POST
   | DeleteConfigurationSet -> `POST
   | DeleteDefaultMessageType -> `POST
   | DeleteDefaultSenderId -> `POST
   | DeleteEventDestination -> `POST
   | DeleteKeyword -> `POST
+  | DeleteMediaMessageSpendLimitOverride -> `POST
+  | DeleteNotifyConfiguration -> `POST
+  | DeleteNotifyMessageSpendLimitOverride -> `POST
   | DeleteOptOutList -> `POST
   | DeleteOptedOutNumber -> `POST
   | DeletePool -> `POST
+  | DeleteProtectConfiguration -> `POST
+  | DeleteProtectConfigurationRuleSetNumberOverride -> `POST
+  | DeleteRcsAgent -> `POST
+  | DeleteRegistration -> `POST
+  | DeleteRegistrationAttachment -> `POST
+  | DeleteRegistrationFieldValue -> `POST
+  | DeleteResourcePolicy -> `POST
   | DeleteTextMessageSpendLimitOverride -> `POST
+  | DeleteVerifiedDestinationNumber -> `POST
   | DeleteVoiceMessageSpendLimitOverride -> `POST
   | DescribeAccountAttributes -> `POST
   | DescribeAccountLimits -> `POST
   | DescribeConfigurationSets -> `POST
   | DescribeKeywords -> `POST
+  | DescribeNotifyConfigurations -> `POST
+  | DescribeNotifyTemplates -> `POST
   | DescribeOptOutLists -> `POST
   | DescribeOptedOutNumbers -> `POST
   | DescribePhoneNumbers -> `POST
   | DescribePools -> `POST
+  | DescribeProtectConfigurations -> `POST
+  | DescribeRcsAgentCountryLaunchStatus -> `POST
+  | DescribeRcsAgents -> `POST
+  | DescribeRegistrationAttachments -> `POST
+  | DescribeRegistrationFieldDefinitions -> `POST
+  | DescribeRegistrationFieldValues -> `POST
+  | DescribeRegistrationSectionDefinitions -> `POST
+  | DescribeRegistrationTypeDefinitions -> `POST
+  | DescribeRegistrationVersions -> `POST
+  | DescribeRegistrations -> `POST
   | DescribeSenderIds -> `POST
   | DescribeSpendLimits -> `POST
+  | DescribeVerifiedDestinationNumbers -> `POST
   | DisassociateOriginationIdentity -> `POST
+  | DisassociateProtectConfiguration -> `POST
+  | DiscardRegistrationVersion -> `POST
+  | GetProtectConfigurationCountryRuleSet -> `POST
+  | GetResourcePolicy -> `POST
+  | ListNotifyCountries -> `POST
   | ListPoolOriginationIdentities -> `POST
+  | ListProtectConfigurationRuleSetNumberOverrides -> `POST
+  | ListRegistrationAssociations -> `POST
   | ListTagsForResource -> `POST
   | PutKeyword -> `POST
+  | PutMessageFeedback -> `POST
   | PutOptedOutNumber -> `POST
+  | PutProtectConfigurationRuleSetNumberOverride -> `POST
+  | PutRegistrationFieldValue -> `POST
+  | PutResourcePolicy -> `POST
   | ReleasePhoneNumber -> `POST
+  | ReleaseSenderId -> `POST
   | RequestPhoneNumber -> `POST
+  | RequestSenderId -> `POST
+  | SendDestinationNumberVerificationCode -> `POST
+  | SendMediaMessage -> `POST
+  | SendNotifyTextMessage -> `POST
+  | SendNotifyVoiceMessage -> `POST
   | SendTextMessage -> `POST
   | SendVoiceMessage -> `POST
+  | SetAccountDefaultProtectConfiguration -> `POST
+  | SetDefaultMessageFeedbackEnabled -> `POST
   | SetDefaultMessageType -> `POST
   | SetDefaultSenderId -> `POST
+  | SetMediaMessageSpendLimitOverride -> `POST
+  | SetNotifyMessageSpendLimitOverride -> `POST
   | SetTextMessageSpendLimitOverride -> `POST
   | SetVoiceMessageSpendLimitOverride -> `POST
+  | SubmitRegistrationVersion -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
   | UpdateEventDestination -> `POST
+  | UpdateNotifyConfiguration -> `POST
   | UpdatePhoneNumber -> `POST
   | UpdatePool -> `POST
+  | UpdateProtectConfiguration -> `POST
+  | UpdateProtectConfigurationCountryRuleSet -> `POST
+  | UpdateRcsAgent -> `POST
+  | UpdateSenderId -> `POST
+  | VerifyDestinationNumber -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | AssociateOriginationIdentity -> (Format.kasprintf Uri.of_string) "/"
+      | AssociateProtectConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | CarrierLookup -> (Format.kasprintf Uri.of_string) "/"
       | CreateConfigurationSet -> (Format.kasprintf Uri.of_string) "/"
       | CreateEventDestination -> (Format.kasprintf Uri.of_string) "/"
+      | CreateNotifyConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | CreateOptOutList -> (Format.kasprintf Uri.of_string) "/"
       | CreatePool -> (Format.kasprintf Uri.of_string) "/"
+      | CreateProtectConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | CreateRcsAgent -> (Format.kasprintf Uri.of_string) "/"
+      | CreateRegistration -> (Format.kasprintf Uri.of_string) "/"
+      | CreateRegistrationAssociation -> (Format.kasprintf Uri.of_string) "/"
+      | CreateRegistrationAttachment -> (Format.kasprintf Uri.of_string) "/"
+      | CreateRegistrationVersion -> (Format.kasprintf Uri.of_string) "/"
+      | CreateVerifiedDestinationNumber ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteAccountDefaultProtectConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
       | DeleteConfigurationSet -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDefaultMessageType -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDefaultSenderId -> (Format.kasprintf Uri.of_string) "/"
       | DeleteEventDestination -> (Format.kasprintf Uri.of_string) "/"
       | DeleteKeyword -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteMediaMessageSpendLimitOverride ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteNotifyConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteNotifyMessageSpendLimitOverride ->
+          (Format.kasprintf Uri.of_string) "/"
       | DeleteOptOutList -> (Format.kasprintf Uri.of_string) "/"
       | DeleteOptedOutNumber -> (Format.kasprintf Uri.of_string) "/"
       | DeletePool -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteProtectConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteProtectConfigurationRuleSetNumberOverride ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteRcsAgent -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteRegistration -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteRegistrationAttachment -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteRegistrationFieldValue -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTextMessageSpendLimitOverride ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteVerifiedDestinationNumber ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteVoiceMessageSpendLimitOverride ->
           (Format.kasprintf Uri.of_string) "/"
@@ -171,33 +453,91 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeAccountLimits -> (Format.kasprintf Uri.of_string) "/"
       | DescribeConfigurationSets -> (Format.kasprintf Uri.of_string) "/"
       | DescribeKeywords -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeNotifyConfigurations -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeNotifyTemplates -> (Format.kasprintf Uri.of_string) "/"
       | DescribeOptOutLists -> (Format.kasprintf Uri.of_string) "/"
       | DescribeOptedOutNumbers -> (Format.kasprintf Uri.of_string) "/"
       | DescribePhoneNumbers -> (Format.kasprintf Uri.of_string) "/"
       | DescribePools -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeProtectConfigurations -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeRcsAgentCountryLaunchStatus ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeRcsAgents -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeRegistrationAttachments ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeRegistrationFieldDefinitions ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeRegistrationFieldValues ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeRegistrationSectionDefinitions ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeRegistrationTypeDefinitions ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeRegistrationVersions -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeRegistrations -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSenderIds -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSpendLimits -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeVerifiedDestinationNumbers ->
+          (Format.kasprintf Uri.of_string) "/"
       | DisassociateOriginationIdentity ->
           (Format.kasprintf Uri.of_string) "/"
+      | DisassociateProtectConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DiscardRegistrationVersion -> (Format.kasprintf Uri.of_string) "/"
+      | GetProtectConfigurationCountryRuleSet ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
+      | ListNotifyCountries -> (Format.kasprintf Uri.of_string) "/"
       | ListPoolOriginationIdentities -> (Format.kasprintf Uri.of_string) "/"
+      | ListProtectConfigurationRuleSetNumberOverrides ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListRegistrationAssociations -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | PutKeyword -> (Format.kasprintf Uri.of_string) "/"
+      | PutMessageFeedback -> (Format.kasprintf Uri.of_string) "/"
       | PutOptedOutNumber -> (Format.kasprintf Uri.of_string) "/"
+      | PutProtectConfigurationRuleSetNumberOverride ->
+          (Format.kasprintf Uri.of_string) "/"
+      | PutRegistrationFieldValue -> (Format.kasprintf Uri.of_string) "/"
+      | PutResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | ReleasePhoneNumber -> (Format.kasprintf Uri.of_string) "/"
+      | ReleaseSenderId -> (Format.kasprintf Uri.of_string) "/"
       | RequestPhoneNumber -> (Format.kasprintf Uri.of_string) "/"
+      | RequestSenderId -> (Format.kasprintf Uri.of_string) "/"
+      | SendDestinationNumberVerificationCode ->
+          (Format.kasprintf Uri.of_string) "/"
+      | SendMediaMessage -> (Format.kasprintf Uri.of_string) "/"
+      | SendNotifyTextMessage -> (Format.kasprintf Uri.of_string) "/"
+      | SendNotifyVoiceMessage -> (Format.kasprintf Uri.of_string) "/"
       | SendTextMessage -> (Format.kasprintf Uri.of_string) "/"
       | SendVoiceMessage -> (Format.kasprintf Uri.of_string) "/"
+      | SetAccountDefaultProtectConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | SetDefaultMessageFeedbackEnabled ->
+          (Format.kasprintf Uri.of_string) "/"
       | SetDefaultMessageType -> (Format.kasprintf Uri.of_string) "/"
       | SetDefaultSenderId -> (Format.kasprintf Uri.of_string) "/"
+      | SetMediaMessageSpendLimitOverride ->
+          (Format.kasprintf Uri.of_string) "/"
+      | SetNotifyMessageSpendLimitOverride ->
+          (Format.kasprintf Uri.of_string) "/"
       | SetTextMessageSpendLimitOverride ->
           (Format.kasprintf Uri.of_string) "/"
       | SetVoiceMessageSpendLimitOverride ->
           (Format.kasprintf Uri.of_string) "/"
+      | SubmitRegistrationVersion -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateEventDestination -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateNotifyConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | UpdatePhoneNumber -> (Format.kasprintf Uri.of_string) "/"
-      | UpdatePool -> (Format.kasprintf Uri.of_string) "/")
+      | UpdatePool -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateProtectConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateProtectConfigurationCountryRuleSet ->
+          (Format.kasprintf Uri.of_string) "/"
+      | UpdateRcsAgent -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateSenderId -> (Format.kasprintf Uri.of_string) "/"
+      | VerifyDestinationNumber -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -208,6 +548,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "PinpointSMSVoiceV2.AssociateOriginationIdentity")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | AssociateProtectConfiguration ->
+      let json = AssociateProtectConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.AssociateProtectConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CarrierLookup ->
+      let json = CarrierLookupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.CarrierLookup")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateConfigurationSet ->
       let json = CreateConfigurationSetRequest.to_json req in
@@ -225,6 +582,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "PinpointSMSVoiceV2.CreateEventDestination")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateNotifyConfiguration ->
+      let json = CreateNotifyConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.CreateNotifyConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateOptOutList ->
       let json = CreateOptOutListRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -240,6 +605,73 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "PinpointSMSVoiceV2.CreatePool")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateProtectConfiguration ->
+      let json = CreateProtectConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.CreateProtectConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateRcsAgent ->
+      let json = CreateRcsAgentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.CreateRcsAgent")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateRegistration ->
+      let json = CreateRegistrationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.CreateRegistration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateRegistrationAssociation ->
+      let json = CreateRegistrationAssociationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.CreateRegistrationAssociation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateRegistrationAttachment ->
+      let json = CreateRegistrationAttachmentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.CreateRegistrationAttachment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateRegistrationVersion ->
+      let json = CreateRegistrationVersionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.CreateRegistrationVersion")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateVerifiedDestinationNumber ->
+      let json = CreateVerifiedDestinationNumberRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.CreateVerifiedDestinationNumber")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteAccountDefaultProtectConfiguration ->
+      let json = DeleteAccountDefaultProtectConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.DeleteAccountDefaultProtectConfiguration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteConfigurationSet ->
       let json = DeleteConfigurationSetRequest.to_json req in
@@ -281,6 +713,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "PinpointSMSVoiceV2.DeleteKeyword")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteMediaMessageSpendLimitOverride ->
+      let json = DeleteMediaMessageSpendLimitOverrideRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.DeleteMediaMessageSpendLimitOverride")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteNotifyConfiguration ->
+      let json = DeleteNotifyConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.DeleteNotifyConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteNotifyMessageSpendLimitOverride ->
+      let json = DeleteNotifyMessageSpendLimitOverrideRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.DeleteNotifyMessageSpendLimitOverride")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteOptOutList ->
       let json = DeleteOptOutListRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -305,6 +763,64 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "PinpointSMSVoiceV2.DeletePool")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteProtectConfiguration ->
+      let json = DeleteProtectConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.DeleteProtectConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteProtectConfigurationRuleSetNumberOverride ->
+      let json =
+        DeleteProtectConfigurationRuleSetNumberOverrideRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.DeleteProtectConfigurationRuleSetNumberOverride")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteRcsAgent ->
+      let json = DeleteRcsAgentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.DeleteRcsAgent")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteRegistration ->
+      let json = DeleteRegistrationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.DeleteRegistration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteRegistrationAttachment ->
+      let json = DeleteRegistrationAttachmentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.DeleteRegistrationAttachment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteRegistrationFieldValue ->
+      let json = DeleteRegistrationFieldValueRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.DeleteRegistrationFieldValue")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteResourcePolicy ->
+      let json = DeleteResourcePolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.DeleteResourcePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteTextMessageSpendLimitOverride ->
       let json = DeleteTextMessageSpendLimitOverrideRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -313,6 +829,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target",
             "PinpointSMSVoiceV2.DeleteTextMessageSpendLimitOverride")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteVerifiedDestinationNumber ->
+      let json = DeleteVerifiedDestinationNumberRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.DeleteVerifiedDestinationNumber")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteVoiceMessageSpendLimitOverride ->
       let json = DeleteVoiceMessageSpendLimitOverrideRequest.to_json req in
@@ -355,6 +880,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "PinpointSMSVoiceV2.DescribeKeywords")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeNotifyConfigurations ->
+      let json = DescribeNotifyConfigurationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.DescribeNotifyConfigurations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeNotifyTemplates ->
+      let json = DescribeNotifyTemplatesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.DescribeNotifyTemplates")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeOptOutLists ->
       let json = DescribeOptOutListsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -387,6 +928,93 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "PinpointSMSVoiceV2.DescribePools")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeProtectConfigurations ->
+      let json = DescribeProtectConfigurationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.DescribeProtectConfigurations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeRcsAgentCountryLaunchStatus ->
+      let json = DescribeRcsAgentCountryLaunchStatusRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.DescribeRcsAgentCountryLaunchStatus")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeRcsAgents ->
+      let json = DescribeRcsAgentsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.DescribeRcsAgents")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeRegistrationAttachments ->
+      let json = DescribeRegistrationAttachmentsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.DescribeRegistrationAttachments")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeRegistrationFieldDefinitions ->
+      let json = DescribeRegistrationFieldDefinitionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.DescribeRegistrationFieldDefinitions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeRegistrationFieldValues ->
+      let json = DescribeRegistrationFieldValuesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.DescribeRegistrationFieldValues")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeRegistrationSectionDefinitions ->
+      let json = DescribeRegistrationSectionDefinitionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.DescribeRegistrationSectionDefinitions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeRegistrationTypeDefinitions ->
+      let json = DescribeRegistrationTypeDefinitionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.DescribeRegistrationTypeDefinitions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeRegistrationVersions ->
+      let json = DescribeRegistrationVersionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.DescribeRegistrationVersions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeRegistrations ->
+      let json = DescribeRegistrationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.DescribeRegistrations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeSenderIds ->
       let json = DescribeSenderIdsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -403,6 +1031,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "PinpointSMSVoiceV2.DescribeSpendLimits")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeVerifiedDestinationNumbers ->
+      let json = DescribeVerifiedDestinationNumbersRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.DescribeVerifiedDestinationNumbers")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DisassociateOriginationIdentity ->
       let json = DisassociateOriginationIdentityRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -412,6 +1049,48 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "PinpointSMSVoiceV2.DisassociateOriginationIdentity")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DisassociateProtectConfiguration ->
+      let json = DisassociateProtectConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.DisassociateProtectConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DiscardRegistrationVersion ->
+      let json = DiscardRegistrationVersionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.DiscardRegistrationVersion")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetProtectConfigurationCountryRuleSet ->
+      let json = GetProtectConfigurationCountryRuleSetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.GetProtectConfigurationCountryRuleSet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetResourcePolicy ->
+      let json = GetResourcePolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.GetResourcePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListNotifyCountries ->
+      let json = ListNotifyCountriesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.ListNotifyCountries")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListPoolOriginationIdentities ->
       let json = ListPoolOriginationIdentitiesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -420,6 +1099,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target",
             "PinpointSMSVoiceV2.ListPoolOriginationIdentities")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListProtectConfigurationRuleSetNumberOverrides ->
+      let json =
+        ListProtectConfigurationRuleSetNumberOverridesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.ListProtectConfigurationRuleSetNumberOverrides")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListRegistrationAssociations ->
+      let json = ListRegistrationAssociationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.ListRegistrationAssociations")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTagsForResource ->
       let json = ListTagsForResourceRequest.to_json req in
@@ -437,6 +1134,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "PinpointSMSVoiceV2.PutKeyword")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutMessageFeedback ->
+      let json = PutMessageFeedbackRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.PutMessageFeedback")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | PutOptedOutNumber ->
       let json = PutOptedOutNumberRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -444,6 +1149,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "PinpointSMSVoiceV2.PutOptedOutNumber")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutProtectConfigurationRuleSetNumberOverride ->
+      let json =
+        PutProtectConfigurationRuleSetNumberOverrideRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.PutProtectConfigurationRuleSetNumberOverride")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutRegistrationFieldValue ->
+      let json = PutRegistrationFieldValueRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.PutRegistrationFieldValue")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutResourcePolicy ->
+      let json = PutResourcePolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.PutResourcePolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ReleasePhoneNumber ->
       let json = ReleasePhoneNumberRequest.to_json req in
@@ -453,6 +1184,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "PinpointSMSVoiceV2.ReleasePhoneNumber")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ReleaseSenderId ->
+      let json = ReleaseSenderIdRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.ReleaseSenderId")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | RequestPhoneNumber ->
       let json = RequestPhoneNumberRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -460,6 +1199,47 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "PinpointSMSVoiceV2.RequestPhoneNumber")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | RequestSenderId ->
+      let json = RequestSenderIdRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.RequestSenderId")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | SendDestinationNumberVerificationCode ->
+      let json = SendDestinationNumberVerificationCodeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.SendDestinationNumberVerificationCode")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | SendMediaMessage ->
+      let json = SendMediaMessageRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.SendMediaMessage")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | SendNotifyTextMessage ->
+      let json = SendNotifyTextMessageRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.SendNotifyTextMessage")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | SendNotifyVoiceMessage ->
+      let json = SendNotifyVoiceMessageRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.SendNotifyVoiceMessage")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | SendTextMessage ->
       let json = SendTextMessageRequest.to_json req in
@@ -477,6 +1257,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "PinpointSMSVoiceV2.SendVoiceMessage")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | SetAccountDefaultProtectConfiguration ->
+      let json = SetAccountDefaultProtectConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.SetAccountDefaultProtectConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | SetDefaultMessageFeedbackEnabled ->
+      let json = SetDefaultMessageFeedbackEnabledRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.SetDefaultMessageFeedbackEnabled")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | SetDefaultMessageType ->
       let json = SetDefaultMessageTypeRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -492,6 +1290,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "PinpointSMSVoiceV2.SetDefaultSenderId")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | SetMediaMessageSpendLimitOverride ->
+      let json = SetMediaMessageSpendLimitOverrideRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.SetMediaMessageSpendLimitOverride")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | SetNotifyMessageSpendLimitOverride ->
+      let json = SetNotifyMessageSpendLimitOverrideRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.SetNotifyMessageSpendLimitOverride")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | SetTextMessageSpendLimitOverride ->
       let json = SetTextMessageSpendLimitOverrideRequest.to_json req in
@@ -510,6 +1326,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target",
             "PinpointSMSVoiceV2.SetVoiceMessageSpendLimitOverride")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | SubmitRegistrationVersion ->
+      let json = SubmitRegistrationVersionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.SubmitRegistrationVersion")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | TagResource ->
       let json = TagResourceRequest.to_json req in
@@ -535,6 +1359,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "PinpointSMSVoiceV2.UpdateEventDestination")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateNotifyConfiguration ->
+      let json = UpdateNotifyConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.UpdateNotifyConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdatePhoneNumber ->
       let json = UpdatePhoneNumberRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -550,6 +1382,47 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "PinpointSMSVoiceV2.UpdatePool")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateProtectConfiguration ->
+      let json = UpdateProtectConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.UpdateProtectConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateProtectConfigurationCountryRuleSet ->
+      let json = UpdateProtectConfigurationCountryRuleSetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "PinpointSMSVoiceV2.UpdateProtectConfigurationCountryRuleSet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateRcsAgent ->
+      let json = UpdateRcsAgentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.UpdateRcsAgent")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateSenderId ->
+      let json = UpdateSenderIdRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.UpdateSenderId")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | VerifyDestinationNumber ->
+      let json = VerifyDestinationNumberRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "PinpointSMSVoiceV2.VerifyDestinationNumber")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -583,6 +1456,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some AssociateOriginationIdentityResult.error_of_json))
+  | AssociateProtectConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AssociateProtectConfigurationResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateProtectConfigurationResult.error_of_json))
+  | CarrierLookup ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CarrierLookupResult.of_json json)
+      else Error (parse_aws_error (Some CarrierLookupResult.error_of_json))
   | CreateConfigurationSet ->
       if is_success
       then
@@ -599,6 +1487,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateEventDestinationResult.error_of_json))
+  | CreateNotifyConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateNotifyConfigurationResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateNotifyConfigurationResult.error_of_json))
   | CreateOptOutList ->
       if is_success
       then
@@ -612,6 +1509,74 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreatePoolResult.of_json json)
       else Error (parse_aws_error (Some CreatePoolResult.error_of_json))
+  | CreateProtectConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateProtectConfigurationResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateProtectConfigurationResult.error_of_json))
+  | CreateRcsAgent ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateRcsAgentResult.of_json json)
+      else Error (parse_aws_error (Some CreateRcsAgentResult.error_of_json))
+  | CreateRegistration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateRegistrationResult.of_json json)
+      else
+        Error (parse_aws_error (Some CreateRegistrationResult.error_of_json))
+  | CreateRegistrationAssociation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateRegistrationAssociationResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateRegistrationAssociationResult.error_of_json))
+  | CreateRegistrationAttachment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateRegistrationAttachmentResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateRegistrationAttachmentResult.error_of_json))
+  | CreateRegistrationVersion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateRegistrationVersionResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateRegistrationVersionResult.error_of_json))
+  | CreateVerifiedDestinationNumber ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateVerifiedDestinationNumberResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateVerifiedDestinationNumberResult.error_of_json))
+  | DeleteAccountDefaultProtectConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteAccountDefaultProtectConfigurationResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DeleteAccountDefaultProtectConfigurationResult.error_of_json))
   | DeleteConfigurationSet ->
       if is_success
       then
@@ -651,6 +1616,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteKeywordResult.of_json json)
       else Error (parse_aws_error (Some DeleteKeywordResult.error_of_json))
+  | DeleteMediaMessageSpendLimitOverride ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteMediaMessageSpendLimitOverrideResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteMediaMessageSpendLimitOverrideResult.error_of_json))
+  | DeleteNotifyConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteNotifyConfigurationResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteNotifyConfigurationResult.error_of_json))
+  | DeleteNotifyMessageSpendLimitOverride ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteNotifyMessageSpendLimitOverrideResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteNotifyMessageSpendLimitOverrideResult.error_of_json))
   | DeleteOptOutList ->
       if is_success
       then
@@ -672,6 +1664,65 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeletePoolResult.of_json json)
       else Error (parse_aws_error (Some DeletePoolResult.error_of_json))
+  | DeleteProtectConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteProtectConfigurationResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteProtectConfigurationResult.error_of_json))
+  | DeleteProtectConfigurationRuleSetNumberOverride ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (DeleteProtectConfigurationRuleSetNumberOverrideResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DeleteProtectConfigurationRuleSetNumberOverrideResult.error_of_json))
+  | DeleteRcsAgent ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRcsAgentResult.of_json json)
+      else Error (parse_aws_error (Some DeleteRcsAgentResult.error_of_json))
+  | DeleteRegistration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRegistrationResult.of_json json)
+      else
+        Error (parse_aws_error (Some DeleteRegistrationResult.error_of_json))
+  | DeleteRegistrationAttachment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRegistrationAttachmentResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteRegistrationAttachmentResult.error_of_json))
+  | DeleteRegistrationFieldValue ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRegistrationFieldValueResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteRegistrationFieldValueResult.error_of_json))
+  | DeleteResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteResourcePolicyResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteResourcePolicyResult.error_of_json))
   | DeleteTextMessageSpendLimitOverride ->
       if is_success
       then
@@ -681,6 +1732,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteTextMessageSpendLimitOverrideResult.error_of_json))
+  | DeleteVerifiedDestinationNumber ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteVerifiedDestinationNumberResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteVerifiedDestinationNumberResult.error_of_json))
   | DeleteVoiceMessageSpendLimitOverride ->
       if is_success
       then
@@ -723,6 +1783,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DescribeKeywordsResult.of_json json)
       else
         Error (parse_aws_error (Some DescribeKeywordsResult.error_of_json))
+  | DescribeNotifyConfigurations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeNotifyConfigurationsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeNotifyConfigurationsResult.error_of_json))
+  | DescribeNotifyTemplates ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeNotifyTemplatesResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeNotifyTemplatesResult.error_of_json))
   | DescribeOptOutLists ->
       if is_success
       then
@@ -753,6 +1830,93 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribePoolsResult.of_json json)
       else Error (parse_aws_error (Some DescribePoolsResult.error_of_json))
+  | DescribeProtectConfigurations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeProtectConfigurationsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeProtectConfigurationsResult.error_of_json))
+  | DescribeRcsAgentCountryLaunchStatus ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRcsAgentCountryLaunchStatusResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRcsAgentCountryLaunchStatusResult.error_of_json))
+  | DescribeRcsAgents ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRcsAgentsResult.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeRcsAgentsResult.error_of_json))
+  | DescribeRegistrationAttachments ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRegistrationAttachmentsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRegistrationAttachmentsResult.error_of_json))
+  | DescribeRegistrationFieldDefinitions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRegistrationFieldDefinitionsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRegistrationFieldDefinitionsResult.error_of_json))
+  | DescribeRegistrationFieldValues ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRegistrationFieldValuesResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRegistrationFieldValuesResult.error_of_json))
+  | DescribeRegistrationSectionDefinitions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRegistrationSectionDefinitionsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRegistrationSectionDefinitionsResult.error_of_json))
+  | DescribeRegistrationTypeDefinitions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRegistrationTypeDefinitionsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRegistrationTypeDefinitionsResult.error_of_json))
+  | DescribeRegistrationVersions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRegistrationVersionsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRegistrationVersionsResult.error_of_json))
+  | DescribeRegistrations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRegistrationsResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeRegistrationsResult.error_of_json))
   | DescribeSenderIds ->
       if is_success
       then
@@ -768,6 +1932,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeSpendLimitsResult.error_of_json))
+  | DescribeVerifiedDestinationNumbers ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeVerifiedDestinationNumbersResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeVerifiedDestinationNumbersResult.error_of_json))
   | DisassociateOriginationIdentity ->
       if is_success
       then
@@ -777,6 +1950,48 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DisassociateOriginationIdentityResult.error_of_json))
+  | DisassociateProtectConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisassociateProtectConfigurationResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateProtectConfigurationResult.error_of_json))
+  | DiscardRegistrationVersion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DiscardRegistrationVersionResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DiscardRegistrationVersionResult.error_of_json))
+  | GetProtectConfigurationCountryRuleSet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetProtectConfigurationCountryRuleSetResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetProtectConfigurationCountryRuleSetResult.error_of_json))
+  | GetResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetResourcePolicyResult.of_json json)
+      else
+        Error (parse_aws_error (Some GetResourcePolicyResult.error_of_json))
+  | ListNotifyCountries ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListNotifyCountriesResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListNotifyCountriesResult.error_of_json))
   | ListPoolOriginationIdentities ->
       if is_success
       then
@@ -786,6 +2001,26 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListPoolOriginationIdentitiesResult.error_of_json))
+  | ListProtectConfigurationRuleSetNumberOverrides ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (ListProtectConfigurationRuleSetNumberOverridesResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListProtectConfigurationRuleSetNumberOverridesResult.error_of_json))
+  | ListRegistrationAssociations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListRegistrationAssociationsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListRegistrationAssociationsResult.error_of_json))
   | ListTagsForResource ->
       if is_success
       then
@@ -800,6 +2035,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (PutKeywordResult.of_json json)
       else Error (parse_aws_error (Some PutKeywordResult.error_of_json))
+  | PutMessageFeedback ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutMessageFeedbackResult.of_json json)
+      else
+        Error (parse_aws_error (Some PutMessageFeedbackResult.error_of_json))
   | PutOptedOutNumber ->
       if is_success
       then
@@ -807,6 +2049,32 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (PutOptedOutNumberResult.of_json json)
       else
         Error (parse_aws_error (Some PutOptedOutNumberResult.error_of_json))
+  | PutProtectConfigurationRuleSetNumberOverride ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutProtectConfigurationRuleSetNumberOverrideResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                PutProtectConfigurationRuleSetNumberOverrideResult.error_of_json))
+  | PutRegistrationFieldValue ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutRegistrationFieldValueResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutRegistrationFieldValueResult.error_of_json))
+  | PutResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutResourcePolicyResult.of_json json)
+      else
+        Error (parse_aws_error (Some PutResourcePolicyResult.error_of_json))
   | ReleasePhoneNumber ->
       if is_success
       then
@@ -814,6 +2082,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ReleasePhoneNumberResult.of_json json)
       else
         Error (parse_aws_error (Some ReleasePhoneNumberResult.error_of_json))
+  | ReleaseSenderId ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ReleaseSenderIdResult.of_json json)
+      else Error (parse_aws_error (Some ReleaseSenderIdResult.error_of_json))
   | RequestPhoneNumber ->
       if is_success
       then
@@ -821,6 +2095,44 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (RequestPhoneNumberResult.of_json json)
       else
         Error (parse_aws_error (Some RequestPhoneNumberResult.error_of_json))
+  | RequestSenderId ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RequestSenderIdResult.of_json json)
+      else Error (parse_aws_error (Some RequestSenderIdResult.error_of_json))
+  | SendDestinationNumberVerificationCode ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SendDestinationNumberVerificationCodeResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some SendDestinationNumberVerificationCodeResult.error_of_json))
+  | SendMediaMessage ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SendMediaMessageResult.of_json json)
+      else
+        Error (parse_aws_error (Some SendMediaMessageResult.error_of_json))
+  | SendNotifyTextMessage ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SendNotifyTextMessageResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some SendNotifyTextMessageResult.error_of_json))
+  | SendNotifyVoiceMessage ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SendNotifyVoiceMessageResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some SendNotifyVoiceMessageResult.error_of_json))
   | SendTextMessage ->
       if is_success
       then
@@ -834,6 +2146,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (SendVoiceMessageResult.of_json json)
       else
         Error (parse_aws_error (Some SendVoiceMessageResult.error_of_json))
+  | SetAccountDefaultProtectConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SetAccountDefaultProtectConfigurationResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some SetAccountDefaultProtectConfigurationResult.error_of_json))
+  | SetDefaultMessageFeedbackEnabled ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SetDefaultMessageFeedbackEnabledResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some SetDefaultMessageFeedbackEnabledResult.error_of_json))
   | SetDefaultMessageType ->
       if is_success
       then
@@ -849,6 +2179,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (SetDefaultSenderIdResult.of_json json)
       else
         Error (parse_aws_error (Some SetDefaultSenderIdResult.error_of_json))
+  | SetMediaMessageSpendLimitOverride ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SetMediaMessageSpendLimitOverrideResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some SetMediaMessageSpendLimitOverrideResult.error_of_json))
+  | SetNotifyMessageSpendLimitOverride ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SetNotifyMessageSpendLimitOverrideResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some SetNotifyMessageSpendLimitOverrideResult.error_of_json))
   | SetTextMessageSpendLimitOverride ->
       if is_success
       then
@@ -867,6 +2215,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some SetVoiceMessageSpendLimitOverrideResult.error_of_json))
+  | SubmitRegistrationVersion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SubmitRegistrationVersionResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some SubmitRegistrationVersionResult.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -887,6 +2244,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateEventDestinationResult.error_of_json))
+  | UpdateNotifyConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateNotifyConfigurationResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateNotifyConfigurationResult.error_of_json))
   | UpdatePhoneNumber ->
       if is_success
       then
@@ -900,3 +2266,42 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdatePoolResult.of_json json)
       else Error (parse_aws_error (Some UpdatePoolResult.error_of_json))
+  | UpdateProtectConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateProtectConfigurationResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateProtectConfigurationResult.error_of_json))
+  | UpdateProtectConfigurationCountryRuleSet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateProtectConfigurationCountryRuleSetResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                UpdateProtectConfigurationCountryRuleSetResult.error_of_json))
+  | UpdateRcsAgent ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateRcsAgentResult.of_json json)
+      else Error (parse_aws_error (Some UpdateRcsAgentResult.error_of_json))
+  | UpdateSenderId ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateSenderIdResult.of_json json)
+      else Error (parse_aws_error (Some UpdateSenderIdResult.error_of_json))
+  | VerifyDestinationNumber ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (VerifyDestinationNumberResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some VerifyDestinationNumberResult.error_of_json))

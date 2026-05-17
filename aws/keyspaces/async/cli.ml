@@ -39,14 +39,20 @@ let create_keyspace =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and replicationSpecification =
+         flag "replication-specification" (optional json_arg)
+           ~doc:"JSON ReplicationSpecification"
        and keyspaceName =
          flag "keyspace-name" (required string) ~doc:"STRING KeyspaceName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_keyspace
            (Values.CreateKeyspaceRequest.make
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~keyspaceName
-              ()) (Some Values.CreateKeyspaceResponse.to_json)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?replicationSpecification:(Option.map
+                                           ~f:Values.ReplicationSpecification.of_json
+                                           replicationSpecification)
+              ~keyspaceName ()) (Some Values.CreateKeyspaceResponse.to_json)
            (Some Values.CreateKeyspaceResponse.error_to_json)])
 let create_table =
   Command.async ~summary:""
@@ -73,6 +79,21 @@ let create_table =
          flag "default-time-to-live" (optional int)
            ~doc:"INT DefaultTimeToLive"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and clientSideTimestamps =
+         flag "client-side-timestamps" (optional json_arg)
+           ~doc:"JSON ClientSideTimestamps"
+       and autoScalingSpecification =
+         flag "auto-scaling-specification" (optional json_arg)
+           ~doc:"JSON AutoScalingSpecification"
+       and replicaSpecifications =
+         flag "replica-specifications" (optional json_arg)
+           ~doc:"JSON ReplicaSpecificationList"
+       and cdcSpecification =
+         flag "cdc-specification" (optional json_arg)
+           ~doc:"JSON CdcSpecification"
+       and warmThroughputSpecification =
+         flag "warm-throughput-specification" (optional json_arg)
+           ~doc:"JSON WarmThroughputSpecification"
        and keyspaceName =
          flag "keyspace-name" (required string) ~doc:"STRING KeyspaceName"
        and tableName =
@@ -96,12 +117,50 @@ let create_table =
                                       pointInTimeRecovery)
               ?ttl:(Option.map ~f:Values.TimeToLive.of_json ttl)
               ?defaultTimeToLive
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~keyspaceName
-              ~tableName
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?clientSideTimestamps:(Option.map
+                                       ~f:Values.ClientSideTimestamps.of_json
+                                       clientSideTimestamps)
+              ?autoScalingSpecification:(Option.map
+                                           ~f:Values.AutoScalingSpecification.of_json
+                                           autoScalingSpecification)
+              ?replicaSpecifications:(Option.map
+                                        ~f:Values.ReplicaSpecificationList.of_json
+                                        replicaSpecifications)
+              ?cdcSpecification:(Option.map
+                                   ~f:Values.CdcSpecification.of_json
+                                   cdcSpecification)
+              ?warmThroughputSpecification:(Option.map
+                                              ~f:Values.WarmThroughputSpecification.of_json
+                                              warmThroughputSpecification)
+              ~keyspaceName ~tableName
               ~schemaDefinition:(Values.SchemaDefinition.of_json
                                    schemaDefinition) ())
            (Some Values.CreateTableResponse.to_json)
            (Some Values.CreateTableResponse.error_to_json)])
+let create_type =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and keyspaceName =
+         flag "keyspace-name" (required string) ~doc:"STRING KeyspaceName"
+       and typeName =
+         flag "type-name" (required string) ~doc:"STRING TypeName"
+       and fieldDefinitions =
+         flag "field-definitions" (required json_arg) ~doc:"JSON FieldList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_type
+           (Values.CreateTypeRequest.make ~keyspaceName ~typeName
+              ~fieldDefinitions:(Values.FieldList.of_json fieldDefinitions)
+              ()) (Some Values.CreateTypeResponse.to_json)
+           (Some Values.CreateTypeResponse.error_to_json)])
 let delete_keyspace =
   Command.async ~summary:""
     ([%map_open.Command
@@ -140,6 +199,26 @@ let delete_table =
            (Values.DeleteTableRequest.make ~keyspaceName ~tableName ())
            (Some Values.DeleteTableResponse.to_json)
            (Some Values.DeleteTableResponse.error_to_json)])
+let delete_type =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and keyspaceName =
+         flag "keyspace-name" (required string) ~doc:"STRING KeyspaceName"
+       and typeName =
+         flag "type-name" (required string) ~doc:"STRING TypeName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_type
+           (Values.DeleteTypeRequest.make ~keyspaceName ~typeName ())
+           (Some Values.DeleteTypeResponse.to_json)
+           (Some Values.DeleteTypeResponse.error_to_json)])
 let get_keyspace =
   Command.async ~summary:""
     ([%map_open.Command
@@ -177,6 +256,47 @@ let get_table =
            (Values.GetTableRequest.make ~keyspaceName ~tableName ())
            (Some Values.GetTableResponse.to_json)
            (Some Values.GetTableResponse.error_to_json)])
+let get_table_auto_scaling_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and keyspaceName =
+         flag "keyspace-name" (required string) ~doc:"STRING KeyspaceName"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING TableName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_table_auto_scaling_settings
+           (Values.GetTableAutoScalingSettingsRequest.make ~keyspaceName
+              ~tableName ())
+           (Some Values.GetTableAutoScalingSettingsResponse.to_json)
+           (Some Values.GetTableAutoScalingSettingsResponse.error_to_json)])
+let get_type =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and keyspaceName =
+         flag "keyspace-name" (required string) ~doc:"STRING KeyspaceName"
+       and typeName =
+         flag "type-name" (required string) ~doc:"STRING TypeName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_type
+           (Values.GetTypeRequest.make ~keyspaceName ~typeName ())
+           (Some Values.GetTypeResponse.to_json)
+           (Some Values.GetTypeResponse.error_to_json)])
 let list_keyspaces =
   Command.async ~summary:""
     ([%map_open.Command
@@ -242,6 +362,28 @@ let list_tags_for_resource =
               ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_types =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and keyspaceName =
+         flag "keyspace-name" (required string) ~doc:"STRING KeyspaceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_types
+           (Values.ListTypesRequest.make ?nextToken ?maxResults ~keyspaceName
+              ()) (Some Values.ListTypesResponse.to_json)
+           (Some Values.ListTypesResponse.error_to_json)])
 let restore_table =
   Command.async ~summary:""
     ([%map_open.Command
@@ -265,6 +407,12 @@ let restore_table =
            ~doc:"JSON PointInTimeRecovery"
        and tagsOverride =
          flag "tags-override" (optional json_arg) ~doc:"JSON TagList"
+       and autoScalingSpecification =
+         flag "auto-scaling-specification" (optional json_arg)
+           ~doc:"JSON AutoScalingSpecification"
+       and replicaSpecifications =
+         flag "replica-specifications" (optional json_arg)
+           ~doc:"JSON ReplicaSpecificationList"
        and sourceKeyspaceName =
          flag "source-keyspace-name" (required string)
            ~doc:"STRING KeyspaceName"
@@ -291,9 +439,15 @@ let restore_table =
                                               ~f:Values.PointInTimeRecovery.of_json
                                               pointInTimeRecoveryOverride)
               ?tagsOverride:(Option.map ~f:Values.TagList.of_json
-                               tagsOverride) ~sourceKeyspaceName
-              ~sourceTableName ~targetKeyspaceName ~targetTableName ())
-           (Some Values.RestoreTableResponse.to_json)
+                               tagsOverride)
+              ?autoScalingSpecification:(Option.map
+                                           ~f:Values.AutoScalingSpecification.of_json
+                                           autoScalingSpecification)
+              ?replicaSpecifications:(Option.map
+                                        ~f:Values.ReplicaSpecificationList.of_json
+                                        replicaSpecifications)
+              ~sourceKeyspaceName ~sourceTableName ~targetKeyspaceName
+              ~targetTableName ()) (Some Values.RestoreTableResponse.to_json)
            (Some Values.RestoreTableResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
@@ -335,6 +489,35 @@ let untag_resource =
               ~tags:(Values.TagList.of_json tags) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_keyspace =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientSideTimestamps =
+         flag "client-side-timestamps" (optional json_arg)
+           ~doc:"JSON ClientSideTimestamps"
+       and keyspaceName =
+         flag "keyspace-name" (required string) ~doc:"STRING KeyspaceName"
+       and replicationSpecification =
+         flag "replication-specification" (required json_arg)
+           ~doc:"JSON ReplicationSpecification" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_keyspace
+           (Values.UpdateKeyspaceRequest.make
+              ?clientSideTimestamps:(Option.map
+                                       ~f:Values.ClientSideTimestamps.of_json
+                                       clientSideTimestamps) ~keyspaceName
+              ~replicationSpecification:(Values.ReplicationSpecification.of_json
+                                           replicationSpecification) ())
+           (Some Values.UpdateKeyspaceResponse.to_json)
+           (Some Values.UpdateKeyspaceResponse.error_to_json)])
 let update_table =
   Command.async ~summary:""
     ([%map_open.Command
@@ -361,6 +544,21 @@ let update_table =
        and defaultTimeToLive =
          flag "default-time-to-live" (optional int)
            ~doc:"INT DefaultTimeToLive"
+       and clientSideTimestamps =
+         flag "client-side-timestamps" (optional json_arg)
+           ~doc:"JSON ClientSideTimestamps"
+       and autoScalingSpecification =
+         flag "auto-scaling-specification" (optional json_arg)
+           ~doc:"JSON AutoScalingSpecification"
+       and replicaSpecifications =
+         flag "replica-specifications" (optional json_arg)
+           ~doc:"JSON ReplicaSpecificationList"
+       and cdcSpecification =
+         flag "cdc-specification" (optional json_arg)
+           ~doc:"JSON CdcSpecification"
+       and warmThroughputSpecification =
+         flag "warm-throughput-specification" (optional json_arg)
+           ~doc:"JSON WarmThroughputSpecification"
        and keyspaceName =
          flag "keyspace-name" (required string) ~doc:"STRING KeyspaceName"
        and tableName =
@@ -381,7 +579,23 @@ let update_table =
                                       ~f:Values.PointInTimeRecovery.of_json
                                       pointInTimeRecovery)
               ?ttl:(Option.map ~f:Values.TimeToLive.of_json ttl)
-              ?defaultTimeToLive ~keyspaceName ~tableName ())
+              ?defaultTimeToLive
+              ?clientSideTimestamps:(Option.map
+                                       ~f:Values.ClientSideTimestamps.of_json
+                                       clientSideTimestamps)
+              ?autoScalingSpecification:(Option.map
+                                           ~f:Values.AutoScalingSpecification.of_json
+                                           autoScalingSpecification)
+              ?replicaSpecifications:(Option.map
+                                        ~f:Values.ReplicaSpecificationList.of_json
+                                        replicaSpecifications)
+              ?cdcSpecification:(Option.map
+                                   ~f:Values.CdcSpecification.of_json
+                                   cdcSpecification)
+              ?warmThroughputSpecification:(Option.map
+                                              ~f:Values.WarmThroughputSpecification.of_json
+                                              warmThroughputSpecification)
+              ~keyspaceName ~tableName ())
            (Some Values.UpdateTableResponse.to_json)
            (Some Values.UpdateTableResponse.error_to_json)])
 let main =
@@ -389,14 +603,20 @@ let main =
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-keyspace", create_keyspace);
     ("create-table", create_table);
+    ("create-type", create_type);
     ("delete-keyspace", delete_keyspace);
     ("delete-table", delete_table);
+    ("delete-type", delete_type);
     ("get-keyspace", get_keyspace);
     ("get-table", get_table);
+    ("get-table-auto-scaling-settings", get_table_auto_scaling_settings);
+    ("get-type", get_type);
     ("list-keyspaces", list_keyspaces);
     ("list-tables", list_tables);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-types", list_types);
     ("restore-table", restore_table);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
+    ("update-keyspace", update_keyspace);
     ("update-table", update_table)]

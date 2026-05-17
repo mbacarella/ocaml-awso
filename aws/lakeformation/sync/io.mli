@@ -6,6 +6,12 @@ val add_l_f_tags_to_resource :
       AddLFTagsToResourceRequest.t ->
         (AddLFTagsToResourceResponse.t, AddLFTagsToResourceResponse.error)
           Result.t
+val assume_decorated_role_with_s_a_m_l :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AssumeDecoratedRoleWithSAMLRequest.t ->
+        (AssumeDecoratedRoleWithSAMLResponse.t,
+          AssumeDecoratedRoleWithSAMLResponse.error) Result.t
 val batch_grant_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -41,6 +47,25 @@ val create_l_f_tag :
     ?cfg:Awso.Cfg.t ->
       CreateLFTagRequest.t ->
         (CreateLFTagResponse.t, CreateLFTagResponse.error) Result.t
+val create_l_f_tag_expression :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateLFTagExpressionRequest.t ->
+        (CreateLFTagExpressionResponse.t,
+          CreateLFTagExpressionResponse.error) Result.t
+val create_lake_formation_identity_center_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateLakeFormationIdentityCenterConfigurationRequest.t ->
+        (CreateLakeFormationIdentityCenterConfigurationResponse.t,
+          CreateLakeFormationIdentityCenterConfigurationResponse.error)
+          Result.t
+val create_lake_formation_opt_in :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateLakeFormationOptInRequest.t ->
+        (CreateLakeFormationOptInResponse.t,
+          CreateLakeFormationOptInResponse.error) Result.t
 val delete_data_cells_filter :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -52,6 +77,25 @@ val delete_l_f_tag :
     ?cfg:Awso.Cfg.t ->
       DeleteLFTagRequest.t ->
         (DeleteLFTagResponse.t, DeleteLFTagResponse.error) Result.t
+val delete_l_f_tag_expression :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteLFTagExpressionRequest.t ->
+        (DeleteLFTagExpressionResponse.t,
+          DeleteLFTagExpressionResponse.error) Result.t
+val delete_lake_formation_identity_center_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteLakeFormationIdentityCenterConfigurationRequest.t ->
+        (DeleteLakeFormationIdentityCenterConfigurationResponse.t,
+          DeleteLakeFormationIdentityCenterConfigurationResponse.error)
+          Result.t
+val delete_lake_formation_opt_in :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteLakeFormationOptInRequest.t ->
+        (DeleteLakeFormationOptInResponse.t,
+          DeleteLakeFormationOptInResponse.error) Result.t
 val delete_objects_on_cancel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -63,6 +107,13 @@ val deregister_resource :
     ?cfg:Awso.Cfg.t ->
       DeregisterResourceRequest.t ->
         (DeregisterResourceResponse.t, DeregisterResourceResponse.error)
+          Result.t
+val describe_lake_formation_identity_center_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeLakeFormationIdentityCenterConfigurationRequest.t ->
+        (DescribeLakeFormationIdentityCenterConfigurationResponse.t,
+          DescribeLakeFormationIdentityCenterConfigurationResponse.error)
           Result.t
 val describe_resource :
   ?endpoint_url:string ->
@@ -81,6 +132,18 @@ val extend_transaction :
       ExtendTransactionRequest.t ->
         (ExtendTransactionResponse.t, ExtendTransactionResponse.error)
           Result.t
+val get_data_cells_filter :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDataCellsFilterRequest.t ->
+        (GetDataCellsFilterResponse.t, GetDataCellsFilterResponse.error)
+          Result.t
+val get_data_lake_principal :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDataLakePrincipalRequest.t ->
+        (GetDataLakePrincipalResponse.t, GetDataLakePrincipalResponse.error)
+          Result.t
 val get_data_lake_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -98,6 +161,12 @@ val get_l_f_tag :
     ?cfg:Awso.Cfg.t ->
       GetLFTagRequest.t ->
         (GetLFTagResponse.t, GetLFTagResponse.error) Result.t
+val get_l_f_tag_expression :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetLFTagExpressionRequest.t ->
+        (GetLFTagExpressionResponse.t, GetLFTagExpressionResponse.error)
+          Result.t
 val get_query_state :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -120,6 +189,12 @@ val get_table_objects :
     ?cfg:Awso.Cfg.t ->
       GetTableObjectsRequest.t ->
         (GetTableObjectsResponse.t, GetTableObjectsResponse.error) Result.t
+val get_temporary_data_location_credentials :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetTemporaryDataLocationCredentialsRequest.t ->
+        (GetTemporaryDataLocationCredentialsResponse.t,
+          GetTemporaryDataLocationCredentialsResponse.error) Result.t
 val get_temporary_glue_partition_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -154,11 +229,23 @@ val list_data_cells_filter :
       ListDataCellsFilterRequest.t ->
         (ListDataCellsFilterResponse.t, ListDataCellsFilterResponse.error)
           Result.t
+val list_l_f_tag_expressions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListLFTagExpressionsRequest.t ->
+        (ListLFTagExpressionsResponse.t, ListLFTagExpressionsResponse.error)
+          Result.t
 val list_l_f_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLFTagsRequest.t ->
         (ListLFTagsResponse.t, ListLFTagsResponse.error) Result.t
+val list_lake_formation_opt_ins :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListLakeFormationOptInsRequest.t ->
+        (ListLakeFormationOptInsResponse.t,
+          ListLakeFormationOptInsResponse.error) Result.t
 val list_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -226,11 +313,30 @@ val start_transaction :
     ?cfg:Awso.Cfg.t ->
       StartTransactionRequest.t ->
         (StartTransactionResponse.t, StartTransactionResponse.error) Result.t
+val update_data_cells_filter :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateDataCellsFilterRequest.t ->
+        (UpdateDataCellsFilterResponse.t,
+          UpdateDataCellsFilterResponse.error) Result.t
 val update_l_f_tag :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateLFTagRequest.t ->
         (UpdateLFTagResponse.t, UpdateLFTagResponse.error) Result.t
+val update_l_f_tag_expression :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateLFTagExpressionRequest.t ->
+        (UpdateLFTagExpressionResponse.t,
+          UpdateLFTagExpressionResponse.error) Result.t
+val update_lake_formation_identity_center_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateLakeFormationIdentityCenterConfigurationRequest.t ->
+        (UpdateLakeFormationIdentityCenterConfigurationResponse.t,
+          UpdateLakeFormationIdentityCenterConfigurationResponse.error)
+          Result.t
 val update_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

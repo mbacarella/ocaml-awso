@@ -78,6 +78,8 @@ let attach_disk =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and autoMounting =
+         flag "auto-mounting" (optional bool) ~doc:"BOOL boolean"
        and diskName =
          flag "disk-name" (required string) ~doc:"STRING ResourceName"
        and instanceName =
@@ -87,8 +89,9 @@ let attach_disk =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.attach_disk
-           (Values.AttachDiskRequest.make ~diskName ~instanceName ~diskPath
-              ()) (Some Values.AttachDiskResult.to_json)
+           (Values.AttachDiskRequest.make ?autoMounting ~diskName
+              ~instanceName ~diskPath ())
+           (Some Values.AttachDiskResult.to_json)
            (Some Values.AttachDiskResult.error_to_json)])
 let attach_instances_to_load_balancer =
   Command.async ~summary:""
@@ -313,6 +316,7 @@ let create_contact_method =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and protocol =
          flag "protocol" (required json_arg) ~doc:"JSON ContactProtocol"
        and contactEndpoint =
@@ -321,6 +325,7 @@ let create_contact_method =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_contact_method
            (Values.CreateContactMethodRequest.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ~protocol:(Values.ContactProtocol.of_json protocol)
               ~contactEndpoint ())
            (Some Values.CreateContactMethodResult.to_json)
@@ -342,6 +347,9 @@ let create_container_service =
        and deployment =
          flag "deployment" (optional json_arg)
            ~doc:"JSON ContainerServiceDeploymentRequest"
+       and privateRegistryAccess =
+         flag "private-registry-access" (optional json_arg)
+           ~doc:"JSON PrivateRegistryAccessRequest"
        and serviceName =
          flag "service-name" (required string)
            ~doc:"STRING ContainerServiceName"
@@ -360,7 +368,10 @@ let create_container_service =
                                     publicDomainNames)
               ?deployment:(Option.map
                              ~f:Values.ContainerServiceDeploymentRequest.of_json
-                             deployment) ~serviceName
+                             deployment)
+              ?privateRegistryAccess:(Option.map
+                                        ~f:Values.PrivateRegistryAccessRequest.of_json
+                                        privateRegistryAccess) ~serviceName
               ~power:(Values.ContainerServicePowerName.of_json power) ~scale
               ()) (Some Values.CreateContainerServiceResult.to_json)
            (Some Values.CreateContainerServiceResult.error_to_json)])
@@ -522,6 +533,11 @@ let create_distribution =
        and ipAddressType =
          flag "ip-address-type" (optional json_arg) ~doc:"JSON IpAddressType"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and certificateName =
+         flag "certificate-name" (optional string) ~doc:"STRING ResourceName"
+       and viewerMinimumTlsProtocolVersion =
+         flag "viewer-minimum-tls-protocol-version" (optional json_arg)
+           ~doc:"JSON ViewerMinimumTlsProtocolVersionEnum"
        and distributionName =
          flag "distribution-name" (required string)
            ~doc:"STRING ResourceName"
@@ -542,6 +558,10 @@ let create_distribution =
               ?ipAddressType:(Option.map ~f:Values.IpAddressType.of_json
                                 ipAddressType)
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?certificateName
+              ?viewerMinimumTlsProtocolVersion:(Option.map
+                                                  ~f:Values.ViewerMinimumTlsProtocolVersionEnum.of_json
+                                                  viewerMinimumTlsProtocolVersion)
               ~distributionName ~origin:(Values.InputOrigin.of_json origin)
               ~defaultCacheBehavior:(Values.CacheBehavior.of_json
                                        defaultCacheBehavior) ~bundleId ())
@@ -588,6 +608,24 @@ let create_domain_entry =
               ~domainEntry:(Values.DomainEntry.of_json domainEntry) ())
            (Some Values.CreateDomainEntryResult.to_json)
            (Some Values.CreateDomainEntryResult.error_to_json)])
+let create_g_u_i_session_access_details =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceName =
+         flag "resource-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_g_u_i_session_access_details
+           (Values.CreateGUISessionAccessDetailsRequest.make ~resourceName ())
+           (Some Values.CreateGUISessionAccessDetailsResult.to_json)
+           (Some Values.CreateGUISessionAccessDetailsResult.error_to_json)])
 let create_instance_snapshot =
   Command.async ~summary:""
     ([%map_open.Command
@@ -750,6 +788,8 @@ let create_load_balancer =
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and ipAddressType =
          flag "ip-address-type" (optional json_arg) ~doc:"JSON IpAddressType"
+       and tlsPolicyName =
+         flag "tls-policy-name" (optional string) ~doc:"STRING string"
        and loadBalancerName =
          flag "load-balancer-name" (required string)
            ~doc:"STRING ResourceName"
@@ -764,8 +804,8 @@ let create_load_balancer =
                                               certificateAlternativeNames)
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ?ipAddressType:(Option.map ~f:Values.IpAddressType.of_json
-                                ipAddressType) ~loadBalancerName
-              ~instancePort ())
+                                ipAddressType) ?tlsPolicyName
+              ~loadBalancerName ~instancePort ())
            (Some Values.CreateLoadBalancerResult.to_json)
            (Some Values.CreateLoadBalancerResult.error_to_json)])
 let create_load_balancer_tls_certificate =
@@ -1564,11 +1604,15 @@ let get_blueprints =
        and includeInactive =
          flag "include-inactive" (optional bool) ~doc:"BOOL boolean"
        and pageToken =
-         flag "page-token" (optional string) ~doc:"STRING string" in
+         flag "page-token" (optional string) ~doc:"STRING string"
+       and appCategory =
+         flag "app-category" (optional json_arg) ~doc:"JSON AppCategory" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_blueprints
-           (Values.GetBlueprintsRequest.make ?includeInactive ?pageToken ())
+           (Values.GetBlueprintsRequest.make ?includeInactive ?pageToken
+              ?appCategory:(Option.map ~f:Values.AppCategory.of_json
+                              appCategory) ())
            (Some Values.GetBlueprintsResult.to_json)
            (Some Values.GetBlueprintsResult.error_to_json)])
 let get_bucket_access_keys =
@@ -1656,12 +1700,14 @@ let get_buckets =
          flag "page-token" (optional string) ~doc:"STRING string"
        and includeConnectedResources =
          flag "include-connected-resources" (optional bool)
-           ~doc:"BOOL boolean" in
+           ~doc:"BOOL boolean"
+       and includeCors =
+         flag "include-cors" (optional bool) ~doc:"BOOL boolean" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_buckets
            (Values.GetBucketsRequest.make ?bucketName ?pageToken
-              ?includeConnectedResources ())
+              ?includeConnectedResources ?includeCors ())
            (Some Values.GetBucketsResult.to_json)
            (Some Values.GetBucketsResult.error_to_json)])
 let get_bundles =
@@ -1677,11 +1723,15 @@ let get_bundles =
        and includeInactive =
          flag "include-inactive" (optional bool) ~doc:"BOOL boolean"
        and pageToken =
-         flag "page-token" (optional string) ~doc:"STRING string" in
+         flag "page-token" (optional string) ~doc:"STRING string"
+       and appCategory =
+         flag "app-category" (optional json_arg) ~doc:"JSON AppCategory" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_bundles
-           (Values.GetBundlesRequest.make ?includeInactive ?pageToken ())
+           (Values.GetBundlesRequest.make ?includeInactive ?pageToken
+              ?appCategory:(Option.map ~f:Values.AppCategory.of_json
+                              appCategory) ())
            (Some Values.GetBundlesResult.to_json)
            (Some Values.GetBundlesResult.error_to_json)])
 let get_certificates =
@@ -1702,7 +1752,9 @@ let get_certificates =
            ~doc:"BOOL IncludeCertificateDetails"
        and certificateName =
          flag "certificate-name" (optional string)
-           ~doc:"STRING CertificateName" in
+           ~doc:"STRING CertificateName"
+       and pageToken =
+         flag "page-token" (optional string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_certificates
@@ -1710,7 +1762,7 @@ let get_certificates =
               ?certificateStatuses:(Option.map
                                       ~f:Values.CertificateStatusList.of_json
                                       certificateStatuses)
-              ?includeCertificateDetails ?certificateName ())
+              ?includeCertificateDetails ?certificateName ?pageToken ())
            (Some Values.GetCertificatesResult.to_json)
            (Some Values.GetCertificatesResult.error_to_json)])
 let get_cloud_formation_stack_records =
@@ -1908,6 +1960,29 @@ let get_container_services =
            (Values.GetContainerServicesRequest.make ?serviceName ())
            (Some Values.ContainerServicesListResult.to_json)
            (Some Values.ContainerServicesListResult.error_to_json)])
+let get_cost_estimate =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceName =
+         flag "resource-name" (required string) ~doc:"STRING ResourceName"
+       and startTime =
+         flag "start-time" (required json_arg) ~doc:"JSON IsoDate"
+       and endTime = flag "end-time" (required json_arg) ~doc:"JSON IsoDate" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_cost_estimate
+           (Values.GetCostEstimateRequest.make ~resourceName
+              ~startTime:(Values.IsoDate.of_json startTime)
+              ~endTime:(Values.IsoDate.of_json endTime) ())
+           (Some Values.GetCostEstimateResult.to_json)
+           (Some Values.GetCostEstimateResult.error_to_json)])
 let get_disk =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2402,6 +2477,24 @@ let get_load_balancer_tls_certificates =
               ~loadBalancerName ())
            (Some Values.GetLoadBalancerTlsCertificatesResult.to_json)
            (Some Values.GetLoadBalancerTlsCertificatesResult.error_to_json)])
+let get_load_balancer_tls_policies =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and pageToken =
+         flag "page-token" (optional string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_load_balancer_tls_policies
+           (Values.GetLoadBalancerTlsPoliciesRequest.make ?pageToken ())
+           (Some Values.GetLoadBalancerTlsPoliciesResult.to_json)
+           (Some Values.GetLoadBalancerTlsPoliciesResult.error_to_json)])
 let get_load_balancers =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2546,11 +2639,14 @@ let get_relational_database_bundles =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and pageToken =
-         flag "page-token" (optional string) ~doc:"STRING string" in
+         flag "page-token" (optional string) ~doc:"STRING string"
+       and includeInactive =
+         flag "include-inactive" (optional bool) ~doc:"BOOL boolean" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_relational_database_bundles
-           (Values.GetRelationalDatabaseBundlesRequest.make ?pageToken ())
+           (Values.GetRelationalDatabaseBundlesRequest.make ?pageToken
+              ?includeInactive ())
            (Some Values.GetRelationalDatabaseBundlesResult.to_json)
            (Some Values.GetRelationalDatabaseBundlesResult.error_to_json)])
 let get_relational_database_events =
@@ -2770,6 +2866,27 @@ let get_relational_databases =
            (Values.GetRelationalDatabasesRequest.make ?pageToken ())
            (Some Values.GetRelationalDatabasesResult.to_json)
            (Some Values.GetRelationalDatabasesResult.error_to_json)])
+let get_setup_history =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and pageToken =
+         flag "page-token" (optional string)
+           ~doc:"STRING SetupHistoryPageToken"
+       and resourceName =
+         flag "resource-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_setup_history
+           (Values.GetSetupHistoryRequest.make ?pageToken ~resourceName ())
+           (Some Values.GetSetupHistoryResult.to_json)
+           (Some Values.GetSetupHistoryResult.error_to_json)])
 let get_static_ip =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2900,6 +3017,7 @@ let put_alarm =
            ~doc:"JSON NotificationTriggerList"
        and notificationEnabled =
          flag "notification-enabled" (optional bool) ~doc:"BOOL boolean"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and alarmName =
          flag "alarm-name" (required string) ~doc:"STRING ResourceName"
        and metricName =
@@ -2926,7 +3044,8 @@ let put_alarm =
               ?notificationTriggers:(Option.map
                                        ~f:Values.NotificationTriggerList.of_json
                                        notificationTriggers)
-              ?notificationEnabled ~alarmName
+              ?notificationEnabled
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~alarmName
               ~metricName:(Values.MetricName.of_json metricName)
               ~monitoredResourceName
               ~comparisonOperator:(Values.ComparisonOperator.of_json
@@ -3083,6 +3202,8 @@ let set_ip_address_type =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and acceptBundleUpdate =
+         flag "accept-bundle-update" (optional bool) ~doc:"BOOL boolean"
        and resourceType =
          flag "resource-type" (required json_arg) ~doc:"JSON ResourceType"
        and resourceName =
@@ -3092,7 +3213,7 @@ let set_ip_address_type =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.set_ip_address_type
-           (Values.SetIpAddressTypeRequest.make
+           (Values.SetIpAddressTypeRequest.make ?acceptBundleUpdate
               ~resourceType:(Values.ResourceType.of_json resourceType)
               ~resourceName
               ~ipAddressType:(Values.IpAddressType.of_json ipAddressType) ())
@@ -3122,6 +3243,53 @@ let set_resource_access_for_bucket =
               ~access:(Values.ResourceBucketAccess.of_json access) ())
            (Some Values.SetResourceAccessForBucketResult.to_json)
            (Some Values.SetResourceAccessForBucketResult.error_to_json)])
+let setup_instance_https =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and instanceName =
+         flag "instance-name" (required string) ~doc:"STRING ResourceName"
+       and emailAddress =
+         flag "email-address" (required string) ~doc:"STRING EmailAddress"
+       and domainNames =
+         flag "domain-names" (required json_arg)
+           ~doc:"JSON SetupDomainNameList"
+       and certificateProvider =
+         flag "certificate-provider" (required json_arg)
+           ~doc:"JSON CertificateProvider" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.setup_instance_https
+           (Values.SetupInstanceHttpsRequest.make ~instanceName ~emailAddress
+              ~domainNames:(Values.SetupDomainNameList.of_json domainNames)
+              ~certificateProvider:(Values.CertificateProvider.of_json
+                                      certificateProvider) ())
+           (Some Values.SetupInstanceHttpsResult.to_json)
+           (Some Values.SetupInstanceHttpsResult.error_to_json)])
+let start_g_u_i_session =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceName =
+         flag "resource-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_g_u_i_session
+           (Values.StartGUISessionRequest.make ~resourceName ())
+           (Some Values.StartGUISessionResult.to_json)
+           (Some Values.StartGUISessionResult.error_to_json)])
 let start_instance =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3160,6 +3328,24 @@ let start_relational_database =
               ~relationalDatabaseName ())
            (Some Values.StartRelationalDatabaseResult.to_json)
            (Some Values.StartRelationalDatabaseResult.error_to_json)])
+let stop_g_u_i_session =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceName =
+         flag "resource-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_g_u_i_session
+           (Values.StopGUISessionRequest.make ~resourceName ())
+           (Some Values.StopGUISessionResult.to_json)
+           (Some Values.StopGUISessionResult.error_to_json)])
 let stop_instance =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3303,6 +3489,8 @@ let update_bucket =
        and accessLogConfig =
          flag "access-log-config" (optional json_arg)
            ~doc:"JSON BucketAccessLogConfig"
+       and cors =
+         flag "cors" (optional json_arg) ~doc:"JSON BucketCorsConfig"
        and bucketName =
          flag "bucket-name" (required string) ~doc:"STRING BucketName" in
        fun () ->
@@ -3316,8 +3504,9 @@ let update_bucket =
                                          readonlyAccessAccounts)
               ?accessLogConfig:(Option.map
                                   ~f:Values.BucketAccessLogConfig.of_json
-                                  accessLogConfig) ~bucketName ())
-           (Some Values.UpdateBucketResult.to_json)
+                                  accessLogConfig)
+              ?cors:(Option.map ~f:Values.BucketCorsConfig.of_json cors)
+              ~bucketName ()) (Some Values.UpdateBucketResult.to_json)
            (Some Values.UpdateBucketResult.error_to_json)])
 let update_bucket_bundle =
   Command.async ~summary:""
@@ -3359,6 +3548,9 @@ let update_container_service =
        and publicDomainNames =
          flag "public-domain-names" (optional json_arg)
            ~doc:"JSON ContainerServicePublicDomains"
+       and privateRegistryAccess =
+         flag "private-registry-access" (optional json_arg)
+           ~doc:"JSON PrivateRegistryAccessRequest"
        and serviceName =
          flag "service-name" (required string)
            ~doc:"STRING ContainerServiceName" in
@@ -3370,8 +3562,11 @@ let update_container_service =
                         power) ?scale ?isDisabled
               ?publicDomainNames:(Option.map
                                     ~f:Values.ContainerServicePublicDomains.of_json
-                                    publicDomainNames) ~serviceName ())
-           (Some Values.UpdateContainerServiceResult.to_json)
+                                    publicDomainNames)
+              ?privateRegistryAccess:(Option.map
+                                        ~f:Values.PrivateRegistryAccessRequest.of_json
+                                        privateRegistryAccess) ~serviceName
+              ()) (Some Values.UpdateContainerServiceResult.to_json)
            (Some Values.UpdateContainerServiceResult.error_to_json)])
 let update_distribution =
   Command.async ~summary:""
@@ -3394,6 +3589,13 @@ let update_distribution =
          flag "cache-behaviors" (optional json_arg)
            ~doc:"JSON CacheBehaviorList"
        and isEnabled = flag "is-enabled" (optional bool) ~doc:"BOOL boolean"
+       and viewerMinimumTlsProtocolVersion =
+         flag "viewer-minimum-tls-protocol-version" (optional json_arg)
+           ~doc:"JSON ViewerMinimumTlsProtocolVersionEnum"
+       and certificateName =
+         flag "certificate-name" (optional string) ~doc:"STRING ResourceName"
+       and useDefaultCertificate =
+         flag "use-default-certificate" (optional bool) ~doc:"BOOL boolean"
        and distributionName =
          flag "distribution-name" (required string)
            ~doc:"STRING ResourceName" in
@@ -3409,8 +3611,12 @@ let update_distribution =
                                         ~f:Values.CacheSettings.of_json
                                         cacheBehaviorSettings)
               ?cacheBehaviors:(Option.map ~f:Values.CacheBehaviorList.of_json
-                                 cacheBehaviors) ?isEnabled ~distributionName
-              ()) (Some Values.UpdateDistributionResult.to_json)
+                                 cacheBehaviors) ?isEnabled
+              ?viewerMinimumTlsProtocolVersion:(Option.map
+                                                  ~f:Values.ViewerMinimumTlsProtocolVersionEnum.of_json
+                                                  viewerMinimumTlsProtocolVersion)
+              ?certificateName ?useDefaultCertificate ~distributionName ())
+           (Some Values.UpdateDistributionResult.to_json)
            (Some Values.UpdateDistributionResult.error_to_json)])
 let update_distribution_bundle =
   Command.async ~summary:""
@@ -3454,6 +3660,39 @@ let update_domain_entry =
               ~domainEntry:(Values.DomainEntry.of_json domainEntry) ())
            (Some Values.UpdateDomainEntryResult.to_json)
            (Some Values.UpdateDomainEntryResult.error_to_json)])
+let update_instance_metadata_options =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and httpTokens =
+         flag "http-tokens" (optional json_arg) ~doc:"JSON HttpTokens"
+       and httpEndpoint =
+         flag "http-endpoint" (optional json_arg) ~doc:"JSON HttpEndpoint"
+       and httpPutResponseHopLimit =
+         flag "http-put-response-hop-limit" (optional int) ~doc:"INT integer"
+       and httpProtocolIpv6 =
+         flag "http-protocol-ipv6" (optional json_arg)
+           ~doc:"JSON HttpProtocolIpv6"
+       and instanceName =
+         flag "instance-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_instance_metadata_options
+           (Values.UpdateInstanceMetadataOptionsRequest.make
+              ?httpTokens:(Option.map ~f:Values.HttpTokens.of_json httpTokens)
+              ?httpEndpoint:(Option.map ~f:Values.HttpEndpoint.of_json
+                               httpEndpoint) ?httpPutResponseHopLimit
+              ?httpProtocolIpv6:(Option.map
+                                   ~f:Values.HttpProtocolIpv6.of_json
+                                   httpProtocolIpv6) ~instanceName ())
+           (Some Values.UpdateInstanceMetadataOptionsResult.to_json)
+           (Some Values.UpdateInstanceMetadataOptionsResult.error_to_json)])
 let update_load_balancer_attribute =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3513,6 +3752,9 @@ let update_relational_database =
        and caCertificateIdentifier =
          flag "ca-certificate-identifier" (optional string)
            ~doc:"STRING string"
+       and relationalDatabaseBlueprintId =
+         flag "relational-database-blueprint-id" (optional string)
+           ~doc:"STRING string"
        and relationalDatabaseName =
          flag "relational-database-name" (required string)
            ~doc:"STRING ResourceName" in
@@ -3523,7 +3765,8 @@ let update_relational_database =
               ?rotateMasterUserPassword ?preferredBackupWindow
               ?preferredMaintenanceWindow ?enableBackupRetention
               ?disableBackupRetention ?publiclyAccessible ?applyImmediately
-              ?caCertificateIdentifier ~relationalDatabaseName ())
+              ?caCertificateIdentifier ?relationalDatabaseBlueprintId
+              ~relationalDatabaseName ())
            (Some Values.UpdateRelationalDatabaseResult.to_json)
            (Some Values.UpdateRelationalDatabaseResult.error_to_json)])
 let update_relational_database_parameters =
@@ -3581,6 +3824,8 @@ let main =
     ("create-distribution", create_distribution);
     ("create-domain", create_domain);
     ("create-domain-entry", create_domain_entry);
+    ("create-g-u-i-session-access-details",
+      create_g_u_i_session_access_details);
     ("create-instance-snapshot", create_instance_snapshot);
     ("create-instances", create_instances);
     ("create-instances-from-snapshot", create_instances_from_snapshot);
@@ -3645,6 +3890,7 @@ let main =
     ("get-container-service-metric-data", get_container_service_metric_data);
     ("get-container-service-powers", get_container_service_powers);
     ("get-container-services", get_container_services);
+    ("get-cost-estimate", get_cost_estimate);
     ("get-disk", get_disk);
     ("get-disk-snapshot", get_disk_snapshot);
     ("get-disk-snapshots", get_disk_snapshots);
@@ -3671,6 +3917,7 @@ let main =
     ("get-load-balancer-metric-data", get_load_balancer_metric_data);
     ("get-load-balancer-tls-certificates",
       get_load_balancer_tls_certificates);
+    ("get-load-balancer-tls-policies", get_load_balancer_tls_policies);
     ("get-load-balancers", get_load_balancers);
     ("get-operation", get_operation);
     ("get-operations", get_operations);
@@ -3694,6 +3941,7 @@ let main =
     ("get-relational-database-snapshot", get_relational_database_snapshot);
     ("get-relational-database-snapshots", get_relational_database_snapshots);
     ("get-relational-databases", get_relational_databases);
+    ("get-setup-history", get_setup_history);
     ("get-static-ip", get_static_ip);
     ("get-static-ips", get_static_ips);
     ("import-key-pair", import_key_pair);
@@ -3710,8 +3958,11 @@ let main =
     ("send-contact-method-verification", send_contact_method_verification);
     ("set-ip-address-type", set_ip_address_type);
     ("set-resource-access-for-bucket", set_resource_access_for_bucket);
+    ("setup-instance-https", setup_instance_https);
+    ("start-g-u-i-session", start_g_u_i_session);
     ("start-instance", start_instance);
     ("start-relational-database", start_relational_database);
+    ("stop-g-u-i-session", stop_g_u_i_session);
     ("stop-instance", stop_instance);
     ("stop-relational-database", stop_relational_database);
     ("tag-resource", tag_resource);
@@ -3724,6 +3975,7 @@ let main =
     ("update-distribution", update_distribution);
     ("update-distribution-bundle", update_distribution_bundle);
     ("update-domain-entry", update_domain_entry);
+    ("update-instance-metadata-options", update_instance_metadata_options);
     ("update-load-balancer-attribute", update_load_balancer_attribute);
     ("update-relational-database", update_relational_database);
     ("update-relational-database-parameters",

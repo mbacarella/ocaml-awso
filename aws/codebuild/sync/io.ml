@@ -17,12 +17,20 @@ let batch_get_build_batches ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetBuildBatches input
 let batch_get_builds ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetBuilds input
+let batch_get_command_executions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetCommandExecutions input
+let batch_get_fleets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetFleets input
 let batch_get_projects ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetProjects input
 let batch_get_report_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetReportGroups input
 let batch_get_reports ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetReports input
+let batch_get_sandboxes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetSandboxes input
+let create_fleet ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateFleet input
 let create_project ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateProject input
 let create_report_group ?endpoint_url ?cfg input =
@@ -31,6 +39,8 @@ let create_webhook ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateWebhook input
 let delete_build_batch ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteBuildBatch input
+let delete_fleet ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteFleet input
 let delete_project ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteProject input
 let delete_report ?endpoint_url ?cfg input =
@@ -63,8 +73,12 @@ let list_builds ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBuilds input
 let list_builds_for_project ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBuildsForProject input
+let list_command_executions_for_sandbox ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCommandExecutionsForSandbox input
 let list_curated_environment_images ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCuratedEnvironmentImages input
+let list_fleets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListFleets input
 let list_projects ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListProjects input
 let list_report_groups ?endpoint_url ?cfg input =
@@ -73,6 +87,10 @@ let list_reports ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListReports input
 let list_reports_for_report_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListReportsForReportGroup input
+let list_sandboxes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListSandboxes input
+let list_sandboxes_for_project ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListSandboxesForProject input
 let list_shared_projects ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListSharedProjects input
 let list_shared_report_groups ?endpoint_url ?cfg input =
@@ -89,10 +107,20 @@ let start_build ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartBuild input
 let start_build_batch ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartBuildBatch input
+let start_command_execution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartCommandExecution input
+let start_sandbox ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartSandbox input
+let start_sandbox_connection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartSandboxConnection input
 let stop_build ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopBuild input
 let stop_build_batch ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopBuildBatch input
+let stop_sandbox ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopSandbox input
+let update_fleet ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateFleet input
 let update_project ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateProject input
 let update_project_visibility ?endpoint_url ?cfg input =

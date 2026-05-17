@@ -5,12 +5,17 @@ type ('i, 'o, 'e) t =
   | AddCustomRoutingEndpoints: (AddCustomRoutingEndpointsRequest.t,
   AddCustomRoutingEndpointsResponse.t,
   AddCustomRoutingEndpointsResponse.error) t 
+  | AddEndpoints: (AddEndpointsRequest.t, AddEndpointsResponse.t,
+  AddEndpointsResponse.error) t 
   | AdvertiseByoipCidr: (AdvertiseByoipCidrRequest.t,
   AdvertiseByoipCidrResponse.t, AdvertiseByoipCidrResponse.error) t 
   | AllowCustomRoutingTraffic: (AllowCustomRoutingTrafficRequest.t, unit,
   unit) t 
   | CreateAccelerator: (CreateAcceleratorRequest.t,
   CreateAcceleratorResponse.t, CreateAcceleratorResponse.error) t 
+  | CreateCrossAccountAttachment: (CreateCrossAccountAttachmentRequest.t,
+  CreateCrossAccountAttachmentResponse.t,
+  CreateCrossAccountAttachmentResponse.error) t 
   | CreateCustomRoutingAccelerator: (CreateCustomRoutingAcceleratorRequest.t,
   CreateCustomRoutingAcceleratorResponse.t,
   CreateCustomRoutingAcceleratorResponse.error) t 
@@ -26,6 +31,8 @@ type ('i, 'o, 'e) t =
   | CreateListener: (CreateListenerRequest.t, CreateListenerResponse.t,
   CreateListenerResponse.error) t 
   | DeleteAccelerator: (DeleteAcceleratorRequest.t, unit, unit) t 
+  | DeleteCrossAccountAttachment: (DeleteCrossAccountAttachmentRequest.t,
+  unit, unit) t 
   | DeleteCustomRoutingAccelerator: (DeleteCustomRoutingAcceleratorRequest.t,
   unit, unit) t 
   | DeleteCustomRoutingEndpointGroup:
@@ -43,6 +50,9 @@ type ('i, 'o, 'e) t =
   | DescribeAcceleratorAttributes: (DescribeAcceleratorAttributesRequest.t,
   DescribeAcceleratorAttributesResponse.t,
   DescribeAcceleratorAttributesResponse.error) t 
+  | DescribeCrossAccountAttachment: (DescribeCrossAccountAttachmentRequest.t,
+  DescribeCrossAccountAttachmentResponse.t,
+  DescribeCrossAccountAttachmentResponse.error) t 
   | DescribeCustomRoutingAccelerator:
   (DescribeCustomRoutingAcceleratorRequest.t,
   DescribeCustomRoutingAcceleratorResponse.t,
@@ -66,6 +76,16 @@ type ('i, 'o, 'e) t =
   ListAcceleratorsResponse.error) t 
   | ListByoipCidrs: (ListByoipCidrsRequest.t, ListByoipCidrsResponse.t,
   ListByoipCidrsResponse.error) t 
+  | ListCrossAccountAttachments: (ListCrossAccountAttachmentsRequest.t,
+  ListCrossAccountAttachmentsResponse.t,
+  ListCrossAccountAttachmentsResponse.error) t 
+  | ListCrossAccountResourceAccounts:
+  (ListCrossAccountResourceAccountsRequest.t,
+  ListCrossAccountResourceAccountsResponse.t,
+  ListCrossAccountResourceAccountsResponse.error) t 
+  | ListCrossAccountResources: (ListCrossAccountResourcesRequest.t,
+  ListCrossAccountResourcesResponse.t,
+  ListCrossAccountResourcesResponse.error) t 
   | ListCustomRoutingAccelerators: (ListCustomRoutingAcceleratorsRequest.t,
   ListCustomRoutingAcceleratorsResponse.t,
   ListCustomRoutingAcceleratorsResponse.error) t 
@@ -93,6 +113,7 @@ type ('i, 'o, 'e) t =
   ProvisionByoipCidrResponse.t, ProvisionByoipCidrResponse.error) t 
   | RemoveCustomRoutingEndpoints: (RemoveCustomRoutingEndpointsRequest.t,
   unit, unit) t 
+  | RemoveEndpoints: (RemoveEndpointsRequest.t, unit, unit) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
@@ -102,6 +123,9 @@ type ('i, 'o, 'e) t =
   | UpdateAcceleratorAttributes: (UpdateAcceleratorAttributesRequest.t,
   UpdateAcceleratorAttributesResponse.t,
   UpdateAcceleratorAttributesResponse.error) t 
+  | UpdateCrossAccountAttachment: (UpdateCrossAccountAttachmentRequest.t,
+  UpdateCrossAccountAttachmentResponse.t,
+  UpdateCrossAccountAttachmentResponse.error) t 
   | UpdateCustomRoutingAccelerator: (UpdateCustomRoutingAcceleratorRequest.t,
   UpdateCustomRoutingAcceleratorResponse.t,
   UpdateCustomRoutingAcceleratorResponse.error) t 
@@ -121,15 +145,18 @@ type ('i, 'o, 'e) t =
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AddCustomRoutingEndpoints -> `POST
+  | AddEndpoints -> `POST
   | AdvertiseByoipCidr -> `POST
   | AllowCustomRoutingTraffic -> `POST
   | CreateAccelerator -> `POST
+  | CreateCrossAccountAttachment -> `POST
   | CreateCustomRoutingAccelerator -> `POST
   | CreateCustomRoutingEndpointGroup -> `POST
   | CreateCustomRoutingListener -> `POST
   | CreateEndpointGroup -> `POST
   | CreateListener -> `POST
   | DeleteAccelerator -> `POST
+  | DeleteCrossAccountAttachment -> `POST
   | DeleteCustomRoutingAccelerator -> `POST
   | DeleteCustomRoutingEndpointGroup -> `POST
   | DeleteCustomRoutingListener -> `POST
@@ -139,6 +166,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeprovisionByoipCidr -> `POST
   | DescribeAccelerator -> `POST
   | DescribeAcceleratorAttributes -> `POST
+  | DescribeCrossAccountAttachment -> `POST
   | DescribeCustomRoutingAccelerator -> `POST
   | DescribeCustomRoutingAcceleratorAttributes -> `POST
   | DescribeCustomRoutingEndpointGroup -> `POST
@@ -147,6 +175,9 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeListener -> `POST
   | ListAccelerators -> `POST
   | ListByoipCidrs -> `POST
+  | ListCrossAccountAttachments -> `POST
+  | ListCrossAccountResourceAccounts -> `POST
+  | ListCrossAccountResources -> `POST
   | ListCustomRoutingAccelerators -> `POST
   | ListCustomRoutingEndpointGroups -> `POST
   | ListCustomRoutingListeners -> `POST
@@ -157,10 +188,12 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListTagsForResource -> `POST
   | ProvisionByoipCidr -> `POST
   | RemoveCustomRoutingEndpoints -> `POST
+  | RemoveEndpoints -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
   | UpdateAccelerator -> `POST
   | UpdateAcceleratorAttributes -> `POST
+  | UpdateCrossAccountAttachment -> `POST
   | UpdateCustomRoutingAccelerator -> `POST
   | UpdateCustomRoutingAcceleratorAttributes -> `POST
   | UpdateCustomRoutingListener -> `POST
@@ -171,9 +204,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | AddCustomRoutingEndpoints -> (Format.kasprintf Uri.of_string) "/"
+      | AddEndpoints -> (Format.kasprintf Uri.of_string) "/"
       | AdvertiseByoipCidr -> (Format.kasprintf Uri.of_string) "/"
       | AllowCustomRoutingTraffic -> (Format.kasprintf Uri.of_string) "/"
       | CreateAccelerator -> (Format.kasprintf Uri.of_string) "/"
+      | CreateCrossAccountAttachment -> (Format.kasprintf Uri.of_string) "/"
       | CreateCustomRoutingAccelerator ->
           (Format.kasprintf Uri.of_string) "/"
       | CreateCustomRoutingEndpointGroup ->
@@ -182,6 +217,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateEndpointGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateListener -> (Format.kasprintf Uri.of_string) "/"
       | DeleteAccelerator -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteCrossAccountAttachment -> (Format.kasprintf Uri.of_string) "/"
       | DeleteCustomRoutingAccelerator ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteCustomRoutingEndpointGroup ->
@@ -193,6 +229,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeprovisionByoipCidr -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAccelerator -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAcceleratorAttributes -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeCrossAccountAttachment ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeCustomRoutingAccelerator ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeCustomRoutingAcceleratorAttributes ->
@@ -204,6 +242,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeListener -> (Format.kasprintf Uri.of_string) "/"
       | ListAccelerators -> (Format.kasprintf Uri.of_string) "/"
       | ListByoipCidrs -> (Format.kasprintf Uri.of_string) "/"
+      | ListCrossAccountAttachments -> (Format.kasprintf Uri.of_string) "/"
+      | ListCrossAccountResourceAccounts ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListCrossAccountResources -> (Format.kasprintf Uri.of_string) "/"
       | ListCustomRoutingAccelerators -> (Format.kasprintf Uri.of_string) "/"
       | ListCustomRoutingEndpointGroups ->
           (Format.kasprintf Uri.of_string) "/"
@@ -216,10 +258,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ProvisionByoipCidr -> (Format.kasprintf Uri.of_string) "/"
       | RemoveCustomRoutingEndpoints -> (Format.kasprintf Uri.of_string) "/"
+      | RemoveEndpoints -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateAccelerator -> (Format.kasprintf Uri.of_string) "/"
       | UpdateAcceleratorAttributes -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateCrossAccountAttachment -> (Format.kasprintf Uri.of_string) "/"
       | UpdateCustomRoutingAccelerator ->
           (Format.kasprintf Uri.of_string) "/"
       | UpdateCustomRoutingAcceleratorAttributes ->
@@ -239,6 +283,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "GlobalAccelerator_V20180706.AddCustomRoutingEndpoints")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | AddEndpoints ->
+      let json = AddEndpointsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GlobalAccelerator_V20180706.AddEndpoints")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | AdvertiseByoipCidr ->
       let json = AdvertiseByoipCidrRequest.to_json req in
@@ -264,6 +316,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "GlobalAccelerator_V20180706.CreateAccelerator")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateCrossAccountAttachment ->
+      let json = CreateCrossAccountAttachmentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "GlobalAccelerator_V20180706.CreateCrossAccountAttachment")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateCustomRoutingAccelerator ->
       let json = CreateCustomRoutingAcceleratorRequest.to_json req in
@@ -315,6 +376,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "GlobalAccelerator_V20180706.DeleteAccelerator")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteCrossAccountAttachment ->
+      let json = DeleteCrossAccountAttachmentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "GlobalAccelerator_V20180706.DeleteCrossAccountAttachment")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteCustomRoutingAccelerator ->
       let json = DeleteCustomRoutingAcceleratorRequest.to_json req in
@@ -394,6 +464,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "GlobalAccelerator_V20180706.DescribeAcceleratorAttributes")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeCrossAccountAttachment ->
+      let json = DescribeCrossAccountAttachmentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "GlobalAccelerator_V20180706.DescribeCrossAccountAttachment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeCustomRoutingAccelerator ->
       let json = DescribeCustomRoutingAcceleratorRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -463,6 +542,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "GlobalAccelerator_V20180706.ListByoipCidrs")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListCrossAccountAttachments ->
+      let json = ListCrossAccountAttachmentsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "GlobalAccelerator_V20180706.ListCrossAccountAttachments")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListCrossAccountResourceAccounts ->
+      let json = ListCrossAccountResourceAccountsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "GlobalAccelerator_V20180706.ListCrossAccountResourceAccounts")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListCrossAccountResources ->
+      let json = ListCrossAccountResourcesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "GlobalAccelerator_V20180706.ListCrossAccountResources")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListCustomRoutingAccelerators ->
       let json = ListCustomRoutingAcceleratorsRequest.to_json req in
@@ -551,6 +657,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "GlobalAccelerator_V20180706.RemoveCustomRoutingEndpoints")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | RemoveEndpoints ->
+      let json = RemoveEndpointsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "GlobalAccelerator_V20180706.RemoveEndpoints")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | TagResource ->
       let json = TagResourceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -583,6 +697,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "GlobalAccelerator_V20180706.UpdateAcceleratorAttributes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateCrossAccountAttachment ->
+      let json = UpdateCrossAccountAttachmentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "GlobalAccelerator_V20180706.UpdateCrossAccountAttachment")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateCustomRoutingAccelerator ->
       let json = UpdateCustomRoutingAcceleratorRequest.to_json req in
@@ -667,6 +790,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some AddCustomRoutingEndpointsResponse.error_of_json))
+  | AddEndpoints ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AddEndpointsResponse.of_json json)
+      else Error (parse_aws_error (Some AddEndpointsResponse.error_of_json))
   | AdvertiseByoipCidr ->
       if is_success
       then
@@ -685,6 +814,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateAcceleratorResponse.error_of_json))
+  | CreateCrossAccountAttachment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateCrossAccountAttachmentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCrossAccountAttachmentResponse.error_of_json))
   | CreateCustomRoutingAccelerator ->
       if is_success
       then
@@ -729,6 +867,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error (parse_aws_error (Some CreateListenerResponse.error_of_json))
   | DeleteAccelerator ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteCrossAccountAttachment ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteCustomRoutingAccelerator ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteCustomRoutingEndpointGroup ->
@@ -766,6 +906,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeAcceleratorAttributesResponse.error_of_json))
+  | DescribeCrossAccountAttachment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeCrossAccountAttachmentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeCrossAccountAttachmentResponse.error_of_json))
   | DescribeCustomRoutingAccelerator ->
       if is_success
       then
@@ -832,6 +981,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListByoipCidrsResponse.of_json json)
       else
         Error (parse_aws_error (Some ListByoipCidrsResponse.error_of_json))
+  | ListCrossAccountAttachments ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCrossAccountAttachmentsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListCrossAccountAttachmentsResponse.error_of_json))
+  | ListCrossAccountResourceAccounts ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCrossAccountResourceAccountsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListCrossAccountResourceAccountsResponse.error_of_json))
+  | ListCrossAccountResources ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCrossAccountResourcesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListCrossAccountResourcesResponse.error_of_json))
   | ListCustomRoutingAccelerators ->
       if is_success
       then
@@ -910,6 +1086,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error (Some ProvisionByoipCidrResponse.error_of_json))
   | RemoveCustomRoutingEndpoints ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | RemoveEndpoints ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | TagResource ->
       if is_success
       then
@@ -939,6 +1117,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateAcceleratorAttributesResponse.error_of_json))
+  | UpdateCrossAccountAttachment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateCrossAccountAttachmentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateCrossAccountAttachmentResponse.error_of_json))
   | UpdateCustomRoutingAccelerator ->
       if is_success
       then
