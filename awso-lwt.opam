@@ -11,9 +11,9 @@ authors: [
   "Michael Bacarella <m@bacarella.com>"
 ]
 license: "MIT"
-homepage: "https://github.com/mbacarella/awso"
-doc: "https://mbacarella.github.io/awso/"
-bug-reports: "https://github.com/mbacarella/awso/issues"
+homepage: "https://github.com/mbacarella/ocaml-awso"
+doc: "https://mbacarella.github.io/ocaml-awso/"
+bug-reports: "https://github.com/mbacarella/ocaml-awso/issues"
 depends: [
   "dune" {>= "3.6"}
   "ocaml" {>= "4.14"}
@@ -37,4 +37,4 @@ build: [
     "@doc" {with-doc}
   ]
 ]
-dev-repo: "git+https://github.com/mbacarella/awso.git"
+dev-repo: "git+https://github.com/mbacarella/ocaml-awso.git"
