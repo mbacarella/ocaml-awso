@@ -1,6 +1,11 @@
 SHELL=/bin/bash
 .PHONY: default install-deps start-ocaml doc format runtest generate-code clean publish-to-opam publish-to-opam-dry-run publish-doc
 
+# Force dune-release to talk to github over SSH. The opam dev-repo field is
+# HTTPS (per opam-repository convention), and dune-release uses it directly
+# for `git ls-remote` before its SSH-rewriting kicks in for the push.
+export DUNE_RELEASE_DEV_REPO = git@github.com:mbacarella/awso.git
+
 default: build
 
 install-deps:
