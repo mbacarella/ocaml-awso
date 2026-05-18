@@ -219,8 +219,6 @@ let () =
     ; "lex-models", Awso_lex_models_async.Cli.main
     ; "lexv2-models", Awso_lexv2_models_async.Cli.main
     ; "license-manager", Awso_license_manager_async.Cli.main
-    ; "license-manager-linux-subscriptions", Awso_license_manager_linux_subscriptions_async.Cli.main
-    ; "license-manager-user-subscriptions", Awso_license_manager_user_subscriptions_async.Cli.main
     ; "lightsail", Awso_lightsail_async.Cli.main
     ; "location", Awso_location_async.Cli.main
     ; "logs", Awso_logs_async.Cli.main

@@ -92,3 +92,18 @@ Links as `byte_complete` bytecode because ARM64's `bl` displacement
 
 ocamlopt has grown more linker tricks since this was a problem, worth
 re-checking whether native links on a modern ocaml without intervention.
+
+## unsupported_services blacklist (lib/codegen/cmd.ml)
+
+The history of why most of those services are excluded has been lost.
+Worth trying to re-add them and see what actually breaks today.
+
+`license-manager-linux-subscriptions` and `license-manager-user-subscriptions`
+are excluded specifically because they fail to build in opam's Windows CI:
+the service names are long enough that combined with the opam build prefix
+(`D:\a\opam-repository\opam-repository\_opam\.opam-switch\build\...`) and the
+`awso_<svc>_<backend>__Values.cmt<rand>.tmp` filenames they emit, paths blow
+the Windows 260 chars max path.
+
+I'm going to guess nobody in the OCaml world cares about this and will leave it
+alone until informed otherwise.
