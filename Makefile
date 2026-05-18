@@ -42,7 +42,7 @@ clean:
 publish-to-opam:
 	dune-release tag
 	dune-release distrib
-	dune-release publish distrib
+	dune-release publish -t distrib
 	dune-release opam pkg
 	dune-release opam submit
 
@@ -56,7 +56,7 @@ publish-to-opam-dry-run:
 	@tar tjf _build/*.tbz | head -40
 	@echo
 	@echo "=== publish distrib (dry-run) ==="
-	dune-release publish distrib --dry-run
+	dune-release publish -t distrib --dry-run
 	@echo
 	@echo "=== opam pkg (dry-run) ==="
 	dune-release opam pkg --dry-run
@@ -65,4 +65,4 @@ publish-to-opam-dry-run:
 	dune-release opam submit --dry-run
 
 publish-doc: doc
-	dune-release publish doc
+	dune-release publish -t doc
