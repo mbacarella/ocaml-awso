@@ -1,21 +1,40 @@
-(* Launches a one-shot ARM64 spot EC2 instance, pushes the local working tree
-   over SSH, installs the OCaml toolchain over SSH, runs `dune build -p ...`
-   (the opam-ci simulation), streams build output back, and tears everything
-   down on completion.
+(* Launches a one-shot ARM64 spot EC2 instance, has it `git clone` the current
+   commit from origin, installs the OCaml toolchain over SSH, runs
+   `dune build -p ...` (the opam-ci simulation), streams build output back, and
+   tears everything down on completion.
 
-   Dogfoods awso-async.ec2 for everything that touches AWS. SSH/scp/tar are
-   shelled out to the local OS.
+   Dogfoods awso-async.ec2 (and .sts) for everything that touches AWS. SSH and
+   git are shelled out to the local OS.
 
-   Resource lifecycle:
-   - Keypair: persistent. Stored at $XDG_CACHE_HOME/awso/ci/awso-ci.id_ed25519
-     (default ~/.cache/awso/ci/), imported to EC2 as KeyPair name "awso-ci".
-     Reused across runs; never deleted by this tool.
-   - Security group: per-run, named awso-ci-<timestamp>. Tied to the detected
-     public IP, so we don't carry a stale rule across runs.
-   - Instance: per-run, spot, one-time, terminate-on-interruption.
+   Resource lifecycle (everything regenerated each run):
+   - Auth keypair: ssh-keygen ed25519, dropped at ~/.cache/awso-ci/auth.id_ed25519
+     (or $XDG_CACHE_HOME/awso-ci/), imported to EC2 as KeyPair "awso-ci-$USER".
+     DeleteKeyPair clears any prior copy before ImportKeyPair.
+   - Host keypair: ssh-keygen ed25519, dropped at ~/.cache/awso-ci/host.ed25519,
+     shipped to the instance via cloud-init's ssh_keys module so we can pin a
+     known fingerprint instead of TOFU.
+   - known_hosts: per-run file at ~/.cache/awso-ci/known_hosts. Never touches
+     ~/.ssh/known_hosts. ssh runs with StrictHostKeyChecking=yes against it.
+   - Security group: named "awso-ci-$USER". Delete-if-exists then create, with
+     ingress locked to the detected public IP.
+   - Instance: spot, one-time, terminate-on-interruption. Tagged Name="awso-ci-$USER".
 
-   At startup we sanity-check for any not-fully-terminated instances launched
-   with key-name=awso-ci (e.g. left behind by --dont-shut-down-on-failure on
+   The remote build:
+   - Detects the current commit and origin URL locally.
+   - Warns if the working tree is dirty (build reflects HEAD, not uncommitted).
+   - Warns if the commit isn't visible at any branch/tag tip on origin.
+   - On the instance: `git init && git remote add origin && git fetch --depth 1
+     <hash> && git checkout --detach FETCH_HEAD` — no source upload over SSH.
+
+   AWS account attestation:
+   - Cloud-init receives the SSH host private key in EC2 user-data. Anyone in
+     this account with ec2:DescribeInstanceAttribute can read it and MITM the
+     build host. On first run for each account, the tool prompts for a typed
+     "yes" attestation that the account is trusted. The attestation is stored
+     at ~/.cache/awso-ci/aws-account-trust/<account-id>.attested.
+
+   At startup we sanity-check for any not-fully-terminated instances tagged
+   Name="awso-ci-$USER" (e.g. left behind by --dont-shut-down-on-failure on
    a previous run) and abort with the cleanup command unless --force.
 
    Failsafes:
@@ -23,14 +42,16 @@
    - User-data schedules `shutdown -h +<max-hours*60>` as an absolute kill.
    - SIGINT/SIGTERM handler attempts cleanup if the tool dies mid-run.
 
-   By default a successful build tears the instance + SG down. A failure also
-   tears them down unless --dont-shut-down-on-failure is passed (in which
-   case the SSH command is printed and the resources are left for the caller
-   to inspect, then clean up by hand). *)
+   By default a successful build tears down the instance, SG, AWS keypair, and
+   local key files. A failure also tears them down unless
+   --dont-shut-down-on-failure is passed (in which case the SSH command is
+   printed and the resources are left for the caller to inspect; the local
+   keypair and known_hosts file are also kept so manual SSH works). *)
 
 open! Core
 open! Async
 module Ec2 = Awso_ec2_async
+module Sts = Awso_sts_async
 
 let eprintf_now fmt = ksprintf (fun s -> eprintf "[ci] %s\n%!" s) fmt
 
@@ -88,6 +109,24 @@ let lookup_default_ami ~arch ~region =
 
 let ssh_user = "ubuntu"
 
+(* AWS resource names are account-shared, so we suffix with the local username
+   to keep concurrent users from colliding on a single account. The cache dir
+   is already per-user (under $HOME) so local file basenames don't need this
+   suffix. *)
+let user_tag () =
+  let raw =
+    match Sys.getenv "USER" with
+    | Some u when not (String.is_empty u) -> u
+    | _ -> failwithf "$USER is not set; cannot compute user_tag" ()
+  in
+  let sanitized =
+    String.map raw ~f:(function
+      | ('a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '-' | '_') as c -> c
+      | _ -> '_')
+  in
+  "awso-ci-" ^ sanitized
+;;
+
 let run_capture ~prog ~args ?(stdin_input = "") () =
   let%bind p = Process.create ~prog ~args () >>| ok_exn in
   Writer.write (Process.stdin p) stdin_input;
@@ -122,25 +161,25 @@ let detect_public_ip () =
   | Error e -> failwithf "Could not detect public IP: %s" (Exn.to_string e) ()
 ;;
 
-(* Persistent local keypair under ~/.cache/awso/ci/. Generated lazily on
-   first call; reused across runs so we don't leak an unbounded number of
-   files locally or KeyPairs in EC2. ssh-keygen creates the private key
-   0600 atomically, so no follow-up chmod (and no race window). *)
-let ensure_local_keypair ~dir ~key_basename =
-  let priv = Filename.concat dir key_basename in
+let unlink_if_exists path =
+  match%bind Sys.file_exists path with
+  | `Yes -> Unix.unlink path
+  | `No | `Unknown -> return ()
+;;
+
+(* Fresh ed25519 keypair, regenerated every run. Unlink any stale files first
+   so ssh-keygen doesn't bail on "file exists". ssh-keygen creates the private
+   key 0600 atomically, so no follow-up chmod (and no race window). Returns
+   the private-key path and the trimmed public-key line. *)
+let generate_keypair ~dir ~basename ~comment =
+  let priv = Filename.concat dir basename in
   let pub = priv ^ ".pub" in
-  let%bind exists = Sys.file_exists priv in
-  let%bind () =
-    match exists with
-    | `Yes -> return ()
-    | `No | `Unknown ->
-      let%map _ =
-        run_or_die
-          ~prog:"ssh-keygen"
-          ~args:
-            [ "-q"; "-t"; "ed25519"; "-N"; ""; "-f"; priv; "-C"; "awso-ci-spot-build" ]
-          ()
-      in
+  let%bind () = unlink_if_exists priv in
+  let%bind () = unlink_if_exists pub in
+  let%bind _ =
+    run_or_die
+      ~prog:"ssh-keygen"
+      ~args:[ "-q"; "-t"; "ed25519"; "-N"; ""; "-f"; priv; "-C"; comment ]
       ()
   in
   let%map pub_text = Reader.file_contents pub in
@@ -163,8 +202,8 @@ let find_project_root start =
   aux start
 ;;
 
-(* ~/.cache/awso/ci/ (or $XDG_CACHE_HOME/awso/ci/ if set). Created 0700
-   atomically; ssh-keygen then drops the 0600 keypair inside. *)
+(* ~/.cache/awso-ci/ (or $XDG_CACHE_HOME/awso-ci/ if set). Created 0700
+   atomically; ssh-keygen drops 0600 keypairs inside. *)
 let ensure_cache_dir () =
   let home =
     match Sys.getenv "HOME" with
@@ -176,7 +215,7 @@ let ensure_cache_dir () =
     | Some s when not (String.is_empty s) -> s
     | _ -> Filename.concat home ".cache"
   in
-  let dir = Filename.concat base "awso/ci" in
+  let dir = Filename.concat base "awso-ci" in
   let%map () = Unix.mkdir ~p:() ~perm:0o700 dir in
   dir
 ;;
@@ -187,6 +226,59 @@ let aws_call ~cfg ~name f request =
   | Error err ->
     let s = err |> Ec2.Ec2_error.to_json |> Yojson.Safe.to_string in
     failwithf "%s: AWS error: %s" name s ()
+;;
+
+let get_aws_account_id ~cfg =
+  match%bind Sts.get_caller_identity ~cfg (Sts.GetCallerIdentityRequest.make ()) with
+  | Ok resp ->
+    (match resp.getCallerIdentityResult.account with
+     | Some a -> return a
+     | None -> failwithf "GetCallerIdentity: no account in response" ())
+  | Error err ->
+    let s = err |> Sts.GetCallerIdentityResponse.error_to_json |> Yojson.Safe.to_string in
+    failwithf "GetCallerIdentity failed: %s" s ()
+;;
+
+(* We stuff the SSH host private key into EC2 user-data so cloud-init can
+   install it before sshd starts. Anyone in this AWS account with
+   ec2:DescribeInstanceAttribute can read user-data, grab the key, and MITM
+   the build box. So make the user pinky-swear once per account that they
+   aren't sharing it with randos. Re-prompt only fires if the file gets
+   deleted (e.g. switching accounts). *)
+let ensure_aws_account_attested ~cache_dir ~account_id =
+  let trust_dir = Filename.concat cache_dir "aws-account-trust" in
+  let%bind () = Unix.mkdir ~p:() ~perm:0o700 trust_dir in
+  let trust_file = Filename.concat trust_dir (account_id ^ ".attested") in
+  match%bind Sys.file_exists trust_file with
+  | `Yes -> return ()
+  | `No | `Unknown ->
+    eprintf
+      "\n\
+       ========================================================\n\
+      \  AWS account attestation required (one-time)\n\
+       ========================================================\n\n\
+       This tool embeds an SSH host private key in EC2 user-data.\n\
+       Anyone in this AWS account with ec2:DescribeInstanceAttribute\n\
+       can read user-data, recover the key, and impersonate the build\n\
+       host to intercept commands and steal source code.\n\n\
+       AWS account: %s\n\n\
+       Type 'yes' to attest that no untrusted parties have access to\n\
+       this AWS account. The attestation will be cached at\n\
+      \  %s\n\
+       and not asked again unless you delete that file.\n\n\
+       attestation> %!"
+      account_id
+      trust_file;
+    let stdin = Lazy.force Reader.stdin in
+    let%bind line = Reader.read_line stdin in
+    let answer =
+      match line with
+      | `Ok s -> String.strip (String.lowercase s)
+      | `Eof -> ""
+    in
+    if String.equal answer "yes"
+    then Writer.save trust_file ~contents:""
+    else failwithf "AWS account %s not attested; aborting" account_id ()
 ;;
 
 let base64_encode s =
@@ -203,35 +295,29 @@ let import_key_pair ~cfg ~key_name ~public_key =
   aws_call ~cfg ~name:"ImportKeyPair" (fun ~cfg r -> Ec2.import_key_pair ~cfg r) req
 ;;
 
-(* True when EC2 already has a KeyPair with this name. *)
-let keypair_exists_on_aws ~cfg ~key_name =
-  let req = Ec2.DescribeKeyPairsRequest.make ~keyNames:[ key_name ] () in
-  match%map Ec2.describe_key_pairs ~cfg req with
-  | Ok _ -> true
-  | Error _ ->
-    (* AWS returns InvalidKeyPair.NotFound when missing; any error here we
-       treat as "not present" — the subsequent import will fail loudly if
-       something else is wrong. *)
-    false
+(* Best-effort: silently swallow errors. Used to clear any prior-run keypair
+   before ImportKeyPair, since ImportKeyPair refuses to overwrite. *)
+let delete_aws_keypair ~cfg ~key_name =
+  let req = Ec2.DeleteKeyPairRequest.make ~keyName:key_name () in
+  match%map Ec2.delete_key_pair ~cfg req with
+  | Ok _ | Error _ -> ()
 ;;
 
-let ensure_aws_keypair ~cfg ~key_name ~public_key =
-  match%bind keypair_exists_on_aws ~cfg ~key_name with
-  | true -> return ()
-  | false ->
-    let%map _ = import_key_pair ~cfg ~key_name ~public_key in
-    ()
+let install_aws_keypair ~cfg ~key_name ~public_key =
+  let%bind () = delete_aws_keypair ~cfg ~key_name in
+  let%map _ = import_key_pair ~cfg ~key_name ~public_key in
+  ()
 ;;
 
-(* Returns instance IDs of any not-fully-terminated instances launched with
-   this key-name in this region. Used as a sanity check at startup so prior
+(* Returns instance IDs of any not-fully-terminated instances tagged with
+   this Name in this region. Used as a sanity check at startup so prior
    runs that left a box alive (e.g. with --dont-shut-down-on-failure) don't
    silently rack up costs. *)
-let leftover_instances ~cfg ~key_name =
+let leftover_instances ~cfg ~name_tag =
   let req =
     Ec2.DescribeInstancesRequest.make
       ~filters:
-        [ Ec2.Filter.make ~name:"key-name" ~values:[ key_name ] ()
+        [ Ec2.Filter.make ~name:"tag:Name" ~values:[ name_tag ] ()
         ; Ec2.Filter.make
             ~name:"instance-state-name"
             ~values:[ "pending"; "running"; "stopping"; "stopped" ]
@@ -293,6 +379,7 @@ let launch_spot_instance
       ~user_data
       ~max_price
       ~disk_gb
+      ~name_tag
   =
   (* Ubuntu cloud-init grows the root partition to fill the underlying EBS
      volume on first boot, so we can just request a bigger one here.
@@ -309,6 +396,13 @@ let launch_spot_instance
         ()
     ]
   in
+  let tag_specifications =
+    [ Ec2.TagSpecification.make
+        ~resourceType:Ec2.ResourceType.Instance
+        ~tags:[ Ec2.Tag.make ~key:"Name" ~value:name_tag () ]
+        ()
+    ]
+  in
   let req =
     Ec2.RunInstancesRequest.make
       ~imageId:ami_id
@@ -320,6 +414,7 @@ let launch_spot_instance
       ~userData:(base64_encode user_data)
       ~instanceInitiatedShutdownBehavior:Ec2.ShutdownBehavior.Terminate
       ~blockDeviceMappings:block_device_mappings
+      ~tagSpecifications:tag_specifications
       ~instanceMarketOptions:
         (Ec2.InstanceMarketOptionsRequest.make
            ~marketType:Ec2.MarketType.Spot
@@ -444,23 +539,56 @@ let delete_security_group ~cfg ~sg_id =
   ()
 ;;
 
-(* Cloud-init does nothing but schedule the absolute kill. All toolchain
-   setup happens over SSH, so we can wait synchronously for it instead of
-   sleeping for an arbitrary cloud-init duration. *)
-let user_data_script ~max_hours =
+(* Best-effort by name. Quietly returns if the SG doesn't exist. *)
+let delete_security_group_by_name ~cfg ~name =
+  let req = Ec2.DescribeSecurityGroupsRequest.make ~groupNames:[ name ] () in
+  match%bind Ec2.describe_security_groups ~cfg req with
+  | Error _ -> return ()
+  | Ok resp ->
+    let sgs = Option.value resp.securityGroups ~default:[] in
+    Deferred.List.iter ~how:`Sequential sgs ~f:(fun (sg : Ec2.SecurityGroup.t) ->
+      match sg.groupId with
+      | None -> return ()
+      | Some sg_id ->
+        (match%map
+           Monitor.try_with ~run:`Schedule (fun () -> delete_security_group ~cfg ~sg_id)
+         with
+         | Ok () | Error _ -> ()))
+;;
+
+(* cloud-config user-data. Two jobs:
+   1. ssh_keys.ed25519_*: cloud-init's ssh_keys module replaces the
+      auto-generated host keys with ours before sshd starts, so the local
+      ssh client can pin a known fingerprint instead of TOFU.
+   2. runcmd: schedule the absolute-kill shutdown.
+
+   The private-key block must be indented as a YAML block scalar (|), with
+   every line of the key indented by exactly 4 spaces beneath the parent. *)
+let user_data_script ~max_hours ~host_priv ~host_pub =
+  let indent_block s =
+    String.split s ~on:'\n'
+    |> List.map ~f:(fun line -> "    " ^ line)
+    |> String.concat ~sep:"\n"
+  in
   sprintf
-    {|#!/bin/bash
-set -euxo pipefail
-shutdown -h +%d || true
+    {|#cloud-config
+ssh_keys:
+  ed25519_private: |
+%s
+  ed25519_public: %s
+runcmd:
+  - [ sh, -c, "shutdown -h +%d || true" ]
 |}
+    (indent_block (String.strip host_priv))
+    host_pub
     (max_hours * 60)
 ;;
 
-let ssh_args ~private_key_path ~user ~host =
+let ssh_args ~private_key_path ~known_hosts_path ~user ~host =
   [ "-o"
-  ; "StrictHostKeyChecking=no"
+  ; "StrictHostKeyChecking=yes"
   ; "-o"
-  ; "UserKnownHostsFile=/dev/null"
+  ; sprintf "UserKnownHostsFile=%s" known_hosts_path
   ; "-o"
   ; "LogLevel=ERROR"
   ; "-i"
@@ -469,54 +597,49 @@ let ssh_args ~private_key_path ~user ~host =
   ]
 ;;
 
-let push_code ~private_key_path ~user ~host ~workdir =
-  let ssh =
-    String.concat
-      ~sep:" "
-      (List.map (ssh_args ~private_key_path ~user ~host) ~f:Filename.quote)
-  in
-  let remote = "mkdir -p ~/awso && cd ~/awso && tar -xzf -" in
-  (* Belt *and* suspenders: don't upload any unnecessary stuff or anything that
-     looks like a secret. *)
-  let exclude_patterns =
-    [ "_build"
-    ; "_opam"
-    ; ".git"
-    ; "vendor"
-    ; ".env"
-    ; ".env.*"
-    ; ".envrc"
-    ; "*.pem"
-    ; "*.key"
-    ; "id_rsa"
-    ; "id_ed25519"
-    ; "secrets"
-    ; "secrets.*"
-    ; "credentials"
-    ]
-  in
-  let excludes =
-    List.map exclude_patterns ~f:(fun p -> "--exclude=" ^ Filename.quote p)
-    |> String.concat ~sep:" "
-  in
-  let cmd =
-    sprintf
-      "tar -czf - -C %s %s . | ssh %s %s"
-      (Filename.quote workdir)
-      excludes
-      ssh
-      (Filename.quote remote)
-  in
-  eprintf_now "pushing code to %s ..." host;
-  match%bind run_capture ~prog:"bash" ~args:[ "-c"; cmd ] () with
-  | Ok _ -> return ()
-  | Error stderr -> failwithf "code push failed: %s" stderr ()
+let write_known_hosts ~path ~host ~host_pub =
+  Writer.save path ~contents:(sprintf "%s %s\n" host host_pub)
 ;;
 
-let run_remote_build ~private_key_path ~user ~host =
-  let ssh_argv = ssh_args ~private_key_path ~user ~host in
+let git_in dir args =
+  run_or_die ~prog:"git" ~args:([ "-C"; dir ] @ args) ()
+;;
+
+(* origin URL, normalized to https for the build box (which has no creds). *)
+let detect_repo_url ~workdir =
+  let%map raw = git_in workdir [ "config"; "--get"; "remote.origin.url" ] in
+  let raw = String.strip raw in
+  match String.chop_prefix raw ~prefix:"git@github.com:" with
+  | Some rest -> "https://github.com/" ^ rest
+  | None ->
+    (match String.chop_prefix raw ~prefix:"ssh://git@github.com/" with
+     | Some rest -> "https://github.com/" ^ rest
+     | None -> raw)
+;;
+
+let detect_commit ~workdir = git_in workdir [ "rev-parse"; "HEAD" ]
+
+let working_tree_dirty ~workdir =
+  let%map out = git_in workdir [ "status"; "--porcelain" ] in
+  not (String.is_empty (String.strip out))
+;;
+
+let commit_reachable_on_remote ~workdir ~commit =
+  match%map
+    run_capture
+      ~prog:"git"
+      ~args:[ "-C"; workdir; "ls-remote"; "origin" ]
+      ()
+  with
+  | Ok out -> String.is_substring out ~substring:commit
+  | Error _ -> false
+;;
+
+let run_remote_build ~private_key_path ~known_hosts_path ~user ~host ~repo_url ~commit =
+  let ssh_argv = ssh_args ~private_key_path ~known_hosts_path ~user ~host in
   let remote_script =
-    {|set -euo pipefail
+    sprintf
+      {|set -euo pipefail
 
 echo '*** machine'
 uname -srm
@@ -524,7 +647,7 @@ echo "$(nproc) cores"
 free -h | awk '/^Mem:/ {print $2 " RAM"}'
 df -h / | tail -1 | awk '{print $2 " disk (" $4 " free)"}'
 
-if ! command -v opam >/dev/null; then
+if ! command -v git >/dev/null || ! command -v opam >/dev/null; then
   echo '*** installing apt deps'
   sudo bash -c '
     export DEBIAN_FRONTEND=noninteractive
@@ -546,13 +669,24 @@ fi
 eval "$(opam env --switch=5.3.0)"
 opam install -y dune
 
-cd ~/awso
+echo "*** fetching commit %s from %s"
+rm -rf ~/awso
+mkdir ~/awso && cd ~/awso
+git init -q
+git remote add origin %s
+git fetch --depth 1 origin %s
+git checkout --detach FETCH_HEAD
+
 echo '*** opam install --deps-only'
 opam install . --deps-only --yes
 echo '*** dune build -p (all six packages)'
 dune build -p awso-common,awso,awso-async,awso-lwt,awso-unix,awso-cli @install
 echo '*** done'
 |}
+      commit
+      repo_url
+      (Filename.quote repo_url)
+      (Filename.quote commit)
   in
   eprintf_now "starting remote build...";
   let%bind p =
@@ -620,11 +754,6 @@ let main_command =
           ~doc:
             "N root EBS volume size in GiB (default 40; need headroom for opam switch \
              ~5-10G + dune _build ~10-20G across ~300 services)"
-      and workdir =
-        flag
-          "--workdir"
-          (optional string)
-          ~doc:"PATH directory to package and ship (default = cwd)"
       and force =
         flag
           "--force"
@@ -649,27 +778,42 @@ let main_command =
                 ())
         in
         let open Deferred.Let_syntax in
-        let%bind workdir =
-          match workdir with
-          | Some s -> return s
-          | None ->
-            let%bind cwd = Unix.getcwd () in
-            find_project_root cwd
-        in
-        eprintf_now "shipping workdir: %s" workdir;
+        let user_tag = user_tag () in
+        let%bind cwd = Unix.getcwd () in
+        let%bind workdir = find_project_root cwd in
         let%bind cfg = Awso_async.Cfg.get_exn ~region:(Awso.Region.of_string region) () in
-        let key_name = "awso-ci" in
+        let%bind cache_dir = ensure_cache_dir () in
+        let%bind account_id = get_aws_account_id ~cfg in
+        let%bind () = ensure_aws_account_attested ~cache_dir ~account_id in
+        let%bind repo_url = detect_repo_url ~workdir in
+        let%bind commit = detect_commit ~workdir in
+        let%bind dirty = working_tree_dirty ~workdir in
+        if dirty
+        then
+          eprintf_now
+            "WARNING: working tree at %s is dirty. Building committed HEAD %s; \
+             uncommitted changes will NOT be in the build."
+            workdir
+            commit;
+        let%bind reachable = commit_reachable_on_remote ~workdir ~commit in
+        if not reachable
+        then
+          eprintf_now
+            "WARNING: commit %s does not appear at any branch/tag tip on origin. \
+             If you haven't pushed it, the remote 'git fetch' will fail."
+            commit;
+        eprintf_now "repo: %s @ %s" repo_url commit;
         let%bind () =
-          match%bind leftover_instances ~cfg ~key_name with
+          match%bind leftover_instances ~cfg ~name_tag:user_tag with
           | [] -> return ()
           | ids when force ->
             eprintf_now
-              "WARNING: prior awso-ci instance(s) still alive (%s); --force given, \
-               proceeding"
+              "WARNING: prior %s instance(s) still alive (%s); --force given, proceeding"
+              user_tag
               (String.concat ~sep:"," ids);
             return ()
           | ids ->
-            eprintf_now "previous awso-ci instance(s) are still alive:";
+            eprintf_now "previous %s instance(s) are still alive:" user_tag;
             List.iter ids ~f:(fun id -> eprintf_now "  %s" id);
             eprintf_now "terminate them with:";
             eprintf_now
@@ -681,39 +825,42 @@ let main_command =
         in
         let%bind public_ip = detect_public_ip () in
         eprintf_now "public IP: %s" public_ip;
-        let run_tag =
-          sprintf
-            "awso-ci-%d"
-            (Time_float.now ()
-             |> Time_float.to_span_since_epoch
-             |> Time_float.Span.to_sec
-             |> Float.to_int)
-        in
-        let sg_name = run_tag in
-        let%bind cache_dir = ensure_cache_dir () in
         let%bind private_key_path, public_key =
-          ensure_local_keypair ~dir:cache_dir ~key_basename:(key_name ^ ".id_ed25519")
+          generate_keypair
+            ~dir:cache_dir
+            ~basename:"auth.id_ed25519"
+            ~comment:"awso-ci-spot-build"
         in
-        eprintf_now "keypair: %s" private_key_path;
-        let%bind () = ensure_aws_keypair ~cfg ~key_name ~public_key in
+        eprintf_now "auth keypair: %s" private_key_path;
+        let%bind () = install_aws_keypair ~cfg ~key_name:user_tag ~public_key in
+        let%bind host_priv_path, host_pub =
+          generate_keypair
+            ~dir:cache_dir
+            ~basename:"host.ed25519"
+            ~comment:"awso-ci-host"
+        in
+        let%bind host_priv = Reader.file_contents host_priv_path in
+        let known_hosts_path = Filename.concat cache_dir "known_hosts" in
+        let%bind () = delete_security_group_by_name ~cfg ~name:user_tag in
         let%bind sg_id =
-          create_security_group ~cfg ~name:sg_name ~description:"awso-ci ephemeral"
+          create_security_group ~cfg ~name:user_tag ~description:"awso-ci ephemeral"
         in
         let%bind () =
           authorize_ssh_from ~cfg ~sg_id ~ip_cidr:(public_ip ^ "/32") |> Deferred.ignore_m
         in
         eprintf_now "security group: %s" sg_id;
-        let user_data = user_data_script ~max_hours in
+        let user_data = user_data_script ~max_hours ~host_priv ~host_pub in
         let%bind instance_id =
           launch_spot_instance
             ~cfg
             ~ami_id
             ~instance_type
-            ~key_name
+            ~key_name:user_tag
             ~sg_id
             ~user_data
             ~max_price
             ~disk_gb
+            ~name_tag:user_tag
         in
         eprintf_now
           "launched %s spot instance %s (%dG root)"
@@ -721,12 +868,18 @@ let main_command =
           instance_id
           disk_gb;
         let cleanup_armed = ref true in
-        let cleanup () =
+        let unlink_local_state () =
+          let%bind () = unlink_if_exists private_key_path in
+          let%bind () = unlink_if_exists (private_key_path ^ ".pub") in
+          let%bind () = unlink_if_exists host_priv_path in
+          let%bind () = unlink_if_exists (host_priv_path ^ ".pub") in
+          unlink_if_exists known_hosts_path
+        in
+        let cleanup ~unlink_local =
           if not !cleanup_armed
           then return ()
           else (
             cleanup_armed := false;
-            (* Keypair persists across runs — don't delete it. *)
             let%bind () =
               Monitor.try_with ~run:`Schedule (fun () ->
                 terminate_instance ~cfg ~instance_id)
@@ -749,38 +902,54 @@ let main_command =
                   (Exn.to_string e);
                 return ()
             in
-            try_sg 8)
+            let%bind () = try_sg 8 in
+            let%bind () = delete_aws_keypair ~cfg ~key_name:user_tag in
+            if unlink_local then unlink_local_state () else return ())
         in
         Signal.handle Signal.terminating ~f:(fun signal ->
           eprintf_now "caught %s; tearing down AWS resources..." (Signal.to_string signal);
           don't_wait_for
-            (let%bind () = cleanup () in
+            (let%bind () = cleanup ~unlink_local:true in
              Shutdown.shutdown 130;
              return ()));
         let%bind host = wait_for_running ~cfg ~instance_id in
         eprintf_now "host: %s ; waiting for ssh..." host;
         let%bind () = wait_for_ssh ~host in
+        let%bind () = write_known_hosts ~path:known_hosts_path ~host ~host_pub in
         let user = ssh_user in
-        let%bind () = push_code ~private_key_path ~user ~host ~workdir in
-        let%bind status = run_remote_build ~private_key_path ~user ~host in
+        let%bind status =
+          run_remote_build
+            ~private_key_path
+            ~known_hosts_path
+            ~user
+            ~host
+            ~repo_url
+            ~commit
+        in
         match status with
         | `Success ->
           eprintf_now "build succeeded; cleaning up";
-          let%bind () = cleanup () in
+          let%bind () = cleanup ~unlink_local:true in
           return ()
         | `Build_failed when dont_shut_down_on_failure ->
           eprintf_now "build failed and --dont-shut-down-on-failure set.";
           eprintf_now "instance %s is still running. SSH:" instance_id;
-          eprintf_now "  ssh -i %s %s@%s" private_key_path ssh_user host;
+          eprintf_now
+            "  ssh -i %s -o UserKnownHostsFile=%s %s@%s"
+            private_key_path
+            known_hosts_path
+            ssh_user
+            host;
           eprintf_now "remember to:";
           eprintf_now "  aws ec2 terminate-instances --instance-ids %s" instance_id;
           eprintf_now "  aws ec2 delete-security-group --group-id %s" sg_id;
+          eprintf_now "  aws ec2 delete-key-pair --key-name %s" user_tag;
           (* Disarm the signal handler — Ctrl-C should NOT tear down. *)
           cleanup_armed := false;
           exit 1
         | `Build_failed ->
           eprintf_now "build failed; tearing down";
-          let%bind () = cleanup () in
+          let%bind () = cleanup ~unlink_local:true in
           exit 1]
 ;;
 
