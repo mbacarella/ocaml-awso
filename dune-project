@@ -12,12 +12,12 @@
 
 (maintainers "Michael Bacarella <m@bacarella.com>")
 
-(homepage "https://github.com/mbacarella/awso")
+(homepage "https://github.com/mbacarella/ocaml-awso")
 
-(documentation "https://mbacarella.github.io/awso/")
+(documentation "https://mbacarella.github.io/ocaml-awso/")
 
 (source
- (github mbacarella/awso))
+ (github mbacarella/ocaml-awso))
 
 (package
  (name awso)
