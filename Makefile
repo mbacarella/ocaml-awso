@@ -45,11 +45,7 @@ clean:
 	dune clean
 
 publish-to-opam:
-	dune-release tag
-	dune-release distrib
-	dune-release publish -t distrib
-	dune-release opam pkg
-	dune-release opam submit
+	dune-release
 
 publish-to-opam-dry-run:
 	@echo "=== building distribution tarball (real, but harmless) ==="
