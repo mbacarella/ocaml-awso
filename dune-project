@@ -36,6 +36,7 @@
   (re
    (>= 1.7.2))
   xmlm
+  yojson
   zarith))
 
 (package
@@ -76,7 +77,8 @@
  (depends
   (ocaml
    (>= 4.14))
-  ppx_expect))
+  ppx_expect
+  yojson))
 
 (package
  (name awso-sync)
