@@ -26,6 +26,7 @@ let eval_structure ~base_module ~io_subsystem operations =
     | `Async -> "Awso_async"
     | `Lwt -> "Awso_lwt"
     | `Sync -> "Awso_sync"
+    | `Eio -> "Awso_eio"
   in
   let base_open = make_open base_module in
   let io_open = make_open io_module in
@@ -142,13 +143,19 @@ let eval_signature ~protocol ~base_module ~io_subsystem endpoints =
       | `Async -> [%type: ([%t ok_arg], [%t error_arg]) Result.t Async.Deferred.t]
       | `Lwt -> [%type: ([%t ok_arg], [%t error_arg]) Result.t Lwt.t]
       | `Sync -> [%type: ([%t ok_arg], [%t error_arg]) Result.t]
+      | `Eio -> [%type: ([%t ok_arg], [%t error_arg]) Result.t]
+    in
+    let cfg_type =
+      match io_subsystem with
+      | `Async | `Lwt | `Sync -> [%type: Awso.Cfg.t]
+      | `Eio -> [%type: Awso_eio.Cfg.t]
     in
     Ast_helper.Sig.value
       (Ast_helper.Val.mk
          name
          [%type:
            ?endpoint_url:string
-           -> ?cfg:Awso.Cfg.t
+           -> ?cfg:[%t cfg_type]
            -> [%t request_type]
            -> [%t result_type]]))
 ;;

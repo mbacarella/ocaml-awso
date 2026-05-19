@@ -2,7 +2,7 @@ open! Core
 open! Async
 module Ec2 = Awso_ec2_async
 
-let print_row a b c d = printf "%-16s  %-15s  %-39s  %-40s\n" a b c d
+let print_row a b c d = printf "%-16s  %-15s  %-39s  %-20s\n" a b c d
 
 let print_instance instance =
   let name =
@@ -45,7 +45,7 @@ let ec2_describe_instances () =
         (String.make 16 '-')
         (String.make 15 '-')
         (String.make 39 '-')
-        (String.make 40 '-');
+        (String.make 20 '-');
       List.iter instances ~f:print_instance;
       return ())
 ;;

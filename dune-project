@@ -29,7 +29,7 @@
    (>= 4.14))
   awso-common
   (cohttp
-   (>= 0.21.0))
+   (>= 6.0.0))
   cryptokit
   ppx_expect
   ppx_yojson_conv
@@ -55,6 +55,24 @@
   (async
    (>= v0.11.0))
   async_ssl))
+
+(package
+ (name awso-eio)
+ (synopsis "AWS client for Eio (400+ services, auto-generated from botocore)")
+ (description
+  "AWS service bindings backed by the Eio I/O library. Generated from botocore for ~400 services. Use this if your codebase is Eio-flavored. Requires OCaml 5+.")
+ (depends
+  (ocaml
+   (>= 5.0))
+  awso
+  (eio
+   (>= 0.12))
+  (cohttp-eio
+   (>= 6.2.1))
+  tls
+  tls-eio
+  ca-certs
+  mirage-crypto-rng))
 
 (package
  (name awso-lwt)

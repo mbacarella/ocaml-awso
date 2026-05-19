@@ -1,0 +1,4 @@
+(executable
+ (name ec2_describe_instances)
+ (modules ec2_describe_instances)
+ (libraries awso-eio.ec2 eio_main))
