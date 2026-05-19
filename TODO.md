@@ -1,5 +1,18 @@
 # TODO
 
+## OCaml 4.14 stack overflows
+
+4.14 stack-overflows on some systems while compiling the generated tables,
+botocore_endpoints.ml (~71k lines) and per-service values.ml files
+(connect/values.ml is 104k lines, glue 88k, etc.).
+
+The 4.14 compiler isn't fully TCO across those depths and runs out of stack
+on opam-ci's constrained containers and on cold local builds. 5.3.0 is fine.
+
+for this release the floor is ocaml 5.3.0. circle back and split the
+offending generated files (bump `num_value_submodules` in
+lib/codegen/dune.ml, plus split botocore_endpoints.ml) so 4.14 builds again
+
 ## fun stuff
 
 ### more I/O backends

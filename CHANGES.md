@@ -20,7 +20,7 @@ Initial opam release, forked from [solvuu/awsm](https://github.com/solvuu/awsm),
 
 ### Compatibility & dep hygiene
 
-- minimum OCaml is 4.14
+- minimum OCaml is 5.0 (4.14 to be available next release!)
 - now on dune 3.6
 - removed Jane Street `Core` from the non-Async runtimes; non-async builds now use a very small `Jane_compat` shim under `lib/common/`
 - replaced ad-hoc JSON with `Yojson.Safe.t` everywhere

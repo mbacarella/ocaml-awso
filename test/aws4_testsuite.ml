@@ -7,7 +7,15 @@ module Req = struct
 
   let request_of_file filename =
     let s = string_of_file filename in
-    let s = if String.is_suffix s ~suffix:"\n" then s else s ^ "\n" in
+    (* cohttp 6.x's parser requires CRLF + a \r\n\r\n end-of-headers marker.
+       Fixtures are a mix of CRLF and LF, with no trailing newline; normalize
+       to LF first to avoid turning existing \r\n into \r\r\n. *)
+    let s =
+      s
+      |> String.substr_replace_all ~pattern:"\r\n" ~with_:"\n"
+      |> String.substr_replace_all ~pattern:"\n" ~with_:"\r\n"
+    in
+    let s = if String.is_suffix s ~suffix:"\r\n" then s ^ "\r\n" else s ^ "\r\n\r\n" in
     match Cohttp.Request.of_string s with
     | `Eof -> assert false
     | `Invalid x -> failwith x
