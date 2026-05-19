@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-.PHONY: default install-deps start-ocaml doc format runtest generate-code clean publish-to-opam publish-to-opam-dry-run publish-doc
+.PHONY: default install-deps start-ocaml doc format runtest generate-code clean publish-to-opam publish-to-opam-dry-run publish-doc opam-ci-bootstrap opam-ci-lint opam-ci-build opam-ci-remove-pins
 
 # Force dune-release to talk to github over SSH.
 export DUNE_RELEASE_DEV_REPO = git@github.com:mbacarella/ocaml-awso.git
@@ -41,6 +41,18 @@ generate-code:
 
 clean:
 	dune clean
+
+opam-ci-bootstrap:
+	dogfood/local-opam-ci/run.sh bootstrap
+
+opam-ci-lint:
+	dogfood/local-opam-ci/run.sh lint
+
+opam-ci-build:
+	dogfood/local-opam-ci/run.sh build
+
+opam-ci-remove-pins:
+	dogfood/local-opam-ci/run.sh remove-pins
 
 publish-to-opam:
 	dune-release
