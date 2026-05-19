@@ -17,7 +17,7 @@ doc: "https://mbacarella.github.io/ocaml-awso/"
 bug-reports: "https://github.com/mbacarella/ocaml-awso/issues"
 depends: [
   "dune" {>= "3.6"}
-  "ocaml" {>= "4.14"}
+  "ocaml" {>= "5.0"}
   "awso-common"
   "cohttp" {>= "0.21.0"}
   "cryptokit"
@@ -25,7 +25,7 @@ depends: [
   "ppx_yojson_conv"
   "re" {>= "1.7.2"}
   "xmlm"
-  "yojson"
+  "yojson" {>= "2.0.0"}
   "zarith"
   "odoc" {with-doc}
 ]

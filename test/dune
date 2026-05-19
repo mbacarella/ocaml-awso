@@ -1,5 +1,6 @@
 (test
  (name test_auth)
+ (package awso)
  (libraries awso)
  (deps
   (glob_files %{project_root}/vendor/aws4_testsuite/*.req)

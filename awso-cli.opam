@@ -16,7 +16,7 @@ doc: "https://mbacarella.github.io/ocaml-awso/"
 bug-reports: "https://github.com/mbacarella/ocaml-awso/issues"
 depends: [
   "dune" {>= "3.6"}
-  "ocaml" {>= "4.14"}
+  "ocaml" {>= "5.0"}
   "awso-async"
   "core_unix"
   "ppx_jane"

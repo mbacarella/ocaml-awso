@@ -14,6 +14,10 @@
   re.pcre
   uri)
  (flags :standard -open Ppxlib)
- (inline_tests)
+ ; (inline_tests) intentionally omitted: lib/codegen has no (package ...), so
+ ; its inline tests would be pulled into every other package's @runtest by
+ ; opam-ci, dragging sedlex/ocamlgraph/ppxlib (codegen-only deps) into runtime
+ ; opam dependencies. The expect tests stay in source for maintainer use; run
+ ; them locally via "dune runtest lib/codegen".
  (preprocess
   (pps ppx_expect ppx_let sedlex.ppx ppxlib.metaquot)))
