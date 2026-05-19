@@ -26,7 +26,7 @@
   "Logic-only runtime for the awso family of packages: request signing (SigV4), HTTP plumbing, credential discovery, region/endpoint tables, and shared types. I/O bindings live in sibling packages (awso-async, awso-lwt, awso-sync).")
  (depends
   (ocaml
-   (>= 5.0))
+   (>= 5.3.0))
   awso-common
   (cohttp
    (>= 0.21.0))
@@ -47,7 +47,7 @@
   "AWS service bindings backed by Jane Street's Async I/O library. Generated from botocore for ~400 services. Use this if your codebase is already Async-flavored.")
  (depends
   (ocaml
-   (>= 5.0))
+   (>= 5.3.0))
   awso
   cohttp-async
   core_unix
@@ -64,7 +64,7 @@
   "AWS service bindings backed by the Lwt I/O library. Generated from botocore for ~400 services. Use this if your codebase is Lwt-flavored.")
  (depends
   (ocaml
-   (>= 5.0))
+   (>= 5.3.0))
   awso
   lwt
   lwt_ppx
@@ -77,7 +77,7 @@
   "Small compatibility shim providing Jane Street Core-like helpers (Result, Option, List combinators) without dragging Core itself into non-Async/Lwt builds. Used by awso and the codegen.")
  (depends
   (ocaml
-   (>= 5.0))
+   (>= 5.3.0))
   ppx_expect
   (yojson
    (>= 2.0.0))))
@@ -89,7 +89,7 @@
   "AWS service bindings with a synchronous (blocking) I/O backend implemented over libcurl. Generated from botocore for ~400 services. Useful for scripts, CLIs, and any context where pulling in a concurrent scheduler is overkill.")
  (depends
   (ocaml
-   (>= 5.0))
+   (>= 5.3.0))
   awso
   ocurl
   ppx_expect))
@@ -101,7 +101,7 @@
   "For fun, an umbrella command-line binary that exposes every awso-async service as a subcommand, similar in spirit to the Python aws-cli. Ships as bytecode because linking ~400 native service libraries exceeds ARM64 executable sizes. Fast enough for interactive use.")
  (depends
   (ocaml
-   (>= 5.0))
+   (>= 5.3.0))
   awso-async
   core_unix
   ppx_jane))
