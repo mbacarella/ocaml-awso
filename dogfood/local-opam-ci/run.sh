@@ -27,8 +27,11 @@ DEFAULT_COMPILER="5.3.0"
 # build needs each opam file to have a `url:` field pointing at a fetchable
 # tarball. Our checked-in .opam files don't (dune-release fills it in at
 # publish time), so build amends the staged copy with a url block pointing
-# at the GitHub release tarball for the latest git tag.
-RELEASE_GH_REPO="mbacarella/ocaml-awso"
+# at a tarball produced locally by `dune-release distrib`. The tarball is
+# copied into the opam-repo clone so it shows up inside opam-ci-check's
+# docker build context, and the url{} src is a file:// URL pointing at its
+# in-container path (opam-ci-check copies the whole opam-repo clone into
+# /home/opam/opam-repository/ inside the container).
 
 usage() {
   cat <<EOF
@@ -41,12 +44,18 @@ Usage: $0 {bootstrap|stage|lint|build [opts]|remove-pins}
                 clone under packages/<pkg>/<pkg>.<ver>/opam.
   lint          Stage, then run opam-ci-check lint against the staged
                 packages.
-  build         Stage, then run opam-ci-check build per package via Docker.
-                Sequential; one container at a time. Forwards any extra args
-                to opam-ci-check build (e.g. --with-test, --lower-bounds).
+  build         Stage, run \`dune-release distrib\` to build a local tarball,
+                copy it into the opam-repo clone, then run opam-ci-check build
+                per package via Docker. Sequential; one container at a time.
+                Forwards any extra args to opam-ci-check build (e.g.
+                --with-test, --lower-bounds).
 
                 Defaults: --distro $DEFAULT_DISTRO --compiler $DEFAULT_COMPILER.
                 Override either via the corresponding flag at the end.
+
+                --head builds from current HEAD instead of the latest release
+                tag, via a throwaway tag local-<sha>. Cleaned up on exit.
+                Uncommitted changes are NOT in the archive — commit first.
   remove-pins   Undo bootstrap's opam pin add (opam-ci-check and
                 opam-ci-check-lint).
 EOF
@@ -92,6 +101,9 @@ opam_version_of() {
 }
 
 stage() {
+  # stage [version-override]: if version-override is set, every package is
+  # staged under that version (used by --head builds with a synthetic version).
+  local version_override="${1:-}"
   if [ ! -d "$OPAM_REPO/.git" ]; then
     echo "[local-opam-ci] opam-repository clone missing; run '$0 bootstrap' first" >&2
     exit 1
@@ -102,11 +114,20 @@ stage() {
   for opam in *.opam; do
     local pkg ver dest
     pkg="${opam%.opam}"
-    ver="$(opam_version_of "$opam")"
+    if [ -n "$version_override" ]; then
+      ver="$version_override"
+    else
+      ver="$(opam_version_of "$opam")"
+    fi
     if [ -z "$ver" ]; then
       echo "[local-opam-ci] skipping $opam (no version: field)" >&2
       continue
     fi
+    # Wipe any prior staging of this package so stale tarball stashes from a
+    # previous `build` (or stale --head version dirs) don't trip lint or
+    # accumulate. None of these packages exist upstream in opam-repository
+    # yet, so there's nothing to preserve.
+    rm -rf "$OPAM_REPO/packages/$pkg"
     dest="$OPAM_REPO/packages/$pkg/$pkg.$ver"
     mkdir -p "$dest"
     # Strip the version: field — opam-repository derives version from the
@@ -148,33 +169,53 @@ latest_release_tag() {
     | head -n1
 }
 
-ensure_release_tarball() {
-  # Fetch the release tarball into the cache once and emit its sha256 on stdout.
-  local tag="$1"
-  local url="https://github.com/$RELEASE_GH_REPO/releases/download/$tag/awso-$tag.tbz"
-  local tarball="$CACHE_DIR/awso-$tag.tbz"
-  if [ ! -f "$tarball" ]; then
-    echo "[local-opam-ci] fetching $url" >&2
-    curl -sSfL -o "$tarball" "$url"
+build_local_tarball() {
+  # build_local_tarball <tag> <version>
+  # Run `dune-release distrib` to produce the source archive from <tag>,
+  # stamping <version> into the opam files. Caches by tag; rerun once the
+  # tarball is gone (e.g. dune clean). --skip-lint --skip-build avoids the
+  # slow unpack-and-build verification — we hand the archive off to
+  # opam-ci-check, which does that for real.
+  #
+  # dune-release names the archive _build/awso-<tag>.tbz (NOT -<version>);
+  # -V only controls the version field written into the opam files inside.
+  local tag="$1" version="$2"
+  local out="$PROJECT_ROOT/_build/awso-$tag.tbz"
+  if [ ! -f "$out" ]; then
+    echo "[local-opam-ci] dune-release distrib -t $tag -V $version" >&2
+    (cd "$PROJECT_ROOT" \
+       && dune-release distrib -t "$tag" -V "$version" \
+            --skip-lint --skip-build) >&2
   fi
-  sha256sum "$tarball" | awk '{print $1}'
+  echo "$out"
 }
 
-append_url_to_staged() {
-  # Append url{} block referencing the release tarball to each staged opam.
-  local tag="$1" sha="$2"
-  local url="https://github.com/$RELEASE_GH_REPO/releases/download/$tag/awso-$tag.tbz"
+inject_local_tarball() {
+  # inject_local_tarball <tag> <version>
+  # Build the distrib archive, copy it into the opam-repo clone (so it lands
+  # in opam-ci-check's docker build context), and append a file:// url{} block
+  # pointing at its in-container path to each staged opam under <version>.
+  local tag="$1" version="$2"
+  local tarball sha
+  tarball="$(build_local_tarball "$tag" "$version")"
+  sha="$(sha256sum "$tarball" | awk '{print $1}')"
+  # Stash under awso's package dir / files/ — that subdir is a standard
+  # opam-repository convention so `opam repository set-url --strict` won't
+  # object, and one copy is enough since opam-ci-check copies the whole
+  # opam-repo clone into every container.
+  local stash_dir="$OPAM_REPO/packages/awso/awso.$version/files"
+  mkdir -p "$stash_dir"
+  cp "$tarball" "$stash_dir/awso-$version.tbz"
+  local in_container="/home/opam/opam-repository/packages/awso/awso.$version/files/awso-$version.tbz"
   shopt -s nullglob
-  local opam pkg ver dest
+  local opam pkg dest
   for opam in "$PROJECT_ROOT"/*.opam; do
     pkg="$(basename "$opam" .opam)"
-    ver="$(opam_version_of "$opam")"
-    [ -z "$ver" ] && continue
-    dest="$OPAM_REPO/packages/$pkg/$pkg.$ver/opam"
+    dest="$OPAM_REPO/packages/$pkg/$pkg.$version/opam"
     [ ! -f "$dest" ] && continue
     cat >>"$dest" <<EOF
 url {
-  src: "$url"
+  src: "file://$in_container"
   checksum: "sha256=$sha"
 }
 EOF
@@ -192,41 +233,69 @@ build() {
     exit 1
   fi
 
-  # Default --distro and --compiler unless the caller passes their own.
+  # Default --distro/--compiler unless the caller passes them; extract our
+  # own --head flag so it doesn't get forwarded to opam-ci-check.
   local extra=()
-  local has_distro=0 has_compiler=0
+  local has_distro=0 has_compiler=0 use_head=0
+  local rest=()
   for arg in "$@"; do
     case "$arg" in
-      --distro|--distro=*) has_distro=1 ;;
-      --compiler|--compiler=*) has_compiler=1 ;;
+      --head) use_head=1 ;;
+      --distro|--distro=*) has_distro=1; rest+=("$arg") ;;
+      --compiler|--compiler=*) has_compiler=1; rest+=("$arg") ;;
+      *) rest+=("$arg") ;;
     esac
   done
+  set -- "${rest[@]}"
   [ "$has_distro" -eq 0 ] && extra+=(--distro "$DEFAULT_DISTRO")
   [ "$has_compiler" -eq 0 ] && extra+=(--compiler "$DEFAULT_COMPILER")
 
-  stage
-
-  local tag sha
-  tag="$(latest_release_tag)"
-  if [ -z "$tag" ]; then
-    echo "[local-opam-ci] no git tags found; tag a release first (dune-release tag)" >&2
-    exit 1
+  local tag version
+  if [ "$use_head" -eq 1 ]; then
+    # Throwaway tag at HEAD, version "<base>+local-<sha>" so it's obviously
+    # not a real release. The tag is deleted on exit (success or failure).
+    local base sha head_sha existing
+    base="$(latest_release_tag)"
+    [ -z "$base" ] && base="0.0.0"
+    sha="$(git -C "$PROJECT_ROOT" rev-parse --short=8 HEAD)"
+    version="$base+local-$sha"
+    tag="local-$sha"
+    head_sha="$(git -C "$PROJECT_ROOT" rev-parse HEAD)"
+    existing="$(git -C "$PROJECT_ROOT" rev-parse -q --verify "refs/tags/$tag" || true)"
+    if [ -z "$existing" ]; then
+      git -C "$PROJECT_ROOT" tag "$tag" HEAD
+    elif [ "$existing" != "$head_sha" ]; then
+      git -C "$PROJECT_ROOT" tag -d "$tag" >/dev/null
+      git -C "$PROJECT_ROOT" tag "$tag" HEAD
+    fi
+    # shellcheck disable=SC2064
+    trap "git -C '$PROJECT_ROOT' tag -d '$tag' >/dev/null 2>&1 || true" EXIT
+    # Force a rebuild — the same tarball name from a previous --head run on
+    # a different HEAD would otherwise be wrongly reused.
+    rm -f "$PROJECT_ROOT/_build/awso-$tag.tbz"
+    echo "[local-opam-ci] --head: throwaway tag $tag at HEAD, version $version"
+  else
+    tag="$(latest_release_tag)"
+    if [ -z "$tag" ]; then
+      echo "[local-opam-ci] no git tags found; tag a release first (dune-release tag)" >&2
+      exit 1
+    fi
+    version="$tag"
+    echo "[local-opam-ci] using release tag $tag"
   fi
-  echo "[local-opam-ci] using release tag $tag"
-  sha="$(ensure_release_tarball "$tag")"
-  append_url_to_staged "$tag" "$sha"
+
+  stage "$version"
+  inject_local_tarball "$tag" "$version"
 
   cd "$PROJECT_ROOT"
   shopt -s nullglob
   local opam
   for opam in *.opam; do
-    local pkg ver
+    local pkg
     pkg="${opam%.opam}"
-    ver="$(opam_version_of "$opam")"
-    [ -z "$ver" ] && continue
-    echo "[local-opam-ci] building $pkg.$ver ..."
+    echo "[local-opam-ci] building $pkg.$version ..."
     # 'build' takes just <name.version>; src/new attributes are lint-only.
-    opam-ci-check build "$pkg.$ver" \
+    opam-ci-check build "$pkg.$version" \
       -r "$OPAM_REPO" \
       "${extra[@]}" \
       "$@"

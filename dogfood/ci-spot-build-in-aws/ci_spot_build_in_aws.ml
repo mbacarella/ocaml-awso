@@ -231,10 +231,10 @@ let aws_call ~cfg ~name f request =
 
 let get_aws_account_id ~cfg =
   match%bind Sts.get_caller_identity ~cfg (Sts.GetCallerIdentityRequest.make ()) with
-  | Ok resp ->
-    (match resp.getCallerIdentityResult.account with
-     | Some a -> return a
-     | None -> failwithf "GetCallerIdentity: no account in response" ())
+  | Ok resp -> (
+    match resp.getCallerIdentityResult.account with
+    | Some a -> return a
+    | None -> failwithf "GetCallerIdentity: no account in response" ())
   | Error err ->
     let s = err |> Sts.GetCallerIdentityResponse.error_to_json |> Yojson.Safe.to_string in
     failwithf "GetCallerIdentity failed: %s" s ()
@@ -550,11 +550,11 @@ let delete_security_group_by_name ~cfg ~name =
     Deferred.List.iter ~how:`Sequential sgs ~f:(fun (sg : Ec2.SecurityGroup.t) ->
       match sg.groupId with
       | None -> return ()
-      | Some sg_id ->
-        (match%map
-           Monitor.try_with ~run:`Schedule (fun () -> delete_security_group ~cfg ~sg_id)
-         with
-         | Ok () | Error _ -> ()))
+      | Some sg_id -> (
+        match%map
+          Monitor.try_with ~run:`Schedule (fun () -> delete_security_group ~cfg ~sg_id)
+        with
+        | Ok () | Error _ -> ()))
 ;;
 
 (* cloud-config user-data. Two jobs:
@@ -602,10 +602,7 @@ let write_known_hosts ~path ~host ~host_pub =
   Writer.save path ~contents:(sprintf "%s %s\n" host host_pub)
 ;;
 
-let git_in dir args =
-  run_or_die ~prog:"git" ~args:([ "-C"; dir ] @ args) ()
-;;
-
+let git_in dir args = run_or_die ~prog:"git" ~args:([ "-C"; dir ] @ args) ()
 let detect_commit ~workdir = git_in workdir [ "rev-parse"; "HEAD" ]
 
 let working_tree_dirty ~workdir =
@@ -872,10 +869,7 @@ let main_command =
         eprintf_now "auth keypair: %s" private_key_path;
         let%bind () = install_aws_keypair ~cfg ~key_name:user_tag ~public_key in
         let%bind host_priv_path, host_pub =
-          generate_keypair
-            ~dir:cache_dir
-            ~basename:"host.ed25519"
-            ~comment:"awso-ci-host"
+          generate_keypair ~dir:cache_dir ~basename:"host.ed25519" ~comment:"awso-ci-host"
         in
         let%bind host_priv = Reader.file_contents host_priv_path in
         let known_hosts_path = Filename.concat cache_dir "known_hosts" in
@@ -989,12 +983,7 @@ let main_command =
           push_code ~private_key_path ~known_hosts_path ~user ~host ~workdir
         in
         let%bind status =
-          run_remote_build
-            ~private_key_path
-            ~known_hosts_path
-            ~user
-            ~host
-            ~lower_bounds
+          run_remote_build ~private_key_path ~known_hosts_path ~user ~host ~lower_bounds
         in
         match status with
         | `Success ->
