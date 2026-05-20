@@ -23246,3 +23246,5346 @@ module InstanceInformationFilterKey =
       of_string (string_of_json ~kind:"InstanceInformationFilterKey" j)
     let to_json = simple_to_json to_value
   end
+module InstanceInformationFilter =
+  struct
+    type nonrec t =
+      {
+      key: InstanceInformationFilterKey.t
+        [@ocaml.doc "The name of the filter."];
+      valueSet: InstanceInformationFilterValueSet.t
+        [@ocaml.doc "The filter values."]}
+    let context_ = "InstanceInformationFilter"
+    let make ~key = fun ~valueSet -> fun () -> { key; valueSet }
+    let to_value x =
+      structure_to_value
+        [("key", (Some (InstanceInformationFilterKey.to_value x.key)));
+        ("valueSet",
+          (Some (InstanceInformationFilterValueSet.to_value x.valueSet)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueSet =
+        InstanceInformationFilterValueSet.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "valueSet") in
+      let key =
+        InstanceInformationFilterKey.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "key") in
+      make ~valueSet ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueSet =
+        field_map_exn json__ "valueSet"
+          InstanceInformationFilterValueSet.of_json in
+      let key =
+        field_map_exn json__ "key" InstanceInformationFilterKey.of_json in
+      make ~valueSet ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a filter for a specific list of managed nodes. You can filter node information by using tags. You specify tags by using a key-value mapping. Use this operation instead of the DescribeInstanceInformationRequest$InstanceInformationFilterList method. The InstanceInformationFilterList method is a legacy method and doesn't support tags."]
+module InstanceInformationFilterList =
+  struct
+    type nonrec t = InstanceInformationFilter.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:0); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstanceInformationFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstanceInformationFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstanceInformationFilterList"
+        ~of_json:InstanceInformationFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeInstanceInformationRequest =
+  struct
+    type nonrec t =
+      {
+      instanceInformationFilterList: InstanceInformationFilterList.t option
+        [@ocaml.doc
+          "This is a legacy method. We recommend that you don't use this method. Instead, use the Filters data type. Filters enables you to return node information by filtering based on tags applied to managed nodes. Attempting to use InstanceInformationFilterList and Filters leads to an exception error."];
+      filters: InstanceInformationStringFilterList.t option
+        [@ocaml.doc
+          "One or more filters. Use a filter to return a more specific list of managed nodes. You can filter based on tags applied to your managed nodes. Tag filters can't be combined with other filter types. Use this Filters data type instead of InstanceInformationFilterList, which is deprecated."];
+      maxResults: MaxResultsEC2Compatible.t option
+        [@ocaml.doc
+          "The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results. The default value is 10 items."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of items to return. (You received this token from a previous call.)"]}
+    let make ?instanceInformationFilterList =
+      fun ?filters ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun () ->
+              { instanceInformationFilterList; filters; maxResults; nextToken
+              }
+    let to_value x =
+      structure_to_value
+        [("InstanceInformationFilterList",
+           (Option.map x.instanceInformationFilterList
+              ~f:InstanceInformationFilterList.to_value));
+        ("Filters",
+          (Option.map x.filters
+             ~f:InstanceInformationStringFilterList.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxResultsEC2Compatible.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResultsEC2Compatible.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let filters =
+        (Option.map ~f:InstanceInformationStringFilterList.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      let instanceInformationFilterList =
+        (Option.map ~f:InstanceInformationFilterList.of_xml)
+          (Xml.child xml_arg0 "InstanceInformationFilterList") in
+      make ?nextToken ?maxResults ?filters ?instanceInformationFilterList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsEC2Compatible.of_json in
+      let filters =
+        field_map json__ "Filters"
+          InstanceInformationStringFilterList.of_json in
+      let instanceInformationFilterList =
+        field_map json__ "InstanceInformationFilterList"
+          InstanceInformationFilterList.of_json in
+      make ?nextToken ?maxResults ?filters ?instanceInformationFilterList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about one or more of your managed nodes, including the operating system platform, SSM Agent version, association status, and IP address. This operation does not return information for nodes that are either Stopped or Terminated. If you specify one or more node IDs, the operation returns information for those managed nodes. If you don't specify node IDs, it returns information for all your managed nodes. If you specify a node ID that isn't valid or a node that you don't own, you receive an error. The IamRole field returned for this API operation is the role assigned to an Amazon EC2 instance configured with a Systems Manager Quick Setup host management configuration or the role assigned to an on-premises managed node."]
+module InvalidInstanceInformationFilterValue =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified filter value isn't valid."]
+module Version =
+  struct
+    type nonrec t = string
+    let context_ = "Version"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i ~pattern:"^[0-9]{1,6}(\\.[0-9]{1,6}){2,3}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Version" j
+    let to_json = simple_to_json to_value
+  end
+module SourceType =
+  struct
+    type nonrec t =
+      | AWS__EC2__Instance 
+      | AWS__IoT__Thing 
+      | AWS__SSM__ManagedInstance 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AWS__EC2__Instance -> "AWS::EC2::Instance"
+      | AWS__IoT__Thing -> "AWS::IoT::Thing"
+      | AWS__SSM__ManagedInstance -> "AWS::SSM::ManagedInstance"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AWS::EC2::Instance" -> AWS__EC2__Instance
+      | "AWS::IoT::Thing" -> AWS__IoT__Thing
+      | "AWS::SSM::ManagedInstance" -> AWS__SSM__ManagedInstance
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module SourceId =
+  struct
+    type nonrec t = string
+    let context_ = "SourceId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9:_-]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SourceId" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceType =
+  struct
+    type nonrec t =
+      | ManagedInstance 
+      | EC2Instance 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ManagedInstance -> "ManagedInstance"
+      | EC2Instance -> "EC2Instance"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ManagedInstance" -> ManagedInstance
+      | "EC2Instance" -> EC2Instance
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ResourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module PingStatus =
+  struct
+    type nonrec t =
+      | Online 
+      | ConnectionLost 
+      | Inactive 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Online -> "Online"
+      | ConnectionLost -> "ConnectionLost"
+      | Inactive -> "Inactive"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Online" -> Online
+      | "ConnectionLost" -> ConnectionLost
+      | "Inactive" -> Inactive
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PingStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PingStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module InstanceAssociationStatusAggregatedCount =
+  struct
+    type nonrec t = (StatusName.t * InstanceCount.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((StatusName.of_string chopped),
+                              (InstanceCount.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (StatusName.to_value x) |>
+                    (fun x -> (InstanceCount.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:StatusName.of_string
+        ~of_json:InstanceCount.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InstanceAggregatedAssociationOverview =
+  struct
+    type nonrec t =
+      {
+      detailedStatus: StatusName.t option
+        [@ocaml.doc
+          "Detailed status information about the aggregated associations."];
+      instanceAssociationStatusAggregatedCount:
+        InstanceAssociationStatusAggregatedCount.t option
+        [@ocaml.doc "The number of associations for the managed nodes."]}
+    let make ?detailedStatus =
+      fun ?instanceAssociationStatusAggregatedCount ->
+        fun () ->
+          { detailedStatus; instanceAssociationStatusAggregatedCount }
+    let to_value x =
+      structure_to_value
+        [("DetailedStatus",
+           (Option.map x.detailedStatus ~f:StatusName.to_value));
+        ("InstanceAssociationStatusAggregatedCount",
+          (Option.map x.instanceAssociationStatusAggregatedCount
+             ~f:InstanceAssociationStatusAggregatedCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let instanceAssociationStatusAggregatedCount =
+        (Option.map ~f:InstanceAssociationStatusAggregatedCount.of_xml)
+          (Xml.child xml_arg0 "InstanceAssociationStatusAggregatedCount") in
+      let detailedStatus =
+        (Option.map ~f:StatusName.of_xml)
+          (Xml.child xml_arg0 "DetailedStatus") in
+      make ?instanceAssociationStatusAggregatedCount ?detailedStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let instanceAssociationStatusAggregatedCount =
+        field_map json__ "InstanceAssociationStatusAggregatedCount"
+          InstanceAssociationStatusAggregatedCount.of_json in
+      let detailedStatus =
+        field_map json__ "DetailedStatus" StatusName.of_json in
+      make ?instanceAssociationStatusAggregatedCount ?detailedStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Status information about the aggregated associations."]
+module IPAddress =
+  struct
+    type nonrec t = string
+    let context_ = "IPAddress"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:46) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IPAddress" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceInformation =
+  struct
+    type nonrec t =
+      {
+      instanceId: InstanceId.t option [@ocaml.doc "The managed node ID."];
+      pingStatus: PingStatus.t option
+        [@ocaml.doc
+          "Connection status of SSM Agent. The status Inactive has been deprecated and is no longer in use."];
+      lastPingDateTime: DateTime.t option
+        [@ocaml.doc
+          "The date and time when the agent last pinged the Systems Manager service."];
+      agentVersion: Version.t option
+        [@ocaml.doc
+          "The version of SSM Agent running on your Linux managed node."];
+      isLatestVersion: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the latest version of SSM Agent is running on your Linux managed node. This field doesn't indicate whether or not the latest version is installed on Windows managed nodes, because some older versions of Windows Server use the EC2Config service to process Systems Manager requests."];
+      platformType: PlatformType.t option
+        [@ocaml.doc "The operating system platform type."];
+      platformName: String_.t option
+        [@ocaml.doc
+          "The name of the operating system platform running on your managed node."];
+      platformVersion: String_.t option
+        [@ocaml.doc
+          "The version of the OS platform running on your managed node."];
+      activationId: ActivationId.t option
+        [@ocaml.doc
+          "The activation ID created by Amazon Web Services Systems Manager when the server or virtual machine (VM) was registered."];
+      iamRole: IamRole.t option
+        [@ocaml.doc
+          "The role assigned to an Amazon EC2 instance configured with a Systems Manager Quick Setup host management configuration or the role assigned to an on-premises managed node. This call doesn't return the IAM role for unmanaged Amazon EC2 instances (instances not configured for Systems Manager). To retrieve the role for an unmanaged instance, use the Amazon EC2 DescribeInstances operation. For information, see DescribeInstances in the Amazon EC2 API Reference or describe-instances in the Amazon Web Services CLI Command Reference."];
+      registrationDate: DateTime.t option
+        [@ocaml.doc
+          "The date the server or VM was registered with Amazon Web Services as a managed node."];
+      resourceType: ResourceType.t option
+        [@ocaml.doc
+          "The type of instance. Instances are either EC2 instances or managed instances."];
+      name: String_.t option
+        [@ocaml.doc
+          "The name assigned to an on-premises server, edge device, or virtual machine (VM) when it is activated as a Systems Manager managed node. The name is specified as the DefaultInstanceName property using the CreateActivation command. It is applied to the managed node by specifying the Activation Code and Activation ID when you install SSM Agent on the node, as explained in How to install SSM Agent on hybrid Linux nodes and How to install SSM Agent on hybrid Windows Server nodes. To retrieve the Name tag of an EC2 instance, use the Amazon EC2 DescribeInstances operation. For information, see DescribeInstances in the Amazon EC2 API Reference or describe-instances in the Amazon Web Services CLI Command Reference."];
+      iPAddress: IPAddress.t option
+        [@ocaml.doc "The IP address of the managed node."];
+      computerName: ComputerName.t option
+        [@ocaml.doc "The fully qualified host name of the managed node."];
+      associationStatus: StatusName.t option
+        [@ocaml.doc "The status of the association."];
+      lastAssociationExecutionDate: DateTime.t option
+        [@ocaml.doc "The date the association was last run."];
+      lastSuccessfulAssociationExecutionDate: DateTime.t option
+        [@ocaml.doc "The last date the association was successfully run."];
+      associationOverview: InstanceAggregatedAssociationOverview.t option
+        [@ocaml.doc "Information about the association."];
+      sourceId: SourceId.t option
+        [@ocaml.doc
+          "The ID of the source resource. For IoT Greengrass devices, SourceId is the Thing name."];
+      sourceType: SourceType.t option
+        [@ocaml.doc
+          "The type of the source resource. For IoT Greengrass devices, SourceType is AWS::IoT::Thing."]}
+    let make ?instanceId =
+      fun ?pingStatus ->
+        fun ?lastPingDateTime ->
+          fun ?agentVersion ->
+            fun ?isLatestVersion ->
+              fun ?platformType ->
+                fun ?platformName ->
+                  fun ?platformVersion ->
+                    fun ?activationId ->
+                      fun ?iamRole ->
+                        fun ?registrationDate ->
+                          fun ?resourceType ->
+                            fun ?name ->
+                              fun ?iPAddress ->
+                                fun ?computerName ->
+                                  fun ?associationStatus ->
+                                    fun ?lastAssociationExecutionDate ->
+                                      fun
+                                        ?lastSuccessfulAssociationExecutionDate
+                                        ->
+                                        fun ?associationOverview ->
+                                          fun ?sourceId ->
+                                            fun ?sourceType ->
+                                              fun () ->
+                                                {
+                                                  instanceId;
+                                                  pingStatus;
+                                                  lastPingDateTime;
+                                                  agentVersion;
+                                                  isLatestVersion;
+                                                  platformType;
+                                                  platformName;
+                                                  platformVersion;
+                                                  activationId;
+                                                  iamRole;
+                                                  registrationDate;
+                                                  resourceType;
+                                                  name;
+                                                  iPAddress;
+                                                  computerName;
+                                                  associationStatus;
+                                                  lastAssociationExecutionDate;
+                                                  lastSuccessfulAssociationExecutionDate;
+                                                  associationOverview;
+                                                  sourceId;
+                                                  sourceType
+                                                }
+    let to_value x =
+      structure_to_value
+        [("InstanceId", (Option.map x.instanceId ~f:InstanceId.to_value));
+        ("PingStatus", (Option.map x.pingStatus ~f:PingStatus.to_value));
+        ("LastPingDateTime",
+          (Option.map x.lastPingDateTime ~f:DateTime.to_value));
+        ("AgentVersion", (Option.map x.agentVersion ~f:Version.to_value));
+        ("IsLatestVersion",
+          (Option.map x.isLatestVersion ~f:Boolean.to_value));
+        ("PlatformType",
+          (Option.map x.platformType ~f:PlatformType.to_value));
+        ("PlatformName", (Option.map x.platformName ~f:String_.to_value));
+        ("PlatformVersion",
+          (Option.map x.platformVersion ~f:String_.to_value));
+        ("ActivationId",
+          (Option.map x.activationId ~f:ActivationId.to_value));
+        ("IamRole", (Option.map x.iamRole ~f:IamRole.to_value));
+        ("RegistrationDate",
+          (Option.map x.registrationDate ~f:DateTime.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType ~f:ResourceType.to_value));
+        ("Name", (Option.map x.name ~f:String_.to_value));
+        ("IPAddress", (Option.map x.iPAddress ~f:IPAddress.to_value));
+        ("ComputerName",
+          (Option.map x.computerName ~f:ComputerName.to_value));
+        ("AssociationStatus",
+          (Option.map x.associationStatus ~f:StatusName.to_value));
+        ("LastAssociationExecutionDate",
+          (Option.map x.lastAssociationExecutionDate ~f:DateTime.to_value));
+        ("LastSuccessfulAssociationExecutionDate",
+          (Option.map x.lastSuccessfulAssociationExecutionDate
+             ~f:DateTime.to_value));
+        ("AssociationOverview",
+          (Option.map x.associationOverview
+             ~f:InstanceAggregatedAssociationOverview.to_value));
+        ("SourceId", (Option.map x.sourceId ~f:SourceId.to_value));
+        ("SourceType", (Option.map x.sourceType ~f:SourceType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceType =
+        (Option.map ~f:SourceType.of_xml) (Xml.child xml_arg0 "SourceType") in
+      let sourceId =
+        (Option.map ~f:SourceId.of_xml) (Xml.child xml_arg0 "SourceId") in
+      let associationOverview =
+        (Option.map ~f:InstanceAggregatedAssociationOverview.of_xml)
+          (Xml.child xml_arg0 "AssociationOverview") in
+      let lastSuccessfulAssociationExecutionDate =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "LastSuccessfulAssociationExecutionDate") in
+      let lastAssociationExecutionDate =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "LastAssociationExecutionDate") in
+      let associationStatus =
+        (Option.map ~f:StatusName.of_xml)
+          (Xml.child xml_arg0 "AssociationStatus") in
+      let computerName =
+        (Option.map ~f:ComputerName.of_xml)
+          (Xml.child xml_arg0 "ComputerName") in
+      let iPAddress =
+        (Option.map ~f:IPAddress.of_xml) (Xml.child xml_arg0 "IPAddress") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      let resourceType =
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      let registrationDate =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "RegistrationDate") in
+      let iamRole =
+        (Option.map ~f:IamRole.of_xml) (Xml.child xml_arg0 "IamRole") in
+      let activationId =
+        (Option.map ~f:ActivationId.of_xml)
+          (Xml.child xml_arg0 "ActivationId") in
+      let platformVersion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PlatformVersion") in
+      let platformName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PlatformName") in
+      let platformType =
+        (Option.map ~f:PlatformType.of_xml)
+          (Xml.child xml_arg0 "PlatformType") in
+      let isLatestVersion =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "IsLatestVersion") in
+      let agentVersion =
+        (Option.map ~f:Version.of_xml) (Xml.child xml_arg0 "AgentVersion") in
+      let lastPingDateTime =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "LastPingDateTime") in
+      let pingStatus =
+        (Option.map ~f:PingStatus.of_xml) (Xml.child xml_arg0 "PingStatus") in
+      let instanceId =
+        (Option.map ~f:InstanceId.of_xml) (Xml.child xml_arg0 "InstanceId") in
+      make ?sourceType ?sourceId ?associationOverview
+        ?lastSuccessfulAssociationExecutionDate ?lastAssociationExecutionDate
+        ?associationStatus ?computerName ?iPAddress ?name ?resourceType
+        ?registrationDate ?iamRole ?activationId ?platformVersion
+        ?platformName ?platformType ?isLatestVersion ?agentVersion
+        ?lastPingDateTime ?pingStatus ?instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceType = field_map json__ "SourceType" SourceType.of_json in
+      let sourceId = field_map json__ "SourceId" SourceId.of_json in
+      let associationOverview =
+        field_map json__ "AssociationOverview"
+          InstanceAggregatedAssociationOverview.of_json in
+      let lastSuccessfulAssociationExecutionDate =
+        field_map json__ "LastSuccessfulAssociationExecutionDate"
+          DateTime.of_json in
+      let lastAssociationExecutionDate =
+        field_map json__ "LastAssociationExecutionDate" DateTime.of_json in
+      let associationStatus =
+        field_map json__ "AssociationStatus" StatusName.of_json in
+      let computerName = field_map json__ "ComputerName" ComputerName.of_json in
+      let iPAddress = field_map json__ "IPAddress" IPAddress.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let registrationDate =
+        field_map json__ "RegistrationDate" DateTime.of_json in
+      let iamRole = field_map json__ "IamRole" IamRole.of_json in
+      let activationId = field_map json__ "ActivationId" ActivationId.of_json in
+      let platformVersion =
+        field_map json__ "PlatformVersion" String_.of_json in
+      let platformName = field_map json__ "PlatformName" String_.of_json in
+      let platformType = field_map json__ "PlatformType" PlatformType.of_json in
+      let isLatestVersion =
+        field_map json__ "IsLatestVersion" Boolean.of_json in
+      let agentVersion = field_map json__ "AgentVersion" Version.of_json in
+      let lastPingDateTime =
+        field_map json__ "LastPingDateTime" DateTime.of_json in
+      let pingStatus = field_map json__ "PingStatus" PingStatus.of_json in
+      let instanceId = field_map json__ "InstanceId" InstanceId.of_json in
+      make ?sourceType ?sourceId ?associationOverview
+        ?lastSuccessfulAssociationExecutionDate ?lastAssociationExecutionDate
+        ?associationStatus ?computerName ?iPAddress ?name ?resourceType
+        ?registrationDate ?iamRole ?activationId ?platformVersion
+        ?platformName ?platformType ?isLatestVersion ?agentVersion
+        ?lastPingDateTime ?pingStatus ?instanceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a filter for a specific list of managed nodes."]
+module InstanceInformationList =
+  struct
+    type nonrec t = InstanceInformation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstanceInformation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstanceInformation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstanceInformationList"
+        ~of_json:InstanceInformation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeInstanceInformationResult =
+  struct
+    type nonrec t =
+      {
+      instanceInformationList: InstanceInformationList.t option
+        [@ocaml.doc "The managed node information list."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use when requesting the next set of items. If there are no additional items to return, the string is empty."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `InvalidFilterKey of InvalidFilterKey.t 
+      | `InvalidInstanceId of InvalidInstanceId.t 
+      | `InvalidInstanceInformationFilterValue of
+          InvalidInstanceInformationFilterValue.t 
+      | `InvalidNextToken of InvalidNextToken.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?instanceInformationList =
+      fun ?nextToken -> fun () -> { instanceInformationList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidFilterKey" ->
+          `InvalidFilterKey (InvalidFilterKey.of_json json)
+      | "InvalidInstanceId" ->
+          `InvalidInstanceId (InvalidInstanceId.of_json json)
+      | "InvalidInstanceInformationFilterValue" ->
+          `InvalidInstanceInformationFilterValue
+            (InvalidInstanceInformationFilterValue.of_json json)
+      | "InvalidNextToken" ->
+          `InvalidNextToken (InvalidNextToken.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidFilterKey" -> `InvalidFilterKey (InvalidFilterKey.of_xml xml)
+      | "InvalidInstanceId" ->
+          `InvalidInstanceId (InvalidInstanceId.of_xml xml)
+      | "InvalidInstanceInformationFilterValue" ->
+          `InvalidInstanceInformationFilterValue
+            (InvalidInstanceInformationFilterValue.of_xml xml)
+      | "InvalidNextToken" -> `InvalidNextToken (InvalidNextToken.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidFilterKey e ->
+          `Assoc
+            [("error", (`String "InvalidFilterKey"));
+            ("details", (InvalidFilterKey.to_json e))]
+      | `InvalidInstanceId e ->
+          `Assoc
+            [("error", (`String "InvalidInstanceId"));
+            ("details", (InvalidInstanceId.to_json e))]
+      | `InvalidInstanceInformationFilterValue e ->
+          `Assoc
+            [("error", (`String "InvalidInstanceInformationFilterValue"));
+            ("details", (InvalidInstanceInformationFilterValue.to_json e))]
+      | `InvalidNextToken e ->
+          `Assoc
+            [("error", (`String "InvalidNextToken"));
+            ("details", (InvalidNextToken.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("InstanceInformationList",
+           (Option.map x.instanceInformationList
+              ~f:InstanceInformationList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let instanceInformationList =
+        (Option.map ~f:InstanceInformationList.of_xml)
+          (Xml.child xml_arg0 "InstanceInformationList") in
+      make ?nextToken ?instanceInformationList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let instanceInformationList =
+        field_map json__ "InstanceInformationList"
+          InstanceInformationList.of_json in
+      make ?nextToken ?instanceInformationList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about one or more of your managed nodes, including the operating system platform, SSM Agent version, association status, and IP address. This operation does not return information for nodes that are either Stopped or Terminated. If you specify one or more node IDs, the operation returns information for those managed nodes. If you don't specify node IDs, it returns information for all your managed nodes. If you specify a node ID that isn't valid or a node that you don't own, you receive an error. The IamRole field returned for this API operation is the role assigned to an Amazon EC2 instance configured with a Systems Manager Quick Setup host management configuration or the role assigned to an on-premises managed node."]
+module PatchComplianceMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:10));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PatchComplianceMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module InstancePatchStateOperatorType =
+  struct
+    type nonrec t =
+      | Equal 
+      | NotEqual 
+      | LessThan 
+      | GreaterThan 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Equal -> "Equal"
+      | NotEqual -> "NotEqual"
+      | LessThan -> "LessThan"
+      | GreaterThan -> "GreaterThan"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Equal" -> Equal
+      | "NotEqual" -> NotEqual
+      | "LessThan" -> LessThan
+      | "GreaterThan" -> GreaterThan
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InstancePatchStateOperatorType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"InstancePatchStateOperatorType" j)
+    let to_json = simple_to_json to_value
+  end
+module InstancePatchStateFilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "InstancePatchStateFilterValue"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstancePatchStateFilterValue" j
+    let to_json = simple_to_json to_value
+  end
+module InstancePatchStateFilterValues =
+  struct
+    type nonrec t = InstancePatchStateFilterValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstancePatchStateFilterValue.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstancePatchStateFilterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstancePatchStateFilterValues"
+        ~of_json:InstancePatchStateFilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InstancePatchStateFilterKey =
+  struct
+    type nonrec t = string
+    let context_ = "InstancePatchStateFilterKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:200) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstancePatchStateFilterKey" j
+    let to_json = simple_to_json to_value
+  end
+module InstancePatchStateFilter =
+  struct
+    type nonrec t =
+      {
+      key: InstancePatchStateFilterKey.t
+        [@ocaml.doc
+          "The key for the filter. Supported values include the following: InstalledCount InstalledOtherCount InstalledPendingRebootCount InstalledRejectedCount MissingCount FailedCount UnreportedNotApplicableCount NotApplicableCount"];
+      values: InstancePatchStateFilterValues.t
+        [@ocaml.doc
+          "The value for the filter. Must be an integer greater than or equal to 0."];
+      type_: InstancePatchStateOperatorType.t
+        [@ocaml.doc
+          "The type of comparison that should be performed for the value."]}
+    let context_ = "InstancePatchStateFilter"
+    let make ~key =
+      fun ~values -> fun ~type_ -> fun () -> { key; values; type_ }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (InstancePatchStateFilterKey.to_value x.key)));
+        ("Values", (Some (InstancePatchStateFilterValues.to_value x.values)));
+        ("Type", (Some (InstancePatchStateOperatorType.to_value x.type_)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        InstancePatchStateOperatorType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      let values =
+        InstancePatchStateFilterValues.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Values") in
+      let key =
+        InstancePatchStateFilterKey.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ~type_ ~values ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ =
+        field_map_exn json__ "Type" InstancePatchStateOperatorType.of_json in
+      let values =
+        field_map_exn json__ "Values" InstancePatchStateFilterValues.of_json in
+      let key =
+        field_map_exn json__ "Key" InstancePatchStateFilterKey.of_json in
+      make ~type_ ~values ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines a filter used in DescribeInstancePatchStatesForPatchGroup to scope down the information returned by the API. Example: To filter for all managed nodes in a patch group having more than three patches with a FailedCount status, use the following for the filter: Value for Key: FailedCount Value for Type: GreaterThan Value for Values: 3"]
+module InstancePatchStateFilterList =
+  struct
+    type nonrec t = InstancePatchStateFilter.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstancePatchStateFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstancePatchStateFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstancePatchStateFilterList"
+        ~of_json:InstancePatchStateFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeInstancePatchStatesForPatchGroupRequest =
+  struct
+    type nonrec t =
+      {
+      patchGroup: PatchGroup.t
+        [@ocaml.doc
+          "The name of the patch group for which the patch state information should be retrieved."];
+      filters: InstancePatchStateFilterList.t option
+        [@ocaml.doc
+          "Each entry in the array is a structure containing: Key (string between 1 and 200 characters) Values (array containing a single string) Type (string \"Equal\", \"NotEqual\", \"LessThan\", \"GreaterThan\")"];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of items to return. (You received this token from a previous call.)"];
+      maxResults: PatchComplianceMaxResults.t option
+        [@ocaml.doc "The maximum number of patches to return (per page)."]}
+    let context_ = "DescribeInstancePatchStatesForPatchGroupRequest"
+    let make ?filters =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ~patchGroup ->
+            fun () -> { filters; nextToken; maxResults; patchGroup }
+    let to_value x =
+      structure_to_value
+        [("PatchGroup", (Some (PatchGroup.to_value x.patchGroup)));
+        ("Filters",
+          (Option.map x.filters ~f:InstancePatchStateFilterList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:PatchComplianceMaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:PatchComplianceMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let filters =
+        (Option.map ~f:InstancePatchStateFilterList.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      let patchGroup =
+        PatchGroup.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PatchGroup") in
+      make ?maxResults ?nextToken ?filters ~patchGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" PatchComplianceMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filters =
+        field_map json__ "Filters" InstancePatchStateFilterList.of_json in
+      let patchGroup = field_map_exn json__ "PatchGroup" PatchGroup.of_json in
+      make ?maxResults ?nextToken ?filters ~patchGroup ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the high-level patch state for the managed nodes in the specified patch group."]
+module SnapshotId =
+  struct
+    type nonrec t = string
+    let context_ = "SnapshotId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SnapshotId" j
+    let to_json = simple_to_json to_value
+  end
+module RebootOption =
+  struct
+    type nonrec t =
+      | RebootIfNeeded 
+      | NoReboot 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RebootIfNeeded -> "RebootIfNeeded"
+      | NoReboot -> "NoReboot"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RebootIfNeeded" -> RebootIfNeeded
+      | "NoReboot" -> NoReboot
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RebootOption" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RebootOption" j)
+    let to_json = simple_to_json to_value
+  end
+module PatchUnreportedNotApplicableCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for PatchUnreportedNotApplicableCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PatchSecurityNonCompliantCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PatchSecurityNonCompliantCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PatchOtherNonCompliantCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PatchOtherNonCompliantCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PatchOperationType =
+  struct
+    type nonrec t =
+      | Scan 
+      | Install 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Scan -> "Scan" | Install -> "Install" | Non_static_id s -> s
+    let of_string =
+      function | "Scan" -> Scan | "Install" -> Install | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PatchOperationType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PatchOperationType" j)
+    let to_json = simple_to_json to_value
+  end
+module PatchNotApplicableCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PatchNotApplicableCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PatchMissingCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PatchMissingCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PatchInstalledRejectedCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PatchInstalledRejectedCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PatchInstalledPendingRebootCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for PatchInstalledPendingRebootCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PatchInstalledOtherCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PatchInstalledOtherCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PatchInstalledCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PatchInstalledCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PatchFailedCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PatchFailedCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PatchCriticalNonCompliantCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PatchCriticalNonCompliantCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PatchAvailableSecurityUpdateCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for PatchAvailableSecurityUpdateCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module OwnerInformation =
+  struct
+    type nonrec t = string
+    let context_ = "OwnerInformation"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OwnerInformation" j
+    let to_json = simple_to_json to_value
+  end
+module InstallOverrideList =
+  struct
+    type nonrec t = string
+    let context_ = "InstallOverrideList"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^https://.+$|^s3://([^/]+)/(.*?([^/]+))$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstallOverrideList" j
+    let to_json = simple_to_json to_value
+  end
+module InstancePatchState =
+  struct
+    type nonrec t =
+      {
+      instanceId: InstanceId.t option
+        [@ocaml.doc
+          "The ID of the managed node the high-level patch compliance information was collected for."];
+      patchGroup: PatchGroup.t option
+        [@ocaml.doc
+          "The name of the patch group the managed node belongs to."];
+      baselineId: BaselineId.t option
+        [@ocaml.doc
+          "The ID of the patch baseline used to patch the managed node."];
+      snapshotId: SnapshotId.t option
+        [@ocaml.doc
+          "The ID of the patch baseline snapshot used during the patching operation when this compliance data was collected."];
+      installOverrideList: InstallOverrideList.t option
+        [@ocaml.doc
+          "An https URL or an Amazon Simple Storage Service (Amazon S3) path-style URL to a list of patches to be installed. This patch installation list, which you maintain in an S3 bucket in YAML format and specify in the SSM document AWS-RunPatchBaseline, overrides the patches specified by the default patch baseline. For more information about the InstallOverrideList parameter, see SSM Command document for patching: AWS-RunPatchBaseline in the Amazon Web Services Systems Manager User Guide."];
+      ownerInformation: OwnerInformation.t option
+        [@ocaml.doc
+          "Placeholder information. This field will always be empty in the current release of the service."];
+      installedCount: PatchInstalledCount.t option
+        [@ocaml.doc
+          "The number of patches from the patch baseline that are installed on the managed node."];
+      installedOtherCount: PatchInstalledOtherCount.t option
+        [@ocaml.doc
+          "The number of patches not specified in the patch baseline that are installed on the managed node."];
+      installedPendingRebootCount: PatchInstalledPendingRebootCount.t option
+        [@ocaml.doc
+          "The number of patches installed by Patch Manager since the last time the managed node was rebooted."];
+      installedRejectedCount: PatchInstalledRejectedCount.t option
+        [@ocaml.doc
+          "The number of patches installed on a managed node that are specified in a RejectedPatches list. Patches with a status of InstalledRejected were typically installed before they were added to a RejectedPatches list. If ALLOW_AS_DEPENDENCY is the specified option for RejectedPatchesAction, the value of InstalledRejectedCount will always be 0 (zero)."];
+      missingCount: PatchMissingCount.t option
+        [@ocaml.doc
+          "The number of patches from the patch baseline that are applicable for the managed node but aren't currently installed."];
+      failedCount: PatchFailedCount.t option
+        [@ocaml.doc
+          "The number of patches from the patch baseline that were attempted to be installed during the last patching operation, but failed to install."];
+      unreportedNotApplicableCount:
+        PatchUnreportedNotApplicableCount.t option
+        [@ocaml.doc
+          "The number of patches beyond the supported limit of NotApplicableCount that aren't reported by name to Inventory. Inventory is a tool in Amazon Web Services Systems Manager."];
+      notApplicableCount: PatchNotApplicableCount.t option
+        [@ocaml.doc
+          "The number of patches from the patch baseline that aren't applicable for the managed node and therefore aren't installed on the node. This number may be truncated if the list of patch names is very large. The number of patches beyond this limit are reported in UnreportedNotApplicableCount."];
+      availableSecurityUpdateCount:
+        PatchAvailableSecurityUpdateCount.t option
+        [@ocaml.doc
+          "The number of security-related patches that are available but not approved because they didn't meet the patch baseline requirements. For example, an updated version of a patch might have been released before the specified auto-approval period was over. Applies to Windows Server managed nodes only."];
+      operationStartTime: DateTime.t option
+        [@ocaml.doc
+          "The time the most recent patching operation was started on the managed node."];
+      operationEndTime: DateTime.t option
+        [@ocaml.doc
+          "The time the most recent patching operation completed on the managed node."];
+      operation: PatchOperationType.t option
+        [@ocaml.doc
+          "The type of patching operation that was performed: or SCAN assesses the patch compliance state. INSTALL installs missing patches."];
+      lastNoRebootInstallOperationTime: DateTime.t option
+        [@ocaml.doc
+          "The time of the last attempt to patch the managed node with NoReboot specified as the reboot option."];
+      rebootOption: RebootOption.t option
+        [@ocaml.doc
+          "Indicates the reboot option specified in the patch baseline. Reboot options apply to Install operations only. Reboots aren't attempted for Patch Manager Scan operations. RebootIfNeeded: Patch Manager tries to reboot the managed node if it installed any patches, or if any patches are detected with a status of InstalledPendingReboot. NoReboot: Patch Manager attempts to install missing packages without trying to reboot the system. Patches installed with this option are assigned a status of InstalledPendingReboot. These patches might not be in effect until a reboot is performed."];
+      criticalNonCompliantCount: PatchCriticalNonCompliantCount.t option
+        [@ocaml.doc
+          "The number of patches per node that are specified as Critical for compliance reporting in the patch baseline aren't installed. These patches might be missing, have failed installation, were rejected, or were installed but awaiting a required managed node reboot. The status of these managed nodes is NON_COMPLIANT."];
+      securityNonCompliantCount: PatchSecurityNonCompliantCount.t option
+        [@ocaml.doc
+          "The number of patches per node that are specified as Security in a patch advisory aren't installed. These patches might be missing, have failed installation, were rejected, or were installed but awaiting a required managed node reboot. The status of these managed nodes is NON_COMPLIANT."];
+      otherNonCompliantCount: PatchOtherNonCompliantCount.t option
+        [@ocaml.doc
+          "The number of patches per node that are specified as other than Critical or Security but aren't compliant with the patch baseline. The status of these managed nodes is NON_COMPLIANT."]}
+    let make ?instanceId =
+      fun ?patchGroup ->
+        fun ?baselineId ->
+          fun ?snapshotId ->
+            fun ?installOverrideList ->
+              fun ?ownerInformation ->
+                fun ?installedCount ->
+                  fun ?installedOtherCount ->
+                    fun ?installedPendingRebootCount ->
+                      fun ?installedRejectedCount ->
+                        fun ?missingCount ->
+                          fun ?failedCount ->
+                            fun ?unreportedNotApplicableCount ->
+                              fun ?notApplicableCount ->
+                                fun ?availableSecurityUpdateCount ->
+                                  fun ?operationStartTime ->
+                                    fun ?operationEndTime ->
+                                      fun ?operation ->
+                                        fun ?lastNoRebootInstallOperationTime
+                                          ->
+                                          fun ?rebootOption ->
+                                            fun ?criticalNonCompliantCount ->
+                                              fun ?securityNonCompliantCount
+                                                ->
+                                                fun ?otherNonCompliantCount
+                                                  ->
+                                                  fun () ->
+                                                    {
+                                                      instanceId;
+                                                      patchGroup;
+                                                      baselineId;
+                                                      snapshotId;
+                                                      installOverrideList;
+                                                      ownerInformation;
+                                                      installedCount;
+                                                      installedOtherCount;
+                                                      installedPendingRebootCount;
+                                                      installedRejectedCount;
+                                                      missingCount;
+                                                      failedCount;
+                                                      unreportedNotApplicableCount;
+                                                      notApplicableCount;
+                                                      availableSecurityUpdateCount;
+                                                      operationStartTime;
+                                                      operationEndTime;
+                                                      operation;
+                                                      lastNoRebootInstallOperationTime;
+                                                      rebootOption;
+                                                      criticalNonCompliantCount;
+                                                      securityNonCompliantCount;
+                                                      otherNonCompliantCount
+                                                    }
+    let to_value x =
+      structure_to_value
+        [("InstanceId", (Option.map x.instanceId ~f:InstanceId.to_value));
+        ("PatchGroup", (Option.map x.patchGroup ~f:PatchGroup.to_value));
+        ("BaselineId", (Option.map x.baselineId ~f:BaselineId.to_value));
+        ("SnapshotId", (Option.map x.snapshotId ~f:SnapshotId.to_value));
+        ("InstallOverrideList",
+          (Option.map x.installOverrideList ~f:InstallOverrideList.to_value));
+        ("OwnerInformation",
+          (Option.map x.ownerInformation ~f:OwnerInformation.to_value));
+        ("InstalledCount",
+          (Option.map x.installedCount ~f:PatchInstalledCount.to_value));
+        ("InstalledOtherCount",
+          (Option.map x.installedOtherCount
+             ~f:PatchInstalledOtherCount.to_value));
+        ("InstalledPendingRebootCount",
+          (Option.map x.installedPendingRebootCount
+             ~f:PatchInstalledPendingRebootCount.to_value));
+        ("InstalledRejectedCount",
+          (Option.map x.installedRejectedCount
+             ~f:PatchInstalledRejectedCount.to_value));
+        ("MissingCount",
+          (Option.map x.missingCount ~f:PatchMissingCount.to_value));
+        ("FailedCount",
+          (Option.map x.failedCount ~f:PatchFailedCount.to_value));
+        ("UnreportedNotApplicableCount",
+          (Option.map x.unreportedNotApplicableCount
+             ~f:PatchUnreportedNotApplicableCount.to_value));
+        ("NotApplicableCount",
+          (Option.map x.notApplicableCount
+             ~f:PatchNotApplicableCount.to_value));
+        ("AvailableSecurityUpdateCount",
+          (Option.map x.availableSecurityUpdateCount
+             ~f:PatchAvailableSecurityUpdateCount.to_value));
+        ("OperationStartTime",
+          (Option.map x.operationStartTime ~f:DateTime.to_value));
+        ("OperationEndTime",
+          (Option.map x.operationEndTime ~f:DateTime.to_value));
+        ("Operation",
+          (Option.map x.operation ~f:PatchOperationType.to_value));
+        ("LastNoRebootInstallOperationTime",
+          (Option.map x.lastNoRebootInstallOperationTime ~f:DateTime.to_value));
+        ("RebootOption",
+          (Option.map x.rebootOption ~f:RebootOption.to_value));
+        ("CriticalNonCompliantCount",
+          (Option.map x.criticalNonCompliantCount
+             ~f:PatchCriticalNonCompliantCount.to_value));
+        ("SecurityNonCompliantCount",
+          (Option.map x.securityNonCompliantCount
+             ~f:PatchSecurityNonCompliantCount.to_value));
+        ("OtherNonCompliantCount",
+          (Option.map x.otherNonCompliantCount
+             ~f:PatchOtherNonCompliantCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let otherNonCompliantCount =
+        (Option.map ~f:PatchOtherNonCompliantCount.of_xml)
+          (Xml.child xml_arg0 "OtherNonCompliantCount") in
+      let securityNonCompliantCount =
+        (Option.map ~f:PatchSecurityNonCompliantCount.of_xml)
+          (Xml.child xml_arg0 "SecurityNonCompliantCount") in
+      let criticalNonCompliantCount =
+        (Option.map ~f:PatchCriticalNonCompliantCount.of_xml)
+          (Xml.child xml_arg0 "CriticalNonCompliantCount") in
+      let rebootOption =
+        (Option.map ~f:RebootOption.of_xml)
+          (Xml.child xml_arg0 "RebootOption") in
+      let lastNoRebootInstallOperationTime =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "LastNoRebootInstallOperationTime") in
+      let operation =
+        (Option.map ~f:PatchOperationType.of_xml)
+          (Xml.child xml_arg0 "Operation") in
+      let operationEndTime =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "OperationEndTime") in
+      let operationStartTime =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "OperationStartTime") in
+      let availableSecurityUpdateCount =
+        (Option.map ~f:PatchAvailableSecurityUpdateCount.of_xml)
+          (Xml.child xml_arg0 "AvailableSecurityUpdateCount") in
+      let notApplicableCount =
+        (Option.map ~f:PatchNotApplicableCount.of_xml)
+          (Xml.child xml_arg0 "NotApplicableCount") in
+      let unreportedNotApplicableCount =
+        (Option.map ~f:PatchUnreportedNotApplicableCount.of_xml)
+          (Xml.child xml_arg0 "UnreportedNotApplicableCount") in
+      let failedCount =
+        (Option.map ~f:PatchFailedCount.of_xml)
+          (Xml.child xml_arg0 "FailedCount") in
+      let missingCount =
+        (Option.map ~f:PatchMissingCount.of_xml)
+          (Xml.child xml_arg0 "MissingCount") in
+      let installedRejectedCount =
+        (Option.map ~f:PatchInstalledRejectedCount.of_xml)
+          (Xml.child xml_arg0 "InstalledRejectedCount") in
+      let installedPendingRebootCount =
+        (Option.map ~f:PatchInstalledPendingRebootCount.of_xml)
+          (Xml.child xml_arg0 "InstalledPendingRebootCount") in
+      let installedOtherCount =
+        (Option.map ~f:PatchInstalledOtherCount.of_xml)
+          (Xml.child xml_arg0 "InstalledOtherCount") in
+      let installedCount =
+        (Option.map ~f:PatchInstalledCount.of_xml)
+          (Xml.child xml_arg0 "InstalledCount") in
+      let ownerInformation =
+        (Option.map ~f:OwnerInformation.of_xml)
+          (Xml.child xml_arg0 "OwnerInformation") in
+      let installOverrideList =
+        (Option.map ~f:InstallOverrideList.of_xml)
+          (Xml.child xml_arg0 "InstallOverrideList") in
+      let snapshotId =
+        (Option.map ~f:SnapshotId.of_xml) (Xml.child xml_arg0 "SnapshotId") in
+      let baselineId =
+        (Option.map ~f:BaselineId.of_xml) (Xml.child xml_arg0 "BaselineId") in
+      let patchGroup =
+        (Option.map ~f:PatchGroup.of_xml) (Xml.child xml_arg0 "PatchGroup") in
+      let instanceId =
+        (Option.map ~f:InstanceId.of_xml) (Xml.child xml_arg0 "InstanceId") in
+      make ?otherNonCompliantCount ?securityNonCompliantCount
+        ?criticalNonCompliantCount ?rebootOption
+        ?lastNoRebootInstallOperationTime ?operation ?operationEndTime
+        ?operationStartTime ?availableSecurityUpdateCount ?notApplicableCount
+        ?unreportedNotApplicableCount ?failedCount ?missingCount
+        ?installedRejectedCount ?installedPendingRebootCount
+        ?installedOtherCount ?installedCount ?ownerInformation
+        ?installOverrideList ?snapshotId ?baselineId ?patchGroup ?instanceId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let otherNonCompliantCount =
+        field_map json__ "OtherNonCompliantCount"
+          PatchOtherNonCompliantCount.of_json in
+      let securityNonCompliantCount =
+        field_map json__ "SecurityNonCompliantCount"
+          PatchSecurityNonCompliantCount.of_json in
+      let criticalNonCompliantCount =
+        field_map json__ "CriticalNonCompliantCount"
+          PatchCriticalNonCompliantCount.of_json in
+      let rebootOption = field_map json__ "RebootOption" RebootOption.of_json in
+      let lastNoRebootInstallOperationTime =
+        field_map json__ "LastNoRebootInstallOperationTime" DateTime.of_json in
+      let operation = field_map json__ "Operation" PatchOperationType.of_json in
+      let operationEndTime =
+        field_map json__ "OperationEndTime" DateTime.of_json in
+      let operationStartTime =
+        field_map json__ "OperationStartTime" DateTime.of_json in
+      let availableSecurityUpdateCount =
+        field_map json__ "AvailableSecurityUpdateCount"
+          PatchAvailableSecurityUpdateCount.of_json in
+      let notApplicableCount =
+        field_map json__ "NotApplicableCount" PatchNotApplicableCount.of_json in
+      let unreportedNotApplicableCount =
+        field_map json__ "UnreportedNotApplicableCount"
+          PatchUnreportedNotApplicableCount.of_json in
+      let failedCount =
+        field_map json__ "FailedCount" PatchFailedCount.of_json in
+      let missingCount =
+        field_map json__ "MissingCount" PatchMissingCount.of_json in
+      let installedRejectedCount =
+        field_map json__ "InstalledRejectedCount"
+          PatchInstalledRejectedCount.of_json in
+      let installedPendingRebootCount =
+        field_map json__ "InstalledPendingRebootCount"
+          PatchInstalledPendingRebootCount.of_json in
+      let installedOtherCount =
+        field_map json__ "InstalledOtherCount"
+          PatchInstalledOtherCount.of_json in
+      let installedCount =
+        field_map json__ "InstalledCount" PatchInstalledCount.of_json in
+      let ownerInformation =
+        field_map json__ "OwnerInformation" OwnerInformation.of_json in
+      let installOverrideList =
+        field_map json__ "InstallOverrideList" InstallOverrideList.of_json in
+      let snapshotId = field_map json__ "SnapshotId" SnapshotId.of_json in
+      let baselineId = field_map json__ "BaselineId" BaselineId.of_json in
+      let patchGroup = field_map json__ "PatchGroup" PatchGroup.of_json in
+      let instanceId = field_map json__ "InstanceId" InstanceId.of_json in
+      make ?otherNonCompliantCount ?securityNonCompliantCount
+        ?criticalNonCompliantCount ?rebootOption
+        ?lastNoRebootInstallOperationTime ?operation ?operationEndTime
+        ?operationStartTime ?availableSecurityUpdateCount ?notApplicableCount
+        ?unreportedNotApplicableCount ?failedCount ?missingCount
+        ?installedRejectedCount ?installedPendingRebootCount
+        ?installedOtherCount ?installedCount ?ownerInformation
+        ?installOverrideList ?snapshotId ?baselineId ?patchGroup ?instanceId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the high-level patch compliance state for a managed node, providing information about the number of installed, missing, not applicable, and failed patches along with metadata about the operation when this information was gathered for the managed node."]
+module InstancePatchStatesList =
+  struct
+    type nonrec t = InstancePatchState.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstancePatchState.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstancePatchState.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstancePatchStatesList"
+        ~of_json:InstancePatchState.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeInstancePatchStatesForPatchGroupResult =
+  struct
+    type nonrec t =
+      {
+      instancePatchStates: InstancePatchStatesList.t option
+        [@ocaml.doc
+          "The high-level patch state for the requested managed nodes."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use when requesting the next set of items. If there are no additional items to return, the string is empty."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `InvalidFilter of InvalidFilter.t 
+      | `InvalidNextToken of InvalidNextToken.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?instancePatchStates =
+      fun ?nextToken -> fun () -> { instancePatchStates; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidFilter" -> `InvalidFilter (InvalidFilter.of_json json)
+      | "InvalidNextToken" ->
+          `InvalidNextToken (InvalidNextToken.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidFilter" -> `InvalidFilter (InvalidFilter.of_xml xml)
+      | "InvalidNextToken" -> `InvalidNextToken (InvalidNextToken.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidFilter e ->
+          `Assoc
+            [("error", (`String "InvalidFilter"));
+            ("details", (InvalidFilter.to_json e))]
+      | `InvalidNextToken e ->
+          `Assoc
+            [("error", (`String "InvalidNextToken"));
+            ("details", (InvalidNextToken.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("InstancePatchStates",
+           (Option.map x.instancePatchStates
+              ~f:InstancePatchStatesList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let instancePatchStates =
+        (Option.map ~f:InstancePatchStatesList.of_xml)
+          (Xml.child xml_arg0 "InstancePatchStates") in
+      make ?nextToken ?instancePatchStates ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let instancePatchStates =
+        field_map json__ "InstancePatchStates"
+          InstancePatchStatesList.of_json in
+      make ?nextToken ?instancePatchStates ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the high-level patch state for the managed nodes in the specified patch group."]
+module DescribeInstancePatchStatesRequest =
+  struct
+    type nonrec t =
+      {
+      instanceIds: InstanceIdList.t
+        [@ocaml.doc
+          "The ID of the managed node for which patch state information should be retrieved."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of items to return. (You received this token from a previous call.)"];
+      maxResults: PatchComplianceMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of managed nodes to return (per page)."]}
+    let context_ = "DescribeInstancePatchStatesRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~instanceIds -> fun () -> { nextToken; maxResults; instanceIds }
+    let to_value x =
+      structure_to_value
+        [("InstanceIds", (Some (InstanceIdList.to_value x.instanceIds)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:PatchComplianceMaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:PatchComplianceMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let instanceIds =
+        InstanceIdList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InstanceIds") in
+      make ?maxResults ?nextToken ~instanceIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" PatchComplianceMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let instanceIds =
+        field_map_exn json__ "InstanceIds" InstanceIdList.of_json in
+      make ?maxResults ?nextToken ~instanceIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the high-level patch state of one or more managed nodes."]
+module InstancePatchStateList =
+  struct
+    type nonrec t = InstancePatchState.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstancePatchState.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstancePatchState.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstancePatchStateList"
+        ~of_json:InstancePatchState.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeInstancePatchStatesResult =
+  struct
+    type nonrec t =
+      {
+      instancePatchStates: InstancePatchStateList.t option
+        [@ocaml.doc
+          "The high-level patch state for the requested managed nodes."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use when requesting the next set of items. If there are no additional items to return, the string is empty."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `InvalidNextToken of InvalidNextToken.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?instancePatchStates =
+      fun ?nextToken -> fun () -> { instancePatchStates; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidNextToken" ->
+          `InvalidNextToken (InvalidNextToken.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidNextToken" -> `InvalidNextToken (InvalidNextToken.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidNextToken e ->
+          `Assoc
+            [("error", (`String "InvalidNextToken"));
+            ("details", (InvalidNextToken.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("InstancePatchStates",
+           (Option.map x.instancePatchStates
+              ~f:InstancePatchStateList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let instancePatchStates =
+        (Option.map ~f:InstancePatchStateList.of_xml)
+          (Xml.child xml_arg0 "InstancePatchStates") in
+      make ?nextToken ?instancePatchStates ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let instancePatchStates =
+        field_map json__ "InstancePatchStates" InstancePatchStateList.of_json in
+      make ?nextToken ?instancePatchStates ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the high-level patch state of one or more managed nodes."]
+module DescribeInstancePatchesRequest =
+  struct
+    type nonrec t =
+      {
+      instanceId: InstanceId.t
+        [@ocaml.doc
+          "The ID of the managed node whose patch state information should be retrieved."];
+      filters: PatchOrchestratorFilterList.t option
+        [@ocaml.doc
+          "Each element in the array is a structure containing a key-value pair. Supported keys for DescribeInstancePatchesinclude the following: Classification Sample values: Security | SecurityUpdates KBId Sample values: KB4480056 | java-1.7.0-openjdk.x86_64 Severity Sample values: Important | Medium | Low State Sample values: Installed | InstalledOther | InstalledPendingReboot For lists of all State values, see Patch compliance state values in the Amazon Web Services Systems Manager User Guide."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of items to return. (You received this token from a previous call.)"];
+      maxResults: PatchComplianceMaxResults.t option
+        [@ocaml.doc "The maximum number of patches to return (per page)."]}
+    let context_ = "DescribeInstancePatchesRequest"
+    let make ?filters =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ~instanceId ->
+            fun () -> { filters; nextToken; maxResults; instanceId }
+    let to_value x =
+      structure_to_value
+        [("InstanceId", (Some (InstanceId.to_value x.instanceId)));
+        ("Filters",
+          (Option.map x.filters ~f:PatchOrchestratorFilterList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:PatchComplianceMaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:PatchComplianceMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let filters =
+        (Option.map ~f:PatchOrchestratorFilterList.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      let instanceId =
+        InstanceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
+      make ?maxResults ?nextToken ?filters ~instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" PatchComplianceMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filters =
+        field_map json__ "Filters" PatchOrchestratorFilterList.of_json in
+      let instanceId = field_map_exn json__ "InstanceId" InstanceId.of_json in
+      make ?maxResults ?nextToken ?filters ~instanceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about the patches on the specified managed node and their state relative to the patch baseline being used for the node."]
+module PatchComplianceDataState =
+  struct
+    type nonrec t =
+      | INSTALLED 
+      | INSTALLED_OTHER 
+      | INSTALLED_PENDING_REBOOT 
+      | INSTALLED_REJECTED 
+      | MISSING 
+      | NOT_APPLICABLE 
+      | FAILED 
+      | AVAILABLE_SECURITY_UPDATE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INSTALLED -> "INSTALLED"
+      | INSTALLED_OTHER -> "INSTALLED_OTHER"
+      | INSTALLED_PENDING_REBOOT -> "INSTALLED_PENDING_REBOOT"
+      | INSTALLED_REJECTED -> "INSTALLED_REJECTED"
+      | MISSING -> "MISSING"
+      | NOT_APPLICABLE -> "NOT_APPLICABLE"
+      | FAILED -> "FAILED"
+      | AVAILABLE_SECURITY_UPDATE -> "AVAILABLE_SECURITY_UPDATE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INSTALLED" -> INSTALLED
+      | "INSTALLED_OTHER" -> INSTALLED_OTHER
+      | "INSTALLED_PENDING_REBOOT" -> INSTALLED_PENDING_REBOOT
+      | "INSTALLED_REJECTED" -> INSTALLED_REJECTED
+      | "MISSING" -> MISSING
+      | "NOT_APPLICABLE" -> NOT_APPLICABLE
+      | "FAILED" -> FAILED
+      | "AVAILABLE_SECURITY_UPDATE" -> AVAILABLE_SECURITY_UPDATE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PatchComplianceDataState" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PatchComplianceDataState" j)
+    let to_json = simple_to_json to_value
+  end
+module PatchCVEIds =
+  struct
+    type nonrec t = string
+    let context_ = "PatchCVEIds"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PatchCVEIds" j
+    let to_json = simple_to_json to_value
+  end
+module PatchComplianceData =
+  struct
+    type nonrec t =
+      {
+      title: PatchTitle.t option [@ocaml.doc "The title of the patch."];
+      kBId: PatchKbNumber.t option
+        [@ocaml.doc "The operating system-specific ID of the patch."];
+      classification: PatchClassification.t option
+        [@ocaml.doc
+          "The classification of the patch, such as SecurityUpdates, Updates, and CriticalUpdates."];
+      severity: PatchSeverity.t option
+        [@ocaml.doc
+          "The severity of the patch such as Critical, Important, and Moderate."];
+      state: PatchComplianceDataState.t option
+        [@ocaml.doc
+          "The state of the patch on the managed node, such as INSTALLED or FAILED. For descriptions of each patch state, see About patch compliance in the Amazon Web Services Systems Manager User Guide."];
+      installedTime: DateTime.t option
+        [@ocaml.doc
+          "The date/time the patch was installed on the managed node. Not all operating systems provide this level of information."];
+      cVEIds: PatchCVEIds.t option
+        [@ocaml.doc
+          "The IDs of one or more Common Vulnerabilities and Exposure (CVE) issues that are resolved by the patch. Currently, CVE ID values are reported only for patches with a status of Missing or Failed."]}
+    let make ?title =
+      fun ?kBId ->
+        fun ?classification ->
+          fun ?severity ->
+            fun ?state ->
+              fun ?installedTime ->
+                fun ?cVEIds ->
+                  fun () ->
+                    {
+                      title;
+                      kBId;
+                      classification;
+                      severity;
+                      state;
+                      installedTime;
+                      cVEIds
+                    }
+    let to_value x =
+      structure_to_value
+        [("Title", (Option.map x.title ~f:PatchTitle.to_value));
+        ("KBId", (Option.map x.kBId ~f:PatchKbNumber.to_value));
+        ("Classification",
+          (Option.map x.classification ~f:PatchClassification.to_value));
+        ("Severity", (Option.map x.severity ~f:PatchSeverity.to_value));
+        ("State", (Option.map x.state ~f:PatchComplianceDataState.to_value));
+        ("InstalledTime", (Option.map x.installedTime ~f:DateTime.to_value));
+        ("CVEIds", (Option.map x.cVEIds ~f:PatchCVEIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cVEIds =
+        (Option.map ~f:PatchCVEIds.of_xml) (Xml.child xml_arg0 "CVEIds") in
+      let installedTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "InstalledTime") in
+      let state =
+        (Option.map ~f:PatchComplianceDataState.of_xml)
+          (Xml.child xml_arg0 "State") in
+      let severity =
+        (Option.map ~f:PatchSeverity.of_xml) (Xml.child xml_arg0 "Severity") in
+      let classification =
+        (Option.map ~f:PatchClassification.of_xml)
+          (Xml.child xml_arg0 "Classification") in
+      let kBId =
+        (Option.map ~f:PatchKbNumber.of_xml) (Xml.child xml_arg0 "KBId") in
+      let title =
+        (Option.map ~f:PatchTitle.of_xml) (Xml.child xml_arg0 "Title") in
+      make ?cVEIds ?installedTime ?state ?severity ?classification ?kBId
+        ?title ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cVEIds = field_map json__ "CVEIds" PatchCVEIds.of_json in
+      let installedTime = field_map json__ "InstalledTime" DateTime.of_json in
+      let state = field_map json__ "State" PatchComplianceDataState.of_json in
+      let severity = field_map json__ "Severity" PatchSeverity.of_json in
+      let classification =
+        field_map json__ "Classification" PatchClassification.of_json in
+      let kBId = field_map json__ "KBId" PatchKbNumber.of_json in
+      let title = field_map json__ "Title" PatchTitle.of_json in
+      make ?cVEIds ?installedTime ?state ?severity ?classification ?kBId
+        ?title ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the state of a patch on a particular managed node as it relates to the patch baseline used to patch the node."]
+module PatchComplianceDataList =
+  struct
+    type nonrec t = PatchComplianceData.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PatchComplianceData.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PatchComplianceData.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PatchComplianceDataList"
+        ~of_json:PatchComplianceData.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeInstancePatchesResult =
+  struct
+    type nonrec t =
+      {
+      patches: PatchComplianceDataList.t option
+        [@ocaml.doc
+          "Each entry in the array is a structure containing: Title (string) KBId (string) Classification (string) Severity (string) State (string, such as \"INSTALLED\" or \"FAILED\") InstalledTime (DateTime) InstalledBy (string)"];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use when requesting the next set of items. If there are no additional items to return, the string is empty."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `InvalidFilter of InvalidFilter.t 
+      | `InvalidInstanceId of InvalidInstanceId.t 
+      | `InvalidNextToken of InvalidNextToken.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?patches = fun ?nextToken -> fun () -> { patches; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidFilter" -> `InvalidFilter (InvalidFilter.of_json json)
+      | "InvalidInstanceId" ->
+          `InvalidInstanceId (InvalidInstanceId.of_json json)
+      | "InvalidNextToken" ->
+          `InvalidNextToken (InvalidNextToken.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidFilter" -> `InvalidFilter (InvalidFilter.of_xml xml)
+      | "InvalidInstanceId" ->
+          `InvalidInstanceId (InvalidInstanceId.of_xml xml)
+      | "InvalidNextToken" -> `InvalidNextToken (InvalidNextToken.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidFilter e ->
+          `Assoc
+            [("error", (`String "InvalidFilter"));
+            ("details", (InvalidFilter.to_json e))]
+      | `InvalidInstanceId e ->
+          `Assoc
+            [("error", (`String "InvalidInstanceId"));
+            ("details", (InvalidInstanceId.to_json e))]
+      | `InvalidNextToken e ->
+          `Assoc
+            [("error", (`String "InvalidNextToken"));
+            ("details", (InvalidNextToken.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Patches",
+           (Option.map x.patches ~f:PatchComplianceDataList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let patches =
+        (Option.map ~f:PatchComplianceDataList.of_xml)
+          (Xml.child xml_arg0 "Patches") in
+      make ?nextToken ?patches ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let patches =
+        field_map json__ "Patches" PatchComplianceDataList.of_json in
+      make ?nextToken ?patches ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about the patches on the specified managed node and their state relative to the patch baseline being used for the node."]
+module DescribeInstancePropertiesMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for DescribeInstancePropertiesMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module InstancePropertyStringFilterKey =
+  struct
+    type nonrec t = string
+    let context_ = "InstancePropertyStringFilterKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100000) >>=
+                  (fun () -> check_pattern i ~pattern:"^.{1,100000}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstancePropertyStringFilterKey" j
+    let to_json = simple_to_json to_value
+  end
+module InstancePropertyFilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "InstancePropertyFilterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100000) >>=
+                  (fun () -> check_pattern i ~pattern:"^.{1,100000}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstancePropertyFilterValue" j
+    let to_json = simple_to_json to_value
+  end
+module InstancePropertyFilterValueSet =
+  struct
+    type nonrec t = InstancePropertyFilterValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:40) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstancePropertyFilterValue.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstancePropertyFilterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstancePropertyFilterValueSet"
+        ~of_json:InstancePropertyFilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InstancePropertyFilterOperator =
+  struct
+    type nonrec t =
+      | Equal 
+      | NotEqual 
+      | BeginWith 
+      | LessThan 
+      | GreaterThan 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Equal -> "Equal"
+      | NotEqual -> "NotEqual"
+      | BeginWith -> "BeginWith"
+      | LessThan -> "LessThan"
+      | GreaterThan -> "GreaterThan"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Equal" -> Equal
+      | "NotEqual" -> NotEqual
+      | "BeginWith" -> BeginWith
+      | "LessThan" -> LessThan
+      | "GreaterThan" -> GreaterThan
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InstancePropertyFilterOperator"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"InstancePropertyFilterOperator" j)
+    let to_json = simple_to_json to_value
+  end
+module InstancePropertyStringFilter =
+  struct
+    type nonrec t =
+      {
+      key: InstancePropertyStringFilterKey.t
+        [@ocaml.doc "The filter key name to describe your managed nodes."];
+      values: InstancePropertyFilterValueSet.t
+        [@ocaml.doc "The filter key name to describe your managed nodes."];
+      operator: InstancePropertyFilterOperator.t option
+        [@ocaml.doc "The operator used by the filter call."]}
+    let context_ = "InstancePropertyStringFilter"
+    let make ?operator =
+      fun ~key -> fun ~values -> fun () -> { operator; key; values }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (InstancePropertyStringFilterKey.to_value x.key)));
+        ("Values", (Some (InstancePropertyFilterValueSet.to_value x.values)));
+        ("Operator",
+          (Option.map x.operator ~f:InstancePropertyFilterOperator.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let operator =
+        (Option.map ~f:InstancePropertyFilterOperator.of_xml)
+          (Xml.child xml_arg0 "Operator") in
+      let values =
+        InstancePropertyFilterValueSet.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Values") in
+      let key =
+        InstancePropertyStringFilterKey.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ?operator ~values ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let operator =
+        field_map json__ "Operator" InstancePropertyFilterOperator.of_json in
+      let values =
+        field_map_exn json__ "Values" InstancePropertyFilterValueSet.of_json in
+      let key =
+        field_map_exn json__ "Key" InstancePropertyStringFilterKey.of_json in
+      make ?operator ~values ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The filters to describe or get information about your managed nodes."]
+module InstancePropertyStringFilterList =
+  struct
+    type nonrec t = InstancePropertyStringFilter.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:40) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstancePropertyStringFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstancePropertyStringFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstancePropertyStringFilterList"
+        ~of_json:InstancePropertyStringFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InstancePropertyFilterKey =
+  struct
+    type nonrec t =
+      | InstanceIds 
+      | AgentVersion 
+      | PingStatus 
+      | PlatformTypes 
+      | DocumentName 
+      | ActivationIds 
+      | IamRole 
+      | ResourceType 
+      | AssociationStatus 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | InstanceIds -> "InstanceIds"
+      | AgentVersion -> "AgentVersion"
+      | PingStatus -> "PingStatus"
+      | PlatformTypes -> "PlatformTypes"
+      | DocumentName -> "DocumentName"
+      | ActivationIds -> "ActivationIds"
+      | IamRole -> "IamRole"
+      | ResourceType -> "ResourceType"
+      | AssociationStatus -> "AssociationStatus"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "InstanceIds" -> InstanceIds
+      | "AgentVersion" -> AgentVersion
+      | "PingStatus" -> PingStatus
+      | "PlatformTypes" -> PlatformTypes
+      | "DocumentName" -> DocumentName
+      | "ActivationIds" -> ActivationIds
+      | "IamRole" -> IamRole
+      | "ResourceType" -> ResourceType
+      | "AssociationStatus" -> AssociationStatus
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InstancePropertyFilterKey" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"InstancePropertyFilterKey" j)
+    let to_json = simple_to_json to_value
+  end
+module InstancePropertyFilter =
+  struct
+    type nonrec t =
+      {
+      key: InstancePropertyFilterKey.t [@ocaml.doc "The name of the filter."];
+      valueSet: InstancePropertyFilterValueSet.t
+        [@ocaml.doc "The filter values."]}
+    let context_ = "InstancePropertyFilter"
+    let make ~key = fun ~valueSet -> fun () -> { key; valueSet }
+    let to_value x =
+      structure_to_value
+        [("key", (Some (InstancePropertyFilterKey.to_value x.key)));
+        ("valueSet",
+          (Some (InstancePropertyFilterValueSet.to_value x.valueSet)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueSet =
+        InstancePropertyFilterValueSet.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "valueSet") in
+      let key =
+        InstancePropertyFilterKey.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "key") in
+      make ~valueSet ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueSet =
+        field_map_exn json__ "valueSet"
+          InstancePropertyFilterValueSet.of_json in
+      let key = field_map_exn json__ "key" InstancePropertyFilterKey.of_json in
+      make ~valueSet ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a filter for a specific list of managed nodes. You can filter node information by using tags. You specify tags by using a key-value mapping."]
+module InstancePropertyFilterList =
+  struct
+    type nonrec t = InstancePropertyFilter.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:40) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstancePropertyFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstancePropertyFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstancePropertyFilterList"
+        ~of_json:InstancePropertyFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeInstancePropertiesRequest =
+  struct
+    type nonrec t =
+      {
+      instancePropertyFilterList: InstancePropertyFilterList.t option
+        [@ocaml.doc "An array of instance property filters."];
+      filtersWithOperator: InstancePropertyStringFilterList.t option
+        [@ocaml.doc "The request filters to use with the operator."];
+      maxResults: DescribeInstancePropertiesMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return for the call. The call also returns a token that you can specify in a subsequent call to get the next set of results."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token provided by a previous request to use to return the next set of properties."]}
+    let make ?instancePropertyFilterList =
+      fun ?filtersWithOperator ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun () ->
+              {
+                instancePropertyFilterList;
+                filtersWithOperator;
+                maxResults;
+                nextToken
+              }
+    let to_value x =
+      structure_to_value
+        [("InstancePropertyFilterList",
+           (Option.map x.instancePropertyFilterList
+              ~f:InstancePropertyFilterList.to_value));
+        ("FiltersWithOperator",
+          (Option.map x.filtersWithOperator
+             ~f:InstancePropertyStringFilterList.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:DescribeInstancePropertiesMaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:DescribeInstancePropertiesMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let filtersWithOperator =
+        (Option.map ~f:InstancePropertyStringFilterList.of_xml)
+          (Xml.child xml_arg0 "FiltersWithOperator") in
+      let instancePropertyFilterList =
+        (Option.map ~f:InstancePropertyFilterList.of_xml)
+          (Xml.child xml_arg0 "InstancePropertyFilterList") in
+      make ?nextToken ?maxResults ?filtersWithOperator
+        ?instancePropertyFilterList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults"
+          DescribeInstancePropertiesMaxResults.of_json in
+      let filtersWithOperator =
+        field_map json__ "FiltersWithOperator"
+          InstancePropertyStringFilterList.of_json in
+      let instancePropertyFilterList =
+        field_map json__ "InstancePropertyFilterList"
+          InstancePropertyFilterList.of_json in
+      make ?nextToken ?maxResults ?filtersWithOperator
+        ?instancePropertyFilterList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An API operation used by the Systems Manager console to display information about Systems Manager managed nodes."]
+module InvalidInstancePropertyFilterValue =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified filter value isn't valid."]
+module PlatformVersion =
+  struct
+    type nonrec t = string
+    let context_ = "PlatformVersion"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:120); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PlatformVersion" j
+    let to_json = simple_to_json to_value
+  end
+module PlatformName =
+  struct
+    type nonrec t = string
+    let context_ = "PlatformName"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:120); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PlatformName" j
+    let to_json = simple_to_json to_value
+  end
+module KeyName =
+  struct
+    type nonrec t = string
+    let context_ = "KeyName"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:255); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KeyName" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceType =
+  struct
+    type nonrec t = string
+    let context_ = "InstanceType"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:120); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstanceType" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceState =
+  struct
+    type nonrec t = string
+    let context_ = "InstanceState"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:120); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstanceState" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceRole =
+  struct
+    type nonrec t = string
+    let context_ = "InstanceRole"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:120); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstanceRole" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceName =
+  struct
+    type nonrec t = string
+    let context_ = "InstanceName"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:255); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstanceName" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceProperty =
+  struct
+    type nonrec t =
+      {
+      name: InstanceName.t option
+        [@ocaml.doc
+          "The value of the EC2 Name tag associated with the node. If a Name tag hasn't been applied to the node, this value is blank."];
+      instanceId: InstanceId.t option
+        [@ocaml.doc "The ID of the managed node."];
+      instanceType: InstanceType.t option
+        [@ocaml.doc
+          "The instance type of the managed node. For example, t3.large."];
+      instanceRole: InstanceRole.t option
+        [@ocaml.doc
+          "The instance profile attached to the node. If an instance profile isn't attached to the node, this value is blank."];
+      keyName: KeyName.t option
+        [@ocaml.doc
+          "The name of the key pair associated with the node. If a key pair isnt't associated with the node, this value is blank."];
+      instanceState: InstanceState.t option
+        [@ocaml.doc "The current state of the node."];
+      architecture: Architecture.t option
+        [@ocaml.doc "The CPU architecture of the node. For example, x86_64."];
+      iPAddress: IPAddress.t option
+        [@ocaml.doc
+          "The public IPv4 address assigned to the node. If a public IPv4 address isn't assigned to the node, this value is blank."];
+      launchTime: DateTime.t option
+        [@ocaml.doc "The timestamp for when the node was launched."];
+      pingStatus: PingStatus.t option
+        [@ocaml.doc
+          "Connection status of the SSM Agent on the managed node."];
+      lastPingDateTime: DateTime.t option
+        [@ocaml.doc
+          "The date and time when the SSM Agent last pinged the Systems Manager service."];
+      agentVersion: Version.t option
+        [@ocaml.doc "The version of SSM Agent running on your managed node."];
+      platformType: PlatformType.t option
+        [@ocaml.doc
+          "The operating system platform type of the managed node. For example, Windows Server or Amazon Linux 2."];
+      platformName: PlatformName.t option
+        [@ocaml.doc
+          "The name of the operating system platform running on your managed node."];
+      platformVersion: PlatformVersion.t option
+        [@ocaml.doc
+          "The version of the OS platform running on your managed node."];
+      activationId: ActivationId.t option
+        [@ocaml.doc
+          "The activation ID created by Systems Manager when the server or virtual machine (VM) was registered"];
+      iamRole: IamRole.t option
+        [@ocaml.doc
+          "The IAM role used in the hybrid activation to register the node with Systems Manager."];
+      registrationDate: DateTime.t option
+        [@ocaml.doc "The date the node was registered with Systems Manager."];
+      resourceType: String_.t option [@ocaml.doc "The type of managed node."];
+      computerName: ComputerName.t option
+        [@ocaml.doc "The fully qualified host name of the managed node."];
+      associationStatus: StatusName.t option
+        [@ocaml.doc
+          "The status of the State Manager association applied to the managed node."];
+      lastAssociationExecutionDate: DateTime.t option
+        [@ocaml.doc "The date the association was last run."];
+      lastSuccessfulAssociationExecutionDate: DateTime.t option
+        [@ocaml.doc "The last date the association was successfully run."];
+      associationOverview: InstanceAggregatedAssociationOverview.t option ;
+      sourceId: SourceId.t option
+        [@ocaml.doc "The ID of the source resource."];
+      sourceType: SourceType.t option
+        [@ocaml.doc "The type of the source resource."]}
+    let make ?name =
+      fun ?instanceId ->
+        fun ?instanceType ->
+          fun ?instanceRole ->
+            fun ?keyName ->
+              fun ?instanceState ->
+                fun ?architecture ->
+                  fun ?iPAddress ->
+                    fun ?launchTime ->
+                      fun ?pingStatus ->
+                        fun ?lastPingDateTime ->
+                          fun ?agentVersion ->
+                            fun ?platformType ->
+                              fun ?platformName ->
+                                fun ?platformVersion ->
+                                  fun ?activationId ->
+                                    fun ?iamRole ->
+                                      fun ?registrationDate ->
+                                        fun ?resourceType ->
+                                          fun ?computerName ->
+                                            fun ?associationStatus ->
+                                              fun
+                                                ?lastAssociationExecutionDate
+                                                ->
+                                                fun
+                                                  ?lastSuccessfulAssociationExecutionDate
+                                                  ->
+                                                  fun ?associationOverview ->
+                                                    fun ?sourceId ->
+                                                      fun ?sourceType ->
+                                                        fun () ->
+                                                          {
+                                                            name;
+                                                            instanceId;
+                                                            instanceType;
+                                                            instanceRole;
+                                                            keyName;
+                                                            instanceState;
+                                                            architecture;
+                                                            iPAddress;
+                                                            launchTime;
+                                                            pingStatus;
+                                                            lastPingDateTime;
+                                                            agentVersion;
+                                                            platformType;
+                                                            platformName;
+                                                            platformVersion;
+                                                            activationId;
+                                                            iamRole;
+                                                            registrationDate;
+                                                            resourceType;
+                                                            computerName;
+                                                            associationStatus;
+                                                            lastAssociationExecutionDate;
+                                                            lastSuccessfulAssociationExecutionDate;
+                                                            associationOverview;
+                                                            sourceId;
+                                                            sourceType
+                                                          }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:InstanceName.to_value));
+        ("InstanceId", (Option.map x.instanceId ~f:InstanceId.to_value));
+        ("InstanceType",
+          (Option.map x.instanceType ~f:InstanceType.to_value));
+        ("InstanceRole",
+          (Option.map x.instanceRole ~f:InstanceRole.to_value));
+        ("KeyName", (Option.map x.keyName ~f:KeyName.to_value));
+        ("InstanceState",
+          (Option.map x.instanceState ~f:InstanceState.to_value));
+        ("Architecture",
+          (Option.map x.architecture ~f:Architecture.to_value));
+        ("IPAddress", (Option.map x.iPAddress ~f:IPAddress.to_value));
+        ("LaunchTime", (Option.map x.launchTime ~f:DateTime.to_value));
+        ("PingStatus", (Option.map x.pingStatus ~f:PingStatus.to_value));
+        ("LastPingDateTime",
+          (Option.map x.lastPingDateTime ~f:DateTime.to_value));
+        ("AgentVersion", (Option.map x.agentVersion ~f:Version.to_value));
+        ("PlatformType",
+          (Option.map x.platformType ~f:PlatformType.to_value));
+        ("PlatformName",
+          (Option.map x.platformName ~f:PlatformName.to_value));
+        ("PlatformVersion",
+          (Option.map x.platformVersion ~f:PlatformVersion.to_value));
+        ("ActivationId",
+          (Option.map x.activationId ~f:ActivationId.to_value));
+        ("IamRole", (Option.map x.iamRole ~f:IamRole.to_value));
+        ("RegistrationDate",
+          (Option.map x.registrationDate ~f:DateTime.to_value));
+        ("ResourceType", (Option.map x.resourceType ~f:String_.to_value));
+        ("ComputerName",
+          (Option.map x.computerName ~f:ComputerName.to_value));
+        ("AssociationStatus",
+          (Option.map x.associationStatus ~f:StatusName.to_value));
+        ("LastAssociationExecutionDate",
+          (Option.map x.lastAssociationExecutionDate ~f:DateTime.to_value));
+        ("LastSuccessfulAssociationExecutionDate",
+          (Option.map x.lastSuccessfulAssociationExecutionDate
+             ~f:DateTime.to_value));
+        ("AssociationOverview",
+          (Option.map x.associationOverview
+             ~f:InstanceAggregatedAssociationOverview.to_value));
+        ("SourceId", (Option.map x.sourceId ~f:SourceId.to_value));
+        ("SourceType", (Option.map x.sourceType ~f:SourceType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceType =
+        (Option.map ~f:SourceType.of_xml) (Xml.child xml_arg0 "SourceType") in
+      let sourceId =
+        (Option.map ~f:SourceId.of_xml) (Xml.child xml_arg0 "SourceId") in
+      let associationOverview =
+        (Option.map ~f:InstanceAggregatedAssociationOverview.of_xml)
+          (Xml.child xml_arg0 "AssociationOverview") in
+      let lastSuccessfulAssociationExecutionDate =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "LastSuccessfulAssociationExecutionDate") in
+      let lastAssociationExecutionDate =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "LastAssociationExecutionDate") in
+      let associationStatus =
+        (Option.map ~f:StatusName.of_xml)
+          (Xml.child xml_arg0 "AssociationStatus") in
+      let computerName =
+        (Option.map ~f:ComputerName.of_xml)
+          (Xml.child xml_arg0 "ComputerName") in
+      let resourceType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceType") in
+      let registrationDate =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "RegistrationDate") in
+      let iamRole =
+        (Option.map ~f:IamRole.of_xml) (Xml.child xml_arg0 "IamRole") in
+      let activationId =
+        (Option.map ~f:ActivationId.of_xml)
+          (Xml.child xml_arg0 "ActivationId") in
+      let platformVersion =
+        (Option.map ~f:PlatformVersion.of_xml)
+          (Xml.child xml_arg0 "PlatformVersion") in
+      let platformName =
+        (Option.map ~f:PlatformName.of_xml)
+          (Xml.child xml_arg0 "PlatformName") in
+      let platformType =
+        (Option.map ~f:PlatformType.of_xml)
+          (Xml.child xml_arg0 "PlatformType") in
+      let agentVersion =
+        (Option.map ~f:Version.of_xml) (Xml.child xml_arg0 "AgentVersion") in
+      let lastPingDateTime =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "LastPingDateTime") in
+      let pingStatus =
+        (Option.map ~f:PingStatus.of_xml) (Xml.child xml_arg0 "PingStatus") in
+      let launchTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "LaunchTime") in
+      let iPAddress =
+        (Option.map ~f:IPAddress.of_xml) (Xml.child xml_arg0 "IPAddress") in
+      let architecture =
+        (Option.map ~f:Architecture.of_xml)
+          (Xml.child xml_arg0 "Architecture") in
+      let instanceState =
+        (Option.map ~f:InstanceState.of_xml)
+          (Xml.child xml_arg0 "InstanceState") in
+      let keyName =
+        (Option.map ~f:KeyName.of_xml) (Xml.child xml_arg0 "KeyName") in
+      let instanceRole =
+        (Option.map ~f:InstanceRole.of_xml)
+          (Xml.child xml_arg0 "InstanceRole") in
+      let instanceType =
+        (Option.map ~f:InstanceType.of_xml)
+          (Xml.child xml_arg0 "InstanceType") in
+      let instanceId =
+        (Option.map ~f:InstanceId.of_xml) (Xml.child xml_arg0 "InstanceId") in
+      let name =
+        (Option.map ~f:InstanceName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?sourceType ?sourceId ?associationOverview
+        ?lastSuccessfulAssociationExecutionDate ?lastAssociationExecutionDate
+        ?associationStatus ?computerName ?resourceType ?registrationDate
+        ?iamRole ?activationId ?platformVersion ?platformName ?platformType
+        ?agentVersion ?lastPingDateTime ?pingStatus ?launchTime ?iPAddress
+        ?architecture ?instanceState ?keyName ?instanceRole ?instanceType
+        ?instanceId ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceType = field_map json__ "SourceType" SourceType.of_json in
+      let sourceId = field_map json__ "SourceId" SourceId.of_json in
+      let associationOverview =
+        field_map json__ "AssociationOverview"
+          InstanceAggregatedAssociationOverview.of_json in
+      let lastSuccessfulAssociationExecutionDate =
+        field_map json__ "LastSuccessfulAssociationExecutionDate"
+          DateTime.of_json in
+      let lastAssociationExecutionDate =
+        field_map json__ "LastAssociationExecutionDate" DateTime.of_json in
+      let associationStatus =
+        field_map json__ "AssociationStatus" StatusName.of_json in
+      let computerName = field_map json__ "ComputerName" ComputerName.of_json in
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let registrationDate =
+        field_map json__ "RegistrationDate" DateTime.of_json in
+      let iamRole = field_map json__ "IamRole" IamRole.of_json in
+      let activationId = field_map json__ "ActivationId" ActivationId.of_json in
+      let platformVersion =
+        field_map json__ "PlatformVersion" PlatformVersion.of_json in
+      let platformName = field_map json__ "PlatformName" PlatformName.of_json in
+      let platformType = field_map json__ "PlatformType" PlatformType.of_json in
+      let agentVersion = field_map json__ "AgentVersion" Version.of_json in
+      let lastPingDateTime =
+        field_map json__ "LastPingDateTime" DateTime.of_json in
+      let pingStatus = field_map json__ "PingStatus" PingStatus.of_json in
+      let launchTime = field_map json__ "LaunchTime" DateTime.of_json in
+      let iPAddress = field_map json__ "IPAddress" IPAddress.of_json in
+      let architecture = field_map json__ "Architecture" Architecture.of_json in
+      let instanceState =
+        field_map json__ "InstanceState" InstanceState.of_json in
+      let keyName = field_map json__ "KeyName" KeyName.of_json in
+      let instanceRole = field_map json__ "InstanceRole" InstanceRole.of_json in
+      let instanceType = field_map json__ "InstanceType" InstanceType.of_json in
+      let instanceId = field_map json__ "InstanceId" InstanceId.of_json in
+      let name = field_map json__ "Name" InstanceName.of_json in
+      make ?sourceType ?sourceId ?associationOverview
+        ?lastSuccessfulAssociationExecutionDate ?lastAssociationExecutionDate
+        ?associationStatus ?computerName ?resourceType ?registrationDate
+        ?iamRole ?activationId ?platformVersion ?platformName ?platformType
+        ?agentVersion ?lastPingDateTime ?pingStatus ?launchTime ?iPAddress
+        ?architecture ?instanceState ?keyName ?instanceRole ?instanceType
+        ?instanceId ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object containing various properties of a managed node."]
+module InstanceProperties =
+  struct
+    type nonrec t = InstanceProperty.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstanceProperty.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstanceProperty.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstanceProperties"
+        ~of_json:InstanceProperty.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeInstancePropertiesResult =
+  struct
+    type nonrec t =
+      {
+      instanceProperties: InstanceProperties.t option
+        [@ocaml.doc "Properties for the managed instances."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of properties to return. Use this token to get the next set of results."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `InvalidActivationId of InvalidActivationId.t 
+      | `InvalidDocument of InvalidDocument.t 
+      | `InvalidFilterKey of InvalidFilterKey.t 
+      | `InvalidInstanceId of InvalidInstanceId.t 
+      | `InvalidInstancePropertyFilterValue of
+          InvalidInstancePropertyFilterValue.t 
+      | `InvalidNextToken of InvalidNextToken.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?instanceProperties =
+      fun ?nextToken -> fun () -> { instanceProperties; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidActivationId" ->
+          `InvalidActivationId (InvalidActivationId.of_json json)
+      | "InvalidDocument" -> `InvalidDocument (InvalidDocument.of_json json)
+      | "InvalidFilterKey" ->
+          `InvalidFilterKey (InvalidFilterKey.of_json json)
+      | "InvalidInstanceId" ->
+          `InvalidInstanceId (InvalidInstanceId.of_json json)
+      | "InvalidInstancePropertyFilterValue" ->
+          `InvalidInstancePropertyFilterValue
+            (InvalidInstancePropertyFilterValue.of_json json)
+      | "InvalidNextToken" ->
+          `InvalidNextToken (InvalidNextToken.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidActivationId" ->
+          `InvalidActivationId (InvalidActivationId.of_xml xml)
+      | "InvalidDocument" -> `InvalidDocument (InvalidDocument.of_xml xml)
+      | "InvalidFilterKey" -> `InvalidFilterKey (InvalidFilterKey.of_xml xml)
+      | "InvalidInstanceId" ->
+          `InvalidInstanceId (InvalidInstanceId.of_xml xml)
+      | "InvalidInstancePropertyFilterValue" ->
+          `InvalidInstancePropertyFilterValue
+            (InvalidInstancePropertyFilterValue.of_xml xml)
+      | "InvalidNextToken" -> `InvalidNextToken (InvalidNextToken.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidActivationId e ->
+          `Assoc
+            [("error", (`String "InvalidActivationId"));
+            ("details", (InvalidActivationId.to_json e))]
+      | `InvalidDocument e ->
+          `Assoc
+            [("error", (`String "InvalidDocument"));
+            ("details", (InvalidDocument.to_json e))]
+      | `InvalidFilterKey e ->
+          `Assoc
+            [("error", (`String "InvalidFilterKey"));
+            ("details", (InvalidFilterKey.to_json e))]
+      | `InvalidInstanceId e ->
+          `Assoc
+            [("error", (`String "InvalidInstanceId"));
+            ("details", (InvalidInstanceId.to_json e))]
+      | `InvalidInstancePropertyFilterValue e ->
+          `Assoc
+            [("error", (`String "InvalidInstancePropertyFilterValue"));
+            ("details", (InvalidInstancePropertyFilterValue.to_json e))]
+      | `InvalidNextToken e ->
+          `Assoc
+            [("error", (`String "InvalidNextToken"));
+            ("details", (InvalidNextToken.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("InstanceProperties",
+           (Option.map x.instanceProperties ~f:InstanceProperties.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let instanceProperties =
+        (Option.map ~f:InstanceProperties.of_xml)
+          (Xml.child xml_arg0 "InstanceProperties") in
+      make ?nextToken ?instanceProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let instanceProperties =
+        field_map json__ "InstanceProperties" InstanceProperties.of_json in
+      make ?nextToken ?instanceProperties ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An API operation used by the Systems Manager console to display information about Systems Manager managed nodes."]
+module DescribeInventoryDeletionsRequest =
+  struct
+    type nonrec t =
+      {
+      deletionId: UUID.t option
+        [@ocaml.doc
+          "Specify the delete inventory ID for which you want information. This ID was returned by the DeleteInventory operation."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token to start the list. Use this token to get the next set of results."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results."]}
+    let make ?deletionId =
+      fun ?nextToken ->
+        fun ?maxResults -> fun () -> { deletionId; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("DeletionId", (Option.map x.deletionId ~f:UUID.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let deletionId =
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "DeletionId") in
+      make ?maxResults ?nextToken ?deletionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let deletionId = field_map json__ "DeletionId" UUID.of_json in
+      make ?maxResults ?nextToken ?deletionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a specific delete inventory operation."]
+module InventoryDeletionStatus =
+  struct
+    type nonrec t =
+      | InProgress 
+      | Complete 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | InProgress -> "InProgress"
+      | Complete -> "Complete"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "InProgress" -> InProgress
+      | "Complete" -> Complete
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InventoryDeletionStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"InventoryDeletionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module InventoryDeletionStartTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module InventoryDeletionLastStatusUpdateTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module InventoryDeletionLastStatusMessage =
+  struct
+    type nonrec t = string
+    let context_ = "InventoryDeletionLastStatusMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"InventoryDeletionLastStatusMessage" j
+    let to_json = simple_to_json to_value
+  end
+module InventoryDeletionStatusItem =
+  struct
+    type nonrec t =
+      {
+      deletionId: UUID.t option
+        [@ocaml.doc
+          "The deletion ID returned by the DeleteInventory operation."];
+      typeName: InventoryItemTypeName.t option
+        [@ocaml.doc "The name of the inventory data type."];
+      deletionStartTime: InventoryDeletionStartTime.t option
+        [@ocaml.doc "The UTC timestamp when the delete operation started."];
+      lastStatus: InventoryDeletionStatus.t option
+        [@ocaml.doc
+          "The status of the operation. Possible values are InProgress and Complete."];
+      lastStatusMessage: InventoryDeletionLastStatusMessage.t option
+        [@ocaml.doc "Information about the status."];
+      deletionSummary: InventoryDeletionSummary.t option
+        [@ocaml.doc
+          "Information about the delete operation. For more information about this summary, see Understanding the delete inventory summary in the Amazon Web Services Systems Manager User Guide."];
+      lastStatusUpdateTime: InventoryDeletionLastStatusUpdateTime.t option
+        [@ocaml.doc "The UTC timestamp of when the last status report."]}
+    let make ?deletionId =
+      fun ?typeName ->
+        fun ?deletionStartTime ->
+          fun ?lastStatus ->
+            fun ?lastStatusMessage ->
+              fun ?deletionSummary ->
+                fun ?lastStatusUpdateTime ->
+                  fun () ->
+                    {
+                      deletionId;
+                      typeName;
+                      deletionStartTime;
+                      lastStatus;
+                      lastStatusMessage;
+                      deletionSummary;
+                      lastStatusUpdateTime
+                    }
+    let to_value x =
+      structure_to_value
+        [("DeletionId", (Option.map x.deletionId ~f:UUID.to_value));
+        ("TypeName",
+          (Option.map x.typeName ~f:InventoryItemTypeName.to_value));
+        ("DeletionStartTime",
+          (Option.map x.deletionStartTime
+             ~f:InventoryDeletionStartTime.to_value));
+        ("LastStatus",
+          (Option.map x.lastStatus ~f:InventoryDeletionStatus.to_value));
+        ("LastStatusMessage",
+          (Option.map x.lastStatusMessage
+             ~f:InventoryDeletionLastStatusMessage.to_value));
+        ("DeletionSummary",
+          (Option.map x.deletionSummary ~f:InventoryDeletionSummary.to_value));
+        ("LastStatusUpdateTime",
+          (Option.map x.lastStatusUpdateTime
+             ~f:InventoryDeletionLastStatusUpdateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastStatusUpdateTime =
+        (Option.map ~f:InventoryDeletionLastStatusUpdateTime.of_xml)
+          (Xml.child xml_arg0 "LastStatusUpdateTime") in
+      let deletionSummary =
+        (Option.map ~f:InventoryDeletionSummary.of_xml)
+          (Xml.child xml_arg0 "DeletionSummary") in
+      let lastStatusMessage =
+        (Option.map ~f:InventoryDeletionLastStatusMessage.of_xml)
+          (Xml.child xml_arg0 "LastStatusMessage") in
+      let lastStatus =
+        (Option.map ~f:InventoryDeletionStatus.of_xml)
+          (Xml.child xml_arg0 "LastStatus") in
+      let deletionStartTime =
+        (Option.map ~f:InventoryDeletionStartTime.of_xml)
+          (Xml.child xml_arg0 "DeletionStartTime") in
+      let typeName =
+        (Option.map ~f:InventoryItemTypeName.of_xml)
+          (Xml.child xml_arg0 "TypeName") in
+      let deletionId =
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "DeletionId") in
+      make ?lastStatusUpdateTime ?deletionSummary ?lastStatusMessage
+        ?lastStatus ?deletionStartTime ?typeName ?deletionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastStatusUpdateTime =
+        field_map json__ "LastStatusUpdateTime"
+          InventoryDeletionLastStatusUpdateTime.of_json in
+      let deletionSummary =
+        field_map json__ "DeletionSummary" InventoryDeletionSummary.of_json in
+      let lastStatusMessage =
+        field_map json__ "LastStatusMessage"
+          InventoryDeletionLastStatusMessage.of_json in
+      let lastStatus =
+        field_map json__ "LastStatus" InventoryDeletionStatus.of_json in
+      let deletionStartTime =
+        field_map json__ "DeletionStartTime"
+          InventoryDeletionStartTime.of_json in
+      let typeName =
+        field_map json__ "TypeName" InventoryItemTypeName.of_json in
+      let deletionId = field_map json__ "DeletionId" UUID.of_json in
+      make ?lastStatusUpdateTime ?deletionSummary ?lastStatusMessage
+        ?lastStatus ?deletionStartTime ?typeName ?deletionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Status information returned by the DeleteInventory operation."]
+module InventoryDeletionsList =
+  struct
+    type nonrec t = InventoryDeletionStatusItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InventoryDeletionStatusItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InventoryDeletionStatusItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InventoryDeletionsList"
+        ~of_json:InventoryDeletionStatusItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InvalidDeletionIdException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The ID specified for the delete operation doesn't exist or isn't valid. Verify the ID and try again."]
+module DescribeInventoryDeletionsResult =
+  struct
+    type nonrec t =
+      {
+      inventoryDeletions: InventoryDeletionsList.t option
+        [@ocaml.doc "A list of status items for deleted inventory."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of items to return. Use this token to get the next set of results."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `InvalidDeletionIdException of InvalidDeletionIdException.t 
+      | `InvalidNextToken of InvalidNextToken.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?inventoryDeletions =
+      fun ?nextToken -> fun () -> { inventoryDeletions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidDeletionIdException" ->
+          `InvalidDeletionIdException
+            (InvalidDeletionIdException.of_json json)
+      | "InvalidNextToken" ->
+          `InvalidNextToken (InvalidNextToken.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidDeletionIdException" ->
+          `InvalidDeletionIdException (InvalidDeletionIdException.of_xml xml)
+      | "InvalidNextToken" -> `InvalidNextToken (InvalidNextToken.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidDeletionIdException e ->
+          `Assoc
+            [("error", (`String "InvalidDeletionIdException"));
+            ("details", (InvalidDeletionIdException.to_json e))]
+      | `InvalidNextToken e ->
+          `Assoc
+            [("error", (`String "InvalidNextToken"));
+            ("details", (InvalidNextToken.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("InventoryDeletions",
+           (Option.map x.inventoryDeletions
+              ~f:InventoryDeletionsList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let inventoryDeletions =
+        (Option.map ~f:InventoryDeletionsList.of_xml)
+          (Xml.child xml_arg0 "InventoryDeletions") in
+      make ?nextToken ?inventoryDeletions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let inventoryDeletions =
+        field_map json__ "InventoryDeletions" InventoryDeletionsList.of_json in
+      make ?nextToken ?inventoryDeletions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a specific delete inventory operation."]
+module MaintenanceWindowMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:10));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaintenanceWindowMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MaintenanceWindowFilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "MaintenanceWindowFilterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MaintenanceWindowFilterValue" j
+    let to_json = simple_to_json to_value
+  end
+module MaintenanceWindowFilterValues =
+  struct
+    type nonrec t = MaintenanceWindowFilterValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MaintenanceWindowFilterValue.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MaintenanceWindowFilterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MaintenanceWindowFilterValues"
+        ~of_json:MaintenanceWindowFilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaintenanceWindowFilterKey =
+  struct
+    type nonrec t = string
+    let context_ = "MaintenanceWindowFilterKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MaintenanceWindowFilterKey" j
+    let to_json = simple_to_json to_value
+  end
+module MaintenanceWindowFilter =
+  struct
+    type nonrec t =
+      {
+      key: MaintenanceWindowFilterKey.t option
+        [@ocaml.doc "The name of the filter."];
+      values: MaintenanceWindowFilterValues.t option
+        [@ocaml.doc "The filter values."]}
+    let make ?key = fun ?values -> fun () -> { key; values }
+    let to_value x =
+      structure_to_value
+        [("Key", (Option.map x.key ~f:MaintenanceWindowFilterKey.to_value));
+        ("Values",
+          (Option.map x.values ~f:MaintenanceWindowFilterValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        (Option.map ~f:MaintenanceWindowFilterValues.of_xml)
+          (Xml.child xml_arg0 "Values") in
+      let key =
+        (Option.map ~f:MaintenanceWindowFilterKey.of_xml)
+          (Xml.child xml_arg0 "Key") in
+      make ?values ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values =
+        field_map json__ "Values" MaintenanceWindowFilterValues.of_json in
+      let key = field_map json__ "Key" MaintenanceWindowFilterKey.of_json in
+      make ?values ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Filter used in the request. Supported filter keys depend on the API operation that includes the filter. API operations that use MaintenanceWindowFilter> include the following: DescribeMaintenanceWindowExecutions DescribeMaintenanceWindowExecutionTaskInvocations DescribeMaintenanceWindowExecutionTasks DescribeMaintenanceWindows DescribeMaintenanceWindowTargets DescribeMaintenanceWindowTasks"]
+module MaintenanceWindowFilterList =
+  struct
+    type nonrec t = MaintenanceWindowFilter.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MaintenanceWindowFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MaintenanceWindowFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MaintenanceWindowFilterList"
+        ~of_json:MaintenanceWindowFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaintenanceWindowExecutionTaskId =
+  struct
+    type nonrec t = string
+    let context_ = "MaintenanceWindowExecutionTaskId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MaintenanceWindowExecutionTaskId" j
+    let to_json = simple_to_json to_value
+  end
+module DescribeMaintenanceWindowExecutionTaskInvocationsRequest =
+  struct
+    type nonrec t =
+      {
+      windowExecutionId: MaintenanceWindowExecutionId.t
+        [@ocaml.doc
+          "The ID of the maintenance window execution the task is part of."];
+      taskId: MaintenanceWindowExecutionTaskId.t
+        [@ocaml.doc
+          "The ID of the specific task in the maintenance window task that should be retrieved."];
+      filters: MaintenanceWindowFilterList.t option
+        [@ocaml.doc
+          "Optional filters used to scope down the returned task invocations. The supported filter key is STATUS with the corresponding values PENDING, IN_PROGRESS, SUCCESS, FAILED, TIMED_OUT, CANCELLING, and CANCELLED."];
+      maxResults: MaintenanceWindowMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of items to return. (You received this token from a previous call.)"]}
+    let context_ = "DescribeMaintenanceWindowExecutionTaskInvocationsRequest"
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~windowExecutionId ->
+            fun ~taskId ->
+              fun () ->
+                { filters; maxResults; nextToken; windowExecutionId; taskId }
+    let to_value x =
+      structure_to_value
+        [("WindowExecutionId",
+           (Some (MaintenanceWindowExecutionId.to_value x.windowExecutionId)));
+        ("TaskId",
+          (Some (MaintenanceWindowExecutionTaskId.to_value x.taskId)));
+        ("Filters",
+          (Option.map x.filters ~f:MaintenanceWindowFilterList.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaintenanceWindowMaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaintenanceWindowMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let filters =
+        (Option.map ~f:MaintenanceWindowFilterList.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      let taskId =
+        MaintenanceWindowExecutionTaskId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TaskId") in
+      let windowExecutionId =
+        MaintenanceWindowExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WindowExecutionId") in
+      make ?nextToken ?maxResults ?filters ~taskId ~windowExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaintenanceWindowMaxResults.of_json in
+      let filters =
+        field_map json__ "Filters" MaintenanceWindowFilterList.of_json in
+      let taskId =
+        field_map_exn json__ "TaskId"
+          MaintenanceWindowExecutionTaskId.of_json in
+      let windowExecutionId =
+        field_map_exn json__ "WindowExecutionId"
+          MaintenanceWindowExecutionId.of_json in
+      make ?nextToken ?maxResults ?filters ~taskId ~windowExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the individual task executions (one per target) for a particular task run as part of a maintenance window execution."]
+module MaintenanceWindowTaskType =
+  struct
+    type nonrec t =
+      | RUN_COMMAND 
+      | AUTOMATION 
+      | STEP_FUNCTIONS 
+      | LAMBDA 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RUN_COMMAND -> "RUN_COMMAND"
+      | AUTOMATION -> "AUTOMATION"
+      | STEP_FUNCTIONS -> "STEP_FUNCTIONS"
+      | LAMBDA -> "LAMBDA"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RUN_COMMAND" -> RUN_COMMAND
+      | "AUTOMATION" -> AUTOMATION
+      | "STEP_FUNCTIONS" -> STEP_FUNCTIONS
+      | "LAMBDA" -> LAMBDA
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MaintenanceWindowTaskType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MaintenanceWindowTaskType" j)
+    let to_json = simple_to_json to_value
+  end
+module MaintenanceWindowTaskTargetId =
+  struct
+    type nonrec t = string
+    let context_ = "MaintenanceWindowTaskTargetId"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:36); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MaintenanceWindowTaskTargetId" j
+    let to_json = simple_to_json to_value
+  end
+module MaintenanceWindowExecutionTaskInvocationParameters =
+  struct
+    type nonrec t = string
+    let context_ = "MaintenanceWindowExecutionTaskInvocationParameters"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json
+        ~kind:"MaintenanceWindowExecutionTaskInvocationParameters" j
+    let to_json = simple_to_json to_value
+  end
+module MaintenanceWindowExecutionTaskInvocationId =
+  struct
+    type nonrec t = string
+    let context_ = "MaintenanceWindowExecutionTaskInvocationId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"MaintenanceWindowExecutionTaskInvocationId" j
+    let to_json = simple_to_json to_value
+  end
+module MaintenanceWindowExecutionTaskExecutionId =
+  struct
+    type nonrec t = string
+    let context_ = "MaintenanceWindowExecutionTaskExecutionId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"MaintenanceWindowExecutionTaskExecutionId" j
+    let to_json = simple_to_json to_value
+  end
+module MaintenanceWindowExecutionStatusDetails =
+  struct
+    type nonrec t = string
+    let context_ = "MaintenanceWindowExecutionStatusDetails"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:250) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"MaintenanceWindowExecutionStatusDetails" j
+    let to_json = simple_to_json to_value
+  end
+module MaintenanceWindowExecutionStatus =
+  struct
+    type nonrec t =
+      | PENDING 
+      | IN_PROGRESS 
+      | SUCCESS 
+      | FAILED 
+      | TIMED_OUT 
+      | CANCELLING 
+      | CANCELLED 
+      | SKIPPED_OVERLAPPING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING -> "PENDING"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | SUCCESS -> "SUCCESS"
+      | FAILED -> "FAILED"
+      | TIMED_OUT -> "TIMED_OUT"
+      | CANCELLING -> "CANCELLING"
+      | CANCELLED -> "CANCELLED"
+      | SKIPPED_OVERLAPPING -> "SKIPPED_OVERLAPPING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING" -> PENDING
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "SUCCESS" -> SUCCESS
+      | "FAILED" -> FAILED
+      | "TIMED_OUT" -> TIMED_OUT
+      | "CANCELLING" -> CANCELLING
+      | "CANCELLED" -> CANCELLED
+      | "SKIPPED_OVERLAPPING" -> SKIPPED_OVERLAPPING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MaintenanceWindowExecutionStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MaintenanceWindowExecutionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module MaintenanceWindowExecutionTaskInvocationIdentity =
+  struct
+    type nonrec t =
+      {
+      windowExecutionId: MaintenanceWindowExecutionId.t option
+        [@ocaml.doc
+          "The ID of the maintenance window execution that ran the task."];
+      taskExecutionId: MaintenanceWindowExecutionTaskId.t option
+        [@ocaml.doc
+          "The ID of the specific task execution in the maintenance window execution."];
+      invocationId: MaintenanceWindowExecutionTaskInvocationId.t option
+        [@ocaml.doc "The ID of the task invocation."];
+      executionId: MaintenanceWindowExecutionTaskExecutionId.t option
+        [@ocaml.doc
+          "The ID of the action performed in the service that actually handled the task invocation. If the task type is RUN_COMMAND, this value is the command ID."];
+      taskType: MaintenanceWindowTaskType.t option
+        [@ocaml.doc "The task type."];
+      parameters: MaintenanceWindowExecutionTaskInvocationParameters.t option
+        [@ocaml.doc
+          "The parameters that were provided for the invocation when it was run."];
+      status: MaintenanceWindowExecutionStatus.t option
+        [@ocaml.doc "The status of the task invocation."];
+      statusDetails: MaintenanceWindowExecutionStatusDetails.t option
+        [@ocaml.doc
+          "The details explaining the status of the task invocation. Not available for all status values."];
+      startTime: DateTime.t option
+        [@ocaml.doc "The time the invocation started."];
+      endTime: DateTime.t option
+        [@ocaml.doc "The time the invocation finished."];
+      ownerInformation: OwnerInformation.t option
+        [@ocaml.doc
+          "User-provided value that was specified when the target was registered with the maintenance window. This was also included in any Amazon CloudWatch Events events raised during the task invocation."];
+      windowTargetId: MaintenanceWindowTaskTargetId.t option
+        [@ocaml.doc
+          "The ID of the target definition in this maintenance window the invocation was performed for."]}
+    let make ?windowExecutionId =
+      fun ?taskExecutionId ->
+        fun ?invocationId ->
+          fun ?executionId ->
+            fun ?taskType ->
+              fun ?parameters ->
+                fun ?status ->
+                  fun ?statusDetails ->
+                    fun ?startTime ->
+                      fun ?endTime ->
+                        fun ?ownerInformation ->
+                          fun ?windowTargetId ->
+                            fun () ->
+                              {
+                                windowExecutionId;
+                                taskExecutionId;
+                                invocationId;
+                                executionId;
+                                taskType;
+                                parameters;
+                                status;
+                                statusDetails;
+                                startTime;
+                                endTime;
+                                ownerInformation;
+                                windowTargetId
+                              }
+    let to_value x =
+      structure_to_value
+        [("WindowExecutionId",
+           (Option.map x.windowExecutionId
+              ~f:MaintenanceWindowExecutionId.to_value));
+        ("TaskExecutionId",
+          (Option.map x.taskExecutionId
+             ~f:MaintenanceWindowExecutionTaskId.to_value));
+        ("InvocationId",
+          (Option.map x.invocationId
+             ~f:MaintenanceWindowExecutionTaskInvocationId.to_value));
+        ("ExecutionId",
+          (Option.map x.executionId
+             ~f:MaintenanceWindowExecutionTaskExecutionId.to_value));
+        ("TaskType",
+          (Option.map x.taskType ~f:MaintenanceWindowTaskType.to_value));
+        ("Parameters",
+          (Option.map x.parameters
+             ~f:MaintenanceWindowExecutionTaskInvocationParameters.to_value));
+        ("Status",
+          (Option.map x.status ~f:MaintenanceWindowExecutionStatus.to_value));
+        ("StatusDetails",
+          (Option.map x.statusDetails
+             ~f:MaintenanceWindowExecutionStatusDetails.to_value));
+        ("StartTime", (Option.map x.startTime ~f:DateTime.to_value));
+        ("EndTime", (Option.map x.endTime ~f:DateTime.to_value));
+        ("OwnerInformation",
+          (Option.map x.ownerInformation ~f:OwnerInformation.to_value));
+        ("WindowTargetId",
+          (Option.map x.windowTargetId
+             ~f:MaintenanceWindowTaskTargetId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let windowTargetId =
+        (Option.map ~f:MaintenanceWindowTaskTargetId.of_xml)
+          (Xml.child xml_arg0 "WindowTargetId") in
+      let ownerInformation =
+        (Option.map ~f:OwnerInformation.of_xml)
+          (Xml.child xml_arg0 "OwnerInformation") in
+      let endTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let startTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let statusDetails =
+        (Option.map ~f:MaintenanceWindowExecutionStatusDetails.of_xml)
+          (Xml.child xml_arg0 "StatusDetails") in
+      let status =
+        (Option.map ~f:MaintenanceWindowExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let parameters =
+        (Option.map
+           ~f:MaintenanceWindowExecutionTaskInvocationParameters.of_xml)
+          (Xml.child xml_arg0 "Parameters") in
+      let taskType =
+        (Option.map ~f:MaintenanceWindowTaskType.of_xml)
+          (Xml.child xml_arg0 "TaskType") in
+      let executionId =
+        (Option.map ~f:MaintenanceWindowExecutionTaskExecutionId.of_xml)
+          (Xml.child xml_arg0 "ExecutionId") in
+      let invocationId =
+        (Option.map ~f:MaintenanceWindowExecutionTaskInvocationId.of_xml)
+          (Xml.child xml_arg0 "InvocationId") in
+      let taskExecutionId =
+        (Option.map ~f:MaintenanceWindowExecutionTaskId.of_xml)
+          (Xml.child xml_arg0 "TaskExecutionId") in
+      let windowExecutionId =
+        (Option.map ~f:MaintenanceWindowExecutionId.of_xml)
+          (Xml.child xml_arg0 "WindowExecutionId") in
+      make ?windowTargetId ?ownerInformation ?endTime ?startTime
+        ?statusDetails ?status ?parameters ?taskType ?executionId
+        ?invocationId ?taskExecutionId ?windowExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let windowTargetId =
+        field_map json__ "WindowTargetId"
+          MaintenanceWindowTaskTargetId.of_json in
+      let ownerInformation =
+        field_map json__ "OwnerInformation" OwnerInformation.of_json in
+      let endTime = field_map json__ "EndTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
+      let statusDetails =
+        field_map json__ "StatusDetails"
+          MaintenanceWindowExecutionStatusDetails.of_json in
+      let status =
+        field_map json__ "Status" MaintenanceWindowExecutionStatus.of_json in
+      let parameters =
+        field_map json__ "Parameters"
+          MaintenanceWindowExecutionTaskInvocationParameters.of_json in
+      let taskType =
+        field_map json__ "TaskType" MaintenanceWindowTaskType.of_json in
+      let executionId =
+        field_map json__ "ExecutionId"
+          MaintenanceWindowExecutionTaskExecutionId.of_json in
+      let invocationId =
+        field_map json__ "InvocationId"
+          MaintenanceWindowExecutionTaskInvocationId.of_json in
+      let taskExecutionId =
+        field_map json__ "TaskExecutionId"
+          MaintenanceWindowExecutionTaskId.of_json in
+      let windowExecutionId =
+        field_map json__ "WindowExecutionId"
+          MaintenanceWindowExecutionId.of_json in
+      make ?windowTargetId ?ownerInformation ?endTime ?startTime
+        ?statusDetails ?status ?parameters ?taskType ?executionId
+        ?invocationId ?taskExecutionId ?windowExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the information about a task invocation for a particular target as part of a task execution performed as part of a maintenance window execution."]
+module MaintenanceWindowExecutionTaskInvocationIdentityList =
+  struct
+    type nonrec t = MaintenanceWindowExecutionTaskInvocationIdentity.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:MaintenanceWindowExecutionTaskInvocationIdentity.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:MaintenanceWindowExecutionTaskInvocationIdentity.of_xml)
+    let of_json j =
+      list_of_json
+        ~kind:"MaintenanceWindowExecutionTaskInvocationIdentityList"
+        ~of_json:MaintenanceWindowExecutionTaskInvocationIdentity.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeMaintenanceWindowExecutionTaskInvocationsResult =
+  struct
+    type nonrec t =
+      {
+      windowExecutionTaskInvocationIdentities:
+        MaintenanceWindowExecutionTaskInvocationIdentityList.t option
+        [@ocaml.doc
+          "Information about the task invocation results per invocation."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use when requesting the next set of items. If there are no additional items to return, the string is empty."]}
+    type nonrec error =
+      [ `DoesNotExistException of DoesNotExistException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?windowExecutionTaskInvocationIdentities =
+      fun ?nextToken ->
+        fun () -> { windowExecutionTaskInvocationIdentities; nextToken }
+    let error_of_json name json =
+      match name with
+      | "DoesNotExistException" ->
+          `DoesNotExistException (DoesNotExistException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DoesNotExistException" ->
+          `DoesNotExistException (DoesNotExistException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DoesNotExistException e ->
+          `Assoc
+            [("error", (`String "DoesNotExistException"));
+            ("details", (DoesNotExistException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WindowExecutionTaskInvocationIdentities",
+           (Option.map x.windowExecutionTaskInvocationIdentities
+              ~f:MaintenanceWindowExecutionTaskInvocationIdentityList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let windowExecutionTaskInvocationIdentities =
+        (Option.map
+           ~f:MaintenanceWindowExecutionTaskInvocationIdentityList.of_xml)
+          (Xml.child xml_arg0 "WindowExecutionTaskInvocationIdentities") in
+      make ?nextToken ?windowExecutionTaskInvocationIdentities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let windowExecutionTaskInvocationIdentities =
+        field_map json__ "WindowExecutionTaskInvocationIdentities"
+          MaintenanceWindowExecutionTaskInvocationIdentityList.of_json in
+      make ?nextToken ?windowExecutionTaskInvocationIdentities ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the individual task executions (one per target) for a particular task run as part of a maintenance window execution."]
+module DescribeMaintenanceWindowExecutionTasksRequest =
+  struct
+    type nonrec t =
+      {
+      windowExecutionId: MaintenanceWindowExecutionId.t
+        [@ocaml.doc
+          "The ID of the maintenance window execution whose task executions should be retrieved."];
+      filters: MaintenanceWindowFilterList.t option
+        [@ocaml.doc
+          "Optional filters used to scope down the returned tasks. The supported filter key is STATUS with the corresponding values PENDING, IN_PROGRESS, SUCCESS, FAILED, TIMED_OUT, CANCELLING, and CANCELLED."];
+      maxResults: MaintenanceWindowMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of items to return. (You received this token from a previous call.)"]}
+    let context_ = "DescribeMaintenanceWindowExecutionTasksRequest"
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~windowExecutionId ->
+            fun () -> { filters; maxResults; nextToken; windowExecutionId }
+    let to_value x =
+      structure_to_value
+        [("WindowExecutionId",
+           (Some (MaintenanceWindowExecutionId.to_value x.windowExecutionId)));
+        ("Filters",
+          (Option.map x.filters ~f:MaintenanceWindowFilterList.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaintenanceWindowMaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaintenanceWindowMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let filters =
+        (Option.map ~f:MaintenanceWindowFilterList.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      let windowExecutionId =
+        MaintenanceWindowExecutionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WindowExecutionId") in
+      make ?nextToken ?maxResults ?filters ~windowExecutionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaintenanceWindowMaxResults.of_json in
+      let filters =
+        field_map json__ "Filters" MaintenanceWindowFilterList.of_json in
+      let windowExecutionId =
+        field_map_exn json__ "WindowExecutionId"
+          MaintenanceWindowExecutionId.of_json in
+      make ?nextToken ?maxResults ?filters ~windowExecutionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "For a given maintenance window execution, lists the tasks that were run."]
+module MaintenanceWindowTaskArn =
+  struct
+    type nonrec t = string
+    let context_ = "MaintenanceWindowTaskArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1600) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MaintenanceWindowTaskArn" j
+    let to_json = simple_to_json to_value
+  end
+module MaintenanceWindowExecutionTaskIdentity =
+  struct
+    type nonrec t =
+      {
+      windowExecutionId: MaintenanceWindowExecutionId.t option
+        [@ocaml.doc
+          "The ID of the maintenance window execution that ran the task."];
+      taskExecutionId: MaintenanceWindowExecutionTaskId.t option
+        [@ocaml.doc
+          "The ID of the specific task execution in the maintenance window execution."];
+      status: MaintenanceWindowExecutionStatus.t option
+        [@ocaml.doc "The status of the task execution."];
+      statusDetails: MaintenanceWindowExecutionStatusDetails.t option
+        [@ocaml.doc
+          "The details explaining the status of the task execution. Not available for all status values."];
+      startTime: DateTime.t option
+        [@ocaml.doc "The time the task execution started."];
+      endTime: DateTime.t option
+        [@ocaml.doc "The time the task execution finished."];
+      taskArn: MaintenanceWindowTaskArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the task that ran."];
+      taskType: MaintenanceWindowTaskType.t option
+        [@ocaml.doc "The type of task that ran."];
+      alarmConfiguration: AlarmConfiguration.t option
+        [@ocaml.doc
+          "The details for the CloudWatch alarm applied to your maintenance window task."];
+      triggeredAlarms: AlarmStateInformationList.t option
+        [@ocaml.doc
+          "The CloudWatch alarm that was invoked by the maintenance window task."]}
+    let make ?windowExecutionId =
+      fun ?taskExecutionId ->
+        fun ?status ->
+          fun ?statusDetails ->
+            fun ?startTime ->
+              fun ?endTime ->
+                fun ?taskArn ->
+                  fun ?taskType ->
+                    fun ?alarmConfiguration ->
+                      fun ?triggeredAlarms ->
+                        fun () ->
+                          {
+                            windowExecutionId;
+                            taskExecutionId;
+                            status;
+                            statusDetails;
+                            startTime;
+                            endTime;
+                            taskArn;
+                            taskType;
+                            alarmConfiguration;
+                            triggeredAlarms
+                          }
+    let to_value x =
+      structure_to_value
+        [("WindowExecutionId",
+           (Option.map x.windowExecutionId
+              ~f:MaintenanceWindowExecutionId.to_value));
+        ("TaskExecutionId",
+          (Option.map x.taskExecutionId
+             ~f:MaintenanceWindowExecutionTaskId.to_value));
+        ("Status",
+          (Option.map x.status ~f:MaintenanceWindowExecutionStatus.to_value));
+        ("StatusDetails",
+          (Option.map x.statusDetails
+             ~f:MaintenanceWindowExecutionStatusDetails.to_value));
+        ("StartTime", (Option.map x.startTime ~f:DateTime.to_value));
+        ("EndTime", (Option.map x.endTime ~f:DateTime.to_value));
+        ("TaskArn",
+          (Option.map x.taskArn ~f:MaintenanceWindowTaskArn.to_value));
+        ("TaskType",
+          (Option.map x.taskType ~f:MaintenanceWindowTaskType.to_value));
+        ("AlarmConfiguration",
+          (Option.map x.alarmConfiguration ~f:AlarmConfiguration.to_value));
+        ("TriggeredAlarms",
+          (Option.map x.triggeredAlarms ~f:AlarmStateInformationList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let triggeredAlarms =
+        (Option.map ~f:AlarmStateInformationList.of_xml)
+          (Xml.child xml_arg0 "TriggeredAlarms") in
+      let alarmConfiguration =
+        (Option.map ~f:AlarmConfiguration.of_xml)
+          (Xml.child xml_arg0 "AlarmConfiguration") in
+      let taskType =
+        (Option.map ~f:MaintenanceWindowTaskType.of_xml)
+          (Xml.child xml_arg0 "TaskType") in
+      let taskArn =
+        (Option.map ~f:MaintenanceWindowTaskArn.of_xml)
+          (Xml.child xml_arg0 "TaskArn") in
+      let endTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let startTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let statusDetails =
+        (Option.map ~f:MaintenanceWindowExecutionStatusDetails.of_xml)
+          (Xml.child xml_arg0 "StatusDetails") in
+      let status =
+        (Option.map ~f:MaintenanceWindowExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let taskExecutionId =
+        (Option.map ~f:MaintenanceWindowExecutionTaskId.of_xml)
+          (Xml.child xml_arg0 "TaskExecutionId") in
+      let windowExecutionId =
+        (Option.map ~f:MaintenanceWindowExecutionId.of_xml)
+          (Xml.child xml_arg0 "WindowExecutionId") in
+      make ?triggeredAlarms ?alarmConfiguration ?taskType ?taskArn ?endTime
+        ?startTime ?statusDetails ?status ?taskExecutionId ?windowExecutionId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let triggeredAlarms =
+        field_map json__ "TriggeredAlarms" AlarmStateInformationList.of_json in
+      let alarmConfiguration =
+        field_map json__ "AlarmConfiguration" AlarmConfiguration.of_json in
+      let taskType =
+        field_map json__ "TaskType" MaintenanceWindowTaskType.of_json in
+      let taskArn =
+        field_map json__ "TaskArn" MaintenanceWindowTaskArn.of_json in
+      let endTime = field_map json__ "EndTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
+      let statusDetails =
+        field_map json__ "StatusDetails"
+          MaintenanceWindowExecutionStatusDetails.of_json in
+      let status =
+        field_map json__ "Status" MaintenanceWindowExecutionStatus.of_json in
+      let taskExecutionId =
+        field_map json__ "TaskExecutionId"
+          MaintenanceWindowExecutionTaskId.of_json in
+      let windowExecutionId =
+        field_map json__ "WindowExecutionId"
+          MaintenanceWindowExecutionId.of_json in
+      make ?triggeredAlarms ?alarmConfiguration ?taskType ?taskArn ?endTime
+        ?startTime ?statusDetails ?status ?taskExecutionId ?windowExecutionId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a task execution performed as part of a maintenance window execution."]
+module MaintenanceWindowExecutionTaskIdentityList =
+  struct
+    type nonrec t = MaintenanceWindowExecutionTaskIdentity.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MaintenanceWindowExecutionTaskIdentity.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:MaintenanceWindowExecutionTaskIdentity.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MaintenanceWindowExecutionTaskIdentityList"
+        ~of_json:MaintenanceWindowExecutionTaskIdentity.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeMaintenanceWindowExecutionTasksResult =
+  struct
+    type nonrec t =
+      {
+      windowExecutionTaskIdentities:
+        MaintenanceWindowExecutionTaskIdentityList.t option
+        [@ocaml.doc "Information about the task executions."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use when requesting the next set of items. If there are no additional items to return, the string is empty."]}
+    type nonrec error =
+      [ `DoesNotExistException of DoesNotExistException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?windowExecutionTaskIdentities =
+      fun ?nextToken ->
+        fun () -> { windowExecutionTaskIdentities; nextToken }
+    let error_of_json name json =
+      match name with
+      | "DoesNotExistException" ->
+          `DoesNotExistException (DoesNotExistException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DoesNotExistException" ->
+          `DoesNotExistException (DoesNotExistException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DoesNotExistException e ->
+          `Assoc
+            [("error", (`String "DoesNotExistException"));
+            ("details", (DoesNotExistException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WindowExecutionTaskIdentities",
+           (Option.map x.windowExecutionTaskIdentities
+              ~f:MaintenanceWindowExecutionTaskIdentityList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let windowExecutionTaskIdentities =
+        (Option.map ~f:MaintenanceWindowExecutionTaskIdentityList.of_xml)
+          (Xml.child xml_arg0 "WindowExecutionTaskIdentities") in
+      make ?nextToken ?windowExecutionTaskIdentities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let windowExecutionTaskIdentities =
+        field_map json__ "WindowExecutionTaskIdentities"
+          MaintenanceWindowExecutionTaskIdentityList.of_json in
+      make ?nextToken ?windowExecutionTaskIdentities ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "For a given maintenance window execution, lists the tasks that were run."]
+module DescribeMaintenanceWindowExecutionsRequest =
+  struct
+    type nonrec t =
+      {
+      windowId: MaintenanceWindowId.t
+        [@ocaml.doc
+          "The ID of the maintenance window whose executions should be retrieved."];
+      filters: MaintenanceWindowFilterList.t option
+        [@ocaml.doc
+          "Each entry in the array is a structure containing: Key. A string between 1 and 128 characters. Supported keys include ExecutedBefore and ExecutedAfter. Values. An array of strings, each between 1 and 256 characters. Supported values are date/time strings in a valid ISO 8601 date/time format, such as 2024-11-04T05:00:00Z."];
+      maxResults: MaintenanceWindowMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of items to return. (You received this token from a previous call.)"]}
+    let context_ = "DescribeMaintenanceWindowExecutionsRequest"
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~windowId ->
+            fun () -> { filters; maxResults; nextToken; windowId }
+    let to_value x =
+      structure_to_value
+        [("WindowId", (Some (MaintenanceWindowId.to_value x.windowId)));
+        ("Filters",
+          (Option.map x.filters ~f:MaintenanceWindowFilterList.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaintenanceWindowMaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaintenanceWindowMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let filters =
+        (Option.map ~f:MaintenanceWindowFilterList.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      let windowId =
+        MaintenanceWindowId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WindowId") in
+      make ?nextToken ?maxResults ?filters ~windowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaintenanceWindowMaxResults.of_json in
+      let filters =
+        field_map json__ "Filters" MaintenanceWindowFilterList.of_json in
+      let windowId =
+        field_map_exn json__ "WindowId" MaintenanceWindowId.of_json in
+      make ?nextToken ?maxResults ?filters ~windowId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the executions of a maintenance window. This includes information about when the maintenance window was scheduled to be active, and information about tasks registered and run with the maintenance window."]
+module MaintenanceWindowExecution =
+  struct
+    type nonrec t =
+      {
+      windowId: MaintenanceWindowId.t option
+        [@ocaml.doc "The ID of the maintenance window."];
+      windowExecutionId: MaintenanceWindowExecutionId.t option
+        [@ocaml.doc "The ID of the maintenance window execution."];
+      status: MaintenanceWindowExecutionStatus.t option
+        [@ocaml.doc "The status of the execution."];
+      statusDetails: MaintenanceWindowExecutionStatusDetails.t option
+        [@ocaml.doc
+          "The details explaining the status. Not available for all status values."];
+      startTime: DateTime.t option
+        [@ocaml.doc "The time the execution started."];
+      endTime: DateTime.t option
+        [@ocaml.doc "The time the execution finished."]}
+    let make ?windowId =
+      fun ?windowExecutionId ->
+        fun ?status ->
+          fun ?statusDetails ->
+            fun ?startTime ->
+              fun ?endTime ->
+                fun () ->
+                  {
+                    windowId;
+                    windowExecutionId;
+                    status;
+                    statusDetails;
+                    startTime;
+                    endTime
+                  }
+    let to_value x =
+      structure_to_value
+        [("WindowId",
+           (Option.map x.windowId ~f:MaintenanceWindowId.to_value));
+        ("WindowExecutionId",
+          (Option.map x.windowExecutionId
+             ~f:MaintenanceWindowExecutionId.to_value));
+        ("Status",
+          (Option.map x.status ~f:MaintenanceWindowExecutionStatus.to_value));
+        ("StatusDetails",
+          (Option.map x.statusDetails
+             ~f:MaintenanceWindowExecutionStatusDetails.to_value));
+        ("StartTime", (Option.map x.startTime ~f:DateTime.to_value));
+        ("EndTime", (Option.map x.endTime ~f:DateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let startTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let statusDetails =
+        (Option.map ~f:MaintenanceWindowExecutionStatusDetails.of_xml)
+          (Xml.child xml_arg0 "StatusDetails") in
+      let status =
+        (Option.map ~f:MaintenanceWindowExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let windowExecutionId =
+        (Option.map ~f:MaintenanceWindowExecutionId.of_xml)
+          (Xml.child xml_arg0 "WindowExecutionId") in
+      let windowId =
+        (Option.map ~f:MaintenanceWindowId.of_xml)
+          (Xml.child xml_arg0 "WindowId") in
+      make ?endTime ?startTime ?statusDetails ?status ?windowExecutionId
+        ?windowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
+      let statusDetails =
+        field_map json__ "StatusDetails"
+          MaintenanceWindowExecutionStatusDetails.of_json in
+      let status =
+        field_map json__ "Status" MaintenanceWindowExecutionStatus.of_json in
+      let windowExecutionId =
+        field_map json__ "WindowExecutionId"
+          MaintenanceWindowExecutionId.of_json in
+      let windowId = field_map json__ "WindowId" MaintenanceWindowId.of_json in
+      make ?endTime ?startTime ?statusDetails ?status ?windowExecutionId
+        ?windowId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the information about an execution of a maintenance window."]
+module MaintenanceWindowExecutionList =
+  struct
+    type nonrec t = MaintenanceWindowExecution.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MaintenanceWindowExecution.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MaintenanceWindowExecution.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MaintenanceWindowExecutionList"
+        ~of_json:MaintenanceWindowExecution.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeMaintenanceWindowExecutionsResult =
+  struct
+    type nonrec t =
+      {
+      windowExecutions: MaintenanceWindowExecutionList.t option
+        [@ocaml.doc "Information about the maintenance window executions."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use when requesting the next set of items. If there are no additional items to return, the string is empty."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?windowExecutions =
+      fun ?nextToken -> fun () -> { windowExecutions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WindowExecutions",
+           (Option.map x.windowExecutions
+              ~f:MaintenanceWindowExecutionList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let windowExecutions =
+        (Option.map ~f:MaintenanceWindowExecutionList.of_xml)
+          (Xml.child xml_arg0 "WindowExecutions") in
+      make ?nextToken ?windowExecutions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let windowExecutions =
+        field_map json__ "WindowExecutions"
+          MaintenanceWindowExecutionList.of_json in
+      make ?nextToken ?windowExecutions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the executions of a maintenance window. This includes information about when the maintenance window was scheduled to be active, and information about tasks registered and run with the maintenance window."]
+module MaintenanceWindowSearchMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for MaintenanceWindowSearchMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MaintenanceWindowResourceType =
+  struct
+    type nonrec t =
+      | INSTANCE 
+      | RESOURCE_GROUP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INSTANCE -> "INSTANCE"
+      | RESOURCE_GROUP -> "RESOURCE_GROUP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INSTANCE" -> INSTANCE
+      | "RESOURCE_GROUP" -> RESOURCE_GROUP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MaintenanceWindowResourceType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MaintenanceWindowResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module DescribeMaintenanceWindowScheduleRequest =
+  struct
+    type nonrec t =
+      {
+      windowId: MaintenanceWindowId.t option
+        [@ocaml.doc
+          "The ID of the maintenance window to retrieve information about."];
+      targets: Targets.t option
+        [@ocaml.doc
+          "The managed node ID or key-value pair to retrieve information about."];
+      resourceType: MaintenanceWindowResourceType.t option
+        [@ocaml.doc
+          "The type of resource you want to retrieve information about. For example, INSTANCE."];
+      filters: PatchOrchestratorFilterList.t option
+        [@ocaml.doc
+          "Filters used to limit the range of results. For example, you can limit maintenance window executions to only those scheduled before or after a certain date and time."];
+      maxResults: MaintenanceWindowSearchMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of items to return. (You received this token from a previous call.)"]}
+    let make ?windowId =
+      fun ?targets ->
+        fun ?resourceType ->
+          fun ?filters ->
+            fun ?maxResults ->
+              fun ?nextToken ->
+                fun () ->
+                  {
+                    windowId;
+                    targets;
+                    resourceType;
+                    filters;
+                    maxResults;
+                    nextToken
+                  }
+    let to_value x =
+      structure_to_value
+        [("WindowId",
+           (Option.map x.windowId ~f:MaintenanceWindowId.to_value));
+        ("Targets", (Option.map x.targets ~f:Targets.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType
+             ~f:MaintenanceWindowResourceType.to_value));
+        ("Filters",
+          (Option.map x.filters ~f:PatchOrchestratorFilterList.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:MaintenanceWindowSearchMaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaintenanceWindowSearchMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let filters =
+        (Option.map ~f:PatchOrchestratorFilterList.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      let resourceType =
+        (Option.map ~f:MaintenanceWindowResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      let targets =
+        (Option.map ~f:Targets.of_xml) (Xml.child xml_arg0 "Targets") in
+      let windowId =
+        (Option.map ~f:MaintenanceWindowId.of_xml)
+          (Xml.child xml_arg0 "WindowId") in
+      make ?nextToken ?maxResults ?filters ?resourceType ?targets ?windowId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults"
+          MaintenanceWindowSearchMaxResults.of_json in
+      let filters =
+        field_map json__ "Filters" PatchOrchestratorFilterList.of_json in
+      let resourceType =
+        field_map json__ "ResourceType" MaintenanceWindowResourceType.of_json in
+      let targets = field_map json__ "Targets" Targets.of_json in
+      let windowId = field_map json__ "WindowId" MaintenanceWindowId.of_json in
+      make ?nextToken ?maxResults ?filters ?resourceType ?targets ?windowId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about upcoming executions of a maintenance window."]
+module ScheduledWindowExecution =
+  struct
+    type nonrec t =
+      {
+      windowId: MaintenanceWindowId.t option
+        [@ocaml.doc "The ID of the maintenance window to be run."];
+      name: MaintenanceWindowName.t option
+        [@ocaml.doc "The name of the maintenance window to be run."];
+      executionTime: MaintenanceWindowStringDateTime.t option
+        [@ocaml.doc
+          "The time, in ISO-8601 Extended format, that the maintenance window is scheduled to be run."]}
+    let make ?windowId =
+      fun ?name ->
+        fun ?executionTime -> fun () -> { windowId; name; executionTime }
+    let to_value x =
+      structure_to_value
+        [("WindowId",
+           (Option.map x.windowId ~f:MaintenanceWindowId.to_value));
+        ("Name", (Option.map x.name ~f:MaintenanceWindowName.to_value));
+        ("ExecutionTime",
+          (Option.map x.executionTime
+             ~f:MaintenanceWindowStringDateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let executionTime =
+        (Option.map ~f:MaintenanceWindowStringDateTime.of_xml)
+          (Xml.child xml_arg0 "ExecutionTime") in
+      let name =
+        (Option.map ~f:MaintenanceWindowName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let windowId =
+        (Option.map ~f:MaintenanceWindowId.of_xml)
+          (Xml.child xml_arg0 "WindowId") in
+      make ?executionTime ?name ?windowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let executionTime =
+        field_map json__ "ExecutionTime"
+          MaintenanceWindowStringDateTime.of_json in
+      let name = field_map json__ "Name" MaintenanceWindowName.of_json in
+      let windowId = field_map json__ "WindowId" MaintenanceWindowId.of_json in
+      make ?executionTime ?name ?windowId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a scheduled execution for a maintenance window."]
+module ScheduledWindowExecutionList =
+  struct
+    type nonrec t = ScheduledWindowExecution.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ScheduledWindowExecution.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ScheduledWindowExecution.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ScheduledWindowExecutionList"
+        ~of_json:ScheduledWindowExecution.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeMaintenanceWindowScheduleResult =
+  struct
+    type nonrec t =
+      {
+      scheduledWindowExecutions: ScheduledWindowExecutionList.t option
+        [@ocaml.doc
+          "Information about maintenance window executions scheduled for the specified time range."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of items to return. (You use this token in the next call.)"]}
+    type nonrec error =
+      [ `DoesNotExistException of DoesNotExistException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?scheduledWindowExecutions =
+      fun ?nextToken -> fun () -> { scheduledWindowExecutions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "DoesNotExistException" ->
+          `DoesNotExistException (DoesNotExistException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DoesNotExistException" ->
+          `DoesNotExistException (DoesNotExistException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DoesNotExistException e ->
+          `Assoc
+            [("error", (`String "DoesNotExistException"));
+            ("details", (DoesNotExistException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ScheduledWindowExecutions",
+           (Option.map x.scheduledWindowExecutions
+              ~f:ScheduledWindowExecutionList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let scheduledWindowExecutions =
+        (Option.map ~f:ScheduledWindowExecutionList.of_xml)
+          (Xml.child xml_arg0 "ScheduledWindowExecutions") in
+      make ?nextToken ?scheduledWindowExecutions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let scheduledWindowExecutions =
+        field_map json__ "ScheduledWindowExecutions"
+          ScheduledWindowExecutionList.of_json in
+      make ?nextToken ?scheduledWindowExecutions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about upcoming executions of a maintenance window."]
+module DescribeMaintenanceWindowTargetsRequest =
+  struct
+    type nonrec t =
+      {
+      windowId: MaintenanceWindowId.t
+        [@ocaml.doc
+          "The ID of the maintenance window whose targets should be retrieved."];
+      filters: MaintenanceWindowFilterList.t option
+        [@ocaml.doc
+          "Optional filters that can be used to narrow down the scope of the returned window targets. The supported filter keys are Type, WindowTargetId, and OwnerInformation."];
+      maxResults: MaintenanceWindowMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of items to return. (You received this token from a previous call.)"]}
+    let context_ = "DescribeMaintenanceWindowTargetsRequest"
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~windowId ->
+            fun () -> { filters; maxResults; nextToken; windowId }
+    let to_value x =
+      structure_to_value
+        [("WindowId", (Some (MaintenanceWindowId.to_value x.windowId)));
+        ("Filters",
+          (Option.map x.filters ~f:MaintenanceWindowFilterList.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaintenanceWindowMaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaintenanceWindowMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let filters =
+        (Option.map ~f:MaintenanceWindowFilterList.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      let windowId =
+        MaintenanceWindowId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WindowId") in
+      make ?nextToken ?maxResults ?filters ~windowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaintenanceWindowMaxResults.of_json in
+      let filters =
+        field_map json__ "Filters" MaintenanceWindowFilterList.of_json in
+      let windowId =
+        field_map_exn json__ "WindowId" MaintenanceWindowId.of_json in
+      make ?nextToken ?maxResults ?filters ~windowId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the targets registered with the maintenance window."]
+module MaintenanceWindowTarget =
+  struct
+    type nonrec t =
+      {
+      windowId: MaintenanceWindowId.t option
+        [@ocaml.doc
+          "The ID of the maintenance window to register the target with."];
+      windowTargetId: MaintenanceWindowTargetId.t option
+        [@ocaml.doc "The ID of the target."];
+      resourceType: MaintenanceWindowResourceType.t option
+        [@ocaml.doc
+          "The type of target that is being registered with the maintenance window."];
+      targets: Targets.t option
+        [@ocaml.doc
+          "The targets, either managed nodes or tags. Specify managed nodes using the following format: Key=instanceids,Values=<instanceid1>,<instanceid2> Tags are specified using the following format: Key=<tag name>,Values=<tag value>."];
+      ownerInformation: OwnerInformation.t option
+        [@ocaml.doc
+          "A user-provided value that will be included in any Amazon CloudWatch Events events that are raised while running tasks for these targets in this maintenance window."];
+      name: MaintenanceWindowName.t option
+        [@ocaml.doc "The name for the maintenance window target."];
+      description: MaintenanceWindowDescription.t option
+        [@ocaml.doc "A description for the target."]}
+    let make ?windowId =
+      fun ?windowTargetId ->
+        fun ?resourceType ->
+          fun ?targets ->
+            fun ?ownerInformation ->
+              fun ?name ->
+                fun ?description ->
+                  fun () ->
+                    {
+                      windowId;
+                      windowTargetId;
+                      resourceType;
+                      targets;
+                      ownerInformation;
+                      name;
+                      description
+                    }
+    let to_value x =
+      structure_to_value
+        [("WindowId",
+           (Option.map x.windowId ~f:MaintenanceWindowId.to_value));
+        ("WindowTargetId",
+          (Option.map x.windowTargetId ~f:MaintenanceWindowTargetId.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType
+             ~f:MaintenanceWindowResourceType.to_value));
+        ("Targets", (Option.map x.targets ~f:Targets.to_value));
+        ("OwnerInformation",
+          (Option.map x.ownerInformation ~f:OwnerInformation.to_value));
+        ("Name", (Option.map x.name ~f:MaintenanceWindowName.to_value));
+        ("Description",
+          (Option.map x.description ~f:MaintenanceWindowDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:MaintenanceWindowDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name =
+        (Option.map ~f:MaintenanceWindowName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let ownerInformation =
+        (Option.map ~f:OwnerInformation.of_xml)
+          (Xml.child xml_arg0 "OwnerInformation") in
+      let targets =
+        (Option.map ~f:Targets.of_xml) (Xml.child xml_arg0 "Targets") in
+      let resourceType =
+        (Option.map ~f:MaintenanceWindowResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      let windowTargetId =
+        (Option.map ~f:MaintenanceWindowTargetId.of_xml)
+          (Xml.child xml_arg0 "WindowTargetId") in
+      let windowId =
+        (Option.map ~f:MaintenanceWindowId.of_xml)
+          (Xml.child xml_arg0 "WindowId") in
+      make ?description ?name ?ownerInformation ?targets ?resourceType
+        ?windowTargetId ?windowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description =
+        field_map json__ "Description" MaintenanceWindowDescription.of_json in
+      let name = field_map json__ "Name" MaintenanceWindowName.of_json in
+      let ownerInformation =
+        field_map json__ "OwnerInformation" OwnerInformation.of_json in
+      let targets = field_map json__ "Targets" Targets.of_json in
+      let resourceType =
+        field_map json__ "ResourceType" MaintenanceWindowResourceType.of_json in
+      let windowTargetId =
+        field_map json__ "WindowTargetId" MaintenanceWindowTargetId.of_json in
+      let windowId = field_map json__ "WindowId" MaintenanceWindowId.of_json in
+      make ?description ?name ?ownerInformation ?targets ?resourceType
+        ?windowTargetId ?windowId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The target registered with the maintenance window."]
+module MaintenanceWindowTargetList =
+  struct
+    type nonrec t = MaintenanceWindowTarget.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MaintenanceWindowTarget.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MaintenanceWindowTarget.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MaintenanceWindowTargetList"
+        ~of_json:MaintenanceWindowTarget.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeMaintenanceWindowTargetsResult =
+  struct
+    type nonrec t =
+      {
+      targets: MaintenanceWindowTargetList.t option
+        [@ocaml.doc
+          "Information about the targets in the maintenance window."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use when requesting the next set of items. If there are no additional items to return, the string is empty."]}
+    type nonrec error =
+      [ `DoesNotExistException of DoesNotExistException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?targets = fun ?nextToken -> fun () -> { targets; nextToken }
+    let error_of_json name json =
+      match name with
+      | "DoesNotExistException" ->
+          `DoesNotExistException (DoesNotExistException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DoesNotExistException" ->
+          `DoesNotExistException (DoesNotExistException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DoesNotExistException e ->
+          `Assoc
+            [("error", (`String "DoesNotExistException"));
+            ("details", (DoesNotExistException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Targets",
+           (Option.map x.targets ~f:MaintenanceWindowTargetList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let targets =
+        (Option.map ~f:MaintenanceWindowTargetList.of_xml)
+          (Xml.child xml_arg0 "Targets") in
+      make ?nextToken ?targets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let targets =
+        field_map json__ "Targets" MaintenanceWindowTargetList.of_json in
+      make ?nextToken ?targets ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the targets registered with the maintenance window."]
+module DescribeMaintenanceWindowTasksRequest =
+  struct
+    type nonrec t =
+      {
+      windowId: MaintenanceWindowId.t
+        [@ocaml.doc
+          "The ID of the maintenance window whose tasks should be retrieved."];
+      filters: MaintenanceWindowFilterList.t option
+        [@ocaml.doc
+          "Optional filters used to narrow down the scope of the returned tasks. The supported filter keys are WindowTaskId, TaskArn, Priority, and TaskType."];
+      maxResults: MaintenanceWindowMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return for this call. The call also returns a token that you can specify in a subsequent call to get the next set of results."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of items to return. (You received this token from a previous call.)"]}
+    let context_ = "DescribeMaintenanceWindowTasksRequest"
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~windowId ->
+            fun () -> { filters; maxResults; nextToken; windowId }
+    let to_value x =
+      structure_to_value
+        [("WindowId", (Some (MaintenanceWindowId.to_value x.windowId)));
+        ("Filters",
+          (Option.map x.filters ~f:MaintenanceWindowFilterList.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaintenanceWindowMaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaintenanceWindowMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let filters =
+        (Option.map ~f:MaintenanceWindowFilterList.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      let windowId =
+        MaintenanceWindowId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WindowId") in
+      make ?nextToken ?maxResults ?filters ~windowId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaintenanceWindowMaxResults.of_json in
+      let filters =
+        field_map json__ "Filters" MaintenanceWindowFilterList.of_json in
+      let windowId =
+        field_map_exn json__ "WindowId" MaintenanceWindowId.of_json in
+      make ?nextToken ?maxResults ?filters ~windowId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the tasks in a maintenance window. For maintenance window tasks without a specified target, you can't supply values for --max-errors and --max-concurrency. Instead, the system inserts a placeholder value of 1, which may be reported in the response to this command. These values don't affect the running of your task and can be ignored."]
+module MaintenanceWindowTaskPriority =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaintenanceWindowTaskPriority"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MaintenanceWindowTaskParameterValue =
+  struct
+    type nonrec t = string
+    let context_ = "MaintenanceWindowTaskParameterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"MaintenanceWindowTaskParameterValue" j
+    let to_json = simple_to_json to_value
+  end
+module MaintenanceWindowTaskParameterValueList =
+  struct
+    type nonrec t = MaintenanceWindowTaskParameterValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MaintenanceWindowTaskParameterValue.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:MaintenanceWindowTaskParameterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MaintenanceWindowTaskParameterValueList"
+        ~of_json:MaintenanceWindowTaskParameterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaintenanceWindowTaskParameterValueExpression =
+  struct
+    type nonrec t =
+      {
+      values: MaintenanceWindowTaskParameterValueList.t option
+        [@ocaml.doc
+          "This field contains an array of 0 or more strings, each 1 to 255 characters in length."]}
+    let make ?values = fun () -> { values }
+    let to_value x =
+      structure_to_value
+        [("Values",
+           (Option.map x.values
+              ~f:MaintenanceWindowTaskParameterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        (Option.map ~f:MaintenanceWindowTaskParameterValueList.of_xml)
+          (Xml.child xml_arg0 "Values") in
+      make ?values ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values =
+        field_map json__ "Values"
+          MaintenanceWindowTaskParameterValueList.of_json in
+      make ?values ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Defines the values for a task parameter."]
+module MaintenanceWindowTaskParameterName =
+  struct
+    type nonrec t = string
+    let context_ = "MaintenanceWindowTaskParameterName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"MaintenanceWindowTaskParameterName" j
+    let to_json = simple_to_json to_value
+  end

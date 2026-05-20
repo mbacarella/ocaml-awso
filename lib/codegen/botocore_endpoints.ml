@@ -330,11 +330,23 @@ end
 (* You might be tempted to emit this as a big `match` table, but that takes
    minutes to compile due to some kind of quadratic behavior in the compiler with
    really gigantic match blocks. So we simply Memo.general over an a-list search
-   instead, which takes seconds to compile and has negligible runtime cost.
+   instead, which takes seconds to compile and has negligible runtime cost. *)
+(* That is, we *were* doing that until we noticed the OCaml 4.x series
+   compilers have some non-TCO places and big inlined a-lists cause
+   stack overflows during compilation. So, we now split it up into sub-alists
+   and combine them at run time. Still under a Memo.general though. *)
+let chunk_list ~size lst =
+  let rec aux acc current current_len = function
+    | [] when current_len = 0 -> List.rev acc
+    | [] -> List.rev (List.rev current :: acc)
+    | x :: rest when current_len = size -> aux (List.rev current :: acc) [ x ] 1 rest
+    | x :: rest -> aux acc (x :: current) (current_len + 1) rest
+  in
+  aux [] [] 0 lst
+;;
 
-   The scheme is split into separate tables to keep the AST literals free of
-   polymorphic variants which the compiler might be unusually slow to
-   unify in bulk. *)
+let endpoint_table_chunk_size = 1000
+
 let make_lookup_uri ep =
   let loc = !Ast_helper.default_loc in
   let pairs_for_scheme scheme =
@@ -349,39 +361,61 @@ let make_lookup_uri ep =
       ; Ast_convenience.str uri
       ]
   in
-  let list_e pairs = Ast_convenience.list (List.map pairs ~f:entry_e) in
-  let http_list_e = list_e (pairs_for_scheme `HTTP) in
-  let https_list_e = list_e (pairs_for_scheme `HTTPS) in
-  [ [%stri
-      let endpoint_uri_table_http : ((string * string) * string) list = [%e http_list_e]]
-  ; [%stri
-      let endpoint_uri_table_https : ((string * string) * string) list = [%e https_list_e]]
-  ; [%stri
-      let endpoint_uri_lookup =
-        Memo.general (fun (scheme, key) ->
-          let table =
-            match scheme with
-            | `HTTPS -> endpoint_uri_table_https
-            | `HTTP -> endpoint_uri_table_http
-          in
-          List.Assoc.find table key ~equal:(fun (r1, s1) (r2, s2) ->
-            String.equal r1 r2 && String.equal s1 s2))
-      ;;]
-  ; [%stri
-      let lookup_uri ~region service scheme =
-        let region = Region.to_string region in
-        let service = Service.to_string service in
-        match endpoint_uri_lookup (scheme, (region, service)) with
-        | Some uri -> Uri.of_string uri
-        | None ->
-          let scheme_s =
-            match scheme with
-            | `HTTPS -> "https"
-            | `HTTP -> "http"
-          in
-          failwithf "unknown endpoint for %s %s, %s" scheme_s region service ()
-      ;;]
-  ]
+  let emit_chunked_table ~base_name pairs =
+    let chunks = chunk_list ~size:endpoint_table_chunk_size pairs in
+    let chunk_name i = sprintf "%s_%d" base_name i in
+    let chunk_stris =
+      List.mapi chunks ~f:(fun i chunk ->
+        let pat = Ast_convenience.pvar (chunk_name i) in
+        let body = Ast_convenience.list (List.map chunk ~f:entry_e) in
+        [%stri let [%p pat] : ((string * string) * string) list = [%e body]])
+    in
+    let parts =
+      Ast_convenience.list
+        (List.mapi chunks ~f:(fun i _ -> Ast_convenience.evar (chunk_name i)))
+    in
+    let combined =
+      let pat = Ast_convenience.pvar base_name in
+      (* Lazy: concat (and any cost of holding the combined list live) is
+         deferred to first force, so [open Awso] doesn't pay it. *)
+      [%stri let [%p pat] = Memo.unit (fun () -> List.concat [%e parts])]
+    in
+    chunk_stris @ [ combined ]
+  in
+  let http_stris =
+    emit_chunked_table ~base_name:"endpoint_uri_table_http" (pairs_for_scheme `HTTP)
+  in
+  let https_stris =
+    emit_chunked_table ~base_name:"endpoint_uri_table_https" (pairs_for_scheme `HTTPS)
+  in
+  http_stris
+  @ https_stris
+  @ [ [%stri
+        let endpoint_uri_lookup =
+          Memo.general (fun (scheme, key) ->
+            let table =
+              match scheme with
+              | `HTTPS -> endpoint_uri_table_https ()
+              | `HTTP -> endpoint_uri_table_http ()
+            in
+            List.Assoc.find table key ~equal:(fun (r1, s1) (r2, s2) ->
+              String.equal r1 r2 && String.equal s1 s2))
+        ;;]
+    ; [%stri
+        let lookup_uri ~region service scheme =
+          let region = Region.to_string region in
+          let service = Service.to_string service in
+          match endpoint_uri_lookup (scheme, (region, service)) with
+          | Some uri -> Uri.of_string uri
+          | None ->
+            let scheme_s =
+              match scheme with
+              | `HTTPS -> "https"
+              | `HTTP -> "http"
+            in
+            failwithf "unknown endpoint for %s %s, %s" scheme_s region service ()
+        ;;]
+    ]
 ;;
 
 let make_lookup_credential_scope ep =
@@ -400,22 +434,35 @@ let make_lookup_credential_scope ep =
       ; Ast_convenience.str scope
       ]
   in
-  let scope_list_e = Ast_convenience.list (List.map scope_pairs ~f:entry_e) in
-  [ [%stri
-      let credential_scope_table : ((string * string) * string) list = [%e scope_list_e]]
-  ; [%stri
-      let credential_scope_lookup =
-        Memo.general (fun key ->
-          List.Assoc.find credential_scope_table key ~equal:(fun (r1, s1) (r2, s2) ->
-            String.equal r1 r2 && String.equal s1 s2))
-      ;;]
-  ; [%stri
-      let lookup_credential_scope ~region service =
-        let region = Region.to_string region in
-        let service = Service.to_string service in
-        match credential_scope_lookup (region, service) with
-        | Some s -> Region.of_string s
-        | None -> failwithf "unknown credential scope for %s, %s" region service ()
-      ;;]
-  ]
+  let chunks = chunk_list ~size:endpoint_table_chunk_size scope_pairs in
+  let chunk_name i = sprintf "credential_scope_table_%d" i in
+  let chunk_stris =
+    List.mapi chunks ~f:(fun i chunk ->
+      let pat = Ast_convenience.pvar (chunk_name i) in
+      let body = Ast_convenience.list (List.map chunk ~f:entry_e) in
+      [%stri let [%p pat] : ((string * string) * string) list = [%e body]])
+  in
+  let parts =
+    Ast_convenience.list
+      (List.mapi chunks ~f:(fun i _ -> Ast_convenience.evar (chunk_name i)))
+  in
+  chunk_stris
+  @ [ [%stri let credential_scope_table = Memo.unit (fun () -> List.concat [%e parts])]
+    ; [%stri
+        let credential_scope_lookup =
+          Memo.general (fun key ->
+            List.Assoc.find
+              (credential_scope_table ())
+              key
+              ~equal:(fun (r1, s1) (r2, s2) -> String.equal r1 r2 && String.equal s1 s2))
+        ;;]
+    ; [%stri
+        let lookup_credential_scope ~region service =
+          let region = Region.to_string region in
+          let service = Service.to_string service in
+          match credential_scope_lookup (region, service) with
+          | Some s -> Region.of_string s
+          | None -> failwithf "unknown credential scope for %s, %s" region service ()
+        ;;]
+    ]
 ;;

@@ -187,6 +187,32 @@ let structure_multi ~awso_service_id ~loc index service open_submodules shape_mo
 
 let module_name_of_ml fn = fn |> String.chop_suffix_exn ~suffix:".ml" |> String.capitalize
 
+(* Order-preserving balanced split. Walk the input in order, accumulating
+   weights into the current bin; when adding the next item would push the
+   running total past [total / num_bins] AND we still have more bins to
+   fill, cut to a new bin. Always returns exactly [num_bins] chunks (the
+   last few may be empty if the input is short). Order matters because
+   later shape_modules can reference earlier ones via the per-submodule
+   [open] chain in [structure_multi]. *)
+let split_balanced_in_order ~num_bins ~weight items =
+  let total = List.fold_left items ~init:0 ~f:(fun acc x -> acc + weight x) in
+  if num_bins <= 1 || total = 0
+  then [ items ]
+  else (
+    let target = max 1 ((total + num_bins - 1) / num_bins) in
+    let bins = Array.make num_bins [] in
+    let weights = Array.make num_bins 0 in
+    let bin = ref 0 in
+    List.iter items ~f:(fun x ->
+      let w = weight x in
+      let on_last_bin = !bin = num_bins - 1 in
+      if (not on_last_bin) && weights.(!bin) > 0 && weights.(!bin) + w > target
+      then incr bin;
+      bins.(!bin) <- x :: bins.(!bin);
+      weights.(!bin) <- weights.(!bin) + w);
+    Array.to_list bins |> List.map ~f:List.rev)
+;;
+
 let make ~awso_service_id ~submodules (service : Botodata.service) =
   let loc = !Ast_helper.default_loc in
   let shape_modules = Service_structure.shape_modules service in
@@ -199,15 +225,11 @@ let make ~awso_service_id ~submodules (service : Botodata.service) =
     let num_submodules = List.length submodule_fns in
     let submodules = List.map submodule_fns ~f:module_name_of_ml in
     let main_module = include_all ~loc submodules in
+    (* Weight by serialized AST size — that's what actually drives compiler
+       stack consumption. Paying the print cost once at codegen-time is fine. *)
+    let weight shape = String.length (Util.structure_to_string [ shape ]) in
     let shape_modules_groups =
-      let length =
-        Float.( / )
-          (Float.of_int (List.length shape_modules))
-          (Float.of_int num_submodules)
-        |> Float.round_up
-        |> Float.to_int
-      in
-      List.chunks_of shape_modules ~length
+      split_balanced_in_order ~num_bins:num_submodules ~weight shape_modules
     in
     let submodules =
       List.mapi submodule_fns ~f:(fun i sub_fn ->

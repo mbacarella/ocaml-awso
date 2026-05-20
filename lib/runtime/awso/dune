@@ -9,7 +9,18 @@
   ; containers. this uses no extensions, so just skip preprocessing for it
   (per_module
    ((pps ppx_expect ppx_yojson_conv)
-    arn auth botodata cfg client data http import region service uri_json xml)
+    arn
+    auth
+    botodata
+    cfg
+    client
+    data
+    http
+    import
+    region
+    service
+    uri_json
+    xml)
    (no_preprocessing botocore_endpoints)))
  (synopsis "OCaml AWS general API.")
  (inline_tests))
