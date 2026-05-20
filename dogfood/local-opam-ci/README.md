@@ -1,19 +1,13 @@
 # local-opam-ci
 
-Run [ocurrent/opam-repo-ci](https://github.com/ocurrent/opam-repo-ci)'s
+The idea is we run [ocurrent/opam-repo-ci](https://github.com/ocurrent/opam-repo-ci)'s
 `opam-ci-check` against this working tree locally, so we catch lint regressions
 (missing deps, malformed fields, etc.) before bothering opam-repository
 maintainers.
 
-This handles **lint only** for now. Build/test (which require Docker or a real
-build environment) will live elsewhere — the plan is to farm them out to AWS
-spot instances via the `ci-spot-build-in-aws` sibling tool.
-
-## Prerequisites
-
-- `git`
-- `opam`
-- `opam-ci-check` installed in the current switch (see `bootstrap`).
+Handles **lint** (no Docker) and **build** (sequential local Docker). For
+parallel/sharded builds, the plan is to farm them out to AWS spot instances
+via the `ci-spot-build-in-aws` sibling tool, eventually.
 
 ## Workflow
 
@@ -21,10 +15,16 @@ spot instances via the `ci-spot-build-in-aws` sibling tool.
 ./run.sh bootstrap        # clones opam-repository into ~/.cache/awso-ci/
 ./run.sh bootstrap pin    # additionally `opam pin add opam-ci-check ...`
 ./run.sh lint             # stages our *.opam files and runs the linter
+./run.sh build            # stages, then `opam-ci-check build` per package
+                          # (Docker, sequential, defaults: debian-12 + 5.3.0)
+./run.sh build --with-test --lower-bounds
+                          # forwards any extra flags to opam-ci-check build
+./run.sh build --distro ubuntu-24.04 --compiler 5.4.0
+                          # override defaults
 ```
 
 `stage` is a separate command if you want to inspect what landed in the clone
-before running the linter:
+before running anything:
 
 ```
 ./run.sh stage
