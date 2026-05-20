@@ -18,8 +18,8 @@ depends: [
   "dune" {>= "3.6"}
   "ocaml" {>= "4.14"}
   "awso-async"
-  "core_unix"
-  "ppx_jane"
+  "core_unix" {>= "v0.16.0"}
+  "ppx_jane" {>= "v0.16.0"}
   "odoc" {with-doc}
 ]
 build: [
