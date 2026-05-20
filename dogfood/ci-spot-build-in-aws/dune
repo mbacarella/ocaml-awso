@@ -2,6 +2,7 @@
  (name ci_spot_build_in_aws)
  (libraries
   awso-async.ec2
+  awso-async.sts
   awso-async
   cohttp-async
   core_unix.command_unix
