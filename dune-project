@@ -58,7 +58,10 @@
   (async
    (>= v0.16.0))
   (async_ssl
-   (>= v0.16.0))))
+   ; skip OpenSSL-3 incompatible revisions; the patched ones are *-1 in opam.
+   (and
+    (>= v0.16.1-1)
+    (<> v0.17.0)))))
 
 (package
  (name awso-lwt)
