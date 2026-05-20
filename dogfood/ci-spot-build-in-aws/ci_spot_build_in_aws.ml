@@ -414,10 +414,10 @@ let wait_for_ssh ~host =
     else if n <= 0
     then failwithf "ssh on %s never became reachable" host ()
     else (
-      let%bind () = Clock.after (Time_float.Span.of_sec 5.) in
+      let%bind () = Clock.after (Time_float.Span.of_sec 1.) in
       loop (n - 1))
   in
-  loop 60 (* ~5 min *)
+  loop 300 (* ~5 min at 1s intervals *)
 ;;
 
 let terminate_instance ~cfg ~instance_id =
@@ -513,10 +513,23 @@ let push_code ~private_key_path ~user ~host ~workdir =
   | Error stderr -> failwithf "code push failed: %s" stderr ()
 ;;
 
-let run_remote_build ~private_key_path ~user ~host =
+let run_remote_build ~private_key_path ~user ~host ~lower_bounds =
   let ssh_argv = ssh_args ~private_key_path ~user ~host in
+  (* Lower-bounds mode mirrors opam-ci's lower-bounds job: floor OCaml at 4.14
+     (our declared minimum) and bias the solver toward older versions of every
+     non-OCaml dep. The default solver times out on resolution this dense, so
+     switch to builtin-0install which handles it in seconds. *)
+  let switch_version, switch_extra_setup, install_extra_flags =
+    if lower_bounds
+    then
+      ( "4.14.2"
+      , "opam option solver=builtin-0install --global"
+      , "--criteria='+count[version-lag,solution]'" )
+    else "5.3.0", "true", ""
+  in
   let remote_script =
-    {|set -euo pipefail
+    Printf.sprintf
+      {|set -euo pipefail
 
 echo '*** machine'
 uname -srm
@@ -525,13 +538,19 @@ free -h | awk '/^Mem:/ {print $2 " RAM"}'
 df -h / | tail -1 | awk '{print $2 " disk (" $4 " free)"}'
 
 if ! command -v opam >/dev/null; then
-  echo '*** installing apt deps'
+  echo '*** installing apt build deps'
   sudo bash -c '
     export DEBIAN_FRONTEND=noninteractive
     apt-get update -y
-    apt-get install -y opam gcc make m4 patch git pkg-config \
-      libffi-dev libgmp-dev libssl-dev zlib1g-dev
+    apt-get install -y \
+      build-essential m4 patch perl git pkg-config ca-certificates curl \
+      bzip2 unzip xz-utils tar gzip \
+      bubblewrap \
+      libffi-dev libgmp-dev libssl-dev zlib1g-dev \
+      libcurl4-gnutls-dev
   '
+  echo '*** installing opam from upstream (apt opam is too old for builtin-0install)'
+  sudo bash -c "curl -fsSL https://opam.ocaml.org/install.sh | bash"
 fi
 
 if [ ! -d ~/.opam ]; then
@@ -539,20 +558,31 @@ if [ ! -d ~/.opam ]; then
   opam init -y --bare --disable-sandboxing
 fi
 
-if ! opam switch list --short 2>/dev/null | grep -qx 5.3.0; then
-  echo '*** creating 5.3.0 switch'
-  opam switch create 5.3.0 --no-install
+%s
+
+if ! opam switch list --short 2>/dev/null | grep -qx %s; then
+  echo '*** creating %s switch'
+  opam switch create %s --no-install
 fi
-eval "$(opam env --switch=5.3.0)"
+eval "$(opam env --switch=%s)"
 opam install -y dune
 
 cd ~/awso
-echo '*** opam install --deps-only'
-opam install . --deps-only --yes
+echo '*** opam install --deps-only %s'
+# unsafe-yes also auto-accepts depext (sudo apt-get) prompts that --yes alone
+# leaves interactive.
+OPAMCONFIRMLEVEL=unsafe-yes opam install . --deps-only --yes %s
 echo '*** dune build -p (all six packages)'
-dune build -p awso-common,awso,awso-async,awso-lwt,awso-unix,awso-cli @install
+dune build -p awso-common,awso,awso-async,awso-lwt,awso-sync,awso-cli @install
 echo '*** done'
 |}
+      switch_extra_setup
+      switch_version
+      switch_version
+      switch_version
+      switch_version
+      (if lower_bounds then "(lower bounds)" else "")
+      install_extra_flags
   in
   eprintf_now "starting remote build...";
   let%bind p =
@@ -630,6 +660,13 @@ let main_command =
           "--force"
           no_arg
           ~doc:" proceed even if a previous awso-ci instance is still running"
+      and lower_bounds =
+        flag
+          "--lower-bounds"
+          no_arg
+          ~doc:
+            " mirror opam-ci's lower-bounds job: OCaml 4.14, builtin-0install solver, \
+             solver biased toward older dep versions"
       in
       fun () ->
         let instance_type =
@@ -699,21 +736,51 @@ let main_command =
         let%bind sg_id =
           create_security_group ~cfg ~name:sg_name ~description:"awso-ci ephemeral"
         in
-        let%bind () =
-          authorize_ssh_from ~cfg ~sg_id ~ip_cidr:(public_ip ^ "/32") |> Deferred.ignore_m
+        (* From here until [launch_spot_instance] succeeds, any failure leaves
+           an orphaned SG. Catch the exception, tear the SG down (with the
+           same retry the regular cleanup uses, since SG delete fails until
+           any partial instance is gone), and re-raise. After this block
+           succeeds the regular cleanup handles SG + instance together. *)
+        let sg_cleanup_only () =
+          let rec try_sg n =
+            match%bind
+              Monitor.try_with ~run:`Schedule (fun () ->
+                delete_security_group ~cfg ~sg_id)
+            with
+            | Ok () -> return ()
+            | Error _ when n > 0 ->
+              let%bind () = Clock.after (Time_float.Span.of_sec 15.) in
+              try_sg (n - 1)
+            | Error e ->
+              eprintf_now "could not delete security group %s: %s" sg_id (Exn.to_string e);
+              return ()
+          in
+          try_sg 8
         in
-        eprintf_now "security group: %s" sg_id;
-        let user_data = user_data_script ~max_hours in
         let%bind instance_id =
-          launch_spot_instance
-            ~cfg
-            ~ami_id
-            ~instance_type
-            ~key_name
-            ~sg_id
-            ~user_data
-            ~max_price
-            ~disk_gb
+          match%bind
+            Monitor.try_with ~run:`Schedule (fun () ->
+              let%bind () =
+                authorize_ssh_from ~cfg ~sg_id ~ip_cidr:(public_ip ^ "/32")
+                |> Deferred.ignore_m
+              in
+              eprintf_now "security group: %s" sg_id;
+              let user_data = user_data_script ~max_hours in
+              launch_spot_instance
+                ~cfg
+                ~ami_id
+                ~instance_type
+                ~key_name
+                ~sg_id
+                ~user_data
+                ~max_price
+                ~disk_gb)
+          with
+          | Ok instance_id -> return instance_id
+          | Error e ->
+            eprintf_now "instance setup failed; tearing down sg %s" sg_id;
+            let%bind () = sg_cleanup_only () in
+            raise e
         in
         eprintf_now
           "launched %s spot instance %s (%dG root)"
@@ -762,7 +829,7 @@ let main_command =
         let%bind () = wait_for_ssh ~host in
         let user = ssh_user in
         let%bind () = push_code ~private_key_path ~user ~host ~workdir in
-        let%bind status = run_remote_build ~private_key_path ~user ~host in
+        let%bind status = run_remote_build ~private_key_path ~user ~host ~lower_bounds in
         match status with
         | `Success ->
           eprintf_now "build succeeded; cleaning up";
