@@ -1,4 +1,4 @@
-(* Launches a one-shot ARM64 spot EC2 instance, pushes the local working tree
+(* Launches a one-shot spot EC2 instance, pushes the local working tree
    over SSH, installs the OCaml toolchain over SSH, runs `dune build -p ...`
    (the opam-ci simulation), streams build output back, and tears everything
    down on completion.
