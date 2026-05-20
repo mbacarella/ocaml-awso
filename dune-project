@@ -50,12 +50,15 @@
    (>= 4.14))
   awso
   cohttp-async
-  core_unix
-  ppx_jane
+  (core_unix
+   (>= v0.16.0))
+  (ppx_jane
+   (>= v0.16.0))
   ppx_yojson_conv
   (async
-   (>= v0.11.0))
-  async_ssl))
+   (>= v0.16.0))
+  (async_ssl
+   (>= v0.16.0))))
 
 (package
  (name awso-lwt)
@@ -103,5 +106,7 @@
   (ocaml
    (>= 4.14))
   awso-async
-  core_unix
-  ppx_jane))
+  (core_unix
+   (>= v0.16.0))
+  (ppx_jane
+   (>= v0.16.0))))
