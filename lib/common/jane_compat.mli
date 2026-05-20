@@ -317,6 +317,7 @@ end
 
 module Memo : sig
   val general : ('a -> 'b) -> 'a -> 'b
+  val unit : (unit -> 'a) -> unit -> 'a
 end
 
 val read_file : string -> string

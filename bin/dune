@@ -1,9 +1,11 @@
 (executable
  (name awso_codegen_main)
+ (modules awso_codegen_main)
  (libraries awso_codegen))
 
 (executable
  (name awso_bootstrap)
+ (modules awso_bootstrap)
  (libraries core core_unix core_unix.command_unix core_unix.sys_unix unix)
  (preprocess
   (pps ppx_jane)))

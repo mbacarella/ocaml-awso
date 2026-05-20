@@ -25,6 +25,7 @@ depends: [
   "ppx_yojson_conv"
   "re" {>= "1.7.2"}
   "xmlm"
+  "yojson" {>= "2.0.0"}
   "zarith"
   "odoc" {with-doc}
 ]

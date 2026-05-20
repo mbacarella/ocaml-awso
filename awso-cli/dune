@@ -222,8 +222,6 @@
   awso-async.lex-models
   awso-async.lexv2-models
   awso-async.license-manager
-  awso-async.license-manager-linux-subscriptions
-  awso-async.license-manager-user-subscriptions
   awso-async.lightsail
   awso-async.location
   awso-async.logs

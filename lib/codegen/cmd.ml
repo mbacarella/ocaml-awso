@@ -2,7 +2,9 @@ open! Import
 
 let unsupported_services : String.Set.t =
   String.Set.of_list
-    [ "apigateway"
+    [ (* TODO: 2026-05-18 mbac: these are excluded but I don't remember why.
+        Try re-adding them in the near future and seeing what breaks. *)
+      "apigateway"
     ; "apigatewayv2"
     ; "appconfig"
     ; "appconfigdata"
@@ -22,6 +24,11 @@ let unsupported_services : String.Set.t =
     ; "s3control"
     ; "sagemaker-runtime"
     ; "workmailmessageflow"
+      (* 2026-05-18 mbac: these services fail in opam windows ci, so we're
+         just going to exclude them until some ocaml user in the world cares
+         about license services. *)
+    ; "license-manager-linux-subscriptions"
+    ; "license-manager-user-subscriptions"
     ]
 ;;
 

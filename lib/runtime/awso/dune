@@ -4,6 +4,23 @@
  (libraries awso_common cohttp unix cryptokit xmlm yojson re.perl)
  (ocamlopt_flags (-linscan))
  (preprocess
-  (pps ppx_expect ppx_yojson_conv))
+  ; botocore_endpoints is 4.4 MiB generated endpoint table, its AST is
+  ; large enough to overflow ppxlib's traversal stack on OCaml 4.14 in opam-ci
+  ; containers. this uses no extensions, so just skip preprocessing for it
+  (per_module
+   ((pps ppx_expect ppx_yojson_conv)
+    arn
+    auth
+    botodata
+    cfg
+    client
+    data
+    http
+    import
+    region
+    service
+    uri_json
+    xml)
+   (no_preprocessing botocore_endpoints)))
  (synopsis "OCaml AWS general API.")
  (inline_tests))
