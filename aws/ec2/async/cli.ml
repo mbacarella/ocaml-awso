@@ -2,6 +2,7 @@
 include Cli_0
 include Cli_1
 include Cli_2
+include Cli_3
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")

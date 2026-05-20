@@ -706,14 +706,27 @@ end
 
 module Memo = struct
   let general (type a b) (f : a -> b) : a -> b =
-    let tbl = Stdlib.Hashtbl.create 16 in
+    let tbl : (a, (b, exn) result) Stdlib.Hashtbl.t = Stdlib.Hashtbl.create 16 in
     fun x ->
-      match Stdlib.Hashtbl.find_opt tbl x with
-      | Some y -> y
-      | None ->
-        let y = f x in
-        Stdlib.Hashtbl.replace tbl x y;
-        y
+      let r =
+        match Stdlib.Hashtbl.find_opt tbl x with
+        | Some r -> r
+        | None ->
+          let r =
+            try Ok (f x) with
+            | e -> Error e
+          in
+          Stdlib.Hashtbl.replace tbl x r;
+          r
+      in
+      match r with
+      | Ok y -> y
+      | Error e -> raise e
+  ;;
+
+  let unit (compute : unit -> 'a) : unit -> 'a =
+    let l = Stdlib.Lazy.from_fun compute in
+    fun () -> Stdlib.Lazy.force l
   ;;
 end
 

@@ -1,18 +1,5 @@
 # TODO
 
-## OCaml 4.14 stack overflows
-
-4.14 stack-overflows on some systems while compiling the generated tables,
-botocore_endpoints.ml (~71k lines) and per-service values.ml files
-(connect/values.ml is 104k lines, glue 88k, etc.).
-
-The 4.14 compiler isn't fully TCO across those depths and runs out of stack
-on opam-ci's constrained containers and on cold local builds. 5.3.0 is fine.
-
-for this release the floor is ocaml 5.3.0. circle back and split the
-offending generated files (bump `num_value_submodules` in
-lib/codegen/dune.ml, plus split botocore_endpoints.ml) so 4.14 builds again
-
 ## fun stuff
 
 ### more I/O backends
@@ -105,6 +92,12 @@ Links as `byte_complete` bytecode because ARM64's `bl` displacement
 
 ocamlopt has grown more linker tricks since this was a problem, worth
 re-checking whether native links on a modern ocaml without intervention.
+
+## use Base inside of Jane_compat
+
+we tried to cut the dependency cone down a bit by removing Base/Core in the lower-level
+stuff, but we actually still need Base for expect tests and other lower level infrastructure.
+So, Jane_compat could take advantage of better optimized stuff in Base now.
 
 ## unsupported_services blacklist (lib/codegen/cmd.ml)
 

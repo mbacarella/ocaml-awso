@@ -1,14 +1,20 @@
 open! Import
 
+(* These chunk counts exist to keep any one generated values.ml/cli.ml small
+   enough that the OCaml compiler doesn't overflow its stack on the AST.
+   The thresholds are empirical (see TODO.md note about OCaml 4.14 stack
+   overflows). Bump these if a new AWS service shows up with a beefy enough
+   values.ml/cli.ml to overflow. *)
 let num_value_submodules = function
   | "ec2" -> 8
-  | "ssm" | "iot" | "rds" | "sagemaker" -> 2
+  | "connect" | "glue" | "quicksight" | "sagemaker" -> 3
+  | "ssm" | "iot" | "rds" -> 2
   | _ -> 0
 ;;
 
 let num_cli_submodules = function
-  | "ec2" -> 3
-  | "iot" | "rds" | "sagemaker" -> 2
+  | "ec2" -> 4
+  | "connect" | "iot" | "rds" | "sagemaker" -> 2
   | _ -> 0
 ;;
 

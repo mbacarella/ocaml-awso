@@ -5,8 +5,7 @@ module Cohttp = struct
   module Header = Cohttp.Header
 
   module Request = struct
-    include (Cohttp.Request.Make (Cohttp__String_io.M)
-             [@alert "-deprecated"])
+    include Cohttp.Request.Make (Cohttp__String_io.M) [@alert "-deprecated"]
 
     let of_string x : [ `Eof | `Invalid of string | `Ok of t ] =
       Cohttp__String_io.open_in x |> read

@@ -2,6 +2,1369 @@
 open Core
 open Async
 open Cli_0[@@warning "-33"]
+let delete_launch_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and launchTemplateId =
+         flag "launch-template-id" (optional string)
+           ~doc:"STRING LaunchTemplateId"
+       and launchTemplateName =
+         flag "launch-template-name" (optional string)
+           ~doc:"STRING LaunchTemplateName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_launch_template
+           (Values.DeleteLaunchTemplateRequest.make ?dryRun ?launchTemplateId
+              ?launchTemplateName ())
+           (Some Values.DeleteLaunchTemplateResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_launch_template_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and launchTemplateId =
+         flag "launch-template-id" (optional string)
+           ~doc:"STRING LaunchTemplateId"
+       and launchTemplateName =
+         flag "launch-template-name" (optional string)
+           ~doc:"STRING LaunchTemplateName"
+       and versions =
+         flag "versions" (required json_arg) ~doc:"JSON VersionStringList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_launch_template_versions
+           (Values.DeleteLaunchTemplateVersionsRequest.make ?dryRun
+              ?launchTemplateId ?launchTemplateName
+              ~versions:(Values.VersionStringList.of_json versions) ())
+           (Some Values.DeleteLaunchTemplateVersionsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_local_gateway_route =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and destinationCidrBlock =
+         flag "destination-cidr-block" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and destinationPrefixListId =
+         flag "destination-prefix-list-id" (optional string)
+           ~doc:"STRING PrefixListResourceId"
+       and localGatewayRouteTableId =
+         flag "local-gateway-route-table-id" (required string)
+           ~doc:"STRING LocalGatewayRoutetableId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_local_gateway_route
+           (Values.DeleteLocalGatewayRouteRequest.make ?destinationCidrBlock
+              ?dryRun ?destinationPrefixListId ~localGatewayRouteTableId ())
+           (Some Values.DeleteLocalGatewayRouteResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_local_gateway_route_table =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and localGatewayRouteTableId =
+         flag "local-gateway-route-table-id" (required string)
+           ~doc:"STRING LocalGatewayRoutetableId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_local_gateway_route_table
+           (Values.DeleteLocalGatewayRouteTableRequest.make ?dryRun
+              ~localGatewayRouteTableId ())
+           (Some Values.DeleteLocalGatewayRouteTableResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_local_gateway_route_table_virtual_interface_group_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and localGatewayRouteTableVirtualInterfaceGroupAssociationId =
+         flag
+           "local-gateway-route-table-virtual-interface-group-association-id"
+           (required string)
+           ~doc:"STRING LocalGatewayRouteTableVirtualInterfaceGroupAssociationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_local_gateway_route_table_virtual_interface_group_association
+           (Values.DeleteLocalGatewayRouteTableVirtualInterfaceGroupAssociationRequest.make
+              ?dryRun
+              ~localGatewayRouteTableVirtualInterfaceGroupAssociationId ())
+           (Some
+              Values.DeleteLocalGatewayRouteTableVirtualInterfaceGroupAssociationResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_local_gateway_route_table_vpc_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and localGatewayRouteTableVpcAssociationId =
+         flag "local-gateway-route-table-vpc-association-id"
+           (required string)
+           ~doc:"STRING LocalGatewayRouteTableVpcAssociationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_local_gateway_route_table_vpc_association
+           (Values.DeleteLocalGatewayRouteTableVpcAssociationRequest.make
+              ?dryRun ~localGatewayRouteTableVpcAssociationId ())
+           (Some
+              Values.DeleteLocalGatewayRouteTableVpcAssociationResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_local_gateway_virtual_interface =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and localGatewayVirtualInterfaceId =
+         flag "local-gateway-virtual-interface-id" (required string)
+           ~doc:"STRING LocalGatewayVirtualInterfaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_local_gateway_virtual_interface
+           (Values.DeleteLocalGatewayVirtualInterfaceRequest.make ?dryRun
+              ~localGatewayVirtualInterfaceId ())
+           (Some Values.DeleteLocalGatewayVirtualInterfaceResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_local_gateway_virtual_interface_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and localGatewayVirtualInterfaceGroupId =
+         flag "local-gateway-virtual-interface-group-id" (required string)
+           ~doc:"STRING LocalGatewayVirtualInterfaceGroupId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_local_gateway_virtual_interface_group
+           (Values.DeleteLocalGatewayVirtualInterfaceGroupRequest.make
+              ?dryRun ~localGatewayVirtualInterfaceGroupId ())
+           (Some Values.DeleteLocalGatewayVirtualInterfaceGroupResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_managed_prefix_list =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and prefixListId =
+         flag "prefix-list-id" (required string)
+           ~doc:"STRING PrefixListResourceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_managed_prefix_list
+           (Values.DeleteManagedPrefixListRequest.make ?dryRun ~prefixListId
+              ()) (Some Values.DeleteManagedPrefixListResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_nat_gateway =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and natGatewayId =
+         flag "nat-gateway-id" (required string) ~doc:"STRING NatGatewayId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_nat_gateway
+           (Values.DeleteNatGatewayRequest.make ?dryRun ~natGatewayId ())
+           (Some Values.DeleteNatGatewayResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_network_acl =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and networkAclId =
+         flag "network-acl-id" (required string) ~doc:"STRING NetworkAclId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_network_acl
+           (Values.DeleteNetworkAclRequest.make ?dryRun ~networkAclId ())
+           None (Some Values.Ec2_error.to_json)])
+let delete_network_acl_entry =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and networkAclId =
+         flag "network-acl-id" (required string) ~doc:"STRING NetworkAclId"
+       and ruleNumber = flag "rule-number" (required int) ~doc:"INT Integer"
+       and egress = flag "egress" (required bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_network_acl_entry
+           (Values.DeleteNetworkAclEntryRequest.make ?dryRun ~networkAclId
+              ~ruleNumber ~egress ()) None (Some Values.Ec2_error.to_json)])
+let delete_network_insights_access_scope =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and networkInsightsAccessScopeId =
+         flag "network-insights-access-scope-id" (required string)
+           ~doc:"STRING NetworkInsightsAccessScopeId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_network_insights_access_scope
+           (Values.DeleteNetworkInsightsAccessScopeRequest.make ?dryRun
+              ~networkInsightsAccessScopeId ())
+           (Some Values.DeleteNetworkInsightsAccessScopeResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_network_insights_access_scope_analysis =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and networkInsightsAccessScopeAnalysisId =
+         flag "network-insights-access-scope-analysis-id" (required string)
+           ~doc:"STRING NetworkInsightsAccessScopeAnalysisId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_network_insights_access_scope_analysis
+           (Values.DeleteNetworkInsightsAccessScopeAnalysisRequest.make
+              ?dryRun ~networkInsightsAccessScopeAnalysisId ())
+           (Some
+              Values.DeleteNetworkInsightsAccessScopeAnalysisResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_network_insights_analysis =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and networkInsightsAnalysisId =
+         flag "network-insights-analysis-id" (required string)
+           ~doc:"STRING NetworkInsightsAnalysisId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_network_insights_analysis
+           (Values.DeleteNetworkInsightsAnalysisRequest.make ?dryRun
+              ~networkInsightsAnalysisId ())
+           (Some Values.DeleteNetworkInsightsAnalysisResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_network_insights_path =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and networkInsightsPathId =
+         flag "network-insights-path-id" (required string)
+           ~doc:"STRING NetworkInsightsPathId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_network_insights_path
+           (Values.DeleteNetworkInsightsPathRequest.make ?dryRun
+              ~networkInsightsPathId ())
+           (Some Values.DeleteNetworkInsightsPathResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_network_interface =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and networkInterfaceId =
+         flag "network-interface-id" (required string)
+           ~doc:"STRING NetworkInterfaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_network_interface
+           (Values.DeleteNetworkInterfaceRequest.make ?dryRun
+              ~networkInterfaceId ()) None (Some Values.Ec2_error.to_json)])
+let delete_network_interface_permission =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and force = flag "force" (optional bool) ~doc:"BOOL Boolean"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and networkInterfacePermissionId =
+         flag "network-interface-permission-id" (required string)
+           ~doc:"STRING NetworkInterfacePermissionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_network_interface_permission
+           (Values.DeleteNetworkInterfacePermissionRequest.make ?force
+              ?dryRun ~networkInterfacePermissionId ())
+           (Some Values.DeleteNetworkInterfacePermissionResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_placement_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and groupName =
+         flag "group-name" (required string)
+           ~doc:"STRING PlacementGroupNameWithResolver" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_placement_group
+           (Values.DeletePlacementGroupRequest.make ?dryRun ~groupName ())
+           None (Some Values.Ec2_error.to_json)])
+let delete_public_ipv4_pool =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and networkBorderGroup =
+         flag "network-border-group" (optional string) ~doc:"STRING String"
+       and poolId =
+         flag "pool-id" (required string) ~doc:"STRING Ipv4PoolEc2Id" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_public_ipv4_pool
+           (Values.DeletePublicIpv4PoolRequest.make ?dryRun
+              ?networkBorderGroup ~poolId ())
+           (Some Values.DeletePublicIpv4PoolResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_queued_reserved_instances =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and reservedInstancesIds =
+         flag "reserved-instances-ids" (required json_arg)
+           ~doc:"JSON DeleteQueuedReservedInstancesIdList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_queued_reserved_instances
+           (Values.DeleteQueuedReservedInstancesRequest.make ?dryRun
+              ~reservedInstancesIds:(Values.DeleteQueuedReservedInstancesIdList.of_json
+                                       reservedInstancesIds) ())
+           (Some Values.DeleteQueuedReservedInstancesResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_route =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and destinationPrefixListId =
+         flag "destination-prefix-list-id" (optional string)
+           ~doc:"STRING PrefixListResourceId"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and destinationCidrBlock =
+         flag "destination-cidr-block" (optional string) ~doc:"STRING String"
+       and destinationIpv6CidrBlock =
+         flag "destination-ipv6-cidr-block" (optional string)
+           ~doc:"STRING String"
+       and routeTableId =
+         flag "route-table-id" (required string) ~doc:"STRING RouteTableId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_route
+           (Values.DeleteRouteRequest.make ?destinationPrefixListId ?dryRun
+              ?destinationCidrBlock ?destinationIpv6CidrBlock ~routeTableId
+              ()) None (Some Values.Ec2_error.to_json)])
+let delete_route_server =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and routeServerId =
+         flag "route-server-id" (required string) ~doc:"STRING RouteServerId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_route_server
+           (Values.DeleteRouteServerRequest.make ?dryRun ~routeServerId ())
+           (Some Values.DeleteRouteServerResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_route_server_endpoint =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and routeServerEndpointId =
+         flag "route-server-endpoint-id" (required string)
+           ~doc:"STRING RouteServerEndpointId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_route_server_endpoint
+           (Values.DeleteRouteServerEndpointRequest.make ?dryRun
+              ~routeServerEndpointId ())
+           (Some Values.DeleteRouteServerEndpointResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_route_server_peer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and routeServerPeerId =
+         flag "route-server-peer-id" (required string)
+           ~doc:"STRING RouteServerPeerId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_route_server_peer
+           (Values.DeleteRouteServerPeerRequest.make ?dryRun
+              ~routeServerPeerId ())
+           (Some Values.DeleteRouteServerPeerResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_route_table =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and routeTableId =
+         flag "route-table-id" (required string) ~doc:"STRING RouteTableId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_route_table
+           (Values.DeleteRouteTableRequest.make ?dryRun ~routeTableId ())
+           None (Some Values.Ec2_error.to_json)])
+let delete_secondary_network =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and secondaryNetworkId =
+         flag "secondary-network-id" (required string)
+           ~doc:"STRING SecondaryNetworkId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_secondary_network
+           (Values.DeleteSecondaryNetworkRequest.make ?clientToken ?dryRun
+              ~secondaryNetworkId ())
+           (Some Values.DeleteSecondaryNetworkResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_secondary_subnet =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and secondarySubnetId =
+         flag "secondary-subnet-id" (required string)
+           ~doc:"STRING SecondarySubnetId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_secondary_subnet
+           (Values.DeleteSecondarySubnetRequest.make ?clientToken ?dryRun
+              ~secondarySubnetId ())
+           (Some Values.DeleteSecondarySubnetResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_security_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and groupId =
+         flag "group-id" (optional string) ~doc:"STRING SecurityGroupId"
+       and groupName =
+         flag "group-name" (optional string) ~doc:"STRING SecurityGroupName"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_security_group
+           (Values.DeleteSecurityGroupRequest.make ?groupId ?groupName
+              ?dryRun ()) (Some Values.DeleteSecurityGroupResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_snapshot =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and snapshotId =
+         flag "snapshot-id" (required string) ~doc:"STRING SnapshotId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_snapshot
+           (Values.DeleteSnapshotRequest.make ?dryRun ~snapshotId ()) None
+           (Some Values.Ec2_error.to_json)])
+let delete_spot_datafeed_subscription =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_spot_datafeed_subscription
+           (Values.DeleteSpotDatafeedSubscriptionRequest.make ?dryRun ())
+           None (Some Values.Ec2_error.to_json)])
+let delete_subnet =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and subnetId =
+         flag "subnet-id" (required string) ~doc:"STRING SubnetId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_subnet
+           (Values.DeleteSubnetRequest.make ?dryRun ~subnetId ()) None
+           (Some Values.Ec2_error.to_json)])
+let delete_subnet_cidr_reservation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and subnetCidrReservationId =
+         flag "subnet-cidr-reservation-id" (required string)
+           ~doc:"STRING SubnetCidrReservationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_subnet_cidr_reservation
+           (Values.DeleteSubnetCidrReservationRequest.make ?dryRun
+              ~subnetCidrReservationId ())
+           (Some Values.DeleteSubnetCidrReservationResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_tags =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and resources =
+         flag "resources" (required json_arg) ~doc:"JSON ResourceIdList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_tags
+           (Values.DeleteTagsRequest.make ?dryRun
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~resources:(Values.ResourceIdList.of_json resources) ()) None
+           (Some Values.Ec2_error.to_json)])
+let delete_traffic_mirror_filter =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and trafficMirrorFilterId =
+         flag "traffic-mirror-filter-id" (required string)
+           ~doc:"STRING TrafficMirrorFilterId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_traffic_mirror_filter
+           (Values.DeleteTrafficMirrorFilterRequest.make ?dryRun
+              ~trafficMirrorFilterId ())
+           (Some Values.DeleteTrafficMirrorFilterResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_traffic_mirror_filter_rule =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and trafficMirrorFilterRuleId =
+         flag "traffic-mirror-filter-rule-id" (required string)
+           ~doc:"STRING TrafficMirrorFilterRuleIdWithResolver" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_traffic_mirror_filter_rule
+           (Values.DeleteTrafficMirrorFilterRuleRequest.make ?dryRun
+              ~trafficMirrorFilterRuleId ())
+           (Some Values.DeleteTrafficMirrorFilterRuleResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_traffic_mirror_session =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and trafficMirrorSessionId =
+         flag "traffic-mirror-session-id" (required string)
+           ~doc:"STRING TrafficMirrorSessionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_traffic_mirror_session
+           (Values.DeleteTrafficMirrorSessionRequest.make ?dryRun
+              ~trafficMirrorSessionId ())
+           (Some Values.DeleteTrafficMirrorSessionResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_traffic_mirror_target =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and trafficMirrorTargetId =
+         flag "traffic-mirror-target-id" (required string)
+           ~doc:"STRING TrafficMirrorTargetId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_traffic_mirror_target
+           (Values.DeleteTrafficMirrorTargetRequest.make ?dryRun
+              ~trafficMirrorTargetId ())
+           (Some Values.DeleteTrafficMirrorTargetResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_transit_gateway =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayId =
+         flag "transit-gateway-id" (required string)
+           ~doc:"STRING TransitGatewayId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_transit_gateway
+           (Values.DeleteTransitGatewayRequest.make ?dryRun ~transitGatewayId
+              ()) (Some Values.DeleteTransitGatewayResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_transit_gateway_client_vpn_attachment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayAttachmentId =
+         flag "transit-gateway-attachment-id" (required string)
+           ~doc:"STRING TransitGatewayAttachmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_transit_gateway_client_vpn_attachment
+           (Values.DeleteTransitGatewayClientVpnAttachmentRequest.make
+              ?dryRun ~transitGatewayAttachmentId ())
+           (Some Values.DeleteTransitGatewayClientVpnAttachmentResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_transit_gateway_connect =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayAttachmentId =
+         flag "transit-gateway-attachment-id" (required string)
+           ~doc:"STRING TransitGatewayAttachmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_transit_gateway_connect
+           (Values.DeleteTransitGatewayConnectRequest.make ?dryRun
+              ~transitGatewayAttachmentId ())
+           (Some Values.DeleteTransitGatewayConnectResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_transit_gateway_connect_peer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayConnectPeerId =
+         flag "transit-gateway-connect-peer-id" (required string)
+           ~doc:"STRING TransitGatewayConnectPeerId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_transit_gateway_connect_peer
+           (Values.DeleteTransitGatewayConnectPeerRequest.make ?dryRun
+              ~transitGatewayConnectPeerId ())
+           (Some Values.DeleteTransitGatewayConnectPeerResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_transit_gateway_metering_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayMeteringPolicyId =
+         flag "transit-gateway-metering-policy-id" (required string)
+           ~doc:"STRING TransitGatewayMeteringPolicyId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_transit_gateway_metering_policy
+           (Values.DeleteTransitGatewayMeteringPolicyRequest.make ?dryRun
+              ~transitGatewayMeteringPolicyId ())
+           (Some Values.DeleteTransitGatewayMeteringPolicyResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_transit_gateway_metering_policy_entry =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayMeteringPolicyId =
+         flag "transit-gateway-metering-policy-id" (required string)
+           ~doc:"STRING TransitGatewayMeteringPolicyId"
+       and policyRuleNumber =
+         flag "policy-rule-number" (required int) ~doc:"INT Integer" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_transit_gateway_metering_policy_entry
+           (Values.DeleteTransitGatewayMeteringPolicyEntryRequest.make
+              ?dryRun ~transitGatewayMeteringPolicyId ~policyRuleNumber ())
+           (Some Values.DeleteTransitGatewayMeteringPolicyEntryResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_transit_gateway_multicast_domain =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayMulticastDomainId =
+         flag "transit-gateway-multicast-domain-id" (required string)
+           ~doc:"STRING TransitGatewayMulticastDomainId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_transit_gateway_multicast_domain
+           (Values.DeleteTransitGatewayMulticastDomainRequest.make ?dryRun
+              ~transitGatewayMulticastDomainId ())
+           (Some Values.DeleteTransitGatewayMulticastDomainResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_transit_gateway_peering_attachment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayAttachmentId =
+         flag "transit-gateway-attachment-id" (required string)
+           ~doc:"STRING TransitGatewayAttachmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_transit_gateway_peering_attachment
+           (Values.DeleteTransitGatewayPeeringAttachmentRequest.make ?dryRun
+              ~transitGatewayAttachmentId ())
+           (Some Values.DeleteTransitGatewayPeeringAttachmentResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_transit_gateway_policy_table =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayPolicyTableId =
+         flag "transit-gateway-policy-table-id" (required string)
+           ~doc:"STRING TransitGatewayPolicyTableId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_transit_gateway_policy_table
+           (Values.DeleteTransitGatewayPolicyTableRequest.make ?dryRun
+              ~transitGatewayPolicyTableId ())
+           (Some Values.DeleteTransitGatewayPolicyTableResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_transit_gateway_prefix_list_reference =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayRouteTableId =
+         flag "transit-gateway-route-table-id" (required string)
+           ~doc:"STRING TransitGatewayRouteTableId"
+       and prefixListId =
+         flag "prefix-list-id" (required string)
+           ~doc:"STRING PrefixListResourceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_transit_gateway_prefix_list_reference
+           (Values.DeleteTransitGatewayPrefixListReferenceRequest.make
+              ?dryRun ~transitGatewayRouteTableId ~prefixListId ())
+           (Some Values.DeleteTransitGatewayPrefixListReferenceResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_transit_gateway_route =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayRouteTableId =
+         flag "transit-gateway-route-table-id" (required string)
+           ~doc:"STRING TransitGatewayRouteTableId"
+       and destinationCidrBlock =
+         flag "destination-cidr-block" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_transit_gateway_route
+           (Values.DeleteTransitGatewayRouteRequest.make ?dryRun
+              ~transitGatewayRouteTableId ~destinationCidrBlock ())
+           (Some Values.DeleteTransitGatewayRouteResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_transit_gateway_route_table =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayRouteTableId =
+         flag "transit-gateway-route-table-id" (required string)
+           ~doc:"STRING TransitGatewayRouteTableId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_transit_gateway_route_table
+           (Values.DeleteTransitGatewayRouteTableRequest.make ?dryRun
+              ~transitGatewayRouteTableId ())
+           (Some Values.DeleteTransitGatewayRouteTableResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_transit_gateway_route_table_announcement =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayRouteTableAnnouncementId =
+         flag "transit-gateway-route-table-announcement-id" (required string)
+           ~doc:"STRING TransitGatewayRouteTableAnnouncementId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_transit_gateway_route_table_announcement
+           (Values.DeleteTransitGatewayRouteTableAnnouncementRequest.make
+              ?dryRun ~transitGatewayRouteTableAnnouncementId ())
+           (Some
+              Values.DeleteTransitGatewayRouteTableAnnouncementResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_transit_gateway_vpc_attachment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayAttachmentId =
+         flag "transit-gateway-attachment-id" (required string)
+           ~doc:"STRING TransitGatewayAttachmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_transit_gateway_vpc_attachment
+           (Values.DeleteTransitGatewayVpcAttachmentRequest.make ?dryRun
+              ~transitGatewayAttachmentId ())
+           (Some Values.DeleteTransitGatewayVpcAttachmentResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_verified_access_endpoint =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and verifiedAccessEndpointId =
+         flag "verified-access-endpoint-id" (required string)
+           ~doc:"STRING VerifiedAccessEndpointId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_verified_access_endpoint
+           (Values.DeleteVerifiedAccessEndpointRequest.make ?clientToken
+              ?dryRun ~verifiedAccessEndpointId ())
+           (Some Values.DeleteVerifiedAccessEndpointResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_verified_access_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and verifiedAccessGroupId =
+         flag "verified-access-group-id" (required string)
+           ~doc:"STRING VerifiedAccessGroupId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_verified_access_group
+           (Values.DeleteVerifiedAccessGroupRequest.make ?clientToken ?dryRun
+              ~verifiedAccessGroupId ())
+           (Some Values.DeleteVerifiedAccessGroupResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_verified_access_instance =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and verifiedAccessInstanceId =
+         flag "verified-access-instance-id" (required string)
+           ~doc:"STRING VerifiedAccessInstanceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_verified_access_instance
+           (Values.DeleteVerifiedAccessInstanceRequest.make ?dryRun
+              ?clientToken ~verifiedAccessInstanceId ())
+           (Some Values.DeleteVerifiedAccessInstanceResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_verified_access_trust_provider =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and verifiedAccessTrustProviderId =
+         flag "verified-access-trust-provider-id" (required string)
+           ~doc:"STRING VerifiedAccessTrustProviderId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_verified_access_trust_provider
+           (Values.DeleteVerifiedAccessTrustProviderRequest.make ?dryRun
+              ?clientToken ~verifiedAccessTrustProviderId ())
+           (Some Values.DeleteVerifiedAccessTrustProviderResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_volume =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and volumeId =
+         flag "volume-id" (required string) ~doc:"STRING VolumeId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_volume
+           (Values.DeleteVolumeRequest.make ?dryRun ~volumeId ()) None
+           (Some Values.Ec2_error.to_json)])
+let delete_vpc =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and vpcId = flag "vpc-id" (required string) ~doc:"STRING VpcId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_vpc (Values.DeleteVpcRequest.make ?dryRun ~vpcId ())
+           None (Some Values.Ec2_error.to_json)])
+let delete_vpc_block_public_access_exclusion =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and exclusionId =
+         flag "exclusion-id" (required string)
+           ~doc:"STRING VpcBlockPublicAccessExclusionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_vpc_block_public_access_exclusion
+           (Values.DeleteVpcBlockPublicAccessExclusionRequest.make ?dryRun
+              ~exclusionId ())
+           (Some Values.DeleteVpcBlockPublicAccessExclusionResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_vpc_encryption_control =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and vpcEncryptionControlId =
+         flag "vpc-encryption-control-id" (required string)
+           ~doc:"STRING VpcEncryptionControlId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_vpc_encryption_control
+           (Values.DeleteVpcEncryptionControlRequest.make ?dryRun
+              ~vpcEncryptionControlId ())
+           (Some Values.DeleteVpcEncryptionControlResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_vpc_endpoint_connection_notifications =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and connectionNotificationIds =
+         flag "connection-notification-ids" (required json_arg)
+           ~doc:"JSON ConnectionNotificationIdsList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_vpc_endpoint_connection_notifications
+           (Values.DeleteVpcEndpointConnectionNotificationsRequest.make
+              ?dryRun
+              ~connectionNotificationIds:(Values.ConnectionNotificationIdsList.of_json
+                                            connectionNotificationIds) ())
+           (Some
+              Values.DeleteVpcEndpointConnectionNotificationsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_vpc_endpoint_service_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and serviceIds =
+         flag "service-ids" (required json_arg)
+           ~doc:"JSON VpcEndpointServiceIdList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_vpc_endpoint_service_configurations
+           (Values.DeleteVpcEndpointServiceConfigurationsRequest.make ?dryRun
+              ~serviceIds:(Values.VpcEndpointServiceIdList.of_json serviceIds)
+              ())
+           (Some Values.DeleteVpcEndpointServiceConfigurationsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_vpc_endpoints =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and vpcEndpointIds =
+         flag "vpc-endpoint-ids" (required json_arg)
+           ~doc:"JSON VpcEndpointIdList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_vpc_endpoints
+           (Values.DeleteVpcEndpointsRequest.make ?dryRun
+              ~vpcEndpointIds:(Values.VpcEndpointIdList.of_json
+                                 vpcEndpointIds) ())
+           (Some Values.DeleteVpcEndpointsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let delete_vpc_peering_connection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and vpcPeeringConnectionId =
+         flag "vpc-peering-connection-id" (required string)
+           ~doc:"STRING VpcPeeringConnectionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_vpc_peering_connection
+           (Values.DeleteVpcPeeringConnectionRequest.make ?dryRun
+              ~vpcPeeringConnectionId ())
+           (Some Values.DeleteVpcPeeringConnectionResult.to_json)
+           (Some Values.Ec2_error.to_json)])
 let delete_vpn_concentrator =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3817,3403 +5180,4 @@ let describe_reserved_instances_offerings =
               ?offeringType:(Option.map ~f:Values.OfferingTypeValues.of_json
                                offeringType) ?nextToken ?maxResults ())
            (Some Values.DescribeReservedInstancesOfferingsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_route_server_endpoints =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and routeServerEndpointIds =
-         flag "route-server-endpoint-ids" (optional json_arg)
-           ~doc:"JSON RouteServerEndpointIdsList"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT RouteServerMaxResults"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_route_server_endpoints
-           (Values.DescribeRouteServerEndpointsRequest.make
-              ?routeServerEndpointIds:(Option.map
-                                         ~f:Values.RouteServerEndpointIdsList.of_json
-                                         routeServerEndpointIds) ?nextToken
-              ?maxResults
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?dryRun ())
-           (Some Values.DescribeRouteServerEndpointsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_route_server_peers =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and routeServerPeerIds =
-         flag "route-server-peer-ids" (optional json_arg)
-           ~doc:"JSON RouteServerPeerIdsList"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT RouteServerMaxResults"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_route_server_peers
-           (Values.DescribeRouteServerPeersRequest.make
-              ?routeServerPeerIds:(Option.map
-                                     ~f:Values.RouteServerPeerIdsList.of_json
-                                     routeServerPeerIds) ?nextToken
-              ?maxResults
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?dryRun ())
-           (Some Values.DescribeRouteServerPeersResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_route_servers =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and routeServerIds =
-         flag "route-server-ids" (optional json_arg)
-           ~doc:"JSON RouteServerIdsList"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT RouteServerMaxResults"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_route_servers
-           (Values.DescribeRouteServersRequest.make
-              ?routeServerIds:(Option.map
-                                 ~f:Values.RouteServerIdsList.of_json
-                                 routeServerIds) ?nextToken ?maxResults
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?dryRun ()) (Some Values.DescribeRouteServersResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_route_tables =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeRouteTablesMaxResults"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and routeTableIds =
-         flag "route-table-ids" (optional json_arg)
-           ~doc:"JSON RouteTableIdStringList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_route_tables
-           (Values.DescribeRouteTablesRequest.make ?nextToken ?maxResults
-              ?dryRun
-              ?routeTableIds:(Option.map
-                                ~f:Values.RouteTableIdStringList.of_json
-                                routeTableIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters) ())
-           (Some Values.DescribeRouteTablesResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_scheduled_instance_availability =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeScheduledInstanceAvailabilityMaxResults"
-       and maxSlotDurationInHours =
-         flag "max-slot-duration-in-hours" (optional int) ~doc:"INT Integer"
-       and minSlotDurationInHours =
-         flag "min-slot-duration-in-hours" (optional int) ~doc:"INT Integer"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and firstSlotStartTimeRange =
-         flag "first-slot-start-time-range" (required json_arg)
-           ~doc:"JSON SlotDateTimeRangeRequest"
-       and recurrence =
-         flag "recurrence" (required json_arg)
-           ~doc:"JSON ScheduledInstanceRecurrenceRequest" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_scheduled_instance_availability
-           (Values.DescribeScheduledInstanceAvailabilityRequest.make ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?maxSlotDurationInHours ?minSlotDurationInHours
-              ?nextToken
-              ~firstSlotStartTimeRange:(Values.SlotDateTimeRangeRequest.of_json
-                                          firstSlotStartTimeRange)
-              ~recurrence:(Values.ScheduledInstanceRecurrenceRequest.of_json
-                             recurrence) ())
-           (Some Values.DescribeScheduledInstanceAvailabilityResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_scheduled_instances =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and scheduledInstanceIds =
-         flag "scheduled-instance-ids" (optional json_arg)
-           ~doc:"JSON ScheduledInstanceIdRequestSet"
-       and slotStartTimeRange =
-         flag "slot-start-time-range" (optional json_arg)
-           ~doc:"JSON SlotStartTimeRangeRequest" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_scheduled_instances
-           (Values.DescribeScheduledInstancesRequest.make ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken
-              ?scheduledInstanceIds:(Option.map
-                                       ~f:Values.ScheduledInstanceIdRequestSet.of_json
-                                       scheduledInstanceIds)
-              ?slotStartTimeRange:(Option.map
-                                     ~f:Values.SlotStartTimeRangeRequest.of_json
-                                     slotStartTimeRange) ())
-           (Some Values.DescribeScheduledInstancesResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_secondary_interfaces =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeSecondaryInterfacesMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and secondaryInterfaceIds =
-         flag "secondary-interface-ids" (optional json_arg)
-           ~doc:"JSON SecondaryInterfaceIdList" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_secondary_interfaces
-           (Values.DescribeSecondaryInterfacesRequest.make ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken
-              ?secondaryInterfaceIds:(Option.map
-                                        ~f:Values.SecondaryInterfaceIdList.of_json
-                                        secondaryInterfaceIds) ())
-           (Some Values.DescribeSecondaryInterfacesResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_secondary_networks =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeSecondaryNetworksMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and secondaryNetworkIds =
-         flag "secondary-network-ids" (optional json_arg)
-           ~doc:"JSON SecondaryNetworkIdList" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_secondary_networks
-           (Values.DescribeSecondaryNetworksRequest.make ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken
-              ?secondaryNetworkIds:(Option.map
-                                      ~f:Values.SecondaryNetworkIdList.of_json
-                                      secondaryNetworkIds) ())
-           (Some Values.DescribeSecondaryNetworksResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_secondary_subnets =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeSecondarySubnetsMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and secondarySubnetIds =
-         flag "secondary-subnet-ids" (optional json_arg)
-           ~doc:"JSON SecondarySubnetIdList" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_secondary_subnets
-           (Values.DescribeSecondarySubnetsRequest.make ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken
-              ?secondarySubnetIds:(Option.map
-                                     ~f:Values.SecondarySubnetIdList.of_json
-                                     secondarySubnetIds) ())
-           (Some Values.DescribeSecondarySubnetsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_security_group_references =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and groupId = flag "group-id" (required json_arg) ~doc:"JSON GroupIds" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_security_group_references
-           (Values.DescribeSecurityGroupReferencesRequest.make ?dryRun
-              ~groupId:(Values.GroupIds.of_json groupId) ())
-           (Some Values.DescribeSecurityGroupReferencesResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_security_group_rules =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and securityGroupRuleIds =
-         flag "security-group-rule-ids" (optional json_arg)
-           ~doc:"JSON SecurityGroupRuleIdList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeSecurityGroupRulesMaxResults" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_security_group_rules
-           (Values.DescribeSecurityGroupRulesRequest.make
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?securityGroupRuleIds:(Option.map
-                                       ~f:Values.SecurityGroupRuleIdList.of_json
-                                       securityGroupRuleIds) ?dryRun
-              ?nextToken ?maxResults ())
-           (Some Values.DescribeSecurityGroupRulesResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_security_group_vpc_associations =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeSecurityGroupVpcAssociationsMaxResults"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_security_group_vpc_associations
-           (Values.DescribeSecurityGroupVpcAssociationsRequest.make
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?nextToken ?maxResults ?dryRun ())
-           (Some Values.DescribeSecurityGroupVpcAssociationsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_security_groups =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and groupIds =
-         flag "group-ids" (optional json_arg) ~doc:"JSON GroupIdStringList"
-       and groupNames =
-         flag "group-names" (optional json_arg)
-           ~doc:"JSON GroupNameStringList"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeSecurityGroupsMaxResults"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_security_groups
-           (Values.DescribeSecurityGroupsRequest.make
-              ?groupIds:(Option.map ~f:Values.GroupIdStringList.of_json
-                           groupIds)
-              ?groupNames:(Option.map ~f:Values.GroupNameStringList.of_json
-                             groupNames) ?nextToken ?maxResults ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters) ())
-           (Some Values.DescribeSecurityGroupsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_service_link_virtual_interfaces =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and serviceLinkVirtualInterfaceIds =
-         flag "service-link-virtual-interface-ids" (optional json_arg)
-           ~doc:"JSON ServiceLinkVirtualInterfaceIdSet"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT ServiceLinkMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_service_link_virtual_interfaces
-           (Values.DescribeServiceLinkVirtualInterfacesRequest.make
-              ?serviceLinkVirtualInterfaceIds:(Option.map
-                                                 ~f:Values.ServiceLinkVirtualInterfaceIdSet.of_json
-                                                 serviceLinkVirtualInterfaceIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ?dryRun ())
-           (Some Values.DescribeServiceLinkVirtualInterfacesResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_snapshot_attribute =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and attribute =
-         flag "attribute" (required json_arg)
-           ~doc:"JSON SnapshotAttributeName"
-       and snapshotId =
-         flag "snapshot-id" (required string) ~doc:"STRING SnapshotId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_snapshot_attribute
-           (Values.DescribeSnapshotAttributeRequest.make ?dryRun
-              ~attribute:(Values.SnapshotAttributeName.of_json attribute)
-              ~snapshotId ())
-           (Some Values.DescribeSnapshotAttributeResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_snapshot_tier_status =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeSnapshotTierStatusMaxResults" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_snapshot_tier_status
-           (Values.DescribeSnapshotTierStatusRequest.make
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?dryRun ?nextToken ?maxResults ())
-           (Some Values.DescribeSnapshotTierStatusResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_snapshots =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and ownerIds =
-         flag "owner-ids" (optional json_arg) ~doc:"JSON OwnerStringList"
-       and restorableByUserIds =
-         flag "restorable-by-user-ids" (optional json_arg)
-           ~doc:"JSON RestorableByStringList"
-       and snapshotIds =
-         flag "snapshot-ids" (optional json_arg)
-           ~doc:"JSON SnapshotIdStringList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_snapshots
-           (Values.DescribeSnapshotsRequest.make ?maxResults ?nextToken
-              ?ownerIds:(Option.map ~f:Values.OwnerStringList.of_json
-                           ownerIds)
-              ?restorableByUserIds:(Option.map
-                                      ~f:Values.RestorableByStringList.of_json
-                                      restorableByUserIds)
-              ?snapshotIds:(Option.map ~f:Values.SnapshotIdStringList.of_json
-                              snapshotIds) ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters) ())
-           (Some Values.DescribeSnapshotsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_spot_datafeed_subscription =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_spot_datafeed_subscription
-           (Values.DescribeSpotDatafeedSubscriptionRequest.make ?dryRun ())
-           (Some Values.DescribeSpotDatafeedSubscriptionResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_spot_fleet_instances =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeSpotFleetInstancesMaxResults"
-       and spotFleetRequestId =
-         flag "spot-fleet-request-id" (required string)
-           ~doc:"STRING SpotFleetRequestId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_spot_fleet_instances
-           (Values.DescribeSpotFleetInstancesRequest.make ?dryRun ?nextToken
-              ?maxResults ~spotFleetRequestId ())
-           (Some Values.DescribeSpotFleetInstancesResponse.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_spot_fleet_request_history =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and eventType =
-         flag "event-type" (optional json_arg) ~doc:"JSON EventType"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeSpotFleetRequestHistoryMaxResults"
-       and spotFleetRequestId =
-         flag "spot-fleet-request-id" (required string)
-           ~doc:"STRING SpotFleetRequestId"
-       and startTime =
-         flag "start-time" (required json_arg) ~doc:"JSON DateTime" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_spot_fleet_request_history
-           (Values.DescribeSpotFleetRequestHistoryRequest.make ?dryRun
-              ?eventType:(Option.map ~f:Values.EventType.of_json eventType)
-              ?nextToken ?maxResults ~spotFleetRequestId
-              ~startTime:(Values.DateTime.of_json startTime) ())
-           (Some Values.DescribeSpotFleetRequestHistoryResponse.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_spot_fleet_requests =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and spotFleetRequestIds =
-         flag "spot-fleet-request-ids" (optional json_arg)
-           ~doc:"JSON SpotFleetRequestIdList"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_spot_fleet_requests
-           (Values.DescribeSpotFleetRequestsRequest.make ?dryRun
-              ?spotFleetRequestIds:(Option.map
-                                      ~f:Values.SpotFleetRequestIdList.of_json
-                                      spotFleetRequestIds) ?nextToken
-              ?maxResults ())
-           (Some Values.DescribeSpotFleetRequestsResponse.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_spot_instance_requests =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and spotInstanceRequestIds =
-         flag "spot-instance-request-ids" (optional json_arg)
-           ~doc:"JSON SpotInstanceRequestIdList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_spot_instance_requests
-           (Values.DescribeSpotInstanceRequestsRequest.make ?nextToken
-              ?maxResults ?dryRun
-              ?spotInstanceRequestIds:(Option.map
-                                         ~f:Values.SpotInstanceRequestIdList.of_json
-                                         spotInstanceRequestIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters) ())
-           (Some Values.DescribeSpotInstanceRequestsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_spot_price_history =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and availabilityZoneId =
-         flag "availability-zone-id" (optional string)
-           ~doc:"STRING AvailabilityZoneId"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and startTime =
-         flag "start-time" (optional json_arg) ~doc:"JSON DateTime"
-       and endTime = flag "end-time" (optional json_arg) ~doc:"JSON DateTime"
-       and instanceTypes =
-         flag "instance-types" (optional json_arg)
-           ~doc:"JSON InstanceTypeList"
-       and productDescriptions =
-         flag "product-descriptions" (optional json_arg)
-           ~doc:"JSON ProductDescriptionList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and availabilityZone =
-         flag "availability-zone" (optional string) ~doc:"STRING String"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_spot_price_history
-           (Values.DescribeSpotPriceHistoryRequest.make ?availabilityZoneId
-              ?dryRun
-              ?startTime:(Option.map ~f:Values.DateTime.of_json startTime)
-              ?endTime:(Option.map ~f:Values.DateTime.of_json endTime)
-              ?instanceTypes:(Option.map ~f:Values.InstanceTypeList.of_json
-                                instanceTypes)
-              ?productDescriptions:(Option.map
-                                      ~f:Values.ProductDescriptionList.of_json
-                                      productDescriptions)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?availabilityZone ?maxResults ?nextToken ())
-           (Some Values.DescribeSpotPriceHistoryResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_stale_security_groups =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeStaleSecurityGroupsMaxResults"
-       and nextToken =
-         flag "next-token" (optional string)
-           ~doc:"STRING DescribeStaleSecurityGroupsNextToken"
-       and vpcId = flag "vpc-id" (required string) ~doc:"STRING VpcId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_stale_security_groups
-           (Values.DescribeStaleSecurityGroupsRequest.make ?dryRun
-              ?maxResults ?nextToken ~vpcId ())
-           (Some Values.DescribeStaleSecurityGroupsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_store_image_tasks =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and imageIds =
-         flag "image-ids" (optional json_arg) ~doc:"JSON ImageIdList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeStoreImageTasksRequestMaxResults" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_store_image_tasks
-           (Values.DescribeStoreImageTasksRequest.make
-              ?imageIds:(Option.map ~f:Values.ImageIdList.of_json imageIds)
-              ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?nextToken ?maxResults ())
-           (Some Values.DescribeStoreImageTasksResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_subnets =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and subnetIds =
-         flag "subnet-ids" (optional json_arg) ~doc:"JSON SubnetIdStringList"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeSubnetsMaxResults"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_subnets
-           (Values.DescribeSubnetsRequest.make
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?subnetIds:(Option.map ~f:Values.SubnetIdStringList.of_json
-                            subnetIds) ?nextToken ?maxResults ?dryRun ())
-           (Some Values.DescribeSubnetsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_tags =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_tags
-           (Values.DescribeTagsRequest.make ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ())
-           (Some Values.DescribeTagsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_traffic_mirror_filter_rules =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and trafficMirrorFilterRuleIds =
-         flag "traffic-mirror-filter-rule-ids" (optional json_arg)
-           ~doc:"JSON TrafficMirrorFilterRuleIdList"
-       and trafficMirrorFilterId =
-         flag "traffic-mirror-filter-id" (optional string)
-           ~doc:"STRING TrafficMirrorFilterId"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT TrafficMirroringMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_traffic_mirror_filter_rules
-           (Values.DescribeTrafficMirrorFilterRulesRequest.make
-              ?trafficMirrorFilterRuleIds:(Option.map
-                                             ~f:Values.TrafficMirrorFilterRuleIdList.of_json
-                                             trafficMirrorFilterRuleIds)
-              ?trafficMirrorFilterId ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ())
-           (Some Values.DescribeTrafficMirrorFilterRulesResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_traffic_mirror_filters =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and trafficMirrorFilterIds =
-         flag "traffic-mirror-filter-ids" (optional json_arg)
-           ~doc:"JSON TrafficMirrorFilterIdList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT TrafficMirroringMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_traffic_mirror_filters
-           (Values.DescribeTrafficMirrorFiltersRequest.make
-              ?trafficMirrorFilterIds:(Option.map
-                                         ~f:Values.TrafficMirrorFilterIdList.of_json
-                                         trafficMirrorFilterIds) ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ())
-           (Some Values.DescribeTrafficMirrorFiltersResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_traffic_mirror_sessions =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and trafficMirrorSessionIds =
-         flag "traffic-mirror-session-ids" (optional json_arg)
-           ~doc:"JSON TrafficMirrorSessionIdList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT TrafficMirroringMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_traffic_mirror_sessions
-           (Values.DescribeTrafficMirrorSessionsRequest.make
-              ?trafficMirrorSessionIds:(Option.map
-                                          ~f:Values.TrafficMirrorSessionIdList.of_json
-                                          trafficMirrorSessionIds) ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ())
-           (Some Values.DescribeTrafficMirrorSessionsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_traffic_mirror_targets =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and trafficMirrorTargetIds =
-         flag "traffic-mirror-target-ids" (optional json_arg)
-           ~doc:"JSON TrafficMirrorTargetIdList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT TrafficMirroringMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_traffic_mirror_targets
-           (Values.DescribeTrafficMirrorTargetsRequest.make
-              ?trafficMirrorTargetIds:(Option.map
-                                         ~f:Values.TrafficMirrorTargetIdList.of_json
-                                         trafficMirrorTargetIds) ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ())
-           (Some Values.DescribeTrafficMirrorTargetsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_transit_gateway_attachments =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and transitGatewayAttachmentIds =
-         flag "transit-gateway-attachment-ids" (optional json_arg)
-           ~doc:"JSON TransitGatewayAttachmentIdStringList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT TransitGatewayMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_transit_gateway_attachments
-           (Values.DescribeTransitGatewayAttachmentsRequest.make
-              ?transitGatewayAttachmentIds:(Option.map
-                                              ~f:Values.TransitGatewayAttachmentIdStringList.of_json
-                                              transitGatewayAttachmentIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ?dryRun ())
-           (Some Values.DescribeTransitGatewayAttachmentsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_transit_gateway_connect_peers =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and transitGatewayConnectPeerIds =
-         flag "transit-gateway-connect-peer-ids" (optional json_arg)
-           ~doc:"JSON TransitGatewayConnectPeerIdStringList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT TransitGatewayMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_transit_gateway_connect_peers
-           (Values.DescribeTransitGatewayConnectPeersRequest.make
-              ?transitGatewayConnectPeerIds:(Option.map
-                                               ~f:Values.TransitGatewayConnectPeerIdStringList.of_json
-                                               transitGatewayConnectPeerIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ?dryRun ())
-           (Some Values.DescribeTransitGatewayConnectPeersResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_transit_gateway_connects =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and transitGatewayAttachmentIds =
-         flag "transit-gateway-attachment-ids" (optional json_arg)
-           ~doc:"JSON TransitGatewayAttachmentIdStringList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT TransitGatewayMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_transit_gateway_connects
-           (Values.DescribeTransitGatewayConnectsRequest.make
-              ?transitGatewayAttachmentIds:(Option.map
-                                              ~f:Values.TransitGatewayAttachmentIdStringList.of_json
-                                              transitGatewayAttachmentIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ?dryRun ())
-           (Some Values.DescribeTransitGatewayConnectsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_transit_gateway_metering_policies =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and transitGatewayMeteringPolicyIds =
-         flag "transit-gateway-metering-policy-ids" (optional json_arg)
-           ~doc:"JSON TransitGatewayMeteringPolicyIdStringList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT TransitGatewayMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_transit_gateway_metering_policies
-           (Values.DescribeTransitGatewayMeteringPoliciesRequest.make
-              ?transitGatewayMeteringPolicyIds:(Option.map
-                                                  ~f:Values.TransitGatewayMeteringPolicyIdStringList.of_json
-                                                  transitGatewayMeteringPolicyIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ?dryRun ())
-           (Some Values.DescribeTransitGatewayMeteringPoliciesResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_transit_gateway_multicast_domains =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and transitGatewayMulticastDomainIds =
-         flag "transit-gateway-multicast-domain-ids" (optional json_arg)
-           ~doc:"JSON TransitGatewayMulticastDomainIdStringList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT TransitGatewayMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_transit_gateway_multicast_domains
-           (Values.DescribeTransitGatewayMulticastDomainsRequest.make
-              ?transitGatewayMulticastDomainIds:(Option.map
-                                                   ~f:Values.TransitGatewayMulticastDomainIdStringList.of_json
-                                                   transitGatewayMulticastDomainIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ?dryRun ())
-           (Some Values.DescribeTransitGatewayMulticastDomainsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_transit_gateway_peering_attachments =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and transitGatewayAttachmentIds =
-         flag "transit-gateway-attachment-ids" (optional json_arg)
-           ~doc:"JSON TransitGatewayAttachmentIdStringList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT TransitGatewayMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_transit_gateway_peering_attachments
-           (Values.DescribeTransitGatewayPeeringAttachmentsRequest.make
-              ?transitGatewayAttachmentIds:(Option.map
-                                              ~f:Values.TransitGatewayAttachmentIdStringList.of_json
-                                              transitGatewayAttachmentIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ?dryRun ())
-           (Some
-              Values.DescribeTransitGatewayPeeringAttachmentsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_transit_gateway_policy_tables =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and transitGatewayPolicyTableIds =
-         flag "transit-gateway-policy-table-ids" (optional json_arg)
-           ~doc:"JSON TransitGatewayPolicyTableIdStringList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT TransitGatewayMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_transit_gateway_policy_tables
-           (Values.DescribeTransitGatewayPolicyTablesRequest.make
-              ?transitGatewayPolicyTableIds:(Option.map
-                                               ~f:Values.TransitGatewayPolicyTableIdStringList.of_json
-                                               transitGatewayPolicyTableIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ?dryRun ())
-           (Some Values.DescribeTransitGatewayPolicyTablesResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_transit_gateway_route_table_announcements =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and transitGatewayRouteTableAnnouncementIds =
-         flag "transit-gateway-route-table-announcement-ids"
-           (optional json_arg)
-           ~doc:"JSON TransitGatewayRouteTableAnnouncementIdStringList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT TransitGatewayMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_transit_gateway_route_table_announcements
-           (Values.DescribeTransitGatewayRouteTableAnnouncementsRequest.make
-              ?transitGatewayRouteTableAnnouncementIds:(Option.map
-                                                          ~f:Values.TransitGatewayRouteTableAnnouncementIdStringList.of_json
-                                                          transitGatewayRouteTableAnnouncementIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ?dryRun ())
-           (Some
-              Values.DescribeTransitGatewayRouteTableAnnouncementsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_transit_gateway_route_tables =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and transitGatewayRouteTableIds =
-         flag "transit-gateway-route-table-ids" (optional json_arg)
-           ~doc:"JSON TransitGatewayRouteTableIdStringList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT TransitGatewayMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_transit_gateway_route_tables
-           (Values.DescribeTransitGatewayRouteTablesRequest.make
-              ?transitGatewayRouteTableIds:(Option.map
-                                              ~f:Values.TransitGatewayRouteTableIdStringList.of_json
-                                              transitGatewayRouteTableIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ?dryRun ())
-           (Some Values.DescribeTransitGatewayRouteTablesResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_transit_gateway_vpc_attachments =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and transitGatewayAttachmentIds =
-         flag "transit-gateway-attachment-ids" (optional json_arg)
-           ~doc:"JSON TransitGatewayAttachmentIdStringList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT TransitGatewayMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_transit_gateway_vpc_attachments
-           (Values.DescribeTransitGatewayVpcAttachmentsRequest.make
-              ?transitGatewayAttachmentIds:(Option.map
-                                              ~f:Values.TransitGatewayAttachmentIdStringList.of_json
-                                              transitGatewayAttachmentIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ?dryRun ())
-           (Some Values.DescribeTransitGatewayVpcAttachmentsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_transit_gateways =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and transitGatewayIds =
-         flag "transit-gateway-ids" (optional json_arg)
-           ~doc:"JSON TransitGatewayIdStringList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT TransitGatewayMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_transit_gateways
-           (Values.DescribeTransitGatewaysRequest.make
-              ?transitGatewayIds:(Option.map
-                                    ~f:Values.TransitGatewayIdStringList.of_json
-                                    transitGatewayIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ?dryRun ())
-           (Some Values.DescribeTransitGatewaysResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_trunk_interface_associations =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and associationIds =
-         flag "association-ids" (optional json_arg)
-           ~doc:"JSON TrunkInterfaceAssociationIdList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeTrunkInterfaceAssociationsMaxResults" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_trunk_interface_associations
-           (Values.DescribeTrunkInterfaceAssociationsRequest.make
-              ?associationIds:(Option.map
-                                 ~f:Values.TrunkInterfaceAssociationIdList.of_json
-                                 associationIds) ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?nextToken ?maxResults ())
-           (Some Values.DescribeTrunkInterfaceAssociationsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_verified_access_endpoints =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and verifiedAccessEndpointIds =
-         flag "verified-access-endpoint-ids" (optional json_arg)
-           ~doc:"JSON VerifiedAccessEndpointIdList"
-       and verifiedAccessInstanceId =
-         flag "verified-access-instance-id" (optional string)
-           ~doc:"STRING VerifiedAccessInstanceId"
-       and verifiedAccessGroupId =
-         flag "verified-access-group-id" (optional string)
-           ~doc:"STRING VerifiedAccessGroupId"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeVerifiedAccessEndpointsMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_verified_access_endpoints
-           (Values.DescribeVerifiedAccessEndpointsRequest.make
-              ?verifiedAccessEndpointIds:(Option.map
-                                            ~f:Values.VerifiedAccessEndpointIdList.of_json
-                                            verifiedAccessEndpointIds)
-              ?verifiedAccessInstanceId ?verifiedAccessGroupId ?maxResults
-              ?nextToken
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?dryRun ())
-           (Some Values.DescribeVerifiedAccessEndpointsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_verified_access_groups =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and verifiedAccessGroupIds =
-         flag "verified-access-group-ids" (optional json_arg)
-           ~doc:"JSON VerifiedAccessGroupIdList"
-       and verifiedAccessInstanceId =
-         flag "verified-access-instance-id" (optional string)
-           ~doc:"STRING VerifiedAccessInstanceId"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeVerifiedAccessGroupMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_verified_access_groups
-           (Values.DescribeVerifiedAccessGroupsRequest.make
-              ?verifiedAccessGroupIds:(Option.map
-                                         ~f:Values.VerifiedAccessGroupIdList.of_json
-                                         verifiedAccessGroupIds)
-              ?verifiedAccessInstanceId ?maxResults ?nextToken
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?dryRun ())
-           (Some Values.DescribeVerifiedAccessGroupsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_verified_access_instance_logging_configurations =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and verifiedAccessInstanceIds =
-         flag "verified-access-instance-ids" (optional json_arg)
-           ~doc:"JSON VerifiedAccessInstanceIdList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeVerifiedAccessInstanceLoggingConfigurationsMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_verified_access_instance_logging_configurations
-           (Values.DescribeVerifiedAccessInstanceLoggingConfigurationsRequest.make
-              ?verifiedAccessInstanceIds:(Option.map
-                                            ~f:Values.VerifiedAccessInstanceIdList.of_json
-                                            verifiedAccessInstanceIds)
-              ?maxResults ?nextToken
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?dryRun ())
-           (Some
-              Values.DescribeVerifiedAccessInstanceLoggingConfigurationsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_verified_access_instances =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and verifiedAccessInstanceIds =
-         flag "verified-access-instance-ids" (optional json_arg)
-           ~doc:"JSON VerifiedAccessInstanceIdList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeVerifiedAccessInstancesMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_verified_access_instances
-           (Values.DescribeVerifiedAccessInstancesRequest.make
-              ?verifiedAccessInstanceIds:(Option.map
-                                            ~f:Values.VerifiedAccessInstanceIdList.of_json
-                                            verifiedAccessInstanceIds)
-              ?maxResults ?nextToken
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?dryRun ())
-           (Some Values.DescribeVerifiedAccessInstancesResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_verified_access_trust_providers =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and verifiedAccessTrustProviderIds =
-         flag "verified-access-trust-provider-ids" (optional json_arg)
-           ~doc:"JSON VerifiedAccessTrustProviderIdList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeVerifiedAccessTrustProvidersMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_verified_access_trust_providers
-           (Values.DescribeVerifiedAccessTrustProvidersRequest.make
-              ?verifiedAccessTrustProviderIds:(Option.map
-                                                 ~f:Values.VerifiedAccessTrustProviderIdList.of_json
-                                                 verifiedAccessTrustProviderIds)
-              ?maxResults ?nextToken
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?dryRun ())
-           (Some Values.DescribeVerifiedAccessTrustProvidersResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_volume_attribute =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and attribute =
-         flag "attribute" (required json_arg) ~doc:"JSON VolumeAttributeName"
-       and volumeId =
-         flag "volume-id" (required string) ~doc:"STRING VolumeId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_volume_attribute
-           (Values.DescribeVolumeAttributeRequest.make ?dryRun
-              ~attribute:(Values.VolumeAttributeName.of_json attribute)
-              ~volumeId ())
-           (Some Values.DescribeVolumeAttributeResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_volume_status =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and volumeIds =
-         flag "volume-ids" (optional json_arg) ~doc:"JSON VolumeIdStringList"
-       and includeManagedResources =
-         flag "include-managed-resources" (optional bool) ~doc:"BOOL Boolean"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_volume_status
-           (Values.DescribeVolumeStatusRequest.make ?maxResults ?nextToken
-              ?volumeIds:(Option.map ~f:Values.VolumeIdStringList.of_json
-                            volumeIds) ?includeManagedResources ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters) ())
-           (Some Values.DescribeVolumeStatusResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_volumes =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and volumeIds =
-         flag "volume-ids" (optional json_arg) ~doc:"JSON VolumeIdStringList"
-       and includeManagedResources =
-         flag "include-managed-resources" (optional bool) ~doc:"BOOL Boolean"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_volumes
-           (Values.DescribeVolumesRequest.make
-              ?volumeIds:(Option.map ~f:Values.VolumeIdStringList.of_json
-                            volumeIds) ?includeManagedResources ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?nextToken ?maxResults ())
-           (Some Values.DescribeVolumesResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_volumes_modifications =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and volumeIds =
-         flag "volume-ids" (optional json_arg) ~doc:"JSON VolumeIdStringList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_volumes_modifications
-           (Values.DescribeVolumesModificationsRequest.make ?dryRun
-              ?volumeIds:(Option.map ~f:Values.VolumeIdStringList.of_json
-                            volumeIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?nextToken ?maxResults ())
-           (Some Values.DescribeVolumesModificationsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_vpc_attribute =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and attribute =
-         flag "attribute" (required json_arg) ~doc:"JSON VpcAttributeName"
-       and vpcId = flag "vpc-id" (required string) ~doc:"STRING VpcId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_vpc_attribute
-           (Values.DescribeVpcAttributeRequest.make ?dryRun
-              ~attribute:(Values.VpcAttributeName.of_json attribute) ~vpcId
-              ()) (Some Values.DescribeVpcAttributeResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_vpc_block_public_access_exclusions =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and exclusionIds =
-         flag "exclusion-ids" (optional json_arg)
-           ~doc:"JSON VpcBlockPublicAccessExclusionIdList"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeVpcBlockPublicAccessExclusionsMaxResults" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_vpc_block_public_access_exclusions
-           (Values.DescribeVpcBlockPublicAccessExclusionsRequest.make ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?exclusionIds:(Option.map
-                               ~f:Values.VpcBlockPublicAccessExclusionIdList.of_json
-                               exclusionIds) ?nextToken ?maxResults ())
-           (Some Values.DescribeVpcBlockPublicAccessExclusionsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_vpc_block_public_access_options =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_vpc_block_public_access_options
-           (Values.DescribeVpcBlockPublicAccessOptionsRequest.make ?dryRun ())
-           (Some Values.DescribeVpcBlockPublicAccessOptionsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_vpc_classic_link =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and vpcIds =
-         flag "vpc-ids" (optional json_arg) ~doc:"JSON VpcClassicLinkIdList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_vpc_classic_link
-           (Values.DescribeVpcClassicLinkRequest.make ?dryRun
-              ?vpcIds:(Option.map ~f:Values.VpcClassicLinkIdList.of_json
-                         vpcIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters) ())
-           (Some Values.DescribeVpcClassicLinkResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_vpc_classic_link_dns_support =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and vpcIds =
-         flag "vpc-ids" (optional json_arg) ~doc:"JSON VpcClassicLinkIdList"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeVpcClassicLinkDnsSupportMaxResults"
-       and nextToken =
-         flag "next-token" (optional string)
-           ~doc:"STRING DescribeVpcClassicLinkDnsSupportNextToken" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_vpc_classic_link_dns_support
-           (Values.DescribeVpcClassicLinkDnsSupportRequest.make
-              ?vpcIds:(Option.map ~f:Values.VpcClassicLinkIdList.of_json
-                         vpcIds) ?maxResults ?nextToken ())
-           (Some Values.DescribeVpcClassicLinkDnsSupportResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_vpc_encryption_controls =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and vpcEncryptionControlIds =
-         flag "vpc-encryption-control-ids" (optional json_arg)
-           ~doc:"JSON VpcEncryptionControlIdList"
-       and vpcIds =
-         flag "vpc-ids" (optional json_arg) ~doc:"JSON VpcIdStringList"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeVpcEncryptionControlsMaxResults" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_vpc_encryption_controls
-           (Values.DescribeVpcEncryptionControlsRequest.make ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?vpcEncryptionControlIds:(Option.map
-                                          ~f:Values.VpcEncryptionControlIdList.of_json
-                                          vpcEncryptionControlIds)
-              ?vpcIds:(Option.map ~f:Values.VpcIdStringList.of_json vpcIds)
-              ?nextToken ?maxResults ())
-           (Some Values.DescribeVpcEncryptionControlsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_vpc_endpoint_associations =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and vpcEndpointIds =
-         flag "vpc-endpoint-ids" (optional json_arg)
-           ~doc:"JSON VpcEndpointIdList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults__lc1"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_vpc_endpoint_associations
-           (Values.DescribeVpcEndpointAssociationsRequest.make ?dryRun
-              ?vpcEndpointIds:(Option.map ~f:Values.VpcEndpointIdList.of_json
-                                 vpcEndpointIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ())
-           (Some Values.DescribeVpcEndpointAssociationsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_vpc_endpoint_connection_notifications =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and connectionNotificationId =
-         flag "connection-notification-id" (optional string)
-           ~doc:"STRING ConnectionNotificationId"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_vpc_endpoint_connection_notifications
-           (Values.DescribeVpcEndpointConnectionNotificationsRequest.make
-              ?dryRun ?connectionNotificationId
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ())
-           (Some
-              Values.DescribeVpcEndpointConnectionNotificationsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_vpc_endpoint_connections =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_vpc_endpoint_connections
-           (Values.DescribeVpcEndpointConnectionsRequest.make ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ())
-           (Some Values.DescribeVpcEndpointConnectionsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_vpc_endpoint_service_configurations =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and serviceIds =
-         flag "service-ids" (optional json_arg)
-           ~doc:"JSON VpcEndpointServiceIdList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_vpc_endpoint_service_configurations
-           (Values.DescribeVpcEndpointServiceConfigurationsRequest.make
-              ?dryRun
-              ?serviceIds:(Option.map
-                             ~f:Values.VpcEndpointServiceIdList.of_json
-                             serviceIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ())
-           (Some
-              Values.DescribeVpcEndpointServiceConfigurationsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_vpc_endpoint_service_permissions =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and serviceId =
-         flag "service-id" (required string)
-           ~doc:"STRING VpcEndpointServiceId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_vpc_endpoint_service_permissions
-           (Values.DescribeVpcEndpointServicePermissionsRequest.make ?dryRun
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ~serviceId ())
-           (Some Values.DescribeVpcEndpointServicePermissionsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_vpc_endpoint_services =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and serviceNames =
-         flag "service-names" (optional json_arg) ~doc:"JSON ValueStringList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and serviceRegions =
-         flag "service-regions" (optional json_arg)
-           ~doc:"JSON ValueStringList" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_vpc_endpoint_services
-           (Values.DescribeVpcEndpointServicesRequest.make ?dryRun
-              ?serviceNames:(Option.map ~f:Values.ValueStringList.of_json
-                               serviceNames)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken
-              ?serviceRegions:(Option.map ~f:Values.ValueStringList.of_json
-                                 serviceRegions) ())
-           (Some Values.DescribeVpcEndpointServicesResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_vpc_endpoints =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and vpcEndpointIds =
-         flag "vpc-endpoint-ids" (optional json_arg)
-           ~doc:"JSON VpcEndpointIdList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_vpc_endpoints
-           (Values.DescribeVpcEndpointsRequest.make ?dryRun
-              ?vpcEndpointIds:(Option.map ~f:Values.VpcEndpointIdList.of_json
-                                 vpcEndpointIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ())
-           (Some Values.DescribeVpcEndpointsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_vpc_peering_connections =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT DescribeVpcPeeringConnectionsMaxResults"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and vpcPeeringConnectionIds =
-         flag "vpc-peering-connection-ids" (optional json_arg)
-           ~doc:"JSON VpcPeeringConnectionIdList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_vpc_peering_connections
-           (Values.DescribeVpcPeeringConnectionsRequest.make ?nextToken
-              ?maxResults ?dryRun
-              ?vpcPeeringConnectionIds:(Option.map
-                                          ~f:Values.VpcPeeringConnectionIdList.of_json
-                                          vpcPeeringConnectionIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters) ())
-           (Some Values.DescribeVpcPeeringConnectionsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_vpcs =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and vpcIds =
-         flag "vpc-ids" (optional json_arg) ~doc:"JSON VpcIdStringList"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING String"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT DescribeVpcsMaxResults"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_vpcs
-           (Values.DescribeVpcsRequest.make
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?vpcIds:(Option.map ~f:Values.VpcIdStringList.of_json vpcIds)
-              ?nextToken ?maxResults ?dryRun ())
-           (Some Values.DescribeVpcsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_vpn_concentrators =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and vpnConcentratorIds =
-         flag "vpn-concentrator-ids" (optional json_arg)
-           ~doc:"JSON VpnConcentratorIdStringList"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and maxResults =
-         flag "max-results" (optional int) ~doc:"INT GVCDMaxResults"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_vpn_concentrators
-           (Values.DescribeVpnConcentratorsRequest.make
-              ?vpnConcentratorIds:(Option.map
-                                     ~f:Values.VpnConcentratorIdStringList.of_json
-                                     vpnConcentratorIds)
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ?dryRun ())
-           (Some Values.DescribeVpnConcentratorsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_vpn_connections =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and vpnConnectionIds =
-         flag "vpn-connection-ids" (optional json_arg)
-           ~doc:"JSON VpnConnectionIdStringList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_vpn_connections
-           (Values.DescribeVpnConnectionsRequest.make
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?vpnConnectionIds:(Option.map
-                                   ~f:Values.VpnConnectionIdStringList.of_json
-                                   vpnConnectionIds) ?dryRun ())
-           (Some Values.DescribeVpnConnectionsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let describe_vpn_gateways =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and filters =
-         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
-       and vpnGatewayIds =
-         flag "vpn-gateway-ids" (optional json_arg)
-           ~doc:"JSON VpnGatewayIdStringList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_vpn_gateways
-           (Values.DescribeVpnGatewaysRequest.make
-              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?vpnGatewayIds:(Option.map
-                                ~f:Values.VpnGatewayIdStringList.of_json
-                                vpnGatewayIds) ?dryRun ())
-           (Some Values.DescribeVpnGatewaysResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let detach_classic_link_vpc =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and instanceId =
-         flag "instance-id" (required string) ~doc:"STRING InstanceId"
-       and vpcId = flag "vpc-id" (required string) ~doc:"STRING VpcId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.detach_classic_link_vpc
-           (Values.DetachClassicLinkVpcRequest.make ?dryRun ~instanceId
-              ~vpcId ()) (Some Values.DetachClassicLinkVpcResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let detach_internet_gateway =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and internetGatewayId =
-         flag "internet-gateway-id" (required string)
-           ~doc:"STRING InternetGatewayId"
-       and vpcId = flag "vpc-id" (required string) ~doc:"STRING VpcId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.detach_internet_gateway
-           (Values.DetachInternetGatewayRequest.make ?dryRun
-              ~internetGatewayId ~vpcId ()) None
-           (Some Values.Ec2_error.to_json)])
-let detach_network_interface =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and force = flag "force" (optional bool) ~doc:"BOOL Boolean"
-       and attachmentId =
-         flag "attachment-id" (required string)
-           ~doc:"STRING NetworkInterfaceAttachmentId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.detach_network_interface
-           (Values.DetachNetworkInterfaceRequest.make ?dryRun ?force
-              ~attachmentId ()) None (Some Values.Ec2_error.to_json)])
-let detach_verified_access_trust_provider =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and clientToken =
-         flag "client-token" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and verifiedAccessInstanceId =
-         flag "verified-access-instance-id" (required string)
-           ~doc:"STRING VerifiedAccessInstanceId"
-       and verifiedAccessTrustProviderId =
-         flag "verified-access-trust-provider-id" (required string)
-           ~doc:"STRING VerifiedAccessTrustProviderId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.detach_verified_access_trust_provider
-           (Values.DetachVerifiedAccessTrustProviderRequest.make ?clientToken
-              ?dryRun ~verifiedAccessInstanceId
-              ~verifiedAccessTrustProviderId ())
-           (Some Values.DetachVerifiedAccessTrustProviderResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let detach_volume =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and device = flag "device" (optional string) ~doc:"STRING String"
-       and force = flag "force" (optional bool) ~doc:"BOOL Boolean"
-       and instanceId =
-         flag "instance-id" (optional string)
-           ~doc:"STRING InstanceIdForResolver"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and volumeId =
-         flag "volume-id" (required string)
-           ~doc:"STRING VolumeIdWithResolver" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.detach_volume
-           (Values.DetachVolumeRequest.make ?device ?force ?instanceId
-              ?dryRun ~volumeId ()) (Some Values.VolumeAttachment.to_json)
-           (Some Values.Ec2_error.to_json)])
-let detach_vpn_gateway =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and vpcId = flag "vpc-id" (required string) ~doc:"STRING VpcId"
-       and vpnGatewayId =
-         flag "vpn-gateway-id" (required string) ~doc:"STRING VpnGatewayId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.detach_vpn_gateway
-           (Values.DetachVpnGatewayRequest.make ?dryRun ~vpcId ~vpnGatewayId
-              ()) None (Some Values.Ec2_error.to_json)])
-let disable_address_transfer =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and allocationId =
-         flag "allocation-id" (required string) ~doc:"STRING AllocationId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_address_transfer
-           (Values.DisableAddressTransferRequest.make ?dryRun ~allocationId
-              ()) (Some Values.DisableAddressTransferResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_allowed_images_settings =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_allowed_images_settings
-           (Values.DisableAllowedImagesSettingsRequest.make ?dryRun ())
-           (Some Values.DisableAllowedImagesSettingsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_aws_network_performance_metric_subscription =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and source = flag "source" (optional string) ~doc:"STRING String"
-       and destination =
-         flag "destination" (optional string) ~doc:"STRING String"
-       and metric = flag "metric" (optional json_arg) ~doc:"JSON MetricType"
-       and statistic =
-         flag "statistic" (optional json_arg) ~doc:"JSON StatisticType"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_aws_network_performance_metric_subscription
-           (Values.DisableAwsNetworkPerformanceMetricSubscriptionRequest.make
-              ?source ?destination
-              ?metric:(Option.map ~f:Values.MetricType.of_json metric)
-              ?statistic:(Option.map ~f:Values.StatisticType.of_json
-                            statistic) ?dryRun ())
-           (Some
-              Values.DisableAwsNetworkPerformanceMetricSubscriptionResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_capacity_manager =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and clientToken =
-         flag "client-token" (optional string) ~doc:"STRING String" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_capacity_manager
-           (Values.DisableCapacityManagerRequest.make ?dryRun ?clientToken ())
-           (Some Values.DisableCapacityManagerResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_ebs_encryption_by_default =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_ebs_encryption_by_default
-           (Values.DisableEbsEncryptionByDefaultRequest.make ?dryRun ())
-           (Some Values.DisableEbsEncryptionByDefaultResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_fast_launch =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and force = flag "force" (optional bool) ~doc:"BOOL Boolean"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and imageId = flag "image-id" (required string) ~doc:"STRING ImageId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_fast_launch
-           (Values.DisableFastLaunchRequest.make ?force ?dryRun ~imageId ())
-           (Some Values.DisableFastLaunchResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_fast_snapshot_restores =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and availabilityZones =
-         flag "availability-zones" (optional json_arg)
-           ~doc:"JSON AvailabilityZoneStringList"
-       and availabilityZoneIds =
-         flag "availability-zone-ids" (optional json_arg)
-           ~doc:"JSON AvailabilityZoneIdStringList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and sourceSnapshotIds =
-         flag "source-snapshot-ids" (required json_arg)
-           ~doc:"JSON SnapshotIdStringList" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_fast_snapshot_restores
-           (Values.DisableFastSnapshotRestoresRequest.make
-              ?availabilityZones:(Option.map
-                                    ~f:Values.AvailabilityZoneStringList.of_json
-                                    availabilityZones)
-              ?availabilityZoneIds:(Option.map
-                                      ~f:Values.AvailabilityZoneIdStringList.of_json
-                                      availabilityZoneIds) ?dryRun
-              ~sourceSnapshotIds:(Values.SnapshotIdStringList.of_json
-                                    sourceSnapshotIds) ())
-           (Some Values.DisableFastSnapshotRestoresResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_image =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and imageId = flag "image-id" (required string) ~doc:"STRING ImageId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_image
-           (Values.DisableImageRequest.make ?dryRun ~imageId ())
-           (Some Values.DisableImageResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_image_block_public_access =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_image_block_public_access
-           (Values.DisableImageBlockPublicAccessRequest.make ?dryRun ())
-           (Some Values.DisableImageBlockPublicAccessResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_image_deprecation =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and imageId = flag "image-id" (required string) ~doc:"STRING ImageId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_image_deprecation
-           (Values.DisableImageDeprecationRequest.make ?dryRun ~imageId ())
-           (Some Values.DisableImageDeprecationResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_image_deregistration_protection =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and imageId = flag "image-id" (required string) ~doc:"STRING ImageId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_image_deregistration_protection
-           (Values.DisableImageDeregistrationProtectionRequest.make ?dryRun
-              ~imageId ())
-           (Some Values.DisableImageDeregistrationProtectionResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_instance_sql_ha_standby_detections =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and instanceIds =
-         flag "instance-ids" (required json_arg)
-           ~doc:"JSON InstanceIdUpdateStringList" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_instance_sql_ha_standby_detections
-           (Values.DisableInstanceSqlHaStandbyDetectionsRequest.make ?dryRun
-              ~instanceIds:(Values.InstanceIdUpdateStringList.of_json
-                              instanceIds) ())
-           (Some Values.DisableInstanceSqlHaStandbyDetectionsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_ipam_organization_admin_account =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and delegatedAdminAccountId =
-         flag "delegated-admin-account-id" (required string)
-           ~doc:"STRING String" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_ipam_organization_admin_account
-           (Values.DisableIpamOrganizationAdminAccountRequest.make ?dryRun
-              ~delegatedAdminAccountId ())
-           (Some Values.DisableIpamOrganizationAdminAccountResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_ipam_policy =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and organizationTargetId =
-         flag "organization-target-id" (optional string) ~doc:"STRING String"
-       and ipamPolicyId =
-         flag "ipam-policy-id" (required string) ~doc:"STRING IpamPolicyId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_ipam_policy
-           (Values.DisableIpamPolicyRequest.make ?dryRun
-              ?organizationTargetId ~ipamPolicyId ())
-           (Some Values.DisableIpamPolicyResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_route_server_propagation =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and routeServerId =
-         flag "route-server-id" (required string) ~doc:"STRING RouteServerId"
-       and routeTableId =
-         flag "route-table-id" (required string) ~doc:"STRING RouteTableId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_route_server_propagation
-           (Values.DisableRouteServerPropagationRequest.make ?dryRun
-              ~routeServerId ~routeTableId ())
-           (Some Values.DisableRouteServerPropagationResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_serial_console_access =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_serial_console_access
-           (Values.DisableSerialConsoleAccessRequest.make ?dryRun ())
-           (Some Values.DisableSerialConsoleAccessResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_snapshot_block_public_access =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_snapshot_block_public_access
-           (Values.DisableSnapshotBlockPublicAccessRequest.make ?dryRun ())
-           (Some Values.DisableSnapshotBlockPublicAccessResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_transit_gateway_route_table_propagation =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and transitGatewayAttachmentId =
-         flag "transit-gateway-attachment-id" (optional string)
-           ~doc:"STRING TransitGatewayAttachmentId"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and transitGatewayRouteTableAnnouncementId =
-         flag "transit-gateway-route-table-announcement-id" (optional string)
-           ~doc:"STRING TransitGatewayRouteTableAnnouncementId"
-       and transitGatewayRouteTableId =
-         flag "transit-gateway-route-table-id" (required string)
-           ~doc:"STRING TransitGatewayRouteTableId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_transit_gateway_route_table_propagation
-           (Values.DisableTransitGatewayRouteTablePropagationRequest.make
-              ?transitGatewayAttachmentId ?dryRun
-              ?transitGatewayRouteTableAnnouncementId
-              ~transitGatewayRouteTableId ())
-           (Some
-              Values.DisableTransitGatewayRouteTablePropagationResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_vgw_route_propagation =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and gatewayId =
-         flag "gateway-id" (required string) ~doc:"STRING VpnGatewayId"
-       and routeTableId =
-         flag "route-table-id" (required string) ~doc:"STRING RouteTableId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_vgw_route_propagation
-           (Values.DisableVgwRoutePropagationRequest.make ?dryRun ~gatewayId
-              ~routeTableId ()) None (Some Values.Ec2_error.to_json)])
-let disable_vpc_classic_link =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and vpcId = flag "vpc-id" (required string) ~doc:"STRING VpcId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_vpc_classic_link
-           (Values.DisableVpcClassicLinkRequest.make ?dryRun ~vpcId ())
-           (Some Values.DisableVpcClassicLinkResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disable_vpc_classic_link_dns_support =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and vpcId = flag "vpc-id" (optional string) ~doc:"STRING VpcId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disable_vpc_classic_link_dns_support
-           (Values.DisableVpcClassicLinkDnsSupportRequest.make ?vpcId ())
-           (Some Values.DisableVpcClassicLinkDnsSupportResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disassociate_address =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and associationId =
-         flag "association-id" (optional string)
-           ~doc:"STRING ElasticIpAssociationId"
-       and publicIp =
-         flag "public-ip" (optional string)
-           ~doc:"STRING EipAllocationPublicIp"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disassociate_address
-           (Values.DisassociateAddressRequest.make ?associationId ?publicIp
-              ?dryRun ()) None (Some Values.Ec2_error.to_json)])
-let disassociate_capacity_reservation_billing_owner =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and capacityReservationId =
-         flag "capacity-reservation-id" (required string)
-           ~doc:"STRING CapacityReservationId"
-       and unusedReservationBillingOwnerId =
-         flag "unused-reservation-billing-owner-id" (required string)
-           ~doc:"STRING AccountID" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disassociate_capacity_reservation_billing_owner
-           (Values.DisassociateCapacityReservationBillingOwnerRequest.make
-              ?dryRun ~capacityReservationId ~unusedReservationBillingOwnerId
-              ())
-           (Some
-              Values.DisassociateCapacityReservationBillingOwnerResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disassociate_client_vpn_target_network =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and clientVpnEndpointId =
-         flag "client-vpn-endpoint-id" (required string)
-           ~doc:"STRING ClientVpnEndpointId"
-       and associationId =
-         flag "association-id" (required string) ~doc:"STRING String" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disassociate_client_vpn_target_network
-           (Values.DisassociateClientVpnTargetNetworkRequest.make ?dryRun
-              ~clientVpnEndpointId ~associationId ())
-           (Some Values.DisassociateClientVpnTargetNetworkResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disassociate_enclave_certificate_iam_role =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and certificateArn =
-         flag "certificate-arn" (required string) ~doc:"STRING CertificateId"
-       and roleArn = flag "role-arn" (required string) ~doc:"STRING RoleId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disassociate_enclave_certificate_iam_role
-           (Values.DisassociateEnclaveCertificateIamRoleRequest.make ?dryRun
-              ~certificateArn ~roleArn ())
-           (Some Values.DisassociateEnclaveCertificateIamRoleResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disassociate_iam_instance_profile =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and associationId =
-         flag "association-id" (required string)
-           ~doc:"STRING IamInstanceProfileAssociationId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disassociate_iam_instance_profile
-           (Values.DisassociateIamInstanceProfileRequest.make ~associationId
-              ()) (Some Values.DisassociateIamInstanceProfileResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disassociate_instance_event_window =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and instanceEventWindowId =
-         flag "instance-event-window-id" (required string)
-           ~doc:"STRING InstanceEventWindowId"
-       and associationTarget =
-         flag "association-target" (required json_arg)
-           ~doc:"JSON InstanceEventWindowDisassociationRequest" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disassociate_instance_event_window
-           (Values.DisassociateInstanceEventWindowRequest.make ?dryRun
-              ~instanceEventWindowId
-              ~associationTarget:(Values.InstanceEventWindowDisassociationRequest.of_json
-                                    associationTarget) ())
-           (Some Values.DisassociateInstanceEventWindowResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disassociate_ipam_byoasn =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and asn = flag "asn" (required string) ~doc:"STRING String"
-       and cidr = flag "cidr" (required string) ~doc:"STRING String" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disassociate_ipam_byoasn
-           (Values.DisassociateIpamByoasnRequest.make ?dryRun ~asn ~cidr ())
-           (Some Values.DisassociateIpamByoasnResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disassociate_ipam_resource_discovery =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and ipamResourceDiscoveryAssociationId =
-         flag "ipam-resource-discovery-association-id" (required string)
-           ~doc:"STRING IpamResourceDiscoveryAssociationId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disassociate_ipam_resource_discovery
-           (Values.DisassociateIpamResourceDiscoveryRequest.make ?dryRun
-              ~ipamResourceDiscoveryAssociationId ())
-           (Some Values.DisassociateIpamResourceDiscoveryResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disassociate_nat_gateway_address =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and maxDrainDurationSeconds =
-         flag "max-drain-duration-seconds" (optional int)
-           ~doc:"INT DrainSeconds"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and natGatewayId =
-         flag "nat-gateway-id" (required string) ~doc:"STRING NatGatewayId"
-       and associationIds =
-         flag "association-ids" (required json_arg)
-           ~doc:"JSON EipAssociationIdList" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disassociate_nat_gateway_address
-           (Values.DisassociateNatGatewayAddressRequest.make
-              ?maxDrainDurationSeconds ?dryRun ~natGatewayId
-              ~associationIds:(Values.EipAssociationIdList.of_json
-                                 associationIds) ())
-           (Some Values.DisassociateNatGatewayAddressResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disassociate_route_server =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and routeServerId =
-         flag "route-server-id" (required string) ~doc:"STRING RouteServerId"
-       and vpcId = flag "vpc-id" (required string) ~doc:"STRING VpcId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disassociate_route_server
-           (Values.DisassociateRouteServerRequest.make ?dryRun ~routeServerId
-              ~vpcId ()) (Some Values.DisassociateRouteServerResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disassociate_route_table =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and associationId =
-         flag "association-id" (required string)
-           ~doc:"STRING RouteTableAssociationId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disassociate_route_table
-           (Values.DisassociateRouteTableRequest.make ?dryRun ~associationId
-              ()) None (Some Values.Ec2_error.to_json)])
-let disassociate_security_group_vpc =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and groupId =
-         flag "group-id" (required string)
-           ~doc:"STRING DisassociateSecurityGroupVpcSecurityGroupId"
-       and vpcId = flag "vpc-id" (required string) ~doc:"STRING String" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disassociate_security_group_vpc
-           (Values.DisassociateSecurityGroupVpcRequest.make ?dryRun ~groupId
-              ~vpcId ())
-           (Some Values.DisassociateSecurityGroupVpcResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disassociate_subnet_cidr_block =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and associationId =
-         flag "association-id" (required string)
-           ~doc:"STRING SubnetCidrAssociationId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disassociate_subnet_cidr_block
-           (Values.DisassociateSubnetCidrBlockRequest.make ~associationId ())
-           (Some Values.DisassociateSubnetCidrBlockResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disassociate_transit_gateway_multicast_domain =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and transitGatewayMulticastDomainId =
-         flag "transit-gateway-multicast-domain-id" (required string)
-           ~doc:"STRING TransitGatewayMulticastDomainId"
-       and transitGatewayAttachmentId =
-         flag "transit-gateway-attachment-id" (required string)
-           ~doc:"STRING TransitGatewayAttachmentId"
-       and subnetIds =
-         flag "subnet-ids" (required json_arg)
-           ~doc:"JSON TransitGatewaySubnetIdList" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disassociate_transit_gateway_multicast_domain
-           (Values.DisassociateTransitGatewayMulticastDomainRequest.make
-              ?dryRun ~transitGatewayMulticastDomainId
-              ~transitGatewayAttachmentId
-              ~subnetIds:(Values.TransitGatewaySubnetIdList.of_json subnetIds)
-              ())
-           (Some
-              Values.DisassociateTransitGatewayMulticastDomainResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disassociate_transit_gateway_policy_table =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and transitGatewayPolicyTableId =
-         flag "transit-gateway-policy-table-id" (required string)
-           ~doc:"STRING TransitGatewayPolicyTableId"
-       and transitGatewayAttachmentId =
-         flag "transit-gateway-attachment-id" (required string)
-           ~doc:"STRING TransitGatewayAttachmentId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disassociate_transit_gateway_policy_table
-           (Values.DisassociateTransitGatewayPolicyTableRequest.make ?dryRun
-              ~transitGatewayPolicyTableId ~transitGatewayAttachmentId ())
-           (Some Values.DisassociateTransitGatewayPolicyTableResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disassociate_transit_gateway_route_table =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and transitGatewayRouteTableId =
-         flag "transit-gateway-route-table-id" (required string)
-           ~doc:"STRING TransitGatewayRouteTableId"
-       and transitGatewayAttachmentId =
-         flag "transit-gateway-attachment-id" (required string)
-           ~doc:"STRING TransitGatewayAttachmentId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disassociate_transit_gateway_route_table
-           (Values.DisassociateTransitGatewayRouteTableRequest.make ?dryRun
-              ~transitGatewayRouteTableId ~transitGatewayAttachmentId ())
-           (Some Values.DisassociateTransitGatewayRouteTableResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disassociate_trunk_interface =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and clientToken =
-         flag "client-token" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and associationId =
-         flag "association-id" (required string)
-           ~doc:"STRING TrunkInterfaceAssociationId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disassociate_trunk_interface
-           (Values.DisassociateTrunkInterfaceRequest.make ?clientToken
-              ?dryRun ~associationId ())
-           (Some Values.DisassociateTrunkInterfaceResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let disassociate_vpc_cidr_block =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and associationId =
-         flag "association-id" (required string)
-           ~doc:"STRING VpcCidrAssociationId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.disassociate_vpc_cidr_block
-           (Values.DisassociateVpcCidrBlockRequest.make ~associationId ())
-           (Some Values.DisassociateVpcCidrBlockResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let enable_address_transfer =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and allocationId =
-         flag "allocation-id" (required string) ~doc:"STRING AllocationId"
-       and transferAccountId =
-         flag "transfer-account-id" (required string) ~doc:"STRING String" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.enable_address_transfer
-           (Values.EnableAddressTransferRequest.make ?dryRun ~allocationId
-              ~transferAccountId ())
-           (Some Values.EnableAddressTransferResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let enable_allowed_images_settings =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and allowedImagesSettingsState =
-         flag "allowed-images-settings-state" (required json_arg)
-           ~doc:"JSON AllowedImagesSettingsEnabledState" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.enable_allowed_images_settings
-           (Values.EnableAllowedImagesSettingsRequest.make ?dryRun
-              ~allowedImagesSettingsState:(Values.AllowedImagesSettingsEnabledState.of_json
-                                             allowedImagesSettingsState) ())
-           (Some Values.EnableAllowedImagesSettingsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let enable_aws_network_performance_metric_subscription =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and source = flag "source" (optional string) ~doc:"STRING String"
-       and destination =
-         flag "destination" (optional string) ~doc:"STRING String"
-       and metric = flag "metric" (optional json_arg) ~doc:"JSON MetricType"
-       and statistic =
-         flag "statistic" (optional json_arg) ~doc:"JSON StatisticType"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.enable_aws_network_performance_metric_subscription
-           (Values.EnableAwsNetworkPerformanceMetricSubscriptionRequest.make
-              ?source ?destination
-              ?metric:(Option.map ~f:Values.MetricType.of_json metric)
-              ?statistic:(Option.map ~f:Values.StatisticType.of_json
-                            statistic) ?dryRun ())
-           (Some
-              Values.EnableAwsNetworkPerformanceMetricSubscriptionResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let enable_capacity_manager =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and organizationsAccess =
-         flag "organizations-access" (optional bool) ~doc:"BOOL Boolean"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and clientToken =
-         flag "client-token" (optional string) ~doc:"STRING String" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.enable_capacity_manager
-           (Values.EnableCapacityManagerRequest.make ?organizationsAccess
-              ?dryRun ?clientToken ())
-           (Some Values.EnableCapacityManagerResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let enable_ebs_encryption_by_default =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.enable_ebs_encryption_by_default
-           (Values.EnableEbsEncryptionByDefaultRequest.make ?dryRun ())
-           (Some Values.EnableEbsEncryptionByDefaultResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let enable_fast_launch =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and resourceType =
-         flag "resource-type" (optional string) ~doc:"STRING String"
-       and snapshotConfiguration =
-         flag "snapshot-configuration" (optional json_arg)
-           ~doc:"JSON FastLaunchSnapshotConfigurationRequest"
-       and launchTemplate =
-         flag "launch-template" (optional json_arg)
-           ~doc:"JSON FastLaunchLaunchTemplateSpecificationRequest"
-       and maxParallelLaunches =
-         flag "max-parallel-launches" (optional int) ~doc:"INT Integer"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and imageId = flag "image-id" (required string) ~doc:"STRING ImageId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.enable_fast_launch
-           (Values.EnableFastLaunchRequest.make ?resourceType
-              ?snapshotConfiguration:(Option.map
-                                        ~f:Values.FastLaunchSnapshotConfigurationRequest.of_json
-                                        snapshotConfiguration)
-              ?launchTemplate:(Option.map
-                                 ~f:Values.FastLaunchLaunchTemplateSpecificationRequest.of_json
-                                 launchTemplate) ?maxParallelLaunches ?dryRun
-              ~imageId ()) (Some Values.EnableFastLaunchResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let enable_fast_snapshot_restores =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and availabilityZones =
-         flag "availability-zones" (optional json_arg)
-           ~doc:"JSON AvailabilityZoneStringList"
-       and availabilityZoneIds =
-         flag "availability-zone-ids" (optional json_arg)
-           ~doc:"JSON AvailabilityZoneIdStringList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and sourceSnapshotIds =
-         flag "source-snapshot-ids" (required json_arg)
-           ~doc:"JSON SnapshotIdStringList" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.enable_fast_snapshot_restores
-           (Values.EnableFastSnapshotRestoresRequest.make
-              ?availabilityZones:(Option.map
-                                    ~f:Values.AvailabilityZoneStringList.of_json
-                                    availabilityZones)
-              ?availabilityZoneIds:(Option.map
-                                      ~f:Values.AvailabilityZoneIdStringList.of_json
-                                      availabilityZoneIds) ?dryRun
-              ~sourceSnapshotIds:(Values.SnapshotIdStringList.of_json
-                                    sourceSnapshotIds) ())
-           (Some Values.EnableFastSnapshotRestoresResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let enable_image =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and imageId = flag "image-id" (required string) ~doc:"STRING ImageId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.enable_image
-           (Values.EnableImageRequest.make ?dryRun ~imageId ())
-           (Some Values.EnableImageResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let enable_image_block_public_access =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and imageBlockPublicAccessState =
-         flag "image-block-public-access-state" (required json_arg)
-           ~doc:"JSON ImageBlockPublicAccessEnabledState" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.enable_image_block_public_access
-           (Values.EnableImageBlockPublicAccessRequest.make ?dryRun
-              ~imageBlockPublicAccessState:(Values.ImageBlockPublicAccessEnabledState.of_json
-                                              imageBlockPublicAccessState) ())
-           (Some Values.EnableImageBlockPublicAccessResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let enable_image_deprecation =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and imageId = flag "image-id" (required string) ~doc:"STRING ImageId"
-       and deprecateAt =
-         flag "deprecate-at" (required json_arg)
-           ~doc:"JSON MillisecondDateTime" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.enable_image_deprecation
-           (Values.EnableImageDeprecationRequest.make ?dryRun ~imageId
-              ~deprecateAt:(Values.MillisecondDateTime.of_json deprecateAt)
-              ()) (Some Values.EnableImageDeprecationResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let enable_image_deregistration_protection =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and withCooldown =
-         flag "with-cooldown" (optional bool) ~doc:"BOOL Boolean"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and imageId = flag "image-id" (required string) ~doc:"STRING ImageId" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.enable_image_deregistration_protection
-           (Values.EnableImageDeregistrationProtectionRequest.make
-              ?withCooldown ?dryRun ~imageId ())
-           (Some Values.EnableImageDeregistrationProtectionResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let enable_instance_sql_ha_standby_detections =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and sqlServerCredentials =
-         flag "sql-server-credentials" (optional string)
-           ~doc:"STRING SecretArn"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and instanceIds =
-         flag "instance-ids" (required json_arg)
-           ~doc:"JSON InstanceIdUpdateStringList" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.enable_instance_sql_ha_standby_detections
-           (Values.EnableInstanceSqlHaStandbyDetectionsRequest.make
-              ?sqlServerCredentials ?dryRun
-              ~instanceIds:(Values.InstanceIdUpdateStringList.of_json
-                              instanceIds) ())
-           (Some Values.EnableInstanceSqlHaStandbyDetectionsResult.to_json)
-           (Some Values.Ec2_error.to_json)])
-let enable_ipam_organization_admin_account =
-  Command.async ~summary:""
-    ([%map_open.Command
-       let cli_profile =
-         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
-       and cli_region =
-         flag "-cli-region" (optional string) ~doc:"REGION override region"
-       and endpoint_url =
-         flag "-endpoint-url" (optional string)
-           ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and delegatedAdminAccountId =
-         flag "delegated-admin-account-id" (required string)
-           ~doc:"STRING String" in
-       fun () ->
-         call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.enable_ipam_organization_admin_account
-           (Values.EnableIpamOrganizationAdminAccountRequest.make ?dryRun
-              ~delegatedAdminAccountId ())
-           (Some Values.EnableIpamOrganizationAdminAccountResult.to_json)
            (Some Values.Ec2_error.to_json)])
