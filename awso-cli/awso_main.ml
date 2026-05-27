@@ -14,7 +14,11 @@ let () =
     ; "amplify", Awso_amplify_async.Cli.main
     ; "amplifybackend", Awso_amplifybackend_async.Cli.main
     ; "amplifyuibuilder", Awso_amplifyuibuilder_async.Cli.main
+    ; "apigateway", Awso_apigateway_async.Cli.main
     ; "apigatewaymanagementapi", Awso_apigatewaymanagementapi_async.Cli.main
+    ; "apigatewayv2", Awso_apigatewayv2_async.Cli.main
+    ; "appconfig", Awso_appconfig_async.Cli.main
+    ; "appconfigdata", Awso_appconfigdata_async.Cli.main
     ; "appfabric", Awso_appfabric_async.Cli.main
     ; "appflow", Awso_appflow_async.Cli.main
     ; "appintegrations", Awso_appintegrations_async.Cli.main
@@ -69,6 +73,7 @@ let () =
     ; "cloudformation", Awso_cloudformation_async.Cli.main
     ; "cloudfront", Awso_cloudfront_async.Cli.main
     ; "cloudfront-keyvaluestore", Awso_cloudfront_keyvaluestore_async.Cli.main
+    ; "cloudhsm", Awso_cloudhsm_async.Cli.main
     ; "cloudhsmv2", Awso_cloudhsmv2_async.Cli.main
     ; "cloudsearch", Awso_cloudsearch_async.Cli.main
     ; "cloudsearchdomain", Awso_cloudsearchdomain_async.Cli.main
@@ -83,6 +88,7 @@ let () =
     ; "codedeploy", Awso_codedeploy_async.Cli.main
     ; "codeguru-reviewer", Awso_codeguru_reviewer_async.Cli.main
     ; "codeguru-security", Awso_codeguru_security_async.Cli.main
+    ; "codeguruprofiler", Awso_codeguruprofiler_async.Cli.main
     ; "codepipeline", Awso_codepipeline_async.Cli.main
     ; "codestar-connections", Awso_codestar_connections_async.Cli.main
     ; "codestar-notifications", Awso_codestar_notifications_async.Cli.main
@@ -172,6 +178,7 @@ let () =
     ; "greengrassv2", Awso_greengrassv2_async.Cli.main
     ; "groundstation", Awso_groundstation_async.Cli.main
     ; "guardduty", Awso_guardduty_async.Cli.main
+    ; "health", Awso_health_async.Cli.main
     ; "healthlake", Awso_healthlake_async.Cli.main
     ; "iam", Awso_iam_async.Cli.main
     ; "identitystore", Awso_identitystore_async.Cli.main
@@ -217,6 +224,7 @@ let () =
     ; "lambda", Awso_lambda_async.Cli.main
     ; "launch-wizard", Awso_launch_wizard_async.Cli.main
     ; "lex-models", Awso_lex_models_async.Cli.main
+    ; "lex-runtime", Awso_lex_runtime_async.Cli.main
     ; "lexv2-models", Awso_lexv2_models_async.Cli.main
     ; "license-manager", Awso_license_manager_async.Cli.main
     ; "lightsail", Awso_lightsail_async.Cli.main
@@ -236,7 +244,9 @@ let () =
     ; "marketplace-entitlement", Awso_marketplace_entitlement_async.Cli.main
     ; "marketplace-reporting", Awso_marketplace_reporting_async.Cli.main
     ; "marketplacecommerceanalytics", Awso_marketplacecommerceanalytics_async.Cli.main
+    ; "mediaconnect", Awso_mediaconnect_async.Cli.main
     ; "mediaconvert", Awso_mediaconvert_async.Cli.main
+    ; "medialive", Awso_medialive_async.Cli.main
     ; "mediapackage", Awso_mediapackage_async.Cli.main
     ; "mediapackage-vod", Awso_mediapackage_vod_async.Cli.main
     ; "mediapackagev2", Awso_mediapackagev2_async.Cli.main
@@ -253,6 +263,7 @@ let () =
     ; "migrationhuborchestrator", Awso_migrationhuborchestrator_async.Cli.main
     ; "migrationhubstrategy", Awso_migrationhubstrategy_async.Cli.main
     ; "mpa", Awso_mpa_async.Cli.main
+    ; "mq", Awso_mq_async.Cli.main
     ; "mturk", Awso_mturk_async.Cli.main
     ; "mwaa", Awso_mwaa_async.Cli.main
     ; "mwaa-serverless", Awso_mwaa_serverless_async.Cli.main
@@ -325,6 +336,7 @@ let () =
     ; "rtbfabric", Awso_rtbfabric_async.Cli.main
     ; "rum", Awso_rum_async.Cli.main
     ; "s3", Awso_s3_async.Cli.main
+    ; "s3control", Awso_s3control_async.Cli.main
     ; "s3files", Awso_s3files_async.Cli.main
     ; "s3outposts", Awso_s3outposts_async.Cli.main
     ; "s3tables", Awso_s3tables_async.Cli.main
@@ -335,6 +347,7 @@ let () =
     ; "sagemaker-featurestore-runtime", Awso_sagemaker_featurestore_runtime_async.Cli.main
     ; "sagemaker-geospatial", Awso_sagemaker_geospatial_async.Cli.main
     ; "sagemaker-metrics", Awso_sagemaker_metrics_async.Cli.main
+    ; "sagemaker-runtime", Awso_sagemaker_runtime_async.Cli.main
     ; "savingsplans", Awso_savingsplans_async.Cli.main
     ; "scheduler", Awso_scheduler_async.Cli.main
     ; "schemas", Awso_schemas_async.Cli.main

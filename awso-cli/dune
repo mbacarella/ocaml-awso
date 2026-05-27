@@ -16,7 +16,11 @@
   awso-async.amplify
   awso-async.amplifybackend
   awso-async.amplifyuibuilder
+  awso-async.apigateway
   awso-async.apigatewaymanagementapi
+  awso-async.apigatewayv2
+  awso-async.appconfig
+  awso-async.appconfigdata
   awso-async.appfabric
   awso-async.appflow
   awso-async.appintegrations
@@ -71,6 +75,7 @@
   awso-async.cloudformation
   awso-async.cloudfront
   awso-async.cloudfront-keyvaluestore
+  awso-async.cloudhsm
   awso-async.cloudhsmv2
   awso-async.cloudsearch
   awso-async.cloudsearchdomain
@@ -85,6 +90,7 @@
   awso-async.codedeploy
   awso-async.codeguru-reviewer
   awso-async.codeguru-security
+  awso-async.codeguruprofiler
   awso-async.codepipeline
   awso-async.codestar-connections
   awso-async.codestar-notifications
@@ -174,6 +180,7 @@
   awso-async.greengrassv2
   awso-async.groundstation
   awso-async.guardduty
+  awso-async.health
   awso-async.healthlake
   awso-async.iam
   awso-async.identitystore
@@ -219,6 +226,7 @@
   awso-async.lambda
   awso-async.launch-wizard
   awso-async.lex-models
+  awso-async.lex-runtime
   awso-async.lexv2-models
   awso-async.license-manager
   awso-async.lightsail
@@ -238,7 +246,9 @@
   awso-async.marketplace-entitlement
   awso-async.marketplace-reporting
   awso-async.marketplacecommerceanalytics
+  awso-async.mediaconnect
   awso-async.mediaconvert
+  awso-async.medialive
   awso-async.mediapackage
   awso-async.mediapackage-vod
   awso-async.mediapackagev2
@@ -255,6 +265,7 @@
   awso-async.migrationhuborchestrator
   awso-async.migrationhubstrategy
   awso-async.mpa
+  awso-async.mq
   awso-async.mturk
   awso-async.mwaa
   awso-async.mwaa-serverless
@@ -327,6 +338,7 @@
   awso-async.rtbfabric
   awso-async.rum
   awso-async.s3
+  awso-async.s3control
   awso-async.s3files
   awso-async.s3outposts
   awso-async.s3tables
@@ -337,6 +349,7 @@
   awso-async.sagemaker-featurestore-runtime
   awso-async.sagemaker-geospatial
   awso-async.sagemaker-metrics
+  awso-async.sagemaker-runtime
   awso-async.savingsplans
   awso-async.scheduler
   awso-async.schemas

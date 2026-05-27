@@ -2,31 +2,17 @@ open! Import
 
 let unsupported_services : String.Set.t =
   String.Set.of_list
-    [ (* TODO: 2026-05-18 mbac: these are excluded but I don't remember why.
-        Try re-adding them in the near future and seeing what breaks. *)
-      "apigateway"
-    ; "apigatewayv2"
-    ; "appconfig"
-    ; "appconfigdata"
-    ; "appsync"
-    ; "cloudhsm"
-    ; "codeguruprofiler"
-    ; "dataexchange"
-    ; "health"
-    ; "iottwinmaker"
-    ; "lex-runtime"
-    ; "lexv2-runtime"
-    ; "lookoutvision"
-    ; "mediaconnect"
-    ; "medialive"
-    ; "mq"
+    [ (* Codegen produces references to symbols it never emits. Each one is
+         a distinct bug in the generator that we have not chased down yet. *)
+      "appsync" (* Unbound module DataSourceIntrospectionModelFieldType *)
+    ; "dataexchange" (* Unbound value __string *)
+    ; "iottwinmaker" (* Unbound module DataType *)
+    ; "lexv2-runtime" (* Unbound module ElicitSubSlot *)
     ; "pinpoint"
-    ; "s3control"
-    ; "sagemaker-runtime"
-    ; "workmailmessageflow"
-      (* 2026-05-18 mbac: these services fail in opam windows ci, so we're
-         just going to exclude them until some ocaml user in the world cares
-         about license services. *)
+      (* generated [make] call shadows itself via a [?make] parameter *)
+    ; "workmailmessageflow" (* lowercase identifier used as module *)
+      (* Fail in opam windows ci due to path-length limits; excluded until
+         someone needs them. *)
     ; "license-manager-linux-subscriptions"
     ; "license-manager-user-subscriptions"
     ]

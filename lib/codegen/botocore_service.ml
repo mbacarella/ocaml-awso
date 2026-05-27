@@ -334,7 +334,13 @@ module Operation = struct
        and () = field_ignored "requestcompression"
        and () = field_ignored "auth"
        and () = field_ignored "unsignedPayload"
-       and () = field_ignored "deprecatedSince" in
+       and () = field_ignored "deprecatedSince"
+         (* Legacy boolean trait superseded by [httpChecksum.requestChecksumRequired]
+            (which we already parse above). Pure policy metadata: AWS will reject
+            requests without a checksum, but users can still set [contentMD5] on
+            the request type. [Awso.Client.content_md5_insecure] is available as
+            a helper to compute it. *)
+       and () = field_ignored "httpChecksumRequired" in
        { Botodata.name
        ; http
        ; input
@@ -478,7 +484,8 @@ module Shape = struct
          and hostLabel = field_opt "hostLabel" bool
          and jsonvalue = field_opt "jsonvalue" bool
          and () = field_ignored "deprecatedSince"
-         and () = field_ignored "contextParam" in
+         and () = field_ignored "contextParam"
+         and () = field_ignored "enum" in
          { Botodata.shape
          ; deprecated
          ; deprecatedMessage
