@@ -1,0 +1,6 @@
+(library
+ (name awso_eio)
+ (public_name awso-eio)
+ (libraries awso cohttp-eio eio tls tls-eio ca-certs mirage-crypto-rng.unix)
+ (ocamlopt_flags (-linscan))
+ (synopsis "Eio-based AWS client runtime."))

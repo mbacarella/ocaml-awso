@@ -19,7 +19,7 @@ depends: [
   "dune" {>= "3.6"}
   "ocaml" {>= "5.3.0"}
   "awso-common"
-  "cohttp" {>= "0.21.0"}
+  "cohttp" {>= "6.0.0"}
   "cryptokit"
   "ppx_expect"
   "ppx_yojson_conv"
