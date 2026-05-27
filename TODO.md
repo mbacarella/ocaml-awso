@@ -4,7 +4,6 @@
 
 ### more I/O backends
 
-- eio for sure
 - riot?
 
 ### mirage
