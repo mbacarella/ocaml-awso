@@ -13,7 +13,11 @@ let make_https () =
     | Error (`Msg m) ->
       failwithf "awso-eio: failed to load system X509 authenticator: %s" m ()
   in
-  let tls_config = Tls.Config.client ~authenticator () in
+  let tls_config =
+    match Tls.Config.client ~authenticator () with
+    | Ok c -> c
+    | Error (`Msg m) -> failwithf "awso-eio: failed to build TLS client config: %s" m ()
+  in
   fun uri raw ->
     let host =
       Uri.host uri |> Option.map ~f:(fun h -> Domain_name.(host_exn (of_string_exn h)))
@@ -64,7 +68,7 @@ let get ~env ?profile ?aws_access_key_id ?aws_secret_access_key ?region ?output 
       | Ok aws_cfg ->
         (* TLS in OCaml needs an entropy source initialised before use.
              Idempotent; safe to call repeatedly. *)
-        Mirage_crypto_rng_unix.initialize (module Mirage_crypto_rng.Fortuna);
+        Mirage_crypto_rng_unix.use_default ();
         let client = Cohttp_eio.Client.make ~https:(Some (make_https ())) env#net in
         Ok { aws_cfg; client }))
 ;;

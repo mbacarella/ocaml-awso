@@ -82,10 +82,17 @@
    (>= 0.12))
   (cohttp-eio
    (>= 6.2.1))
-  tls
-  tls-eio
+  ; 2.1.0 fixes CVE-2026-45388 (missing client-side keyUsage /
+  ; extendedKeyUsage validation in TLS 1.3). awso-eio is a TLS client.
+  (tls
+   (>= 2.1.0))
+  (tls-eio
+   (>= 2.1.0))
   ca-certs
-  mirage-crypto-rng))
+  ; 1.2.0 introduced Mirage_crypto_rng_unix.use_default (replacement for
+  ; the now-deprecated initialize).
+  (mirage-crypto-rng
+   (>= 1.2.0))))
 
 (package
  (name awso-lwt)

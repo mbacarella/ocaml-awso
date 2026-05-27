@@ -94,6 +94,20 @@ EOF
   fi
 }
 
+require_opam_ci_check() {
+  # opam-ci-check is installed into a specific opam switch. If the caller's
+  # shell hasn't loaded that switch's env, the binary is invisible and the
+  # subcommand silently fails. Probe for it and give a useful hint.
+  if command -v opam-ci-check >/dev/null 2>&1; then
+    return 0
+  fi
+  echo "[local-opam-ci] opam-ci-check is not on PATH." >&2
+  echo "If you installed it via '$0 bootstrap pin', load that opam switch's env first:" >&2
+  echo "  eval \$(opam env)" >&2
+  echo "Or run via 'opam exec -- $0 ...'." >&2
+  exit 1
+}
+
 opam_version_of() {
   # Read the version: field from an opam file. Tolerates extra whitespace.
   local file="$1"
@@ -138,6 +152,7 @@ stage() {
 }
 
 lint() {
+  require_opam_ci_check
   stage
   cd "$PROJECT_ROOT"
   shopt -s nullglob
@@ -224,6 +239,7 @@ EOF
 
 build() {
   shift  # drop the "build" subcommand
+  require_opam_ci_check
   if ! command -v docker >/dev/null 2>&1; then
     echo "[local-opam-ci] docker not found; build requires Docker" >&2
     exit 1
