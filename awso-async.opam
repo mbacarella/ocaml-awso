@@ -24,7 +24,7 @@ depends: [
   "ppx_jane" {>= "v0.16.0"}
   "ppx_yojson_conv"
   "async" {>= "v0.16.0"}
-  "async_ssl" {>= "v0.16.1-1" & != "v0.17.0"}
+  "async_ssl" {>= "v0.16.1-2" & (< "v0.17.0" | >= "v0.17.0-2")}
   "odoc" {with-doc}
 ]
 build: [

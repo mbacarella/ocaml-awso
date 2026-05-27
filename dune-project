@@ -58,10 +58,16 @@
   (async
    (>= v0.16.0))
   (async_ssl
-   ; skip OpenSSL-3 incompatible revisions; the patched ones are *-1 in opam.
+   ; only the *-2 revisions suppress both -Wimplicit-function-declaration
+   ; (needed on OpenSSL builds without the ENGINE_* API, e.g. centos-10)
+   ; and -Wincompatible-pointer-types (OpenSSL 3 stricter pointer types,
+   ; e.g. debian-13). The intermediate -1 revisions only suppress the
+   ; pointer-types warning, which leaves the ENGINE_* errors uncaught.
    (and
-    (>= v0.16.1-1)
-    (<> v0.17.0)))))
+    (>= v0.16.1-2)
+    (or
+     (< v0.17.0)
+     (>= v0.17.0-2))))))
 
 (package
  (name awso-lwt)

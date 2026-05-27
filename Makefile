@@ -49,7 +49,11 @@ opam-ci-lint:
 	dogfood/local-opam-ci/run.sh lint
 
 opam-ci-build:
-	dogfood/local-opam-ci/run.sh build --head --lower-bounds --distro debian-12 --compiler 4.14
+#	dogfood/local-opam-ci/run.sh build --head --lower-bounds --distro debian-12 --compiler 4.14
+#	dogfood/local-opam-ci/run.sh build --head --lower-bounds --distro debian-12 --compiler 5.3.0
+	dogfood/local-opam-ci/run.sh build --head --lower-bounds --distro debian-13 --compiler 5.3.0
+
+
 
 opam-ci-remove-pins:
 	dogfood/local-opam-ci/run.sh remove-pins
