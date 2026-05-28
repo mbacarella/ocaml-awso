@@ -11,9 +11,9 @@
 ### Compatibility & dep hygiene
 
 - minimum OCaml is now 5.3.0 (we'd hoped to widen to 4.14 this release but ran out of time chasing compiler stack overflows on the giant generated tables; the door is open for 0.9.2)
-- `tls >= 2.1.0`. Fixes [CVE-2026-45388](https://github.com/mirleft/ocaml-tls/security/advisories) (TLS 1.3 client missing `keyUsage`/`extendedKeyUsage` validation). Directly affects awso-eio
+- `tls >= 2.1.0`. Noticed [CVE-2026-45388](https://github.com/mirleft/ocaml-tls/security/advisories) (TLS 1.3 client missing `keyUsage`/`extendedKeyUsage` validation), decided to get ahead of it.
 - `mirage-crypto-rng >= 1.2.0` for `Mirage_crypto_rng_unix.use_default` (the now-deprecated `initialize` is gone in our usage)
-- `async_ssl` constrained to the `-2` opam-repository revisions that re-add `-Wno-implicit-function-declaration`. The intermediate `-1` revisions only suppressed `-Wno-incompatible-pointer-types`, which left the build broken on distros where OpenSSL ships without the deprecated `ENGINE_*` API (e.g. centos-10). Fixed upstream in [ocaml/opam-repository#29939](https://github.com/ocaml/opam-repository/pull/29939) and the corresponding source-archives PR
+- `async_ssl` constrained to the `-2` opam-repository revisions that re-add `-Wno-implicit-function-declaration`. The intermediate `-1` revisions only suppressed `-Wno-incompatible-pointer-types`, which left the build broken on distros where OpenSSL ships without the deprecated `ENGINE_*` API (e.g. centos-10). Fixed upstream in [ocaml/opam-repository#29939](https://github.com/ocaml/opam-repository/pull/29939) and the corresponding source-archives PR. Note: this is broken where `async_ssl` is attempted on systems that have completely removed `openssl/engine.h`. Upstream should probably remove it.
 - `core_unix`, `ppx_jane`, `async` floored at `v0.16.0` to match what we actually test against
 
 ### Code generation changes
