@@ -100,11 +100,21 @@ So, Jane_compat could take advantage of better optimized stuff in Base now.
 
 ## unsupported_services blacklist (lib/codegen/cmd.ml)
 
-The history of why most of those services are excluded has been lost.
-Worth trying to re-add them and see what actually breaks today.
+In 0.9.1 we re-attempted the previously-undocumented exclusions. 13 came back
+without trouble; 6 still ship codegen bugs (now annotated inline in the
+blacklist) and stay excluded:
+
+- `appsync`: codegen emits a reference to `DataSourceIntrospectionModelFieldType`
+  it never defines
+- `dataexchange`: generated `endpoints.ml` calls `__string.to_header`, no such
+  symbol
+- `iottwinmaker`: unbound module `DataType` (likely shape name collision)
+- `lexv2-runtime`: unbound module `ElicitSubSlot` (recursive shape?)
+- `pinpoint`: generated `make` call gets shadowed by its own `?make` parameter
+- `workmailmessageflow`: lowercase identifier used in module position
 
 `license-manager-linux-subscriptions` and `license-manager-user-subscriptions`
-are excluded specifically because they fail to build in opam's Windows CI:
+are still excluded specifically because they fail to build in opam's Windows CI:
 the service names are long enough that combined with the opam build prefix
 (`D:\a\opam-repository\opam-repository\_opam\.opam-switch\build\...`) and the
 `awso_<svc>_<backend>__Values.cmt<rand>.tmp` filenames they emit, paths blow

@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.9.1 (2026-05-28)
+
+### New stuff
+
+- `awso-eio`: backend for [Eio](https://github.com/ocaml-multicore/eio). Same 400+ services exposed as `awso-eio.<svc>`. Requires OCaml 5
+- 13 services re-enabled that the codegen had skipped (apigateway, apigatewayv2, appconfig, appconfigdata, cloudhsm, codeguruprofiler, health, lex-runtime, mediaconnect, medialive, mq, s3control, sagemaker-runtime); 6 others (appsync, dataexchange, iottwinmaker, lexv2-runtime, pinpoint, workmailmessageflow) still excluded with documented codegen bugs to chase later
+- `CREDITS.md`
+
+### Compatibility & dep hygiene
+
+- minimum OCaml is now 5.3.0 (we'd hoped to widen to 4.14 this release but ran out of time chasing compiler stack overflows on the giant generated tables; the door is open for 0.9.2)
+- `tls >= 2.1.0`. Fixes [CVE-2026-45388](https://github.com/mirleft/ocaml-tls/security/advisories) (TLS 1.3 client missing `keyUsage`/`extendedKeyUsage` validation). Directly affects awso-eio
+- `mirage-crypto-rng >= 1.2.0` for `Mirage_crypto_rng_unix.use_default` (the now-deprecated `initialize` is gone in our usage)
+- `async_ssl` constrained to the `-2` opam-repository revisions that re-add `-Wno-implicit-function-declaration`. The intermediate `-1` revisions only suppressed `-Wno-incompatible-pointer-types`, which left the build broken on distros where OpenSSL ships without the deprecated `ENGINE_*` API (e.g. centos-10). Fixed upstream in [ocaml/opam-repository#29939](https://github.com/ocaml/opam-repository/pull/29939) and the corresponding source-archives PR
+- `core_unix`, `ppx_jane`, `async` floored at `v0.16.0` to match what we actually test against
+
+### Code generation changes
+
+- Parse the new botocore `enum` field on shape members
+- Parse the legacy `httpChecksumRequired` operation trait (currently ignored since we don't auto-compute checksums; users still set `?contentMD5` themselves with `Awso.Client.content_md5_insecure` as a helper)
+
 ## 0.9.0 (2026-05-17)
 
 Initial opam release, forked from [solvuu/awsm](https://github.com/solvuu/awsm), which was itself never released to opam.
