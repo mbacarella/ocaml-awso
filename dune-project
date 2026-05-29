@@ -27,7 +27,8 @@
  (depends
   (ocaml
    (>= 5.3.0))
-  awso-common
+  (awso-common
+   (= :version))
   (cohttp
    (>= 6.0.0))
   cryptokit
@@ -48,7 +49,8 @@
  (depends
   (ocaml
    (>= 5.3.0))
-  awso
+  (awso
+   (= :version))
   cohttp-async
   (core_unix
    (>= v0.16.0))
@@ -77,7 +79,8 @@
  (depends
   (ocaml
    (>= 5.0))
-  awso
+  (awso
+   (= :version))
   (eio
    (>= 0.12))
   (cohttp-eio
@@ -102,7 +105,8 @@
  (depends
   (ocaml
    (>= 5.3.0))
-  awso
+  (awso
+   (= :version))
   lwt
   lwt_ppx
   cohttp-lwt-unix))
@@ -127,7 +131,8 @@
  (depends
   (ocaml
    (>= 5.3.0))
-  awso
+  (awso
+   (= :version))
   ocurl
   ppx_expect))
 
@@ -139,7 +144,8 @@
  (depends
   (ocaml
    (>= 5.3.0))
-  awso-async
+  (awso-async
+   (= :version))
   (core_unix
    (>= v0.16.0))
   (ppx_jane
