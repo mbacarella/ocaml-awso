@@ -439,7 +439,8 @@ let of_json_converter_of_shape shape_name shape =
         ss.members
         ~init:([ Nolabel, Ast_convenience.unit () ], Fn.id)
         ~f:(fun (labels, bindings) (field_name, member) ->
-          let field_name_e = Ast_convenience.str field_name in
+          let json_name = Option.value member.locationName ~default:field_name in
+          let field_name_e = Ast_convenience.str json_name in
           let argument_is_required = Shape.structure_shape_required_field ss field_name in
           let of_json_e =
             Ast_convenience.evar (Shape.capitalized_id member.shape ^ ".of_json")
@@ -477,6 +478,40 @@ let of_json_converter_of_shape shape_name shape =
     let value_conv = Ast_convenience.evar (Shape.capitalized_id ms.value ^ ".of_json") in
     [%expr
       fun j -> object_of_json ~key_of_string:[%e key_conv] ~of_json:[%e value_conv] j]
+;;
+
+let%expect_test "of_json uses the member location name" =
+  let member : Botodata.shape_member =
+    { shape = "DetectorStatus"
+    ; deprecated = None
+    ; deprecatedMessage = None
+    ; location = None
+    ; locationName = Some "status"
+    ; documentation = None
+    ; xmlNamespace = None
+    ; streaming = None
+    ; xmlAttribute = None
+    ; queryName = None
+    ; box = None
+    ; flattened = None
+    ; idempotencyToken = None
+    ; eventpayload = None
+    ; hostLabel = None
+    ; jsonvalue = None
+    }
+  in
+  let shape =
+    Botodata.Structure_shape
+      { Botodata.empty_structure_shape with members = [ "Status", member ] }
+  in
+  printf
+    "%s%!"
+    (Util.expression_to_string (of_json_converter_of_shape "GetDetectorResponse" shape));
+  [%expect
+    {|
+    fun json__ ->
+      let status = field_map json__ "status" DetectorStatus.of_json in
+      make ?status () |}]
 ;;
 
 let to_json_converter_of_shape shape =
