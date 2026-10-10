@@ -110,22 +110,77 @@ let lookup_default_ami ~arch ~region =
 
 let ssh_user = "ubuntu"
 
+let sanitize_tag raw =
+  String.map raw ~f:(function
+    | ('a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '-' | '_') as c -> c
+    | _ -> '_')
+;;
+
 (* AWS resource names are account-shared, so we suffix with the local username
    to keep concurrent users from colliding on a single account. The cache dir
    is already per-user (under $HOME) so local file basenames don't need this
-   suffix. *)
-let user_tag () =
+   suffix. [--name] adds a further per-run suffix, to both the AWS names and
+   the local key/known_hosts files, so several runs (e.g. one per arch) can
+   be in flight at once. *)
+let user_tag ~run_name =
   let raw =
     match Sys.getenv "USER" with
     | Some u when not (String.is_empty u) -> u
     | _ -> failwithf "$USER is not set; cannot compute user_tag" ()
   in
-  let sanitized =
-    String.map raw ~f:(function
-      | ('a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '-' | '_') as c -> c
-      | _ -> '_')
+  let base = "awso-ci-" ^ sanitize_tag raw in
+  match run_name with
+  | None -> base
+  | Some n -> base ^ "-" ^ sanitize_tag n
+;;
+
+(* Local cache basenames: unchanged without [--name], else suffixed. *)
+let local_file_name ~run_name basename =
+  match run_name with
+  | None -> basename
+  | Some n -> sprintf "%s-%s" basename (sanitize_tag n)
+;;
+
+(* Newest Canonical-published AMI whose name matches, e.g. Ubuntu 24.04
+   ("noble"). 099720109477 is Canonical's AWS account. *)
+let resolve_ubuntu_ami ~cfg ~arch ~codename ~version =
+  let arch_name =
+    match arch with
+    | Arm64 -> "arm64"
+    | X86_64 -> "amd64"
   in
-  "awso-ci-" ^ sanitized
+  let pattern =
+    sprintf
+      "ubuntu/images/hvm-ssd-gp3/ubuntu-%s-%s-%s-server-*"
+      codename
+      version
+      arch_name
+  in
+  let req =
+    Ec2.DescribeImagesRequest.make
+      ~owners:[ "099720109477" ]
+      ~filters:
+        [ Ec2.Filter.make ~name:"name" ~values:[ pattern ] ()
+        ; Ec2.Filter.make ~name:"state" ~values:[ "available" ] ()
+        ]
+      ()
+  in
+  match%map Ec2.describe_images ~cfg req with
+  | Error err ->
+    failwithf
+      "DescribeImages: AWS error: %s"
+      (err |> Ec2.Ec2_error.to_json |> Yojson.Safe.to_string)
+      ()
+  | Ok resp -> (
+    Option.value resp.images ~default:[]
+    |> List.filter_map ~f:(fun (i : Ec2.Image.t) ->
+      match i.imageId, i.creationDate with
+      | Some id, Some date -> Some (date, id)
+      | _ -> None)
+    |> List.max_elt ~compare:[%compare: string * string]
+    |> function
+    | Some (_, id) -> id
+    | None -> failwithf "no Canonical AMI matches %s" pattern ())
 ;;
 
 let run_capture ~prog ~args ?(stdin_input = "") () =
@@ -528,6 +583,25 @@ let terminate_instance ~cfg ~instance_id =
   ()
 ;;
 
+(* Metal instances can take 5-10 minutes in shutting-down, and the SG can't be
+   deleted until the instance is gone. Gives up after [tries] polls. *)
+let rec wait_for_terminated ~cfg ~instance_id ~tries =
+  let%bind state =
+    Monitor.try_with ~run:`Schedule (fun () -> describe_instance ~cfg ~instance_id)
+    >>| function
+    | Ok i -> Option.bind i.state ~f:(fun s -> s.name)
+    | Error _ -> None
+  in
+  match state with
+  | Some Ec2.InstanceStateName.Terminated -> return ()
+  | _ when tries <= 0 ->
+    eprintf_now "gave up waiting for %s to terminate" instance_id;
+    return ()
+  | _ ->
+    let%bind () = Clock.after (Time_float.Span.of_sec 10.) in
+    wait_for_terminated ~cfg ~instance_id ~tries:(tries - 1)
+;;
+
 let delete_security_group ~cfg ~sg_id =
   let req = Ec2.DeleteSecurityGroupRequest.make ~groupId:sg_id () in
   let%map _ =
@@ -592,6 +666,10 @@ let ssh_args ~private_key_path ~known_hosts_path ~user ~host =
   ; sprintf "UserKnownHostsFile=%s" known_hosts_path
   ; "-o"
   ; "LogLevel=ERROR"
+    (* Remote scripts can run for hours (e.g. benchmarks) with long silent
+       stretches; keep NATs from dropping the idle session. *)
+  ; "-o"
+  ; "ServerAliveInterval=30"
   ; "-i"
   ; private_key_path
   ; sprintf "%s@%s" user host
@@ -610,7 +688,18 @@ let working_tree_dirty ~workdir =
   not (String.is_empty (String.strip out))
 ;;
 
-let push_code ~private_key_path ~known_hosts_path ~user ~host ~workdir =
+(* [~awso_tree]: the tree is awso's own checkout, whose build products and
+   vendored sources stay behind.  Any other tree ([--workdir]) is shipped
+   whole, but for what looks like a secret. *)
+let push_code
+      ~private_key_path
+      ~known_hosts_path
+      ~user
+      ~host
+      ~workdir
+      ~remote_dir
+      ~awso_tree
+  =
   let ssh =
     String.concat
       ~sep:" "
@@ -618,25 +707,23 @@ let push_code ~private_key_path ~known_hosts_path ~user ~host ~workdir =
          (ssh_args ~private_key_path ~known_hosts_path ~user ~host)
          ~f:Filename.quote)
   in
-  let remote = "mkdir -p ~/awso && cd ~/awso && tar -xzf -" in
+  let remote = sprintf "mkdir -p ~/%s && cd ~/%s && tar -xzf -" remote_dir remote_dir in
   (* Belt *and* suspenders: don't upload any unnecessary stuff or anything that
      looks like a secret. *)
+  let build_patterns = [ "_build"; "_opam"; ".git"; "vendor" ] in
   let exclude_patterns =
-    [ "_build"
-    ; "_opam"
-    ; ".git"
-    ; "vendor"
-    ; ".env"
-    ; ".env.*"
-    ; ".envrc"
-    ; "*.pem"
-    ; "*.key"
-    ; "id_rsa"
-    ; "id_ed25519"
-    ; "secrets"
-    ; "secrets.*"
-    ; "credentials"
-    ]
+    (if awso_tree then build_patterns else [])
+    @ [ ".env"
+      ; ".env.*"
+      ; ".envrc"
+      ; "*.pem"
+      ; "*.key"
+      ; "id_rsa"
+      ; "id_ed25519"
+      ; "secrets"
+      ; "secrets.*"
+      ; "credentials"
+      ]
   in
   let excludes =
     List.map exclude_patterns ~f:(fun p -> "--exclude=" ^ Filename.quote p)
@@ -656,7 +743,105 @@ let push_code ~private_key_path ~known_hosts_path ~user ~host ~workdir =
   | Error stderr -> failwithf "code push failed: %s" stderr ()
 ;;
 
-let run_remote_build ~private_key_path ~known_hosts_path ~user ~host ~lower_bounds =
+(* The script runs detached on the instance (setsid + nohup, output to a log
+   there), and we follow that log over ssh. A launcher that dies (killed, OOM,
+   laptop asleep) or a dropped connection then no longer kills the run:
+   following resumes at the byte offset we'd reached, and the results stay on
+   the instance to fetch until the --max-hours kill switch. *)
+let run_dir = ".awso-ci-run"
+
+let run_detached_and_follow ~ssh_argv ~script =
+  let ssh_cmd ?stdin_input cmd =
+    run_capture ~prog:"ssh" ~args:(ssh_argv @ [ cmd ]) ?stdin_input ()
+  in
+  let%bind () =
+    match%map
+      ssh_cmd
+        ~stdin_input:script
+        (sprintf "mkdir -p ~/%s && cat > ~/%s/script.sh" run_dir run_dir)
+    with
+    | Ok _ -> ()
+    | Error e -> failwithf "uploading remote script failed: %s" e ()
+  in
+  let%bind () =
+    (* The braces keep [&] to the setsid command alone: backgrounding the
+       whole [&&] chain would leave a subshell holding ssh's stdout, and ssh
+       would wait for the script to finish. [$!] is then bash -c's pid: with
+       no job control the job isn't a process-group leader, so setsid execs
+       in place rather than forking. *)
+    match%map
+      ssh_cmd
+        (sprintf
+           "cd ~/%s && rm -f exit && : > log && { setsid nohup bash -c 'bash script.sh; \
+            echo $? > exit' > log 2>&1 < /dev/null & echo $! > ~/%s/pid; }"
+           run_dir
+           run_dir)
+    with
+    | Ok _ -> ()
+    | Error e -> failwithf "starting remote script failed: %s" e ()
+  in
+  (* tail exits once the script's pid is gone; ssh exits 255 on connection
+     trouble, after which we reconnect from [offset]. *)
+  let rec follow ~offset ~unreachable_since =
+    let%bind p =
+      Process.create
+        ~prog:"ssh"
+        ~args:
+          (ssh_argv
+           @ [ sprintf
+                 "cd ~/%s && exec tail -c +%d --pid=$(cat pid) -F log 2>/dev/null"
+                 run_dir
+                 (offset + 1)
+             ])
+        ()
+      >>| ok_exn
+    in
+    let%bind () = Writer.close (Process.stdin p) in
+    let got = ref 0 in
+    let stdout_done =
+      Pipe.iter_without_pushback
+        (Reader.pipe (Process.stdout p))
+        ~f:(fun chunk ->
+          got := !got + String.length chunk;
+          Writer.write (force Writer.stdout) chunk)
+    in
+    let%bind (_ : string) = Reader.contents (Process.stderr p) in
+    let%bind () = stdout_done in
+    let%bind exit_or_signal = Process.wait p in
+    let offset = offset + !got in
+    match exit_or_signal with
+    | Ok () -> return offset
+    | Error _ ->
+      let now = Time_float.now () in
+      let since = if !got > 0 then now else Option.value unreachable_since ~default:now in
+      if Time_float.Span.( > ) (Time_float.diff now since) (Time_float.Span.of_min 5.)
+      then (
+        eprintf_now "lost the instance for 5 min; giving up on following the log";
+        return offset)
+      else (
+        eprintf_now "connection lost; reconnecting to follow the log...";
+        let%bind () = Clock.after (Time_float.Span.of_sec 10.) in
+        follow ~offset ~unreachable_since:(Some since))
+  in
+  let%bind (_ : int) = follow ~offset:0 ~unreachable_since:None in
+  match%map ssh_cmd (sprintf "cat ~/%s/exit" run_dir) with
+  | Ok "0" -> `Success
+  | Ok code ->
+    eprintf_now "remote script exited with %s" code;
+    `Build_failed
+  | Error _ ->
+    eprintf_now "remote script has no exit status (killed, or instance gone)";
+    `Build_failed
+;;
+
+let run_remote_build
+      ~private_key_path
+      ~known_hosts_path
+      ~user
+      ~host
+      ~lower_bounds
+      ~script_override
+  =
   let ssh_argv = ssh_args ~private_key_path ~known_hosts_path ~user ~host in
   (* Lower-bounds mode mirrors opam-ci's lower-bounds job: floor OCaml at 4.14
      (our declared minimum) and bias the solver toward older versions of every
@@ -727,31 +912,118 @@ echo '*** done'
       (if lower_bounds then "(lower bounds)" else "")
       install_extra_flags
   in
+  let remote_script = Option.value script_override ~default:remote_script in
   eprintf_now "starting remote build...";
-  let%bind p =
-    Process.create ~prog:"ssh" ~args:(ssh_argv @ [ "bash"; "-s" ]) () >>| ok_exn
+  run_detached_and_follow ~ssh_argv ~script:remote_script
+;;
+
+(* Pulls each [--fetch] path back from the instance with tar over ssh (no
+   scp, so globs and directories behave the same). Relative paths are
+   relative to the remote home; absolute ones land under [into] with the
+   leading / stripped, as tar does. Best-effort: a missing path is reported
+   and skipped, so one failure doesn't lose the rest before teardown. Returns
+   whether every path came back. *)
+let fetch_results
+      ?(quiet = false)
+      ~private_key_path
+      ~known_hosts_path
+      ~user
+      ~host
+      ~paths
+      ~into
+      ()
+  =
+  match paths with
+  | [] -> return true
+  | _ :: _ ->
+    let%bind () = Unix.mkdir ~p:() into in
+    let ssh =
+      String.concat
+        ~sep:" "
+        (List.map
+           (ssh_args ~private_key_path ~known_hosts_path ~user ~host)
+           ~f:Filename.quote)
+    in
+    Deferred.List.for_all paths ~f:(fun path ->
+      let remote = sprintf "cd ~ && tar -czf - -- %s" (Filename.quote path) in
+      let cmd =
+        sprintf
+          "set -o pipefail; ssh %s %s | tar -xzf - -C %s"
+          ssh
+          (Filename.quote remote)
+          (Filename.quote into)
+      in
+      if not quiet then eprintf_now "fetching %s into %s ..." path into;
+      match%map run_capture ~prog:"bash" ~args:[ "-c"; cmd ] () with
+      | Ok _ -> true
+      | Error stderr ->
+        eprintf_now "fetch of %s failed: %s" path (String.strip stderr);
+        false)
+;;
+
+(* While the remote script runs, re-fetch every [every] so that a spot
+   interruption (the instance just vanishes, taking the final fetch with it)
+   loses at most one interval of results. Snapshots land in [into]/periodic,
+   replaced only by a complete newer one: a fetch cut short by the instance
+   disappearing must not clobber the last good copy. *)
+let periodic_fetch
+      ~private_key_path
+      ~known_hosts_path
+      ~user
+      ~host
+      ~paths
+      ~into
+      ~every
+      ~stop
+  =
+  let snapshot = Filename.concat into "periodic" in
+  let tmp = Filename.concat into ".periodic.tmp" in
+  let rec loop () =
+    match%bind
+      Deferred.choose
+        [ Deferred.choice (Clock.after every) (fun () -> `Fetch)
+        ; Deferred.choice stop (fun () -> `Stop)
+        ]
+    with
+    | `Stop -> return ()
+    | `Fetch ->
+      let%bind (_ : (string, string) Result.t) =
+        run_capture ~prog:"rm" ~args:[ "-rf"; tmp ] ()
+      in
+      let%bind ok =
+        fetch_results
+          ~quiet:true
+          ~private_key_path
+          ~known_hosts_path
+          ~user
+          ~host
+          ~paths
+          ~into:tmp
+          ()
+      in
+      let%bind () =
+        if ok
+        then (
+          let%bind (_ : (string, string) Result.t) =
+            run_capture ~prog:"rm" ~args:[ "-rf"; snapshot ] ()
+          in
+          let%map () = Unix.rename ~src:tmp ~dst:snapshot in
+          eprintf_now "periodic fetch: snapshot in %s" snapshot)
+        else return ()
+      in
+      loop ()
   in
-  let stdin_w = Process.stdin p in
-  Writer.write stdin_w remote_script;
-  let%bind () = Writer.close stdin_w in
-  let stdout_done =
-    Reader.transfer (Process.stdout p) (Writer.pipe (force Writer.stdout))
-  in
-  let stderr_done =
-    Reader.transfer (Process.stderr p) (Writer.pipe (force Writer.stderr))
-  in
-  let%bind () = stdout_done
-  and () = stderr_done in
-  let%map exit_or_signal = Process.wait p in
-  match exit_or_signal with
-  | Ok () -> `Success
-  | Error _ -> `Build_failed
+  match paths with
+  | [] -> return ()
+  | _ :: _ -> loop ()
 ;;
 
 let main_command =
   let open Command.Let_syntax in
   Command.async
-    ~summary:"Build awso on a one-shot spot EC2 (arm64 or x86-64)"
+    ~summary:
+      "Build awso (or, with --workdir/--remote-script, any tree) on a one-shot spot EC2 \
+       (arm64 or x86-64)"
     [%map_open
       let arch =
         flag "--arch" (required arch_arg) ~doc:"ARCH 'arm64' or 'x86-64' (required)"
@@ -805,39 +1077,119 @@ let main_command =
           ~doc:
             " mirror opam-ci's lower-bounds job: OCaml 4.14, builtin-0install solver, \
              solver biased toward older dep versions"
+      and workdir_opt =
+        flag
+          "--workdir"
+          (optional string)
+          ~doc:
+            "DIR push this tree instead of awso's checkout (shipped whole but for \
+             secret-looking files, into ~/<basename DIR> on the instance)"
+      and remote_script_file =
+        flag
+          "--remote-script"
+          (optional string)
+          ~doc:"FILE run this bash script on the instance instead of awso's build"
+      and keep_running =
+        flag
+          "--keep-running"
+          no_arg
+          ~doc:
+            " leave the instance running after the script, whatever its outcome (the \
+             --max-hours kill switch still applies)"
+      and run_name =
+        flag
+          "--name"
+          (optional string)
+          ~doc:
+            "SUFFIX per-run suffix for the AWS resource names and local key files \
+             (awso-ci-$USER-SUFFIX), so several runs can be in flight at once"
+      and fetch_paths =
+        flag
+          "--fetch"
+          (listed string)
+          ~doc:
+            "REMOTE_PATH after the script (whatever its outcome), copy this path \
+             (relative to the remote home) back into --fetch-into; repeatable"
+      and fetch_into =
+        flag
+          "--fetch-into"
+          (optional_with_default "." string)
+          ~doc:"DIR local directory for --fetch (default .)"
+      and fetch_every =
+        flag
+          "--fetch-every"
+          (optional int)
+          ~doc:
+            "MINUTES also fetch the --fetch paths periodically while the script runs, \
+             into <fetch-into>/periodic, so a spot interruption doesn't lose everything"
+      and ubuntu =
+        flag
+          "--ubuntu"
+          (optional_with_default "22.04" string)
+          ~doc:
+            "VERSION '22.04' (default, built-in AMI table) or '24.04' (newest Canonical \
+             AMI, looked up at launch); ignored with --ami-id"
       in
       fun () ->
         let instance_type =
           Option.value instance_type_opt ~default:(default_instance_type arch)
         in
-        let ami_id =
-          match ami_id_opt with
-          | Some s -> s
-          | None -> (
+        let open Deferred.Let_syntax in
+        let user_tag = user_tag ~run_name in
+        let%bind cwd = Unix.getcwd () in
+        let%bind workdir =
+          match workdir_opt with
+          | Some dir -> return dir
+          | None -> find_project_root cwd
+        in
+        let awso_tree = Option.is_none workdir_opt in
+        let remote_dir = if awso_tree then "awso" else Filename.basename workdir in
+        let%bind script_override =
+          match remote_script_file with
+          | None -> return None
+          | Some file -> Reader.file_contents file >>| Option.some
+        in
+        let%bind cfg = Awso_async.Cfg.get_exn ~region:(Awso.Region.of_string region) () in
+        let%bind ami_id =
+          match ami_id_opt, ubuntu with
+          | Some s, _ -> return s
+          | None, "22.04" -> (
             match lookup_default_ami ~arch ~region with
-            | Some s -> s
+            | Some s -> return s
             | None ->
               failwithf
                 "no default %s AMI for region %s; pass --ami-id"
                 (arch_label arch)
                 region
                 ())
+          | None, "24.04" ->
+            let%map id =
+              resolve_ubuntu_ami ~cfg ~arch ~codename:"noble" ~version:"24.04"
+            in
+            eprintf_now "ubuntu 24.04 %s AMI: %s" (arch_label arch) id;
+            id
+          | None, v -> failwithf "--ubuntu must be 22.04 or 24.04, got %S" v ()
         in
-        let open Deferred.Let_syntax in
-        let user_tag = user_tag () in
-        let%bind cwd = Unix.getcwd () in
-        let%bind workdir = find_project_root cwd in
-        let%bind cfg = Awso_async.Cfg.get_exn ~region:(Awso.Region.of_string region) () in
         let%bind cache_dir = ensure_cache_dir () in
         let%bind account_id = get_aws_account_id ~cfg in
         let%bind () = ensure_aws_account_attested ~cache_dir ~account_id in
-        let%bind commit = detect_commit ~workdir in
-        let%bind dirty = working_tree_dirty ~workdir in
-        eprintf_now
-          "workdir: %s @ %s%s"
-          workdir
-          (String.strip commit)
-          (if dirty then " (dirty — pushing working tree as-is)" else "");
+        let%bind () =
+          (* A --workdir need not be a git checkout (an exported tree). *)
+          match%bind
+            run_capture ~prog:"git" ~args:[ "-C"; workdir; "rev-parse"; "HEAD" ] ()
+          with
+          | Error _ when not awso_tree ->
+            eprintf_now "workdir: %s (not a git checkout)" workdir;
+            return ()
+          | Error _ | Ok _ ->
+            let%bind commit = detect_commit ~workdir in
+            let%map dirty = working_tree_dirty ~workdir in
+            eprintf_now
+              "workdir: %s @ %s%s"
+              workdir
+              (String.strip commit)
+              (if dirty then " (dirty — pushing working tree as-is)" else "")
+        in
         let%bind () =
           match%bind leftover_instances ~cfg ~name_tag:user_tag with
           | [] -> return ()
@@ -863,16 +1215,21 @@ let main_command =
         let%bind private_key_path, public_key =
           generate_keypair
             ~dir:cache_dir
-            ~basename:"auth.id_ed25519"
+            ~basename:(local_file_name ~run_name "auth.id_ed25519")
             ~comment:"awso-ci-spot-build"
         in
         eprintf_now "auth keypair: %s" private_key_path;
         let%bind () = install_aws_keypair ~cfg ~key_name:user_tag ~public_key in
         let%bind host_priv_path, host_pub =
-          generate_keypair ~dir:cache_dir ~basename:"host.ed25519" ~comment:"awso-ci-host"
+          generate_keypair
+            ~dir:cache_dir
+            ~basename:(local_file_name ~run_name "host.ed25519")
+            ~comment:"awso-ci-host"
         in
         let%bind host_priv = Reader.file_contents host_priv_path in
-        let known_hosts_path = Filename.concat cache_dir "known_hosts" in
+        let known_hosts_path =
+          Filename.concat cache_dir (local_file_name ~run_name "known_hosts")
+        in
         let%bind () = delete_security_group_by_name ~cfg ~name:user_tag in
         let%bind sg_id =
           create_security_group ~cfg ~name:user_tag ~description:"awso-ci ephemeral"
@@ -920,8 +1277,9 @@ let main_command =
           with
           | Ok instance_id -> return instance_id
           | Error e ->
-            eprintf_now "instance setup failed; tearing down sg %s" sg_id;
+            eprintf_now "instance setup failed; tearing down sg %s and keypair" sg_id;
             let%bind () = sg_cleanup_only () in
+            let%bind () = delete_aws_keypair ~cfg ~key_name:user_tag in
             raise e
         in
         eprintf_now
@@ -947,7 +1305,10 @@ let main_command =
                 terminate_instance ~cfg ~instance_id)
               >>| ignore
             in
-            (* SG deletion fails until instance is fully terminated; brief retry. *)
+            (* SG deletion fails until instance is fully terminated; wait for
+               that (up to ~20 min), then a brief retry for eventual consistency. *)
+            eprintf_now "waiting for %s to terminate..." instance_id;
+            let%bind () = wait_for_terminated ~cfg ~instance_id ~tries:120 in
             let rec try_sg n =
               match%bind
                 Monitor.try_with ~run:`Schedule (fun () ->
@@ -959,9 +1320,13 @@ let main_command =
                 try_sg (n - 1)
               | Error e ->
                 eprintf_now
-                  "could not delete security group %s: %s"
+                  "could not delete security group %s: %s\n\
+                   [ci] clean up manually: aws ec2 delete-security-group --region %s \
+                   --group-id %s"
                   sg_id
-                  (Exn.to_string e);
+                  (Exn.to_string e)
+                  region
+                  sg_id;
                 return ()
             in
             let%bind () = try_sg 8 in
@@ -980,18 +1345,52 @@ let main_command =
         let%bind () = write_known_hosts ~path:known_hosts_path ~host ~host_pub in
         let user = ssh_user in
         let%bind () =
-          push_code ~private_key_path ~known_hosts_path ~user ~host ~workdir
+          push_code
+            ~private_key_path
+            ~known_hosts_path
+            ~user
+            ~host
+            ~workdir
+            ~remote_dir
+            ~awso_tree
+        in
+        let script_done = Ivar.create () in
+        let periodic =
+          match fetch_every with
+          | None -> return ()
+          | Some minutes ->
+            periodic_fetch
+              ~private_key_path
+              ~known_hosts_path
+              ~user
+              ~host
+              ~paths:fetch_paths
+              ~into:fetch_into
+              ~every:(Time_float.Span.of_min (Float.of_int minutes))
+              ~stop:(Ivar.read script_done)
         in
         let%bind status =
-          run_remote_build ~private_key_path ~known_hosts_path ~user ~host ~lower_bounds
+          run_remote_build
+            ~private_key_path
+            ~known_hosts_path
+            ~user
+            ~host
+            ~lower_bounds
+            ~script_override
         in
-        match status with
-        | `Success ->
-          eprintf_now "build succeeded; cleaning up";
-          let%bind () = cleanup ~unlink_local:true in
-          return ()
-        | `Build_failed when dont_shut_down_on_failure ->
-          eprintf_now "build failed and --dont-shut-down-on-failure set.";
+        Ivar.fill_exn script_done ();
+        let%bind () = periodic in
+        let%bind (_ : bool) =
+          fetch_results
+            ~private_key_path
+            ~known_hosts_path
+            ~user
+            ~host
+            ~paths:fetch_paths
+            ~into:fetch_into
+            ()
+        in
+        let leave_running ~exit_code =
           eprintf_now "instance %s is still running. SSH:" instance_id;
           eprintf_now
             "  ssh -i %s -o UserKnownHostsFile=%s %s@%s"
@@ -1005,7 +1404,22 @@ let main_command =
           eprintf_now "  aws ec2 delete-key-pair --key-name %s" user_tag;
           (* Disarm the signal handler — Ctrl-C should NOT tear down. *)
           cleanup_armed := false;
-          exit 1
+          exit exit_code
+        in
+        match status with
+        | `Success when keep_running ->
+          eprintf_now "build succeeded and --keep-running set.";
+          leave_running ~exit_code:0
+        | `Build_failed when keep_running ->
+          eprintf_now "build failed and --keep-running set.";
+          leave_running ~exit_code:1
+        | `Success ->
+          eprintf_now "build succeeded; cleaning up";
+          let%bind () = cleanup ~unlink_local:true in
+          return ()
+        | `Build_failed when dont_shut_down_on_failure ->
+          eprintf_now "build failed and --dont-shut-down-on-failure set.";
+          leave_running ~exit_code:1
         | `Build_failed ->
           eprintf_now "build failed; tearing down";
           let%bind () = cleanup ~unlink_local:true in
