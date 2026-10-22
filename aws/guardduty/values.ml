@@ -114,8 +114,8 @@ module ProductCode =
       make ?productType ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let productType = field_map json__ "ProductType" String_.of_json in
-      let code = field_map json__ "Code" String_.of_json in
+      let productType = field_map json__ "productCodeType" String_.of_json in
+      let code = field_map json__ "productCodeId" String_.of_json in
       make ?productType ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -147,8 +147,8 @@ module PrivateIpAddressDetails =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let privateIpAddress =
-        field_map json__ "PrivateIpAddress" SensitiveString.of_json in
-      let privateDnsName = field_map json__ "PrivateDnsName" String_.of_json in
+        field_map json__ "privateIpAddress" SensitiveString.of_json in
+      let privateDnsName = field_map json__ "privateDnsName" String_.of_json in
       make ?privateIpAddress ?privateDnsName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -175,8 +175,8 @@ module SecurityGroup =
       make ?groupName ?groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let groupName = field_map json__ "GroupName" String_.of_json in
-      let groupId = field_map json__ "GroupId" String_.of_json in
+      let groupName = field_map json__ "groupName" String_.of_json in
+      let groupId = field_map json__ "groupId" String_.of_json in
       make ?groupName ?groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -341,7 +341,7 @@ module Observations =
       make ?text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let text = field_map json__ "Text" ObservationTexts.of_json in
+      let text = field_map json__ "text" ObservationTexts.of_json in
       make ?text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the observed behavior."]
@@ -489,8 +489,8 @@ module IamInstanceProfile =
       make ?id ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let id = field_map json__ "Id" String_.of_json in
-      let arn = field_map json__ "Arn" String_.of_json in make ?id ?arn ()
+      let id = field_map json__ "id" String_.of_json in
+      let arn = field_map json__ "arn" String_.of_json in make ?id ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the EC2 instance profile."]
 module ProductCodes =
@@ -853,15 +853,15 @@ module PublicAccessConfiguration =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let publicBucketRestrictBehavior =
-        field_map json__ "PublicBucketRestrictBehavior"
+        field_map json__ "publicBucketRestrictBehavior"
           PublicBucketRestrictBehavior.of_json in
       let publicAclIgnoreBehavior =
-        field_map json__ "PublicAclIgnoreBehavior"
+        field_map json__ "publicAclIgnoreBehavior"
           PublicAclIgnoreBehavior.of_json in
       let publicPolicyAccess =
-        field_map json__ "PublicPolicyAccess" PublicAccessStatus.of_json in
+        field_map json__ "publicPolicyAccess" PublicAccessStatus.of_json in
       let publicAclAccess =
-        field_map json__ "PublicAclAccess" PublicAccessStatus.of_json in
+        field_map json__ "publicAclAccess" PublicAccessStatus.of_json in
       make ?publicBucketRestrictBehavior ?publicAclIgnoreBehavior
         ?publicPolicyAccess ?publicAclAccess ()
     let to_json v = composed_to_json to_value v
@@ -1050,10 +1050,10 @@ module ScanFilePath =
       make ?fileName ?hash ?volumeArn ?filePath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let fileName = field_map json__ "FileName" String_.of_json in
-      let hash = field_map json__ "Hash" String_.of_json in
-      let volumeArn = field_map json__ "VolumeArn" String_.of_json in
-      let filePath = field_map json__ "FilePath" String_.of_json in
+      let fileName = field_map json__ "fileName" String_.of_json in
+      let hash = field_map json__ "hash" String_.of_json in
+      let volumeArn = field_map json__ "volumeArn" String_.of_json in
+      let filePath = field_map json__ "filePath" String_.of_json in
       make ?fileName ?hash ?volumeArn ?filePath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1095,8 +1095,8 @@ module VolumeMount =
       make ?mountPath ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let mountPath = field_map json__ "MountPath" String_.of_json in
-      let name = field_map json__ "Name" String_.of_json in
+      let mountPath = field_map json__ "mountPath" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
       make ?mountPath ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Container volume mount."]
@@ -1155,13 +1155,13 @@ module BlockPublicAccess =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let blockPublicPolicy =
-        field_map json__ "BlockPublicPolicy" Boolean.of_json in
+        field_map json__ "blockPublicPolicy" Boolean.of_json in
       let blockPublicAcls =
-        field_map json__ "BlockPublicAcls" Boolean.of_json in
+        field_map json__ "blockPublicAcls" Boolean.of_json in
       let restrictPublicBuckets =
-        field_map json__ "RestrictPublicBuckets" Boolean.of_json in
+        field_map json__ "restrictPublicBuckets" Boolean.of_json in
       let ignorePublicAcls =
-        field_map json__ "IgnorePublicAcls" Boolean.of_json in
+        field_map json__ "ignorePublicAcls" Boolean.of_json in
       make ?blockPublicPolicy ?blockPublicAcls ?restrictPublicBuckets
         ?ignorePublicAcls ()
     let to_json v = composed_to_json to_value v
@@ -1198,9 +1198,9 @@ module AccessControlList =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let allowsPublicWriteAccess =
-        field_map json__ "AllowsPublicWriteAccess" Boolean.of_json in
+        field_map json__ "allowsPublicWriteAccess" Boolean.of_json in
       let allowsPublicReadAccess =
-        field_map json__ "AllowsPublicReadAccess" Boolean.of_json in
+        field_map json__ "allowsPublicReadAccess" Boolean.of_json in
       make ?allowsPublicWriteAccess ?allowsPublicReadAccess ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1236,9 +1236,9 @@ module BucketPolicy =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let allowsPublicWriteAccess =
-        field_map json__ "AllowsPublicWriteAccess" Boolean.of_json in
+        field_map json__ "allowsPublicWriteAccess" Boolean.of_json in
       let allowsPublicReadAccess =
-        field_map json__ "AllowsPublicReadAccess" Boolean.of_json in
+        field_map json__ "allowsPublicReadAccess" Boolean.of_json in
       make ?allowsPublicWriteAccess ?allowsPublicReadAccess ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1273,7 +1273,7 @@ module City =
       make ?cityName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let cityName = field_map json__ "CityName" String_.of_json in
+      let cityName = field_map json__ "cityName" String_.of_json in
       make ?cityName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1301,8 +1301,8 @@ module Country =
       make ?countryName ?countryCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let countryName = field_map json__ "CountryName" String_.of_json in
-      let countryCode = field_map json__ "CountryCode" String_.of_json in
+      let countryName = field_map json__ "countryName" String_.of_json in
+      let countryCode = field_map json__ "countryCode" String_.of_json in
       make ?countryName ?countryCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1327,8 +1327,8 @@ module GeoLocation =
       make ?lon ?lat ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let lon = field_map json__ "Lon" Double.of_json in
-      let lat = field_map json__ "Lat" Double.of_json in make ?lon ?lat ()
+      let lon = field_map json__ "lon" Double.of_json in
+      let lat = field_map json__ "lat" Double.of_json in make ?lon ?lat ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about the location of the remote IP address. By default, GuardDuty returns Geolocation with Lat and Lon as 0.0."]
@@ -1363,10 +1363,10 @@ module Organization =
       make ?org ?isp ?asnOrg ?asn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let org = field_map json__ "Org" String_.of_json in
-      let isp = field_map json__ "Isp" String_.of_json in
-      let asnOrg = field_map json__ "AsnOrg" String_.of_json in
-      let asn = field_map json__ "Asn" String_.of_json in
+      let org = field_map json__ "org" String_.of_json in
+      let isp = field_map json__ "isp" String_.of_json in
+      let asnOrg = field_map json__ "asnOrg" String_.of_json in
+      let asn = field_map json__ "asn" String_.of_json in
       make ?org ?isp ?asnOrg ?asn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1404,10 +1404,10 @@ module AnomalyObject =
       make ?observations ?profileSubtype ?profileType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let observations = field_map json__ "Observations" Observations.of_json in
+      let observations = field_map json__ "observations" Observations.of_json in
       let profileSubtype =
-        field_map json__ "ProfileSubtype" ProfileSubtype.of_json in
-      let profileType = field_map json__ "ProfileType" ProfileType.of_json in
+        field_map json__ "profileSubtype" ProfileSubtype.of_json in
+      let profileType = field_map json__ "profileType" ProfileType.of_json in
       make ?observations ?profileSubtype ?profileType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the unusual anomalies."]
@@ -1512,8 +1512,8 @@ module Account =
       make ?name ?uid ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let name = field_map json__ "Name" String_.of_json in
-      let uid = field_map json__ "Uid" String_.of_json in make ?name ?uid ()
+      let name = field_map json__ "account" String_.of_json in
+      let uid = field_map json__ "uid" String_.of_json in make ?name ?uid ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about the Amazon Web Services account within which the activity took place."]
@@ -1568,9 +1568,9 @@ module AccessKey =
       make ?userType ?userName ?principalId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let userType = field_map json__ "UserType" String_.of_json in
-      let userName = field_map json__ "UserName" String_.of_json in
-      let principalId = field_map json__ "PrincipalId" String_.of_json in
+      let userType = field_map json__ "userType" String_.of_json in
+      let userName = field_map json__ "userName" String_.of_json in
+      let principalId = field_map json__ "principalId" String_.of_json in
       make ?userType ?userName ?principalId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the access keys."]
@@ -1595,7 +1595,7 @@ module AutoscalingAutoScalingGroup =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let ec2InstanceUids =
-        field_map json__ "Ec2InstanceUids" Ec2InstanceUids.of_json in
+        field_map json__ "ec2InstanceUids" Ec2InstanceUids.of_json in
       make ?ec2InstanceUids ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1621,7 +1621,7 @@ module CloudformationStack =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let ec2InstanceUids =
-        field_map json__ "Ec2InstanceUids" Ec2InstanceUids.of_json in
+        field_map json__ "ec2InstanceUids" Ec2InstanceUids.of_json in
       make ?ec2InstanceUids ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1649,8 +1649,8 @@ module ContainerFindingResource =
       make ?imageUid ?image ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let imageUid = field_map json__ "ImageUid" ContainerImageUid.of_json in
-      let image = field_map json__ "Image" String_.of_json in
+      let imageUid = field_map json__ "imageUid" ContainerImageUid.of_json in
+      let image = field_map json__ "image" String_.of_json in
       make ?imageUid ?image ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1676,7 +1676,7 @@ module Ec2Image =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let ec2InstanceUids =
-        field_map json__ "Ec2InstanceUids" Ec2InstanceUids.of_json in
+        field_map json__ "ec2InstanceUids" Ec2InstanceUids.of_json in
       make ?ec2InstanceUids ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1774,19 +1774,19 @@ module Ec2Instance =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let ec2NetworkInterfaceUids =
-        field_map json__ "Ec2NetworkInterfaceUids"
+        field_map json__ "ec2NetworkInterfaceUids"
           Ec2NetworkInterfaceUids.of_json in
-      let productCodes = field_map json__ "ProductCodes" ProductCodes.of_json in
-      let platform = field_map json__ "Platform" String_.of_json in
-      let outpostArn = field_map json__ "OutpostArn" String_.of_json in
-      let instanceType = field_map json__ "InstanceType" String_.of_json in
+      let productCodes = field_map json__ "productCodes" ProductCodes.of_json in
+      let platform = field_map json__ "platform" String_.of_json in
+      let outpostArn = field_map json__ "outpostArn" String_.of_json in
+      let instanceType = field_map json__ "instanceType" String_.of_json in
       let iamInstanceProfile =
         field_map json__ "IamInstanceProfile" IamInstanceProfile.of_json in
-      let instanceState = field_map json__ "InstanceState" String_.of_json in
+      let instanceState = field_map json__ "instanceState" String_.of_json in
       let imageDescription =
-        field_map json__ "ImageDescription" String_.of_json in
+        field_map json__ "imageDescription" String_.of_json in
       let availabilityZone =
-        field_map json__ "AvailabilityZone" String_.of_json in
+        field_map json__ "availabilityZone" String_.of_json in
       make ?ec2NetworkInterfaceUids ?productCodes ?platform ?outpostArn
         ?instanceType ?iamInstanceProfile ?instanceState ?imageDescription
         ?availabilityZone ()
@@ -1820,9 +1820,9 @@ module Ec2LaunchTemplate =
       make ?version ?ec2InstanceUids ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let version = field_map json__ "Version" LaunchTemplateVersion.of_json in
+      let version = field_map json__ "version" LaunchTemplateVersion.of_json in
       let ec2InstanceUids =
-        field_map json__ "Ec2InstanceUids" Ec2InstanceUids.of_json in
+        field_map json__ "ec2InstanceUids" Ec2InstanceUids.of_json in
       make ?version ?ec2InstanceUids ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1891,15 +1891,15 @@ module Ec2NetworkInterface =
         ?ipv6Addresses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let vpcId = field_map json__ "VpcId" String_.of_json in
-      let subNetId = field_map json__ "SubNetId" String_.of_json in
+      let vpcId = field_map json__ "vpcId" String_.of_json in
+      let subNetId = field_map json__ "subNetId" String_.of_json in
       let securityGroups =
-        field_map json__ "SecurityGroups" SecurityGroups.of_json in
-      let publicIp = field_map json__ "PublicIp" String_.of_json in
+        field_map json__ "securityGroups" SecurityGroups.of_json in
+      let publicIp = field_map json__ "publicIp" String_.of_json in
       let privateIpAddresses =
-        field_map json__ "PrivateIpAddresses" PrivateIpAddresses.of_json in
+        field_map json__ "privateIpAddresses" PrivateIpAddresses.of_json in
       let ipv6Addresses =
-        field_map json__ "Ipv6Addresses" Ipv6Addresses.of_json in
+        field_map json__ "ipv6Addresses" Ipv6Addresses.of_json in
       make ?vpcId ?subNetId ?securityGroups ?publicIp ?privateIpAddresses
         ?ipv6Addresses ()
     let to_json v = composed_to_json to_value v
@@ -1926,7 +1926,7 @@ module Ec2Vpc =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let ec2InstanceUids =
-        field_map json__ "Ec2InstanceUids" Ec2InstanceUids.of_json in
+        field_map json__ "ec2InstanceUids" Ec2InstanceUids.of_json in
       make ?ec2InstanceUids ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1958,8 +1958,8 @@ module EcsCluster =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let ec2InstanceUids =
-        field_map json__ "Ec2InstanceUids" Ec2InstanceUids.of_json in
-      let status = field_map json__ "Status" EcsClusterStatus.of_json in
+        field_map json__ "ec2InstanceUids" Ec2InstanceUids.of_json in
+      let status = field_map json__ "status" EcsClusterStatus.of_json in
       make ?ec2InstanceUids ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2011,11 +2011,11 @@ module EcsTask =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let containerUids =
-        field_map json__ "ContainerUids" ContainerUids.of_json in
-      let launchType = field_map json__ "LaunchType" EcsLaunchType.of_json in
+        field_map json__ "containerUids" ContainerUids.of_json in
+      let launchType = field_map json__ "launchType" EcsLaunchType.of_json in
       let taskDefinitionArn =
-        field_map json__ "TaskDefinitionArn" String_.of_json in
-      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+        field_map json__ "taskDefinitionArn" String_.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       make ?containerUids ?launchType ?taskDefinitionArn ?createdAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2067,11 +2067,11 @@ module EksCluster =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let ec2InstanceUids =
-        field_map json__ "Ec2InstanceUids" Ec2InstanceUids.of_json in
-      let vpcId = field_map json__ "VpcId" String_.of_json in
-      let status = field_map json__ "Status" ClusterStatus.of_json in
-      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
-      let arn = field_map json__ "Arn" String_.of_json in
+        field_map json__ "ec2InstanceUids" Ec2InstanceUids.of_json in
+      let vpcId = field_map json__ "vpcId" String_.of_json in
+      let status = field_map json__ "status" ClusterStatus.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
       make ?ec2InstanceUids ?vpcId ?status ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2097,7 +2097,7 @@ module IamInstanceProfileV2 =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let ec2InstanceUids =
-        field_map json__ "Ec2InstanceUids" Ec2InstanceUids.of_json in
+        field_map json__ "ec2InstanceUids" Ec2InstanceUids.of_json in
       make ?ec2InstanceUids ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2141,11 +2141,10 @@ module KubernetesWorkload =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let kubernetesResourcesTypes =
-        field_map json__ "KubernetesResourcesTypes"
-          KubernetesResourcesTypes.of_json in
-      let namespace = field_map json__ "Namespace" String_.of_json in
+        field_map json__ "type" KubernetesResourcesTypes.of_json in
+      let namespace = field_map json__ "namespace" String_.of_json in
       let containerUids =
-        field_map json__ "ContainerUids" ContainerUids.of_json in
+        field_map json__ "containerUids" ContainerUids.of_json in
       make ?kubernetesResourcesTypes ?namespace ?containerUids ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2260,24 +2259,24 @@ module S3Bucket =
         ?encryptionKeyArn ?encryptionType ?createdAt ?ownerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let s3ObjectUids = field_map json__ "S3ObjectUids" S3ObjectUids.of_json in
+      let s3ObjectUids = field_map json__ "s3ObjectUids" S3ObjectUids.of_json in
       let bucketPublicAccess =
-        field_map json__ "BucketPublicAccess"
+        field_map json__ "bucketPublicAccess"
           PublicAccessConfiguration.of_json in
       let accountPublicAccess =
-        field_map json__ "AccountPublicAccess"
+        field_map json__ "accountPublicAccess"
           PublicAccessConfiguration.of_json in
       let publicWriteAccess =
-        field_map json__ "PublicWriteAccess" PublicAccessStatus.of_json in
+        field_map json__ "publicWriteAccess" PublicAccessStatus.of_json in
       let publicReadAccess =
-        field_map json__ "PublicReadAccess" PublicAccessStatus.of_json in
+        field_map json__ "publicReadAccess" PublicAccessStatus.of_json in
       let effectivePermission =
-        field_map json__ "EffectivePermission" String_.of_json in
+        field_map json__ "effectivePermission" String_.of_json in
       let encryptionKeyArn =
-        field_map json__ "EncryptionKeyArn" String_.of_json in
-      let encryptionType = field_map json__ "EncryptionType" String_.of_json in
-      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
-      let ownerId = field_map json__ "OwnerId" String_.of_json in
+        field_map json__ "encryptionKeyArn" String_.of_json in
+      let encryptionType = field_map json__ "encryptionType" String_.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let ownerId = field_map json__ "ownerId" String_.of_json in
       make ?s3ObjectUids ?bucketPublicAccess ?accountPublicAccess
         ?publicWriteAccess ?publicReadAccess ?effectivePermission
         ?encryptionKeyArn ?encryptionType ?createdAt ?ownerId ()
@@ -2310,9 +2309,9 @@ module S3Object =
       make ?versionId ?key ?eTag ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let versionId = field_map json__ "VersionId" String_.of_json in
-      let key = field_map json__ "Key" String_.of_json in
-      let eTag = field_map json__ "ETag" String_.of_json in
+      let versionId = field_map json__ "versionId" String_.of_json in
+      let key = field_map json__ "key" String_.of_json in
+      let eTag = field_map json__ "eTag" String_.of_json in
       make ?versionId ?key ?eTag ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the Amazon S3 object."]
@@ -2336,8 +2335,8 @@ module Tag =
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let value = field_map json__ "Value" String_.of_json in
-      let key = field_map json__ "Key" String_.of_json in make ?value ?key ()
+      let value = field_map json__ "value" String_.of_json in
+      let key = field_map json__ "key" String_.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about a tag key-value pair."]
 module Indicator =
@@ -2370,9 +2369,9 @@ module Indicator =
       make ?title ?values ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let title = field_map json__ "Title" IndicatorTitle.of_json in
-      let values = field_map json__ "Values" IndicatorValues.of_json in
-      let key = field_map json__ "Key" IndicatorType.of_json in
+      let title = field_map json__ "title" IndicatorTitle.of_json in
+      let values = field_map json__ "values" IndicatorValues.of_json in
+      let key = field_map json__ "key" IndicatorType.of_json in
       make ?title ?values ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2429,8 +2428,8 @@ module AdditionalInfo =
       make ?deviceName ?versionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let deviceName = field_map json__ "DeviceName" NonEmptyString.of_json in
-      let versionId = field_map json__ "VersionId" NonEmptyString.of_json in
+      let deviceName = field_map json__ "deviceName" NonEmptyString.of_json in
+      let versionId = field_map json__ "versionId" NonEmptyString.of_json in
       make ?deviceName ?versionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2463,8 +2462,8 @@ module SecurityContext =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let allowPrivilegeEscalation =
-        field_map json__ "AllowPrivilegeEscalation" Boolean.of_json in
-      let privileged = field_map json__ "Privileged" Boolean.of_json in
+        field_map json__ "allowPrivilegeEscalation" Boolean.of_json in
+      let privileged = field_map json__ "privileged" Boolean.of_json in
       make ?allowPrivilegeEscalation ?privileged ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Container security context."]
@@ -2511,7 +2510,7 @@ module HostPath =
       make ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let path = field_map json__ "Path" String_.of_json in make ?path ()
+      let path = field_map json__ "path" String_.of_json in make ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a pre-existing file or directory on the host machine that the volume maps to."]
@@ -2536,7 +2535,7 @@ module AccountLevelPermissions =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let blockPublicAccess =
-        field_map json__ "BlockPublicAccess" BlockPublicAccess.of_json in
+        field_map json__ "blockPublicAccess" BlockPublicAccess.of_json in
       make ?blockPublicAccess ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2581,10 +2580,10 @@ module BucketLevelPermissions =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let blockPublicAccess =
-        field_map json__ "BlockPublicAccess" BlockPublicAccess.of_json in
-      let bucketPolicy = field_map json__ "BucketPolicy" BucketPolicy.of_json in
+        field_map json__ "blockPublicAccess" BlockPublicAccess.of_json in
+      let bucketPolicy = field_map json__ "bucketPolicy" BucketPolicy.of_json in
       let accessControlList =
-        field_map json__ "AccessControlList" AccessControlList.of_json in
+        field_map json__ "accessControlList" AccessControlList.of_json in
       make ?blockPublicAccess ?bucketPolicy ?accessControlList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2617,9 +2616,9 @@ module LocalIpDetails =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let ipAddressV6 =
-        field_map json__ "IpAddressV6" SensitiveString.of_json in
+        field_map json__ "ipAddressV6" SensitiveString.of_json in
       let ipAddressV4 =
-        field_map json__ "IpAddressV4" SensitiveString.of_json in
+        field_map json__ "ipAddressV4" SensitiveString.of_json in
       make ?ipAddressV6 ?ipAddressV4 ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2645,8 +2644,8 @@ module LocalPortDetails =
       make ?portName ?port ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let portName = field_map json__ "PortName" String_.of_json in
-      let port = field_map json__ "Port" Integer.of_json in
+      let portName = field_map json__ "portName" String_.of_json in
+      let port = field_map json__ "port" Integer.of_json in
       make ?portName ?port ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2714,14 +2713,14 @@ module RemoteIpDetails =
         ?city ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let organization = field_map json__ "Organization" Organization.of_json in
+      let organization = field_map json__ "organization" Organization.of_json in
       let ipAddressV6 =
-        field_map json__ "IpAddressV6" SensitiveString.of_json in
+        field_map json__ "ipAddressV6" SensitiveString.of_json in
       let ipAddressV4 =
-        field_map json__ "IpAddressV4" SensitiveString.of_json in
-      let geoLocation = field_map json__ "GeoLocation" GeoLocation.of_json in
-      let country = field_map json__ "Country" Country.of_json in
-      let city = field_map json__ "City" City.of_json in
+        field_map json__ "ipAddressV4" SensitiveString.of_json in
+      let geoLocation = field_map json__ "geoLocation" GeoLocation.of_json in
+      let country = field_map json__ "country" Country.of_json in
+      let city = field_map json__ "city" City.of_json in
       make ?organization ?ipAddressV6 ?ipAddressV4 ?geoLocation ?country
         ?city ()
     let to_json v = composed_to_json to_value v
@@ -2817,9 +2816,9 @@ module ActorProcess =
       make ?sha256 ?path ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let sha256 = field_map json__ "Sha256" ProcessSha256.of_json in
-      let path = field_map json__ "Path" ProcessPath.of_json in
-      let name = field_map json__ "Name" ProcessName.of_json in
+      let sha256 = field_map json__ "sha256" ProcessSha256.of_json in
+      let path = field_map json__ "path" ProcessPath.of_json in
+      let name = field_map json__ "name" ProcessName.of_json in
       make ?sha256 ?path ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2861,10 +2860,10 @@ module Session =
       make ?issuer ?createdTime ?mfaStatus ?uid ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let issuer = field_map json__ "Issuer" String_.of_json in
-      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
-      let mfaStatus = field_map json__ "MfaStatus" MfaStatus.of_json in
-      let uid = field_map json__ "Uid" String_.of_json in
+      let issuer = field_map json__ "issuer" String_.of_json in
+      let createdTime = field_map json__ "createdTime" Timestamp.of_json in
+      let mfaStatus = field_map json__ "mfaStatus" MfaStatus.of_json in
+      let uid = field_map json__ "uid" String_.of_json in
       make ?issuer ?createdTime ?mfaStatus ?uid ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the authenticated session."]
@@ -2905,11 +2904,11 @@ module User =
       make ?account ?credentialUid ?type_ ?uid ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let account = field_map json__ "Account" Account.of_json in
-      let credentialUid = field_map json__ "CredentialUid" String_.of_json in
-      let type_ = field_map json__ "Type" String_.of_json in
-      let uid = field_map json__ "Uid" String_.of_json in
-      let name = field_map json__ "Name" String_.of_json in
+      let account = field_map json__ "account" Account.of_json in
+      let credentialUid = field_map json__ "credentialUid" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
+      let uid = field_map json__ "uid" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
       make ?account ?credentialUid ?type_ ?uid ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2936,8 +2935,8 @@ module AutonomousSystem =
       make ?number ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let number = field_map json__ "Number" Integer.of_json in
-      let name = field_map json__ "Name" String_.of_json in
+      let number = field_map json__ "number" Integer.of_json in
+      let name = field_map json__ "name" String_.of_json in
       make ?number ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2960,7 +2959,7 @@ module NetworkConnection =
       make ?direction ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let direction = field_map json__ "Direction" NetworkDirection.of_json in
+      let direction = field_map json__ "direction" NetworkDirection.of_json in
       make ?direction ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the network connection."]
@@ -2995,10 +2994,10 @@ module NetworkGeoLocation =
       make ?longitude ?latitude ?country ?city ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let longitude = field_map json__ "Longitude" Double.of_json in
-      let latitude = field_map json__ "Latitude" Double.of_json in
-      let country = field_map json__ "Country" String_.of_json in
-      let city = field_map json__ "City" String_.of_json in
+      let longitude = field_map json__ "lon" Double.of_json in
+      let latitude = field_map json__ "lat" Double.of_json in
+      let country = field_map json__ "country" String_.of_json in
+      let city = field_map json__ "city" String_.of_json in
       make ?longitude ?latitude ?country ?city ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about network endpoint location."]
@@ -3228,29 +3227,29 @@ module ResourceData =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let cloudformationStack =
-        field_map json__ "CloudformationStack" CloudformationStack.of_json in
-      let ec2Image = field_map json__ "Ec2Image" Ec2Image.of_json in
-      let ec2Vpc = field_map json__ "Ec2Vpc" Ec2Vpc.of_json in
+        field_map json__ "cloudformationStack" CloudformationStack.of_json in
+      let ec2Image = field_map json__ "ec2Image" Ec2Image.of_json in
+      let ec2Vpc = field_map json__ "ec2Vpc" Ec2Vpc.of_json in
       let ec2LaunchTemplate =
-        field_map json__ "Ec2LaunchTemplate" Ec2LaunchTemplate.of_json in
+        field_map json__ "ec2LaunchTemplate" Ec2LaunchTemplate.of_json in
       let autoscalingAutoScalingGroup =
-        field_map json__ "AutoscalingAutoScalingGroup"
+        field_map json__ "autoscalingAutoScalingGroup"
           AutoscalingAutoScalingGroup.of_json in
       let iamInstanceProfile =
-        field_map json__ "IamInstanceProfile" IamInstanceProfileV2.of_json in
-      let ecsTask = field_map json__ "EcsTask" EcsTask.of_json in
-      let ecsCluster = field_map json__ "EcsCluster" EcsCluster.of_json in
+        field_map json__ "iamInstanceProfile" IamInstanceProfileV2.of_json in
+      let ecsTask = field_map json__ "ecsTask" EcsTask.of_json in
+      let ecsCluster = field_map json__ "ecsCluster" EcsCluster.of_json in
       let container =
-        field_map json__ "Container" ContainerFindingResource.of_json in
+        field_map json__ "container" ContainerFindingResource.of_json in
       let kubernetesWorkload =
-        field_map json__ "KubernetesWorkload" KubernetesWorkload.of_json in
-      let eksCluster = field_map json__ "EksCluster" EksCluster.of_json in
-      let s3Object = field_map json__ "S3Object" S3Object.of_json in
+        field_map json__ "kubernetesWorkload" KubernetesWorkload.of_json in
+      let eksCluster = field_map json__ "eksCluster" EksCluster.of_json in
+      let s3Object = field_map json__ "s3Object" S3Object.of_json in
       let ec2NetworkInterface =
-        field_map json__ "Ec2NetworkInterface" Ec2NetworkInterface.of_json in
-      let accessKey = field_map json__ "AccessKey" AccessKey.of_json in
-      let ec2Instance = field_map json__ "Ec2Instance" Ec2Instance.of_json in
-      let s3Bucket = field_map json__ "S3Bucket" S3Bucket.of_json in
+        field_map json__ "ec2NetworkInterface" Ec2NetworkInterface.of_json in
+      let accessKey = field_map json__ "accessKey" AccessKey.of_json in
+      let ec2Instance = field_map json__ "ec2Instance" Ec2Instance.of_json in
+      let s3Bucket = field_map json__ "s3Bucket" S3Bucket.of_json in
       make ?cloudformationStack ?ec2Image ?ec2Vpc ?ec2LaunchTemplate
         ?autoscalingAutoScalingGroup ?iamInstanceProfile ?ecsTask ?ecsCluster
         ?container ?kubernetesWorkload ?eksCluster ?s3Object
@@ -3505,10 +3504,10 @@ module ScanThreatName =
       make ?filePaths ?itemCount ?severity ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let filePaths = field_map json__ "FilePaths" FilePaths.of_json in
-      let itemCount = field_map json__ "ItemCount" Integer.of_json in
-      let severity = field_map json__ "Severity" String_.of_json in
-      let name = field_map json__ "Name" String_.of_json in
+      let filePaths = field_map json__ "filePaths" FilePaths.of_json in
+      let itemCount = field_map json__ "itemCount" Integer.of_json in
+      let severity = field_map json__ "severity" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
       make ?filePaths ?itemCount ?severity ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3554,10 +3553,10 @@ module ItemDetails =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let additionalInfo =
-        field_map json__ "AdditionalInfo" AdditionalInfo.of_json in
-      let hash = field_map json__ "Hash" String_.of_json in
-      let itemPath = field_map json__ "ItemPath" NonEmptyString.of_json in
-      let resourceArn = field_map json__ "ResourceArn" NonEmptyString.of_json in
+        field_map json__ "additionalInfo" AdditionalInfo.of_json in
+      let hash = field_map json__ "hash" String_.of_json in
+      let itemPath = field_map json__ "itemPath" NonEmptyString.of_json in
+      let resourceArn = field_map json__ "resourceArn" NonEmptyString.of_json in
       make ?additionalInfo ?hash ?itemPath ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3586,8 +3585,8 @@ module ItemPath =
       make ?hash ?nestedItemPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let hash = field_map json__ "Hash" String_.of_json in
-      let nestedItemPath = field_map json__ "NestedItemPath" String_.of_json in
+      let hash = field_map json__ "hash" String_.of_json in
+      let nestedItemPath = field_map json__ "nestedItemPath" String_.of_json in
       make ?hash ?nestedItemPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3667,15 +3666,15 @@ module LineageObject =
         ?namespacePid ?startTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let parentUuid = field_map json__ "ParentUuid" String_.of_json in
-      let euid = field_map json__ "Euid" Integer.of_json in
-      let executablePath = field_map json__ "ExecutablePath" String_.of_json in
-      let uuid = field_map json__ "Uuid" String_.of_json in
-      let pid = field_map json__ "Pid" Integer.of_json in
-      let name = field_map json__ "Name" String_.of_json in
-      let userId = field_map json__ "UserId" Integer.of_json in
-      let namespacePid = field_map json__ "NamespacePid" Integer.of_json in
-      let startTime = field_map json__ "StartTime" Timestamp.of_json in
+      let parentUuid = field_map json__ "parentUuid" String_.of_json in
+      let euid = field_map json__ "euid" Integer.of_json in
+      let executablePath = field_map json__ "executablePath" String_.of_json in
+      let uuid = field_map json__ "uuid" String_.of_json in
+      let pid = field_map json__ "pid" Integer.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let userId = field_map json__ "userId" Integer.of_json in
+      let namespacePid = field_map json__ "namespacePid" Integer.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
       make ?parentUuid ?euid ?executablePath ?uuid ?pid ?name ?userId
         ?namespacePid ?startTime ()
     let to_json v = composed_to_json to_value v
@@ -3828,14 +3827,14 @@ module Container =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let securityContext =
-        field_map json__ "SecurityContext" SecurityContext.of_json in
-      let volumeMounts = field_map json__ "VolumeMounts" VolumeMounts.of_json in
-      let imagePrefix = field_map json__ "ImagePrefix" String_.of_json in
-      let image = field_map json__ "Image" String_.of_json in
-      let name = field_map json__ "Name" String_.of_json in
-      let id = field_map json__ "Id" String_.of_json in
+        field_map json__ "securityContext" SecurityContext.of_json in
+      let volumeMounts = field_map json__ "volumeMounts" VolumeMounts.of_json in
+      let imagePrefix = field_map json__ "imagePrefix" String_.of_json in
+      let image = field_map json__ "image" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in
       let containerRuntime =
-        field_map json__ "ContainerRuntime" String_.of_json in
+        field_map json__ "containerRuntime" String_.of_json in
       make ?securityContext ?volumeMounts ?imagePrefix ?image ?name ?id
         ?containerRuntime ()
     let to_json v = composed_to_json to_value v
@@ -3861,8 +3860,8 @@ module Volume =
       make ?hostPath ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let hostPath = field_map json__ "HostPath" HostPath.of_json in
-      let name = field_map json__ "Name" String_.of_json in
+      let hostPath = field_map json__ "hostPath" HostPath.of_json in
+      let name = field_map json__ "name" String_.of_json in
       make ?hostPath ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Volume used by the Kubernetes workload."]
@@ -3925,10 +3924,10 @@ module PermissionConfiguration =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let accountLevelPermissions =
-        field_map json__ "AccountLevelPermissions"
+        field_map json__ "accountLevelPermissions"
           AccountLevelPermissions.of_json in
       let bucketLevelPermissions =
-        field_map json__ "BucketLevelPermissions"
+        field_map json__ "bucketLevelPermissions"
           BucketLevelPermissions.of_json in
       make ?accountLevelPermissions ?bucketLevelPermissions ()
     let to_json v = composed_to_json to_value v
@@ -3972,11 +3971,11 @@ module S3ObjectDetail =
       make ?versionId ?hash ?eTag ?key ?objectArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let versionId = field_map json__ "VersionId" String_.of_json in
-      let hash = field_map json__ "Hash" String_.of_json in
-      let eTag = field_map json__ "ETag" String_.of_json in
-      let key = field_map json__ "Key" String_.of_json in
-      let objectArn = field_map json__ "ObjectArn" String_.of_json in
+      let versionId = field_map json__ "versionId" String_.of_json in
+      let hash = field_map json__ "hash" String_.of_json in
+      let eTag = field_map json__ "eTag" String_.of_json in
+      let key = field_map json__ "key" String_.of_json in
+      let objectArn = field_map json__ "objectArn" String_.of_json in
       make ?versionId ?hash ?eTag ?key ?objectArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the S3 object that was scanned"]
@@ -4017,11 +4016,11 @@ module PortProbeDetail =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let remoteIpDetails =
-        field_map json__ "RemoteIpDetails" RemoteIpDetails.of_json in
+        field_map json__ "remoteIpDetails" RemoteIpDetails.of_json in
       let localIpDetails =
-        field_map json__ "LocalIpDetails" LocalIpDetails.of_json in
+        field_map json__ "localIpDetails" LocalIpDetails.of_json in
       let localPortDetails =
-        field_map json__ "LocalPortDetails" LocalPortDetails.of_json in
+        field_map json__ "localPortDetails" LocalPortDetails.of_json in
       make ?remoteIpDetails ?localIpDetails ?localPortDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the port probe details."]
@@ -4074,11 +4073,11 @@ module LoginAttribute =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let successfulLoginAttempts =
-        field_map json__ "SuccessfulLoginAttempts" Integer.of_json in
+        field_map json__ "successfulLoginAttempts" Integer.of_json in
       let failedLoginAttempts =
-        field_map json__ "FailedLoginAttempts" Integer.of_json in
-      let application = field_map json__ "Application" String_.of_json in
-      let user = field_map json__ "User" String_.of_json in
+        field_map json__ "failedLoginAttempts" Integer.of_json in
+      let application = field_map json__ "application" String_.of_json in
+      let user = field_map json__ "user" String_.of_json in
       make ?successfulLoginAttempts ?failedLoginAttempts ?application ?user
         ()
     let to_json v = composed_to_json to_value v
@@ -4186,10 +4185,10 @@ module Actor =
       make ?process ?session ?user ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let process = field_map json__ "Process" ActorProcess.of_json in
-      let session = field_map json__ "Session" Session.of_json in
-      let user = field_map json__ "User" User.of_json in
-      let id = field_map json__ "Id" String_.of_json in
+      let process = field_map json__ "process" ActorProcess.of_json in
+      let session = field_map json__ "session" Session.of_json in
+      let user = field_map json__ "user" User.of_json in
+      let id = field_map json__ "id" String_.of_json in
       make ?process ?session ?user ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4278,14 +4277,14 @@ module NetworkEndpoint =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let connection =
-        field_map json__ "Connection" NetworkConnection.of_json in
+        field_map json__ "connection" NetworkConnection.of_json in
       let autonomousSystem =
-        field_map json__ "AutonomousSystem" AutonomousSystem.of_json in
-      let location = field_map json__ "Location" NetworkGeoLocation.of_json in
-      let port = field_map json__ "Port" Integer.of_json in
-      let domain = field_map json__ "Domain" String_.of_json in
-      let ip = field_map json__ "Ip" String_.of_json in
-      let id = field_map json__ "Id" String_.of_json in
+        field_map json__ "autonomousSystem" AutonomousSystem.of_json in
+      let location = field_map json__ "location" NetworkGeoLocation.of_json in
+      let port = field_map json__ "port" Integer.of_json in
+      let domain = field_map json__ "domain" String_.of_json in
+      let ip = field_map json__ "ip" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in
       make ?connection ?autonomousSystem ?location ?port ?domain ?ip ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4371,16 +4370,16 @@ module ResourceV2 =
         ?accountId ?name ?uid ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let data = field_map json__ "Data" ResourceData.of_json in
-      let tags = field_map json__ "Tags" Tags.of_json in
-      let cloudPartition = field_map json__ "CloudPartition" String_.of_json in
-      let service = field_map json__ "Service" String_.of_json in
-      let region = field_map json__ "Region" String_.of_json in
+      let data = field_map json__ "data" ResourceData.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let cloudPartition = field_map json__ "cloudPartition" String_.of_json in
+      let service = field_map json__ "service" String_.of_json in
+      let region = field_map json__ "region" String_.of_json in
       let resourceType =
-        field_map json__ "ResourceType" FindingResourceType.of_json in
-      let accountId = field_map json__ "AccountId" String_.of_json in
-      let name = field_map json__ "Name" String_.of_json in
-      let uid = field_map json__ "Uid" String_.of_json in
+        field_map json__ "resourceType" FindingResourceType.of_json in
+      let accountId = field_map json__ "accountId" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let uid = field_map json__ "uid" String_.of_json in
       make ?data ?tags ?cloudPartition ?service ?region ?resourceType
         ?accountId ?name ?uid ()
     let to_json v = composed_to_json to_value v
@@ -4514,21 +4513,21 @@ module Signal =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let signalIndicators =
-        field_map json__ "SignalIndicators" Indicators.of_json in
-      let endpointIds = field_map json__ "EndpointIds" EndpointIds.of_json in
-      let actorIds = field_map json__ "ActorIds" ActorIds.of_json in
-      let resourceUids = field_map json__ "ResourceUids" ResourceUids.of_json in
-      let count = field_map json__ "Count" Integer.of_json in
-      let severity = field_map json__ "Severity" Double.of_json in
-      let lastSeenAt = field_map json__ "LastSeenAt" Timestamp.of_json in
-      let firstSeenAt = field_map json__ "FirstSeenAt" Timestamp.of_json in
-      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
-      let name = field_map json__ "Name" String_.of_json in
+        field_map json__ "signalIndicators" Indicators.of_json in
+      let endpointIds = field_map json__ "endpointIds" EndpointIds.of_json in
+      let actorIds = field_map json__ "actorIds" ActorIds.of_json in
+      let resourceUids = field_map json__ "resourceUids" ResourceUids.of_json in
+      let count = field_map json__ "count" Integer.of_json in
+      let severity = field_map json__ "severity" Double.of_json in
+      let lastSeenAt = field_map json__ "lastSeenAt" Timestamp.of_json in
+      let firstSeenAt = field_map json__ "firstSeenAt" Timestamp.of_json in
+      let updatedAt = field_map json__ "updatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let name = field_map json__ "name" String_.of_json in
       let description =
-        field_map json__ "Description" SignalDescription.of_json in
-      let type_ = field_map json__ "Type" SignalType.of_json in
-      let uid = field_map json__ "Uid" String_.of_json in
+        field_map json__ "description" SignalDescription.of_json in
+      let type_ = field_map json__ "type" SignalType.of_json in
+      let uid = field_map json__ "uid" String_.of_json in
       make ?signalIndicators ?endpointIds ?actorIds ?resourceUids ?count
         ?severity ?lastSeenAt ?firstSeenAt ?updatedAt ?createdAt ?name
         ?description ?type_ ?uid ()
@@ -4818,8 +4817,8 @@ module Total =
       make ?unit ?amount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let unit = field_map json__ "Unit" String_.of_json in
-      let amount = field_map json__ "Amount" String_.of_json in
+      let unit = field_map json__ "unit" String_.of_json in
+      let amount = field_map json__ "amount" String_.of_json in
       make ?unit ?amount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4853,9 +4852,9 @@ module OrganizationFeatureStatisticsAdditionalConfiguration =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let enabledAccountsCount =
-        field_map json__ "EnabledAccountsCount" Integer.of_json in
+        field_map json__ "enabledAccountsCount" Integer.of_json in
       let name =
-        field_map json__ "Name" OrgFeatureAdditionalConfiguration.of_json in
+        field_map json__ "name" OrgFeatureAdditionalConfiguration.of_json in
       make ?enabledAccountsCount ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4884,8 +4883,8 @@ module EbsVolumesResult =
       make ?reason ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let reason = field_map json__ "Reason" String_.of_json in
-      let status = field_map json__ "Status" DataSourceStatus.of_json in
+      let reason = field_map json__ "reason" String_.of_json in
+      let status = field_map json__ "status" DataSourceStatus.of_json in
       make ?reason ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4923,10 +4922,10 @@ module MemberAdditionalConfigurationResult =
       make ?updatedAt ?status ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
-      let status = field_map json__ "Status" FeatureStatus.of_json in
+      let updatedAt = field_map json__ "updatedAt" Timestamp.of_json in
+      let status = field_map json__ "status" FeatureStatus.of_json in
       let name =
-        field_map json__ "Name" OrgFeatureAdditionalConfiguration.of_json in
+        field_map json__ "name" OrgFeatureAdditionalConfiguration.of_json in
       make ?updatedAt ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4992,13 +4991,13 @@ module VolumeDetail =
         ?deviceName ?volumeType ?volumeArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let kmsKeyArn = field_map json__ "KmsKeyArn" String_.of_json in
-      let snapshotArn = field_map json__ "SnapshotArn" String_.of_json in
-      let encryptionType = field_map json__ "EncryptionType" String_.of_json in
-      let volumeSizeInGB = field_map json__ "VolumeSizeInGB" Integer.of_json in
-      let deviceName = field_map json__ "DeviceName" String_.of_json in
-      let volumeType = field_map json__ "VolumeType" String_.of_json in
-      let volumeArn = field_map json__ "VolumeArn" String_.of_json in
+      let kmsKeyArn = field_map json__ "kmsKeyArn" String_.of_json in
+      let snapshotArn = field_map json__ "snapshotArn" String_.of_json in
+      let encryptionType = field_map json__ "encryptionType" String_.of_json in
+      let volumeSizeInGB = field_map json__ "volumeSizeInGB" Integer.of_json in
+      let deviceName = field_map json__ "deviceName" String_.of_json in
+      let volumeType = field_map json__ "volumeType" String_.of_json in
+      let volumeArn = field_map json__ "volumeArn" String_.of_json in
       make ?kmsKeyArn ?snapshotArn ?encryptionType ?volumeSizeInGB
         ?deviceName ?volumeType ?volumeArn ()
     let to_json v = composed_to_json to_value v
@@ -5151,21 +5150,21 @@ module NetworkInterface =
         ?networkInterfaceId ?ipv6Addresses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let vpcId = field_map json__ "VpcId" String_.of_json in
-      let subnetId = field_map json__ "SubnetId" String_.of_json in
+      let vpcId = field_map json__ "vpcId" String_.of_json in
+      let subnetId = field_map json__ "subnetId" String_.of_json in
       let securityGroups =
-        field_map json__ "SecurityGroups" SecurityGroups.of_json in
-      let publicIp = field_map json__ "PublicIp" String_.of_json in
-      let publicDnsName = field_map json__ "PublicDnsName" String_.of_json in
+        field_map json__ "securityGroups" SecurityGroups.of_json in
+      let publicIp = field_map json__ "publicIp" String_.of_json in
+      let publicDnsName = field_map json__ "publicDnsName" String_.of_json in
       let privateIpAddresses =
-        field_map json__ "PrivateIpAddresses" PrivateIpAddresses.of_json in
+        field_map json__ "privateIpAddresses" PrivateIpAddresses.of_json in
       let privateIpAddress =
-        field_map json__ "PrivateIpAddress" SensitiveString.of_json in
-      let privateDnsName = field_map json__ "PrivateDnsName" String_.of_json in
+        field_map json__ "privateIpAddress" SensitiveString.of_json in
+      let privateDnsName = field_map json__ "privateDnsName" String_.of_json in
       let networkInterfaceId =
-        field_map json__ "NetworkInterfaceId" String_.of_json in
+        field_map json__ "networkInterfaceId" String_.of_json in
       let ipv6Addresses =
-        field_map json__ "Ipv6Addresses" Ipv6Addresses.of_json in
+        field_map json__ "ipv6Addresses" Ipv6Addresses.of_json in
       make ?vpcId ?subnetId ?securityGroups ?publicIp ?publicDnsName
         ?privateIpAddresses ?privateIpAddress ?privateDnsName
         ?networkInterfaceId ?ipv6Addresses ()
@@ -5195,8 +5194,8 @@ module ImpersonatedUser =
       make ?groups ?username ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let groups = field_map json__ "Groups" Groups.of_json in
-      let username = field_map json__ "Username" String_.of_json in
+      let groups = field_map json__ "groups" Groups.of_json in
+      let username = field_map json__ "username" String_.of_json in
       make ?groups ?username ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the impersonated user."]
@@ -5281,8 +5280,8 @@ module DefaultServerSideEncryption =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let kmsMasterKeyArn =
-        field_map json__ "KmsMasterKeyArn" String_.of_json in
-      let encryptionType = field_map json__ "EncryptionType" String_.of_json in
+        field_map json__ "kmsMasterKeyArn" String_.of_json in
+      let encryptionType = field_map json__ "encryptionType" String_.of_json in
       make ?kmsMasterKeyArn ?encryptionType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5303,7 +5302,7 @@ module Owner =
       make ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let id = field_map json__ "Id" String_.of_json in make ?id ()
+      let id = field_map json__ "id" String_.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information on the owner of the bucket."]
 module PublicAccess =
@@ -5338,9 +5337,9 @@ module PublicAccess =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let effectivePermission =
-        field_map json__ "EffectivePermission" String_.of_json in
+        field_map json__ "effectivePermission" String_.of_json in
       let permissionConfiguration =
-        field_map json__ "PermissionConfiguration"
+        field_map json__ "permissionConfiguration"
           PermissionConfiguration.of_json in
       make ?effectivePermission ?permissionConfiguration ()
     let to_json v = composed_to_json to_value v
@@ -5421,7 +5420,7 @@ module DomainDetails =
       make ?domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let domain = field_map json__ "Domain" String_.of_json in
+      let domain = field_map json__ "domain" String_.of_json in
       make ?domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the domain."]
@@ -5450,8 +5449,8 @@ module RemoteAccountDetails =
       make ?affiliated ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let affiliated = field_map json__ "Affiliated" Boolean.of_json in
-      let accountId = field_map json__ "AccountId" String_.of_json in
+      let affiliated = field_map json__ "affiliated" Boolean.of_json in
+      let accountId = field_map json__ "accountId" String_.of_json in
       make ?affiliated ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5503,8 +5502,8 @@ module RemotePortDetails =
       make ?portName ?port ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let portName = field_map json__ "PortName" String_.of_json in
-      let port = field_map json__ "Port" Integer.of_json in
+      let portName = field_map json__ "portName" String_.of_json in
+      let port = field_map json__ "port" Integer.of_json in
       make ?portName ?port ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the remote port."]
@@ -5615,7 +5614,7 @@ module AnomalyUnusual =
       make ?behavior ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let behavior = field_map json__ "Behavior" Behavior.of_json in
+      let behavior = field_map json__ "behavior" Behavior.of_json in
       make ?behavior ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5824,9 +5823,9 @@ module HighestSeverityThreatDetails =
       make ?count ?threatName ?severity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let count = field_map json__ "Count" Integer.of_json in
-      let threatName = field_map json__ "ThreatName" String_.of_json in
-      let severity = field_map json__ "Severity" String_.of_json in
+      let count = field_map json__ "count" Integer.of_json in
+      let threatName = field_map json__ "threatName" String_.of_json in
+      let severity = field_map json__ "severity" String_.of_json in
       make ?count ?threatName ?severity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5857,9 +5856,9 @@ module ScannedItemCount =
       make ?volumes ?files ?totalGb ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let volumes = field_map json__ "Volumes" Integer.of_json in
-      let files = field_map json__ "Files" Integer.of_json in
-      let totalGb = field_map json__ "TotalGb" Integer.of_json in
+      let volumes = field_map json__ "volumes" Integer.of_json in
+      let files = field_map json__ "files" Integer.of_json in
+      let totalGb = field_map json__ "totalGb" Integer.of_json in
       make ?volumes ?files ?totalGb ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Total number of scanned files."]
@@ -5908,11 +5907,11 @@ module ThreatDetectedByName =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let threatNames =
-        field_map json__ "ThreatNames" ScanThreatNames.of_json in
-      let shortened = field_map json__ "Shortened" Boolean.of_json in
+        field_map json__ "threatNames" ScanThreatNames.of_json in
+      let shortened = field_map json__ "shortened" Boolean.of_json in
       let uniqueThreatNameCount =
-        field_map json__ "UniqueThreatNameCount" Integer.of_json in
-      let itemCount = field_map json__ "ItemCount" Integer.of_json in
+        field_map json__ "uniqueThreatNameCount" Integer.of_json in
+      let itemCount = field_map json__ "itemCount" Integer.of_json in
       make ?threatNames ?shortened ?uniqueThreatNameCount ?itemCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5932,7 +5931,7 @@ module ThreatsDetectedItemCount =
       make ?files ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let files = field_map json__ "Files" Integer.of_json in make ?files ()
+      let files = field_map json__ "files" Integer.of_json in make ?files ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains total number of infected files."]
 module ThreatIntelligenceDetail =
@@ -5971,9 +5970,9 @@ module ThreatIntelligenceDetail =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let threatFileSha256 =
-        field_map json__ "ThreatFileSha256" String_.of_json in
-      let threatNames = field_map json__ "ThreatNames" ThreatNames.of_json in
-      let threatListName = field_map json__ "ThreatListName" String_.of_json in
+        field_map json__ "threatFileSha256" String_.of_json in
+      let threatNames = field_map json__ "threatNames" ThreatNames.of_json in
+      let threatListName = field_map json__ "threatListName" String_.of_json in
       make ?threatFileSha256 ?threatNames ?threatListName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6000,7 +5999,7 @@ module IncrementalScanDetails =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let baselineResourceArn =
-        field_map_exn json__ "BaselineResourceArn" NonEmptyString.of_json in
+        field_map_exn json__ "baselineResourceArn" NonEmptyString.of_json in
       make ~baselineResourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6083,12 +6082,12 @@ module Threat =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let itemDetails =
-        field_map json__ "ItemDetails" ItemDetailsList.of_json in
-      let hash = field_map json__ "Hash" String_.of_json in
-      let count = field_map json__ "Count" Long.of_json in
-      let itemPaths = field_map json__ "ItemPaths" ItemPaths.of_json in
-      let source = field_map json__ "Source" String_.of_json in
-      let name = field_map json__ "Name" String_.of_json in
+        field_map json__ "itemDetails" ItemDetailsList.of_json in
+      let hash = field_map json__ "hash" String_.of_json in
+      let count = field_map json__ "count" Long.of_json in
+      let itemPaths = field_map json__ "itemPaths" ItemPaths.of_json in
+      let source = field_map json__ "source" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
       make ?itemDetails ?hash ?count ?itemPaths ?source ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6249,20 +6248,20 @@ module ProcessDetails =
         ?pwd ?namespacePid ?executableSha256 ?executablePath ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let lineage = field_map json__ "Lineage" Lineage.of_json in
-      let euid = field_map json__ "Euid" Integer.of_json in
-      let userId = field_map json__ "UserId" Integer.of_json in
-      let user = field_map json__ "User" String_.of_json in
-      let parentUuid = field_map json__ "ParentUuid" String_.of_json in
-      let uuid = field_map json__ "Uuid" String_.of_json in
-      let startTime = field_map json__ "StartTime" Timestamp.of_json in
-      let pid = field_map json__ "Pid" Integer.of_json in
-      let pwd = field_map json__ "Pwd" String_.of_json in
-      let namespacePid = field_map json__ "NamespacePid" Integer.of_json in
+      let lineage = field_map json__ "lineage" Lineage.of_json in
+      let euid = field_map json__ "euid" Integer.of_json in
+      let userId = field_map json__ "userId" Integer.of_json in
+      let user = field_map json__ "user" String_.of_json in
+      let parentUuid = field_map json__ "parentUuid" String_.of_json in
+      let uuid = field_map json__ "uuid" String_.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let pid = field_map json__ "pid" Integer.of_json in
+      let pwd = field_map json__ "pwd" String_.of_json in
+      let namespacePid = field_map json__ "namespacePid" Integer.of_json in
       let executableSha256 =
-        field_map json__ "ExecutableSha256" String_.of_json in
-      let executablePath = field_map json__ "ExecutablePath" String_.of_json in
-      let name = field_map json__ "Name" String_.of_json in
+        field_map json__ "executableSha256" String_.of_json in
+      let executablePath = field_map json__ "executablePath" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
       make ?lineage ?euid ?userId ?user ?parentUuid ?uuid ?startTime ?pid
         ?pwd ?namespacePid ?executableSha256 ?executablePath ?name ()
     let to_json v = composed_to_json to_value v
@@ -6318,8 +6317,8 @@ module ScanConditionPair =
       make ?value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let value = field_map json__ "Value" TagValue.of_json in
-      let key = field_map_exn json__ "Key" TagKey.of_json in
+      let value = field_map json__ "value" TagValue.of_json in
+      let key = field_map_exn json__ "key" TagKey.of_json in
       make ?value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6421,7 +6420,7 @@ module AgentDetails =
       make ?version ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let version = field_map json__ "Version" String_.of_json in
+      let version = field_map json__ "version" String_.of_json in
       make ?version ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6457,9 +6456,9 @@ module ContainerInstanceDetails =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let compatibleContainerInstances =
-        field_map json__ "CompatibleContainerInstances" Long.of_json in
+        field_map json__ "compatibleContainerInstances" Long.of_json in
       let coveredContainerInstances =
-        field_map json__ "CoveredContainerInstances" Long.of_json in
+        field_map json__ "coveredContainerInstances" Long.of_json in
       make ?compatibleContainerInstances ?coveredContainerInstances ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6492,8 +6491,8 @@ module FargateDetails =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let managementType =
-        field_map json__ "ManagementType" ManagementType.of_json in
-      let issues = field_map json__ "Issues" Issues.of_json in
+        field_map json__ "managementType" ManagementType.of_json in
+      let issues = field_map json__ "issues" Issues.of_json in
       make ?managementType ?issues ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6521,8 +6520,8 @@ module AddonDetails =
       make ?addonStatus ?addonVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let addonStatus = field_map json__ "AddonStatus" String_.of_json in
-      let addonVersion = field_map json__ "AddonVersion" String_.of_json in
+      let addonStatus = field_map json__ "addonStatus" String_.of_json in
+      let addonVersion = field_map json__ "addonVersion" String_.of_json in
       make ?addonStatus ?addonVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6598,8 +6597,8 @@ module UsageTopAccountResult =
       make ?total ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let total = field_map json__ "Total" Total.of_json in
-      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let total = field_map json__ "total" Total.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
       make ?total ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6625,7 +6624,7 @@ module DataSourceFreeTrial =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let freeTrialDaysRemaining =
-        field_map json__ "FreeTrialDaysRemaining" Integer.of_json in
+        field_map json__ "freeTrialDaysRemaining" Integer.of_json in
       make ?freeTrialDaysRemaining ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6777,7 +6776,7 @@ module KubernetesAuditLogsConfigurationResult =
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let status = field_map json__ "Status" DataSourceStatus.of_json in
+      let status = field_map json__ "status" DataSourceStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6802,7 +6801,7 @@ module ScanEc2InstanceWithFindingsResult =
       make ?ebsVolumes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let ebsVolumes = field_map json__ "EbsVolumes" EbsVolumesResult.of_json in
+      let ebsVolumes = field_map json__ "ebsVolumes" EbsVolumesResult.of_json in
       make ?ebsVolumes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6955,17 +6954,17 @@ module EcsTaskDetails =
         ?startedAt ?taskCreatedAt ?version ?definitionArn ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let launchType = field_map json__ "LaunchType" String_.of_json in
-      let group = field_map json__ "Group" String_.of_json in
-      let containers = field_map json__ "Containers" Containers.of_json in
-      let volumes = field_map json__ "Volumes" Volumes.of_json in
-      let tags = field_map json__ "Tags" Tags.of_json in
-      let startedBy = field_map json__ "StartedBy" String_.of_json in
-      let startedAt = field_map json__ "StartedAt" Timestamp.of_json in
-      let taskCreatedAt = field_map json__ "TaskCreatedAt" Timestamp.of_json in
-      let version = field_map json__ "Version" String_.of_json in
-      let definitionArn = field_map json__ "DefinitionArn" String_.of_json in
-      let arn = field_map json__ "Arn" String_.of_json in
+      let launchType = field_map json__ "launchType" String_.of_json in
+      let group = field_map json__ "group" String_.of_json in
+      let containers = field_map json__ "containers" Containers.of_json in
+      let volumes = field_map json__ "volumes" Volumes.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let startedBy = field_map json__ "startedBy" String_.of_json in
+      let startedAt = field_map json__ "startedAt" Timestamp.of_json in
+      let taskCreatedAt = field_map json__ "createdAt" Timestamp.of_json in
+      let version = field_map json__ "version" String_.of_json in
+      let definitionArn = field_map json__ "definitionArn" String_.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
       make ?launchType ?group ?containers ?volumes ?tags ?startedBy
         ?startedAt ?taskCreatedAt ?version ?definitionArn ?arn ()
     let to_json v = composed_to_json to_value v
@@ -7048,12 +7047,12 @@ module KubernetesUserDetails =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let impersonatedUser =
-        field_map json__ "ImpersonatedUser" ImpersonatedUser.of_json in
+        field_map json__ "impersonatedUser" ImpersonatedUser.of_json in
       let sessionName =
-        field_map json__ "SessionName" SessionNameList.of_json in
-      let groups = field_map json__ "Groups" Groups.of_json in
-      let uid = field_map json__ "Uid" String_.of_json in
-      let username = field_map json__ "Username" String_.of_json in
+        field_map json__ "sessionName" SessionNameList.of_json in
+      let groups = field_map json__ "groups" Groups.of_json in
+      let uid = field_map json__ "uid" String_.of_json in
+      let username = field_map json__ "username" String_.of_json in
       make ?impersonatedUser ?sessionName ?groups ?uid ?username ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7144,17 +7143,17 @@ module KubernetesWorkloadDetails =
         ?hostNetwork ?namespace ?uid ?type_ ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let hostPID = field_map json__ "HostPID" Boolean.of_json in
-      let hostIPC = field_map json__ "HostIPC" Boolean.of_json in
-      let volumes = field_map json__ "Volumes" Volumes.of_json in
-      let containers = field_map json__ "Containers" Containers.of_json in
+      let hostPID = field_map json__ "hostPID" Boolean.of_json in
+      let hostIPC = field_map json__ "hostIPC" Boolean.of_json in
+      let volumes = field_map json__ "volumes" Volumes.of_json in
+      let containers = field_map json__ "containers" Containers.of_json in
       let serviceAccountName =
-        field_map json__ "ServiceAccountName" String_.of_json in
-      let hostNetwork = field_map json__ "HostNetwork" Boolean.of_json in
-      let namespace = field_map json__ "Namespace" String_.of_json in
-      let uid = field_map json__ "Uid" String_.of_json in
-      let type_ = field_map json__ "Type" String_.of_json in
-      let name = field_map json__ "Name" String_.of_json in
+        field_map json__ "serviceAccountName" String_.of_json in
+      let hostNetwork = field_map json__ "hostNetwork" Boolean.of_json in
+      let namespace = field_map json__ "namespace" String_.of_json in
+      let uid = field_map json__ "uid" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
       make ?hostPID ?hostIPC ?volumes ?containers ?serviceAccountName
         ?hostNetwork ?namespace ?uid ?type_ ?name ()
     let to_json v = composed_to_json to_value v
@@ -7193,9 +7192,9 @@ module VpcConfig =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let securityGroups =
-        field_map json__ "SecurityGroups" SecurityGroups.of_json in
-      let vpcId = field_map json__ "VpcId" String_.of_json in
-      let subnetIds = field_map json__ "SubnetIds" SubnetIds.of_json in
+        field_map json__ "securityGroups" SecurityGroups.of_json in
+      let vpcId = field_map json__ "vpcId" String_.of_json in
+      let subnetIds = field_map json__ "subnetIds" SubnetIds.of_json in
       make ?securityGroups ?vpcId ?subnetIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7281,17 +7280,17 @@ module S3BucketDetail =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let s3ObjectDetails =
-        field_map json__ "S3ObjectDetails" S3ObjectDetails.of_json in
-      let publicAccess = field_map json__ "PublicAccess" PublicAccess.of_json in
+        field_map json__ "s3ObjectDetails" S3ObjectDetails.of_json in
+      let publicAccess = field_map json__ "publicAccess" PublicAccess.of_json in
       let defaultServerSideEncryption =
-        field_map json__ "DefaultServerSideEncryption"
+        field_map json__ "defaultServerSideEncryption"
           DefaultServerSideEncryption.of_json in
-      let tags = field_map json__ "Tags" Tags.of_json in
-      let owner = field_map json__ "Owner" Owner.of_json in
-      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
-      let type_ = field_map json__ "Type" String_.of_json in
-      let name = field_map json__ "Name" String_.of_json in
-      let arn = field_map json__ "Arn" String_.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let owner = field_map json__ "owner" Owner.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
       make ?s3ObjectDetails ?publicAccess ?defaultServerSideEncryption ?tags
         ?owner ?createdAt ?type_ ?name ?arn ()
     let to_json v = composed_to_json to_value v
@@ -7388,18 +7387,18 @@ module AwsApiCallAction =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let affectedResources =
-        field_map json__ "AffectedResources" AffectedResources.of_json in
+        field_map json__ "affectedResources" AffectedResources.of_json in
       let remoteAccountDetails =
-        field_map json__ "RemoteAccountDetails" RemoteAccountDetails.of_json in
-      let serviceName = field_map json__ "ServiceName" String_.of_json in
+        field_map json__ "remoteAccountDetails" RemoteAccountDetails.of_json in
+      let serviceName = field_map json__ "serviceName" String_.of_json in
       let remoteIpDetails =
-        field_map json__ "RemoteIpDetails" RemoteIpDetails.of_json in
-      let userAgent = field_map json__ "UserAgent" String_.of_json in
-      let errorCode = field_map json__ "ErrorCode" String_.of_json in
+        field_map json__ "remoteIpDetails" RemoteIpDetails.of_json in
+      let userAgent = field_map json__ "userAgent" String_.of_json in
+      let errorCode = field_map json__ "errorCode" String_.of_json in
       let domainDetails =
-        field_map json__ "DomainDetails" DomainDetails.of_json in
-      let callerType = field_map json__ "CallerType" String_.of_json in
-      let api = field_map json__ "Api" String_.of_json in
+        field_map json__ "domainDetails" DomainDetails.of_json in
+      let callerType = field_map json__ "callerType" String_.of_json in
+      let api = field_map json__ "api" String_.of_json in
       make ?affectedResources ?remoteAccountDetails ?serviceName
         ?remoteIpDetails ?userAgent ?errorCode ?domainDetails ?callerType
         ?api ()
@@ -7462,12 +7461,12 @@ module DnsRequestAction =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let vpcOwnerAccountId =
-        field_map json__ "VpcOwnerAccountId" AccountId.of_json in
+        field_map json__ "vpcOwnerAccountId" AccountId.of_json in
       let domainWithSuffix =
-        field_map json__ "DomainWithSuffix" String_.of_json in
-      let blocked = field_map json__ "Blocked" Boolean.of_json in
-      let protocol = field_map json__ "Protocol" String_.of_json in
-      let domain = field_map json__ "Domain" String_.of_json in
+        field_map json__ "domainWithSuffix" String_.of_json in
+      let blocked = field_map json__ "blocked" Boolean.of_json in
+      let protocol = field_map json__ "protocol" String_.of_json in
+      let domain = field_map json__ "domain" String_.of_json in
       make ?vpcOwnerAccountId ?domainWithSuffix ?blocked ?protocol ?domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7570,18 +7569,18 @@ module KubernetesApiCallAction =
         ?resourceName ?namespace ?subresource ?resource ?verb ?requestUri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let parameters = field_map json__ "Parameters" String_.of_json in
-      let statusCode = field_map json__ "StatusCode" Integer.of_json in
+      let parameters = field_map json__ "parameters" String_.of_json in
+      let statusCode = field_map json__ "statusCode" Integer.of_json in
       let remoteIpDetails =
-        field_map json__ "RemoteIpDetails" RemoteIpDetails.of_json in
-      let userAgent = field_map json__ "UserAgent" String_.of_json in
-      let sourceIps = field_map json__ "SourceIps" SourceIps.of_json in
-      let resourceName = field_map json__ "ResourceName" String_.of_json in
-      let namespace = field_map json__ "Namespace" String_.of_json in
-      let subresource = field_map json__ "Subresource" String_.of_json in
-      let resource = field_map json__ "Resource" String_.of_json in
-      let verb = field_map json__ "Verb" String_.of_json in
-      let requestUri = field_map json__ "RequestUri" String_.of_json in
+        field_map json__ "remoteIpDetails" RemoteIpDetails.of_json in
+      let userAgent = field_map json__ "userAgent" String_.of_json in
+      let sourceIps = field_map json__ "sourceIPs" SourceIps.of_json in
+      let resourceName = field_map json__ "resourceName" String_.of_json in
+      let namespace = field_map json__ "namespace" String_.of_json in
+      let subresource = field_map json__ "subresource" String_.of_json in
+      let resource = field_map json__ "resource" String_.of_json in
+      let verb = field_map json__ "verb" String_.of_json in
+      let requestUri = field_map json__ "requestUri" String_.of_json in
       make ?parameters ?statusCode ?remoteIpDetails ?userAgent ?sourceIps
         ?resourceName ?namespace ?subresource ?resource ?verb ?requestUri ()
     let to_json v = composed_to_json to_value v
@@ -7625,10 +7624,10 @@ module KubernetesPermissionCheckedDetails =
       make ?allowed ?namespace ?resource ?verb ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let allowed = field_map json__ "Allowed" Boolean.of_json in
-      let namespace = field_map json__ "Namespace" String_.of_json in
-      let resource = field_map json__ "Resource" String_.of_json in
-      let verb = field_map json__ "Verb" String_.of_json in
+      let allowed = field_map json__ "allowed" Boolean.of_json in
+      let namespace = field_map json__ "namespace" String_.of_json in
+      let resource = field_map json__ "resource" String_.of_json in
+      let verb = field_map json__ "verb" String_.of_json in
       make ?allowed ?namespace ?resource ?verb ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7674,11 +7673,11 @@ module KubernetesRoleBindingDetails =
       make ?roleRefKind ?roleRefName ?uid ?name ?kind ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let roleRefKind = field_map json__ "RoleRefKind" String_.of_json in
-      let roleRefName = field_map json__ "RoleRefName" String_.of_json in
-      let uid = field_map json__ "Uid" String_.of_json in
-      let name = field_map json__ "Name" String_.of_json in
-      let kind = field_map json__ "Kind" String_.of_json in
+      let roleRefKind = field_map json__ "roleRefKind" String_.of_json in
+      let roleRefName = field_map json__ "roleRefName" String_.of_json in
+      let uid = field_map json__ "uid" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let kind = field_map json__ "kind" String_.of_json in
       make ?roleRefKind ?roleRefName ?uid ?name ?kind ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7707,9 +7706,9 @@ module KubernetesRoleDetails =
       make ?uid ?name ?kind ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let uid = field_map json__ "Uid" String_.of_json in
-      let name = field_map json__ "Name" String_.of_json in
-      let kind = field_map json__ "Kind" String_.of_json in
+      let uid = field_map json__ "uid" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let kind = field_map json__ "kind" String_.of_json in
       make ?uid ?name ?kind ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7801,19 +7800,19 @@ module NetworkConnectionAction =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let remotePortDetails =
-        field_map json__ "RemotePortDetails" RemotePortDetails.of_json in
+        field_map json__ "remotePortDetails" RemotePortDetails.of_json in
       let remoteIpDetails =
-        field_map json__ "RemoteIpDetails" RemoteIpDetails.of_json in
+        field_map json__ "remoteIpDetails" RemoteIpDetails.of_json in
       let localNetworkInterface =
-        field_map json__ "LocalNetworkInterface" String_.of_json in
+        field_map json__ "localNetworkInterface" String_.of_json in
       let localIpDetails =
-        field_map json__ "LocalIpDetails" LocalIpDetails.of_json in
-      let protocol = field_map json__ "Protocol" String_.of_json in
+        field_map json__ "localIpDetails" LocalIpDetails.of_json in
+      let protocol = field_map json__ "protocol" String_.of_json in
       let localPortDetails =
-        field_map json__ "LocalPortDetails" LocalPortDetails.of_json in
+        field_map json__ "localPortDetails" LocalPortDetails.of_json in
       let connectionDirection =
-        field_map json__ "ConnectionDirection" String_.of_json in
-      let blocked = field_map json__ "Blocked" Boolean.of_json in
+        field_map json__ "connectionDirection" String_.of_json in
+      let blocked = field_map json__ "blocked" Boolean.of_json in
       make ?remotePortDetails ?remoteIpDetails ?localNetworkInterface
         ?localIpDetails ?protocol ?localPortDetails ?connectionDirection
         ?blocked ()
@@ -7847,8 +7846,8 @@ module PortProbeAction =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let portProbeDetails =
-        field_map json__ "PortProbeDetails" PortProbeDetails.of_json in
-      let blocked = field_map json__ "Blocked" Boolean.of_json in
+        field_map json__ "portProbeDetails" PortProbeDetails.of_json in
+      let blocked = field_map json__ "blocked" Boolean.of_json in
       make ?portProbeDetails ?blocked ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7883,7 +7882,7 @@ module RdsLoginAttemptAction =
       let loginAttributes =
         field_map json__ "LoginAttributes" LoginAttributes.of_json in
       let remoteIpDetails =
-        field_map json__ "RemoteIpDetails" RemoteIpDetails.of_json in
+        field_map json__ "remoteIpDetails" RemoteIpDetails.of_json in
       make ?loginAttributes ?remoteIpDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7911,8 +7910,8 @@ module Anomaly =
       make ?unusual ?profiles ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let unusual = field_map json__ "Unusual" AnomalyUnusual.of_json in
-      let profiles = field_map json__ "Profiles" AnomalyProfiles.of_json in
+      let unusual = field_map json__ "unusual" AnomalyUnusual.of_json in
+      let profiles = field_map json__ "profiles" AnomalyProfiles.of_json in
       make ?unusual ?profiles ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the anomalies."]
@@ -8001,17 +8000,17 @@ module Sequence =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let additionalSequenceTypes =
-        field_map json__ "AdditionalSequenceTypes"
+        field_map json__ "additionalSequenceTypes"
           AdditionalSequenceTypes.of_json in
       let sequenceIndicators =
-        field_map json__ "SequenceIndicators" Indicators.of_json in
-      let signals = field_map json__ "Signals" Signals.of_json in
-      let endpoints = field_map json__ "Endpoints" NetworkEndpoints.of_json in
-      let resources = field_map json__ "Resources" Resources.of_json in
-      let actors = field_map json__ "Actors" Actors.of_json in
+        field_map json__ "sequenceIndicators" Indicators.of_json in
+      let signals = field_map json__ "signals" Signals.of_json in
+      let endpoints = field_map json__ "endpoints" NetworkEndpoints.of_json in
+      let resources = field_map json__ "resources" Resources.of_json in
+      let actors = field_map json__ "actors" Actors.of_json in
       let description =
-        field_map json__ "Description" SequenceDescription.of_json in
-      let uid = field_map json__ "Uid" String_.of_json in
+        field_map json__ "description" SequenceDescription.of_json in
+      let uid = field_map json__ "uid" String_.of_json in
       make ?additionalSequenceTypes ?sequenceIndicators ?signals ?endpoints
         ?resources ?actors ?description ?uid ()
     let to_json v = composed_to_json to_value v
@@ -8073,15 +8072,15 @@ module ScanDetections =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let threatDetectedByName =
-        field_map json__ "ThreatDetectedByName" ThreatDetectedByName.of_json in
+        field_map json__ "threatDetectedByName" ThreatDetectedByName.of_json in
       let highestSeverityThreatDetails =
-        field_map json__ "HighestSeverityThreatDetails"
+        field_map json__ "highestSeverityThreatDetails"
           HighestSeverityThreatDetails.of_json in
       let threatsDetectedItemCount =
-        field_map json__ "ThreatsDetectedItemCount"
+        field_map json__ "threatsDetectedItemCount"
           ThreatsDetectedItemCount.of_json in
       let scannedItemCount =
-        field_map json__ "ScannedItemCount" ScannedItemCount.of_json in
+        field_map json__ "scannedItemCount" ScannedItemCount.of_json in
       make ?threatDetectedByName ?highestSeverityThreatDetails
         ?threatsDetectedItemCount ?scannedItemCount ()
     let to_json v = composed_to_json to_value v
@@ -8194,9 +8193,9 @@ module MalwareProtectionFindingsScanConfiguration =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let incrementalScanDetails =
-        field_map json__ "IncrementalScanDetails"
+        field_map json__ "incrementalScanDetails"
           IncrementalScanDetails.of_json in
-      let triggerType = field_map json__ "TriggerType" TriggerType.of_json in
+      let triggerType = field_map json__ "triggerType" TriggerType.of_json in
       make ?incrementalScanDetails ?triggerType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8503,38 +8502,38 @@ module RuntimeContext =
         ?libraryPath ?scriptPath ?modifiedAt ?modifyingProcess ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let threatFilePath = field_map json__ "ThreatFilePath" String_.of_json in
+      let threatFilePath = field_map json__ "threatFilePath" String_.of_json in
       let commandLineExample =
-        field_map json__ "CommandLineExample" String_.of_json in
-      let serviceName = field_map json__ "ServiceName" String_.of_json in
-      let toolCategory = field_map json__ "ToolCategory" String_.of_json in
-      let toolName = field_map json__ "ToolName" String_.of_json in
+        field_map json__ "commandLineExample" String_.of_json in
+      let serviceName = field_map json__ "serviceName" String_.of_json in
+      let toolCategory = field_map json__ "toolCategory" String_.of_json in
+      let toolName = field_map json__ "toolName" String_.of_json in
       let memoryRegions =
-        field_map json__ "MemoryRegions" MemoryRegionsList.of_json in
+        field_map json__ "memoryRegions" MemoryRegionsList.of_json in
       let ianaProtocolNumber =
-        field_map json__ "IanaProtocolNumber" Integer.of_json in
-      let addressFamily = field_map json__ "AddressFamily" String_.of_json in
+        field_map json__ "ianaProtocolNumber" Integer.of_json in
+      let addressFamily = field_map json__ "addressFamily" String_.of_json in
       let targetProcess =
-        field_map json__ "TargetProcess" ProcessDetails.of_json in
+        field_map json__ "targetProcess" ProcessDetails.of_json in
       let shellHistoryFilePath =
-        field_map json__ "ShellHistoryFilePath" String_.of_json in
-      let moduleSha256 = field_map json__ "ModuleSha256" String_.of_json in
-      let moduleFilePath = field_map json__ "ModuleFilePath" String_.of_json in
-      let moduleName = field_map json__ "ModuleName" String_.of_json in
-      let flags = field_map json__ "Flags" FlagsList.of_json in
-      let fileSystemType = field_map json__ "FileSystemType" String_.of_json in
-      let mountTarget = field_map json__ "MountTarget" String_.of_json in
-      let mountSource = field_map json__ "MountSource" String_.of_json in
+        field_map json__ "shellHistoryFilePath" String_.of_json in
+      let moduleSha256 = field_map json__ "moduleSha256" String_.of_json in
+      let moduleFilePath = field_map json__ "moduleFilePath" String_.of_json in
+      let moduleName = field_map json__ "moduleName" String_.of_json in
+      let flags = field_map json__ "flags" FlagsList.of_json in
+      let fileSystemType = field_map json__ "fileSystemType" String_.of_json in
+      let mountTarget = field_map json__ "mountTarget" String_.of_json in
+      let mountSource = field_map json__ "mountSource" String_.of_json in
       let releaseAgentPath =
-        field_map json__ "ReleaseAgentPath" String_.of_json in
-      let runcBinaryPath = field_map json__ "RuncBinaryPath" String_.of_json in
-      let socketPath = field_map json__ "SocketPath" String_.of_json in
-      let ldPreloadValue = field_map json__ "LdPreloadValue" String_.of_json in
-      let libraryPath = field_map json__ "LibraryPath" String_.of_json in
-      let scriptPath = field_map json__ "ScriptPath" String_.of_json in
-      let modifiedAt = field_map json__ "ModifiedAt" Timestamp.of_json in
+        field_map json__ "releaseAgentPath" String_.of_json in
+      let runcBinaryPath = field_map json__ "runcBinaryPath" String_.of_json in
+      let socketPath = field_map json__ "socketPath" String_.of_json in
+      let ldPreloadValue = field_map json__ "ldPreloadValue" String_.of_json in
+      let libraryPath = field_map json__ "libraryPath" String_.of_json in
+      let scriptPath = field_map json__ "scriptPath" String_.of_json in
+      let modifiedAt = field_map json__ "modifiedAt" Timestamp.of_json in
       let modifyingProcess =
-        field_map json__ "ModifyingProcess" ProcessDetails.of_json in
+        field_map json__ "modifyingProcess" ProcessDetails.of_json in
       make ?threatFilePath ?commandLineExample ?serviceName ?toolCategory
         ?toolName ?memoryRegions ?ianaProtocolNumber ?addressFamily
         ?targetProcess ?shellHistoryFilePath ?moduleSha256 ?moduleFilePath
@@ -8561,7 +8560,7 @@ module OrganizationEbsVolumes =
       make ?autoEnable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let autoEnable = field_map json__ "AutoEnable" Boolean.of_json in
+      let autoEnable = field_map json__ "autoEnable" Boolean.of_json in
       make ?autoEnable ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Organization-wide EBS volumes scan configuration."]
@@ -8593,9 +8592,9 @@ module OrganizationAdditionalConfiguration =
       make ?autoEnable ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let autoEnable = field_map json__ "AutoEnable" OrgFeatureStatus.of_json in
+      let autoEnable = field_map json__ "autoEnable" OrgFeatureStatus.of_json in
       let name =
-        field_map json__ "Name" OrgFeatureAdditionalConfiguration.of_json in
+        field_map json__ "name" OrgFeatureAdditionalConfiguration.of_json in
       make ?autoEnable ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8624,9 +8623,9 @@ module MemberAdditionalConfiguration =
       make ?status ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let status = field_map json__ "Status" FeatureStatus.of_json in
+      let status = field_map json__ "status" FeatureStatus.of_json in
       let name =
-        field_map json__ "Name" OrgFeatureAdditionalConfiguration.of_json in
+        field_map json__ "name" OrgFeatureAdditionalConfiguration.of_json in
       make ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8795,9 +8794,9 @@ module DetectorAdditionalConfiguration =
       make ?status ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let status = field_map json__ "Status" FeatureStatus.of_json in
+      let status = field_map json__ "status" FeatureStatus.of_json in
       let name =
-        field_map json__ "Name" FeatureAdditionalConfiguration.of_json in
+        field_map json__ "name" FeatureAdditionalConfiguration.of_json in
       make ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8836,9 +8835,9 @@ module FilterCondition =
       make ?lessThan ?greaterThan ?equalsValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let lessThan = field_map json__ "LessThan" LongValue.of_json in
-      let greaterThan = field_map json__ "GreaterThan" LongValue.of_json in
-      let equalsValue = field_map json__ "EqualsValue" NonEmptyString.of_json in
+      let lessThan = field_map json__ "lessThan" LongValue.of_json in
+      let greaterThan = field_map json__ "greaterThan" LongValue.of_json in
+      let equalsValue = field_map json__ "equalsValue" NonEmptyString.of_json in
       make ?lessThan ?greaterThan ?equalsValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the condition."]
@@ -8944,11 +8943,11 @@ module CoverageEc2InstanceDetails =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let managementType =
-        field_map json__ "ManagementType" ManagementType.of_json in
-      let agentDetails = field_map json__ "AgentDetails" AgentDetails.of_json in
-      let clusterArn = field_map json__ "ClusterArn" String_.of_json in
-      let instanceType = field_map json__ "InstanceType" String_.of_json in
-      let instanceId = field_map json__ "InstanceId" String_.of_json in
+        field_map json__ "managementType" ManagementType.of_json in
+      let agentDetails = field_map json__ "agentDetails" AgentDetails.of_json in
+      let clusterArn = field_map json__ "clusterArn" String_.of_json in
+      let instanceType = field_map json__ "instanceType" String_.of_json in
+      let instanceId = field_map json__ "instanceId" String_.of_json in
       make ?managementType ?agentDetails ?clusterArn ?instanceType
         ?instanceId ()
     let to_json v = composed_to_json to_value v
@@ -8992,11 +8991,11 @@ module CoverageEcsClusterDetails =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let containerInstanceDetails =
-        field_map json__ "ContainerInstanceDetails"
+        field_map json__ "containerInstanceDetails"
           ContainerInstanceDetails.of_json in
       let fargateDetails =
-        field_map json__ "FargateDetails" FargateDetails.of_json in
-      let clusterName = field_map json__ "ClusterName" String_.of_json in
+        field_map json__ "fargateDetails" FargateDetails.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
       make ?containerInstanceDetails ?fargateDetails ?clusterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9058,11 +9057,11 @@ module CoverageEksClusterDetails =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let managementType =
-        field_map json__ "ManagementType" ManagementType.of_json in
-      let addonDetails = field_map json__ "AddonDetails" AddonDetails.of_json in
-      let compatibleNodes = field_map json__ "CompatibleNodes" Long.of_json in
-      let coveredNodes = field_map json__ "CoveredNodes" Long.of_json in
-      let clusterName = field_map json__ "ClusterName" String_.of_json in
+        field_map json__ "managementType" ManagementType.of_json in
+      let addonDetails = field_map json__ "addonDetails" AddonDetails.of_json in
+      let compatibleNodes = field_map json__ "compatibleNodes" Long.of_json in
+      let coveredNodes = field_map json__ "coveredNodes" Long.of_json in
+      let clusterName = field_map json__ "clusterName" String_.of_json in
       make ?managementType ?addonDetails ?compatibleNodes ?coveredNodes
         ?clusterName ()
     let to_json v = composed_to_json to_value v
@@ -9120,8 +9119,8 @@ module CoverageFilterCondition =
       make ?notEquals ?equals ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let notEquals = field_map json__ "NotEquals" NotEquals.of_json in
-      let equals = field_map json__ "Equals" Equals.of_json in
+      let notEquals = field_map json__ "notEquals" NotEquals.of_json in
+      let equals = field_map json__ "equals" Equals.of_json in
       make ?notEquals ?equals ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9326,7 +9325,7 @@ module KubernetesDataSourceFreeTrial =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let auditLogs =
-        field_map json__ "AuditLogs" DataSourceFreeTrial.of_json in
+        field_map json__ "auditLogs" DataSourceFreeTrial.of_json in
       make ?auditLogs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9354,7 +9353,7 @@ module MalwareProtectionDataSourceFreeTrial =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let scanEc2InstanceWithFindings =
-        field_map json__ "ScanEc2InstanceWithFindings"
+        field_map json__ "scanEc2InstanceWithFindings"
           DataSourceFreeTrial.of_json in
       make ?scanEc2InstanceWithFindings ()
     let to_json v = composed_to_json to_value v
@@ -9390,8 +9389,8 @@ module FreeTrialFeatureConfigurationResult =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let freeTrialDaysRemaining =
-        field_map json__ "FreeTrialDaysRemaining" Integer.of_json in
-      let name = field_map json__ "Name" FreeTrialFeatureResult.of_json in
+        field_map json__ "freeTrialDaysRemaining" Integer.of_json in
+      let name = field_map json__ "name" FreeTrialFeatureResult.of_json in
       make ?freeTrialDaysRemaining ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9434,11 +9433,11 @@ module OrganizationFeatureStatistics =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let additionalConfiguration =
-        field_map json__ "AdditionalConfiguration"
+        field_map json__ "additionalConfiguration"
           OrganizationFeatureStatisticsAdditionalConfigurations.of_json in
       let enabledAccountsCount =
-        field_map json__ "EnabledAccountsCount" Integer.of_json in
-      let name = field_map json__ "Name" OrgFeature.of_json in
+        field_map json__ "enabledAccountsCount" Integer.of_json in
+      let name = field_map json__ "name" OrgFeature.of_json in
       make ?additionalConfiguration ?enabledAccountsCount ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9461,7 +9460,7 @@ module CloudTrailConfigurationResult =
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let status = field_map json__ "Status" DataSourceStatus.of_json in
+      let status = field_map json__ "status" DataSourceStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9483,7 +9482,7 @@ module DNSLogsConfigurationResult =
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let status = field_map json__ "Status" DataSourceStatus.of_json in
+      let status = field_map json__ "status" DataSourceStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9506,7 +9505,7 @@ module FlowLogsConfigurationResult =
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let status = field_map json__ "Status" DataSourceStatus.of_json in
+      let status = field_map json__ "status" DataSourceStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9533,7 +9532,7 @@ module KubernetesConfigurationResult =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let auditLogs =
-        field_map json__ "AuditLogs"
+        field_map json__ "auditLogs"
           KubernetesAuditLogsConfigurationResult.of_json in
       make ?auditLogs ()
     let to_json v = composed_to_json to_value v
@@ -9567,9 +9566,9 @@ module MalwareProtectionConfigurationResult =
       make ?serviceRole ?scanEc2InstanceWithFindings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let serviceRole = field_map json__ "ServiceRole" String_.of_json in
+      let serviceRole = field_map json__ "serviceRole" String_.of_json in
       let scanEc2InstanceWithFindings =
-        field_map json__ "ScanEc2InstanceWithFindings"
+        field_map json__ "scanEc2InstanceWithFindings"
           ScanEc2InstanceWithFindingsResult.of_json in
       make ?serviceRole ?scanEc2InstanceWithFindings ()
     let to_json v = composed_to_json to_value v
@@ -9593,7 +9592,7 @@ module S3LogsConfigurationResult =
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let status = field_map json__ "Status" DataSourceStatus.of_json in
+      let status = field_map json__ "status" DataSourceStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9641,11 +9640,11 @@ module MemberFeaturesConfigurationResult =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let additionalConfiguration =
-        field_map json__ "AdditionalConfiguration"
+        field_map json__ "additionalConfiguration"
           MemberAdditionalConfigurationResults.of_json in
-      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
-      let status = field_map json__ "Status" FeatureStatus.of_json in
-      let name = field_map json__ "Name" OrgFeature.of_json in
+      let updatedAt = field_map json__ "updatedAt" Timestamp.of_json in
+      let status = field_map json__ "status" FeatureStatus.of_json in
+      let name = field_map json__ "name" OrgFeature.of_json in
       make ?additionalConfiguration ?updatedAt ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9707,7 +9706,7 @@ module EbsSnapshot =
       make ?deviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let deviceName = field_map json__ "DeviceName" NonEmptyString.of_json in
+      let deviceName = field_map json__ "deviceName" NonEmptyString.of_json in
       make ?deviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9746,10 +9745,10 @@ module AccessKeyDetails =
       make ?userType ?userName ?principalId ?accessKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let userType = field_map json__ "UserType" String_.of_json in
-      let userName = field_map json__ "UserName" String_.of_json in
-      let principalId = field_map json__ "PrincipalId" String_.of_json in
-      let accessKeyId = field_map json__ "AccessKeyId" String_.of_json in
+      let userType = field_map json__ "userType" String_.of_json in
+      let userName = field_map json__ "userName" String_.of_json in
+      let principalId = field_map json__ "principalId" String_.of_json in
+      let accessKeyId = field_map json__ "accessKeyId" String_.of_json in
       make ?userType ?userName ?principalId ?accessKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the access keys."]
@@ -9770,7 +9769,7 @@ module EbsSnapshotDetails =
       make ?snapshotArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let snapshotArn = field_map json__ "SnapshotArn" String_.of_json in
+      let snapshotArn = field_map json__ "snapshotArn" String_.of_json in
       make ?snapshotArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9805,9 +9804,9 @@ module EbsVolumeDetails =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let skippedVolumeDetails =
-        field_map json__ "SkippedVolumeDetails" VolumeDetails.of_json in
+        field_map json__ "skippedVolumeDetails" VolumeDetails.of_json in
       let scannedVolumeDetails =
-        field_map json__ "ScannedVolumeDetails" VolumeDetails.of_json in
+        field_map json__ "scannedVolumeDetails" VolumeDetails.of_json in
       make ?skippedVolumeDetails ?scannedVolumeDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9829,7 +9828,7 @@ module Ec2ImageDetails =
       make ?imageArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let imageArn = field_map json__ "ImageArn" String_.of_json in
+      let imageArn = field_map json__ "imageArn" String_.of_json in
       make ?imageArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details about the EC2 AMI that was scanned."]
@@ -9912,17 +9911,17 @@ module EcsClusterDetails =
         ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let taskDetails = field_map json__ "TaskDetails" EcsTaskDetails.of_json in
-      let tags = field_map json__ "Tags" Tags.of_json in
+      let taskDetails = field_map json__ "taskDetails" EcsTaskDetails.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
       let runningTasksCount =
-        field_map json__ "RunningTasksCount" Integer.of_json in
+        field_map json__ "runningTasksCount" Integer.of_json in
       let registeredContainerInstancesCount =
-        field_map json__ "RegisteredContainerInstancesCount" Integer.of_json in
+        field_map json__ "registeredContainerInstancesCount" Integer.of_json in
       let activeServicesCount =
-        field_map json__ "ActiveServicesCount" Integer.of_json in
-      let status = field_map json__ "Status" String_.of_json in
-      let arn = field_map json__ "Arn" String_.of_json in
-      let name = field_map json__ "Name" String_.of_json in
+        field_map json__ "activeServicesCount" Integer.of_json in
+      let status = field_map json__ "status" String_.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
       make ?taskDetails ?tags ?runningTasksCount
         ?registeredContainerInstancesCount ?activeServicesCount ?status ?arn
         ?name ()
@@ -9969,12 +9968,12 @@ module EksClusterDetails =
       make ?createdAt ?tags ?status ?vpcId ?arn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
-      let tags = field_map json__ "Tags" Tags.of_json in
-      let status = field_map json__ "Status" String_.of_json in
-      let vpcId = field_map json__ "VpcId" String_.of_json in
-      let arn = field_map json__ "Arn" String_.of_json in
-      let name = field_map json__ "Name" String_.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let status = field_map json__ "status" String_.of_json in
+      let vpcId = field_map json__ "vpcId" String_.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
       make ?createdAt ?tags ?status ?vpcId ?arn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10095,23 +10094,23 @@ module InstanceDetails =
         ?imageDescription ?iamInstanceProfile ?availabilityZone ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let tags = field_map json__ "Tags" Tags.of_json in
-      let productCodes = field_map json__ "ProductCodes" ProductCodes.of_json in
-      let platform = field_map json__ "Platform" String_.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let productCodes = field_map json__ "productCodes" ProductCodes.of_json in
+      let platform = field_map json__ "platform" String_.of_json in
       let networkInterfaces =
-        field_map json__ "NetworkInterfaces" NetworkInterfaces.of_json in
-      let launchTime = field_map json__ "LaunchTime" String_.of_json in
-      let outpostArn = field_map json__ "OutpostArn" String_.of_json in
-      let instanceType = field_map json__ "InstanceType" String_.of_json in
-      let instanceState = field_map json__ "InstanceState" String_.of_json in
-      let instanceId = field_map json__ "InstanceId" String_.of_json in
-      let imageId = field_map json__ "ImageId" String_.of_json in
+        field_map json__ "networkInterfaces" NetworkInterfaces.of_json in
+      let launchTime = field_map json__ "launchTime" String_.of_json in
+      let outpostArn = field_map json__ "outpostArn" String_.of_json in
+      let instanceType = field_map json__ "instanceType" String_.of_json in
+      let instanceState = field_map json__ "instanceState" String_.of_json in
+      let instanceId = field_map json__ "instanceId" String_.of_json in
+      let imageId = field_map json__ "imageId" String_.of_json in
       let imageDescription =
-        field_map json__ "ImageDescription" String_.of_json in
+        field_map json__ "imageDescription" String_.of_json in
       let iamInstanceProfile =
-        field_map json__ "IamInstanceProfile" IamInstanceProfile.of_json in
+        field_map json__ "iamInstanceProfile" IamInstanceProfile.of_json in
       let availabilityZone =
-        field_map json__ "AvailabilityZone" String_.of_json in
+        field_map json__ "availabilityZone" String_.of_json in
       make ?tags ?productCodes ?platform ?networkInterfaces ?launchTime
         ?outpostArn ?instanceType ?instanceState ?instanceId ?imageId
         ?imageDescription ?iamInstanceProfile ?availabilityZone ()
@@ -10150,10 +10149,10 @@ module KubernetesDetails =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let kubernetesWorkloadDetails =
-        field_map json__ "KubernetesWorkloadDetails"
+        field_map json__ "kubernetesWorkloadDetails"
           KubernetesWorkloadDetails.of_json in
       let kubernetesUserDetails =
-        field_map json__ "KubernetesUserDetails"
+        field_map json__ "kubernetesUserDetails"
           KubernetesUserDetails.of_json in
       make ?kubernetesWorkloadDetails ?kubernetesUserDetails ()
     let to_json v = composed_to_json to_value v
@@ -10241,17 +10240,17 @@ module LambdaDetails =
         ?lastModifiedAt ?description ?functionName ?functionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let tags = field_map json__ "Tags" Tags.of_json in
-      let vpcConfig = field_map json__ "VpcConfig" VpcConfig.of_json in
-      let role = field_map json__ "Role" String_.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let vpcConfig = field_map json__ "vpcConfig" VpcConfig.of_json in
+      let role = field_map json__ "role" String_.of_json in
       let functionVersion =
-        field_map json__ "FunctionVersion" String_.of_json in
-      let revisionId = field_map json__ "RevisionId" String_.of_json in
+        field_map json__ "functionVersion" String_.of_json in
+      let revisionId = field_map json__ "revisionId" String_.of_json in
       let lastModifiedAt =
-        field_map json__ "LastModifiedAt" Timestamp.of_json in
-      let description = field_map json__ "Description" String_.of_json in
-      let functionName = field_map json__ "FunctionName" String_.of_json in
-      let functionArn = field_map json__ "FunctionArn" String_.of_json in
+        field_map json__ "lastModifiedAt" Timestamp.of_json in
+      let description = field_map json__ "description" String_.of_json in
+      let functionName = field_map json__ "functionName" String_.of_json in
+      let functionArn = field_map json__ "functionArn" String_.of_json in
       make ?tags ?vpcConfig ?role ?functionVersion ?revisionId
         ?lastModifiedAt ?description ?functionName ?functionArn ()
     let to_json v = composed_to_json to_value v
@@ -10330,15 +10329,15 @@ module RdsDbInstanceDetails =
         ?engineVersion ?engine ?dbInstanceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let tags = field_map json__ "Tags" Tags.of_json in
-      let dbiResourceId = field_map json__ "DbiResourceId" String_.of_json in
-      let dbInstanceArn = field_map json__ "DbInstanceArn" String_.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let dbiResourceId = field_map json__ "dbiResourceId" String_.of_json in
+      let dbInstanceArn = field_map json__ "dbInstanceArn" String_.of_json in
       let dbClusterIdentifier =
-        field_map json__ "DbClusterIdentifier" String_.of_json in
-      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
-      let engine = field_map json__ "Engine" String_.of_json in
+        field_map json__ "dbClusterIdentifier" String_.of_json in
+      let engineVersion = field_map json__ "engineVersion" String_.of_json in
+      let engine = field_map json__ "engine" String_.of_json in
       let dbInstanceIdentifier =
-        field_map json__ "DbInstanceIdentifier" String_.of_json in
+        field_map json__ "dbInstanceIdentifier" String_.of_json in
       make ?tags ?dbiResourceId ?dbInstanceArn ?dbClusterIdentifier
         ?engineVersion ?engine ?dbInstanceIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -10388,11 +10387,11 @@ module RdsDbUserDetails =
       make ?authMethod ?ssl ?database ?application ?user ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let authMethod = field_map json__ "AuthMethod" String_.of_json in
-      let ssl = field_map json__ "Ssl" String_.of_json in
-      let database = field_map json__ "Database" String_.of_json in
-      let application = field_map json__ "Application" String_.of_json in
-      let user = field_map json__ "User" String_.of_json in
+      let authMethod = field_map json__ "authMethod" String_.of_json in
+      let ssl = field_map json__ "ssl" String_.of_json in
+      let database = field_map json__ "database" String_.of_json in
+      let application = field_map json__ "application" String_.of_json in
+      let user = field_map json__ "user" String_.of_json in
       make ?authMethod ?ssl ?database ?application ?user ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10471,17 +10470,17 @@ module RdsLimitlessDbDetails =
         ?dbShardGroupResourceId ?dbShardGroupIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let tags = field_map json__ "Tags" Tags.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
       let dbClusterIdentifier =
-        field_map json__ "DbClusterIdentifier" String_.of_json in
-      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
-      let engine = field_map json__ "Engine" String_.of_json in
+        field_map json__ "dbClusterIdentifier" String_.of_json in
+      let engineVersion = field_map json__ "engineVersion" String_.of_json in
+      let engine = field_map json__ "engine" String_.of_json in
       let dbShardGroupArn =
-        field_map json__ "DbShardGroupArn" String_.of_json in
+        field_map json__ "dbShardGroupArn" String_.of_json in
       let dbShardGroupResourceId =
-        field_map json__ "DbShardGroupResourceId" String_.of_json in
+        field_map json__ "dbShardGroupResourceId" String_.of_json in
       let dbShardGroupIdentifier =
-        field_map json__ "DbShardGroupIdentifier" String_.of_json in
+        field_map json__ "dbShardGroupIdentifier" String_.of_json in
       make ?tags ?dbClusterIdentifier ?engineVersion ?engine ?dbShardGroupArn
         ?dbShardGroupResourceId ?dbShardGroupIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -10515,9 +10514,9 @@ module RecoveryPointDetails =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let backupVaultName =
-        field_map json__ "BackupVaultName" String_.of_json in
+        field_map json__ "backupVaultName" String_.of_json in
       let recoveryPointArn =
-        field_map json__ "RecoveryPointArn" String_.of_json in
+        field_map json__ "recoveryPointArn" String_.of_json in
       make ?backupVaultName ?recoveryPointArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details about the backup recovery point."]
@@ -10670,30 +10669,30 @@ module Action =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let rdsLoginAttemptAction =
-        field_map json__ "RdsLoginAttemptAction"
+        field_map json__ "rdsLoginAttemptAction"
           RdsLoginAttemptAction.of_json in
       let kubernetesRoleDetails =
-        field_map json__ "KubernetesRoleDetails"
+        field_map json__ "kubernetesRoleDetails"
           KubernetesRoleDetails.of_json in
       let kubernetesRoleBindingDetails =
-        field_map json__ "KubernetesRoleBindingDetails"
+        field_map json__ "kubernetesRoleBindingDetails"
           KubernetesRoleBindingDetails.of_json in
       let kubernetesPermissionCheckedDetails =
-        field_map json__ "KubernetesPermissionCheckedDetails"
+        field_map json__ "kubernetesPermissionCheckedDetails"
           KubernetesPermissionCheckedDetails.of_json in
       let kubernetesApiCallAction =
-        field_map json__ "KubernetesApiCallAction"
+        field_map json__ "kubernetesApiCallAction"
           KubernetesApiCallAction.of_json in
       let portProbeAction =
-        field_map json__ "PortProbeAction" PortProbeAction.of_json in
+        field_map json__ "portProbeAction" PortProbeAction.of_json in
       let networkConnectionAction =
-        field_map json__ "NetworkConnectionAction"
+        field_map json__ "networkConnectionAction"
           NetworkConnectionAction.of_json in
       let dnsRequestAction =
-        field_map json__ "DnsRequestAction" DnsRequestAction.of_json in
+        field_map json__ "dnsRequestAction" DnsRequestAction.of_json in
       let awsApiCallAction =
-        field_map json__ "AwsApiCallAction" AwsApiCallAction.of_json in
-      let actionType = field_map json__ "ActionType" String_.of_json in
+        field_map json__ "awsApiCallAction" AwsApiCallAction.of_json in
+      let actionType = field_map json__ "actionType" String_.of_json in
       make ?rdsLoginAttemptAction ?kubernetesRoleDetails
         ?kubernetesRoleBindingDetails ?kubernetesPermissionCheckedDetails
         ?kubernetesApiCallAction ?portProbeAction ?networkConnectionAction
@@ -10723,8 +10722,8 @@ module Detection =
       make ?sequence ?anomaly ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let sequence = field_map json__ "Sequence" Sequence.of_json in
-      let anomaly = field_map json__ "Anomaly" Anomaly.of_json in
+      let sequence = field_map json__ "sequence" Sequence.of_json in
+      let anomaly = field_map json__ "anomaly" Anomaly.of_json in
       make ?sequence ?anomaly ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the detected behavior."]
@@ -10820,16 +10819,16 @@ module EbsVolumeScanDetails =
         ?scanCompletedAt ?scanStartedAt ?scanId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let scanType = field_map json__ "ScanType" ScanType.of_json in
+      let scanType = field_map json__ "scanType" ScanType.of_json in
       let scanDetections =
-        field_map json__ "ScanDetections" ScanDetections.of_json in
-      let sources = field_map json__ "Sources" Sources.of_json in
+        field_map json__ "scanDetections" ScanDetections.of_json in
+      let sources = field_map json__ "sources" Sources.of_json in
       let triggerFindingId =
-        field_map json__ "TriggerFindingId" String_.of_json in
+        field_map json__ "triggerFindingId" String_.of_json in
       let scanCompletedAt =
-        field_map json__ "ScanCompletedAt" Timestamp.of_json in
-      let scanStartedAt = field_map json__ "ScanStartedAt" Timestamp.of_json in
-      let scanId = field_map json__ "ScanId" String_.of_json in
+        field_map json__ "scanCompletedAt" Timestamp.of_json in
+      let scanStartedAt = field_map json__ "scanStartedAt" Timestamp.of_json in
+      let scanId = field_map json__ "scanId" String_.of_json in
       make ?scanType ?scanDetections ?sources ?triggerFindingId
         ?scanCompletedAt ?scanStartedAt ?scanId ()
     let to_json v = composed_to_json to_value v
@@ -10858,7 +10857,7 @@ module Evidence =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let threatIntelligenceDetails =
-        field_map json__ "ThreatIntelligenceDetails"
+        field_map json__ "threatIntelligenceDetails"
           ThreatIntelligenceDetails.of_json in
       make ?threatIntelligenceDetails ()
     let to_json v = composed_to_json to_value v
@@ -10933,15 +10932,15 @@ module MalwareScanDetails =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let uniqueThreatCount =
-        field_map json__ "UniqueThreatCount" Integer.of_json in
+        field_map json__ "uniqueThreatCount" Integer.of_json in
       let scanConfiguration =
-        field_map json__ "ScanConfiguration"
+        field_map json__ "scanConfiguration"
           MalwareProtectionFindingsScanConfiguration.of_json in
-      let scanCategory = field_map json__ "ScanCategory" ScanCategory.of_json in
+      let scanCategory = field_map json__ "scanCategory" ScanCategory.of_json in
       let scanType =
-        field_map json__ "ScanType" MalwareProtectionScanType.of_json in
-      let scanId = field_map json__ "ScanId" String_.of_json in
-      let threats = field_map json__ "Threats" Threats.of_json in
+        field_map json__ "scanType" MalwareProtectionScanType.of_json in
+      let scanId = field_map json__ "scanId" String_.of_json in
+      let threats = field_map json__ "threats" Threats.of_json in
       make ?uniqueThreatCount ?scanConfiguration ?scanCategory ?scanType
         ?scanId ?threats ()
     let to_json v = composed_to_json to_value v
@@ -10969,8 +10968,8 @@ module RuntimeDetails =
       make ?context ?process ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let context = field_map json__ "Context" RuntimeContext.of_json in
-      let process = field_map json__ "Process" ProcessDetails.of_json in
+      let context = field_map json__ "context" RuntimeContext.of_json in
+      let process = field_map json__ "process" ProcessDetails.of_json in
       make ?context ?process ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10996,8 +10995,8 @@ module ServiceAdditionalInfo =
       make ?type_ ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let type_ = field_map json__ "Type" String_.of_json in
-      let value = field_map json__ "Value" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
+      let value = field_map json__ "value" String_.of_json in
       make ?type_ ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Additional information about the generated finding."]
@@ -11032,10 +11031,10 @@ module DetectorAdditionalConfigurationResult =
       make ?updatedAt ?status ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
-      let status = field_map json__ "Status" FeatureStatus.of_json in
+      let updatedAt = field_map json__ "updatedAt" Timestamp.of_json in
+      let status = field_map json__ "status" FeatureStatus.of_json in
       let name =
-        field_map json__ "Name" FeatureAdditionalConfiguration.of_json in
+        field_map json__ "name" FeatureAdditionalConfiguration.of_json in
       make ?updatedAt ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the additional configuration."]
@@ -11057,7 +11056,7 @@ module OrganizationEbsVolumesResult =
       make ?autoEnable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let autoEnable = field_map json__ "AutoEnable" Boolean.of_json in
+      let autoEnable = field_map json__ "autoEnable" Boolean.of_json in
       make ?autoEnable ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11090,9 +11089,9 @@ module OrganizationAdditionalConfigurationResult =
       make ?autoEnable ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let autoEnable = field_map json__ "AutoEnable" OrgFeatureStatus.of_json in
+      let autoEnable = field_map json__ "autoEnable" OrgFeatureStatus.of_json in
       let name =
-        field_map json__ "Name" OrgFeatureAdditionalConfiguration.of_json in
+        field_map json__ "name" OrgFeatureAdditionalConfiguration.of_json in
       make ?autoEnable ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11200,7 +11199,7 @@ module OrganizationKubernetesAuditLogsConfiguration =
       make ~autoEnable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let autoEnable = field_map_exn json__ "AutoEnable" Boolean.of_json in
+      let autoEnable = field_map_exn json__ "autoEnable" Boolean.of_json in
       make ~autoEnable ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Organization-wide Kubernetes audit logs configuration."]
@@ -11225,7 +11224,7 @@ module OrganizationScanEc2InstanceWithFindings =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let ebsVolumes =
-        field_map json__ "EbsVolumes" OrganizationEbsVolumes.of_json in
+        field_map json__ "ebsVolumes" OrganizationEbsVolumes.of_json in
       make ?ebsVolumes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11277,7 +11276,7 @@ module KubernetesAuditLogsConfiguration =
       make ~enable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let enable = field_map_exn json__ "Enable" Boolean.of_json in
+      let enable = field_map_exn json__ "enable" Boolean.of_json in
       make ~enable ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11300,7 +11299,7 @@ module ScanEc2InstanceWithFindings =
       make ?ebsVolumes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let ebsVolumes = field_map json__ "EbsVolumes" Boolean.of_json in
+      let ebsVolumes = field_map json__ "ebsVolumes" Boolean.of_json in
       make ?ebsVolumes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11354,7 +11353,7 @@ module ScanCondition =
       make ~mapEquals ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let mapEquals = field_map_exn json__ "MapEquals" MapEquals.of_json in
+      let mapEquals = field_map_exn json__ "mapEquals" MapEquals.of_json in
       make ~mapEquals ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the condition."]
@@ -11565,21 +11564,21 @@ module Condition =
         ?neq ?eq ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let notMatches = field_map json__ "NotMatches" NotMatches.of_json in
-      let matches = field_map json__ "Matches" Matches.of_json in
-      let lessThanOrEqual = field_map json__ "LessThanOrEqual" Long.of_json in
-      let lessThan = field_map json__ "LessThan" Long.of_json in
+      let notMatches = field_map json__ "notMatches" NotMatches.of_json in
+      let matches = field_map json__ "matches" Matches.of_json in
+      let lessThanOrEqual = field_map json__ "lessThanOrEqual" Long.of_json in
+      let lessThan = field_map json__ "lessThan" Long.of_json in
       let greaterThanOrEqual =
-        field_map json__ "GreaterThanOrEqual" Long.of_json in
-      let greaterThan = field_map json__ "GreaterThan" Long.of_json in
-      let notEquals = field_map json__ "NotEquals" NotEquals.of_json in
-      let equals = field_map json__ "Equals" Equals.of_json in
-      let lte = field_map json__ "Lte" Integer.of_json in
-      let lt = field_map json__ "Lt" Integer.of_json in
-      let gte = field_map json__ "Gte" Integer.of_json in
-      let gt = field_map json__ "Gt" Integer.of_json in
-      let neq = field_map json__ "Neq" Neq.of_json in
-      let eq = field_map json__ "Eq" Eq.of_json in
+        field_map json__ "greaterThanOrEqual" Long.of_json in
+      let greaterThan = field_map json__ "greaterThan" Long.of_json in
+      let notEquals = field_map json__ "notEquals" NotEquals.of_json in
+      let equals = field_map json__ "equals" Equals.of_json in
+      let lte = field_map json__ "lte" Integer.of_json in
+      let lt = field_map json__ "lt" Integer.of_json in
+      let gte = field_map json__ "gte" Integer.of_json in
+      let gt = field_map json__ "gt" Integer.of_json in
+      let neq = field_map json__ "neq" Neq.of_json in
+      let eq = field_map json__ "eq" Eq.of_json in
       make ?notMatches ?matches ?lessThanOrEqual ?lessThan
         ?greaterThanOrEqual ?greaterThan ?notEquals ?equals ?lte ?lt ?gte ?gt
         ?neq ?eq ()
@@ -11885,10 +11884,9 @@ module ListMalwareScansFilterCriterion =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let filterCondition =
-        field_map json__ "FilterCondition" FilterCondition.of_json in
+        field_map json__ "filterCondition" FilterCondition.of_json in
       let listMalwareScansCriterionKey =
-        field_map json__ "ListMalwareScansCriterionKey"
-          ListMalwareScansCriterionKey.of_json in
+        field_map json__ "criterionKey" ListMalwareScansCriterionKey.of_json in
       make ?filterCondition ?listMalwareScansCriterionKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11950,15 +11948,15 @@ module CoverageResourceDetails =
         ?eksClusterDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
       let ec2InstanceDetails =
-        field_map json__ "Ec2InstanceDetails"
+        field_map json__ "ec2InstanceDetails"
           CoverageEc2InstanceDetails.of_json in
       let ecsClusterDetails =
-        field_map json__ "EcsClusterDetails"
+        field_map json__ "ecsClusterDetails"
           CoverageEcsClusterDetails.of_json in
       let eksClusterDetails =
-        field_map json__ "EksClusterDetails"
+        field_map json__ "eksClusterDetails"
           CoverageEksClusterDetails.of_json in
       make ?resourceType ?ec2InstanceDetails ?ecsClusterDetails
         ?eksClusterDetails ()
@@ -12019,9 +12017,9 @@ module CoverageFilterCriterion =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let filterCondition =
-        field_map json__ "FilterCondition" CoverageFilterCondition.of_json in
+        field_map json__ "filterCondition" CoverageFilterCondition.of_json in
       let criterionKey =
-        field_map json__ "CriterionKey" CoverageFilterCriterionKey.of_json in
+        field_map json__ "criterionKey" CoverageFilterCriterionKey.of_json in
       make ?filterCondition ?criterionKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12047,8 +12045,8 @@ module UsageAccountResult =
       make ?total ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let total = field_map json__ "Total" Total.of_json in
-      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let total = field_map json__ "total" Total.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
       make ?total ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12075,8 +12073,8 @@ module UsageDataSourceResult =
       make ?total ?dataSource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let total = field_map json__ "Total" Total.of_json in
-      let dataSource = field_map json__ "DataSource" DataSource.of_json in
+      let total = field_map json__ "total" Total.of_json in
+      let dataSource = field_map json__ "dataSource" DataSource.of_json in
       make ?total ?dataSource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12101,8 +12099,8 @@ module UsageFeatureResult =
       make ?total ?feature ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let total = field_map json__ "Total" Total.of_json in
-      let feature = field_map json__ "Feature" UsageFeature.of_json in
+      let total = field_map json__ "total" Total.of_json in
+      let feature = field_map json__ "feature" UsageFeature.of_json in
       make ?total ?feature ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12129,8 +12127,8 @@ module UsageResourceResult =
       make ?total ?resource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let total = field_map json__ "Total" Total.of_json in
-      let resource = field_map json__ "Resource" String_.of_json in
+      let total = field_map json__ "total" Total.of_json in
+      let resource = field_map json__ "resource" String_.of_json in
       make ?total ?resource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12161,8 +12159,8 @@ module UsageTopAccountsResult =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let accounts =
-        field_map json__ "Accounts" UsageTopAccountsByFeatureList.of_json in
-      let feature = field_map json__ "Feature" UsageFeature.of_json in
+        field_map json__ "accounts" UsageTopAccountsByFeatureList.of_json in
+      let feature = field_map json__ "feature" UsageFeature.of_json in
       make ?accounts ?feature ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12241,15 +12239,15 @@ module DataSourcesFreeTrial =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let malwareProtection =
-        field_map json__ "MalwareProtection"
+        field_map json__ "malwareProtection"
           MalwareProtectionDataSourceFreeTrial.of_json in
       let kubernetes =
-        field_map json__ "Kubernetes" KubernetesDataSourceFreeTrial.of_json in
-      let s3Logs = field_map json__ "S3Logs" DataSourceFreeTrial.of_json in
-      let flowLogs = field_map json__ "FlowLogs" DataSourceFreeTrial.of_json in
-      let dnsLogs = field_map json__ "DnsLogs" DataSourceFreeTrial.of_json in
+        field_map json__ "kubernetes" KubernetesDataSourceFreeTrial.of_json in
+      let s3Logs = field_map json__ "s3Logs" DataSourceFreeTrial.of_json in
+      let flowLogs = field_map json__ "flowLogs" DataSourceFreeTrial.of_json in
+      let dnsLogs = field_map json__ "dnsLogs" DataSourceFreeTrial.of_json in
       let cloudTrail =
-        field_map json__ "CloudTrail" DataSourceFreeTrial.of_json in
+        field_map json__ "cloudTrail" DataSourceFreeTrial.of_json in
       make ?malwareProtection ?kubernetes ?s3Logs ?flowLogs ?dnsLogs
         ?cloudTrail ()
     let to_json v = composed_to_json to_value v
@@ -12391,18 +12389,18 @@ module DataSourceConfigurationsResult =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let malwareProtection =
-        field_map json__ "MalwareProtection"
+        field_map json__ "malwareProtection"
           MalwareProtectionConfigurationResult.of_json in
       let kubernetes =
-        field_map json__ "Kubernetes" KubernetesConfigurationResult.of_json in
+        field_map json__ "kubernetes" KubernetesConfigurationResult.of_json in
       let s3Logs =
-        field_map json__ "S3Logs" S3LogsConfigurationResult.of_json in
+        field_map json__ "s3Logs" S3LogsConfigurationResult.of_json in
       let flowLogs =
-        field_map json__ "FlowLogs" FlowLogsConfigurationResult.of_json in
+        field_map json__ "flowLogs" FlowLogsConfigurationResult.of_json in
       let dNSLogs =
-        field_map json__ "DNSLogs" DNSLogsConfigurationResult.of_json in
+        field_map json__ "dnsLogs" DNSLogsConfigurationResult.of_json in
       let cloudTrail =
-        field_map json__ "CloudTrail" CloudTrailConfigurationResult.of_json in
+        field_map json__ "cloudTrail" CloudTrailConfigurationResult.of_json in
       make ?malwareProtection ?kubernetes ?s3Logs ?flowLogs ?dNSLogs
         ?cloudTrail ()
     let to_json v = composed_to_json to_value v
@@ -12485,11 +12483,11 @@ module ScanResultThreat =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let itemDetails =
-        field_map json__ "ItemDetails" ItemDetailsList.of_json in
-      let hash = field_map json__ "Hash" NonEmptyString.of_json in
-      let count = field_map json__ "Count" PositiveLong.of_json in
-      let source = field_map json__ "Source" DetectionSource.of_json in
-      let name = field_map json__ "Name" NonEmptyString.of_json in
+        field_map json__ "itemDetails" ItemDetailsList.of_json in
+      let hash = field_map json__ "hash" NonEmptyString.of_json in
+      let count = field_map json__ "count" PositiveLong.of_json in
+      let source = field_map json__ "source" DetectionSource.of_json in
+      let name = field_map json__ "name" NonEmptyString.of_json in
       make ?itemDetails ?hash ?count ?source ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12591,8 +12589,8 @@ module ScannedResourceDetails =
       make ?ebsSnapshot ?ebsVolume ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let ebsSnapshot = field_map json__ "EbsSnapshot" EbsSnapshot.of_json in
-      let ebsVolume = field_map json__ "EbsVolume" VolumeDetail.of_json in
+      let ebsSnapshot = field_map json__ "ebsSnapshot" EbsSnapshot.of_json in
+      let ebsVolume = field_map json__ "ebsVolume" VolumeDetail.of_json in
       make ?ebsSnapshot ?ebsVolume ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12631,10 +12629,10 @@ module AccountStatistics =
       make ?totalFindings ?lastGeneratedAt ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let totalFindings = field_map json__ "TotalFindings" Integer.of_json in
+      let totalFindings = field_map json__ "totalFindings" Integer.of_json in
       let lastGeneratedAt =
-        field_map json__ "LastGeneratedAt" Timestamp.of_json in
-      let accountId = field_map json__ "AccountId" String_.of_json in
+        field_map json__ "lastGeneratedAt" Timestamp.of_json in
+      let accountId = field_map json__ "accountId" String_.of_json in
       make ?totalFindings ?lastGeneratedAt ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12679,11 +12677,11 @@ module DateStatistics =
       make ?totalFindings ?severity ?lastGeneratedAt ?date ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let totalFindings = field_map json__ "TotalFindings" Integer.of_json in
-      let severity = field_map json__ "Severity" Double.of_json in
+      let totalFindings = field_map json__ "totalFindings" Integer.of_json in
+      let severity = field_map json__ "severity" Double.of_json in
       let lastGeneratedAt =
-        field_map json__ "LastGeneratedAt" Timestamp.of_json in
-      let date = field_map json__ "Date" Timestamp.of_json in
+        field_map json__ "lastGeneratedAt" Timestamp.of_json in
+      let date = field_map json__ "date" Timestamp.of_json in
       make ?totalFindings ?severity ?lastGeneratedAt ?date ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12721,10 +12719,10 @@ module FindingTypeStatistics =
       make ?totalFindings ?lastGeneratedAt ?findingType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let totalFindings = field_map json__ "TotalFindings" Integer.of_json in
+      let totalFindings = field_map json__ "totalFindings" Integer.of_json in
       let lastGeneratedAt =
-        field_map json__ "LastGeneratedAt" Timestamp.of_json in
-      let findingType = field_map json__ "FindingType" String_.of_json in
+        field_map json__ "lastGeneratedAt" Timestamp.of_json in
+      let findingType = field_map json__ "findingType" String_.of_json in
       make ?totalFindings ?lastGeneratedAt ?findingType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12783,12 +12781,12 @@ module ResourceStatistics =
         ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let totalFindings = field_map json__ "TotalFindings" Integer.of_json in
-      let resourceType = field_map json__ "ResourceType" String_.of_json in
-      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      let totalFindings = field_map json__ "totalFindings" Integer.of_json in
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
       let lastGeneratedAt =
-        field_map json__ "LastGeneratedAt" Timestamp.of_json in
-      let accountId = field_map json__ "AccountId" String_.of_json in
+        field_map json__ "lastGeneratedAt" Timestamp.of_json in
+      let accountId = field_map json__ "accountId" String_.of_json in
       make ?totalFindings ?resourceType ?resourceId ?lastGeneratedAt
         ?accountId ()
     let to_json v = composed_to_json to_value v
@@ -12828,10 +12826,10 @@ module SeverityStatistics =
       make ?totalFindings ?severity ?lastGeneratedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let totalFindings = field_map json__ "TotalFindings" Integer.of_json in
-      let severity = field_map json__ "Severity" Double.of_json in
+      let totalFindings = field_map json__ "totalFindings" Integer.of_json in
+      let severity = field_map json__ "severity" Double.of_json in
       let lastGeneratedAt =
-        field_map json__ "LastGeneratedAt" Timestamp.of_json in
+        field_map json__ "lastGeneratedAt" Timestamp.of_json in
       make ?totalFindings ?severity ?lastGeneratedAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about severity level for each finding type."]
@@ -13008,37 +13006,37 @@ module Resource =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let recoveryPointDetails =
-        field_map json__ "RecoveryPointDetails" RecoveryPointDetails.of_json in
+        field_map json__ "recoveryPointDetails" RecoveryPointDetails.of_json in
       let ec2ImageDetails =
-        field_map json__ "Ec2ImageDetails" Ec2ImageDetails.of_json in
+        field_map json__ "ec2ImageDetails" Ec2ImageDetails.of_json in
       let ebsSnapshotDetails =
-        field_map json__ "EbsSnapshotDetails" EbsSnapshotDetails.of_json in
+        field_map json__ "ebsSnapshotDetails" EbsSnapshotDetails.of_json in
       let rdsDbUserDetails =
-        field_map json__ "RdsDbUserDetails" RdsDbUserDetails.of_json in
+        field_map json__ "rdsDbUserDetails" RdsDbUserDetails.of_json in
       let rdsLimitlessDbDetails =
-        field_map json__ "RdsLimitlessDbDetails"
+        field_map json__ "rdsLimitlessDbDetails"
           RdsLimitlessDbDetails.of_json in
       let rdsDbInstanceDetails =
-        field_map json__ "RdsDbInstanceDetails" RdsDbInstanceDetails.of_json in
+        field_map json__ "rdsDbInstanceDetails" RdsDbInstanceDetails.of_json in
       let lambdaDetails =
-        field_map json__ "LambdaDetails" LambdaDetails.of_json in
+        field_map json__ "lambdaDetails" LambdaDetails.of_json in
       let containerDetails =
-        field_map json__ "ContainerDetails" Container.of_json in
+        field_map json__ "containerDetails" Container.of_json in
       let ecsClusterDetails =
-        field_map json__ "EcsClusterDetails" EcsClusterDetails.of_json in
+        field_map json__ "ecsClusterDetails" EcsClusterDetails.of_json in
       let ebsVolumeDetails =
-        field_map json__ "EbsVolumeDetails" EbsVolumeDetails.of_json in
-      let resourceType = field_map json__ "ResourceType" String_.of_json in
+        field_map json__ "ebsVolumeDetails" EbsVolumeDetails.of_json in
+      let resourceType = field_map json__ "resourceType" String_.of_json in
       let kubernetesDetails =
-        field_map json__ "KubernetesDetails" KubernetesDetails.of_json in
+        field_map json__ "kubernetesDetails" KubernetesDetails.of_json in
       let eksClusterDetails =
-        field_map json__ "EksClusterDetails" EksClusterDetails.of_json in
+        field_map json__ "eksClusterDetails" EksClusterDetails.of_json in
       let instanceDetails =
-        field_map json__ "InstanceDetails" InstanceDetails.of_json in
+        field_map json__ "instanceDetails" InstanceDetails.of_json in
       let s3BucketDetails =
-        field_map json__ "S3BucketDetails" S3BucketDetails.of_json in
+        field_map json__ "s3BucketDetails" S3BucketDetails.of_json in
       let accessKeyDetails =
-        field_map json__ "AccessKeyDetails" AccessKeyDetails.of_json in
+        field_map json__ "accessKeyDetails" AccessKeyDetails.of_json in
       make ?recoveryPointDetails ?ec2ImageDetails ?ebsSnapshotDetails
         ?rdsDbUserDetails ?rdsLimitlessDbDetails ?rdsDbInstanceDetails
         ?lambdaDetails ?containerDetails ?ecsClusterDetails ?ebsVolumeDetails
@@ -13194,25 +13192,25 @@ module Service =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let malwareScanDetails =
-        field_map json__ "MalwareScanDetails" MalwareScanDetails.of_json in
-      let detection = field_map json__ "Detection" Detection.of_json in
+        field_map json__ "malwareScanDetails" MalwareScanDetails.of_json in
+      let detection = field_map json__ "detection" Detection.of_json in
       let runtimeDetails =
-        field_map json__ "RuntimeDetails" RuntimeDetails.of_json in
+        field_map json__ "runtimeDetails" RuntimeDetails.of_json in
       let ebsVolumeScanDetails =
-        field_map json__ "EbsVolumeScanDetails" EbsVolumeScanDetails.of_json in
-      let featureName = field_map json__ "FeatureName" String_.of_json in
+        field_map json__ "ebsVolumeScanDetails" EbsVolumeScanDetails.of_json in
+      let featureName = field_map json__ "featureName" String_.of_json in
       let additionalInfo =
-        field_map json__ "AdditionalInfo" ServiceAdditionalInfo.of_json in
-      let userFeedback = field_map json__ "UserFeedback" String_.of_json in
-      let serviceName = field_map json__ "ServiceName" String_.of_json in
-      let resourceRole = field_map json__ "ResourceRole" String_.of_json in
-      let eventLastSeen = field_map json__ "EventLastSeen" String_.of_json in
-      let eventFirstSeen = field_map json__ "EventFirstSeen" String_.of_json in
-      let detectorId = field_map json__ "DetectorId" DetectorId.of_json in
-      let count = field_map json__ "Count" Integer.of_json in
-      let archived = field_map json__ "Archived" Boolean.of_json in
-      let evidence = field_map json__ "Evidence" Evidence.of_json in
-      let action = field_map json__ "Action" Action.of_json in
+        field_map json__ "additionalInfo" ServiceAdditionalInfo.of_json in
+      let userFeedback = field_map json__ "userFeedback" String_.of_json in
+      let serviceName = field_map json__ "serviceName" String_.of_json in
+      let resourceRole = field_map json__ "resourceRole" String_.of_json in
+      let eventLastSeen = field_map json__ "eventLastSeen" String_.of_json in
+      let eventFirstSeen = field_map json__ "eventFirstSeen" String_.of_json in
+      let detectorId = field_map json__ "detectorId" DetectorId.of_json in
+      let count = field_map json__ "count" Integer.of_json in
+      let archived = field_map json__ "archived" Boolean.of_json in
+      let evidence = field_map json__ "evidence" Evidence.of_json in
+      let action = field_map json__ "action" Action.of_json in
       make ?malwareScanDetails ?detection ?runtimeDetails
         ?ebsVolumeScanDetails ?featureName ?additionalInfo ?userFeedback
         ?serviceName ?resourceRole ?eventLastSeen ?eventFirstSeen ?detectorId
@@ -13319,7 +13317,7 @@ module OrganizationKubernetesAuditLogsConfigurationResult =
       make ?autoEnable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let autoEnable = field_map json__ "AutoEnable" Boolean.of_json in
+      let autoEnable = field_map json__ "autoEnable" Boolean.of_json in
       make ?autoEnable ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13345,7 +13343,7 @@ module OrganizationScanEc2InstanceWithFindingsResult =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let ebsVolumes =
-        field_map json__ "EbsVolumes" OrganizationEbsVolumesResult.of_json in
+        field_map json__ "ebsVolumes" OrganizationEbsVolumesResult.of_json in
       make ?ebsVolumes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13397,7 +13395,7 @@ module ResourceDetails =
       make ?instanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let instanceArn = field_map json__ "InstanceArn" InstanceArn.of_json in
+      let instanceArn = field_map json__ "instanceArn" InstanceArn.of_json in
       make ?instanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13419,7 +13417,7 @@ module ScanResultDetails =
       make ?scanResult ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let scanResult = field_map json__ "ScanResult" ScanResult.of_json in
+      let scanResult = field_map json__ "scanResult" ScanResult.of_json in
       make ?scanResult ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the result of the scan."]
@@ -13490,10 +13488,10 @@ module TriggerDetails =
       make ?triggerType ?description ?guardDutyFindingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let triggerType = field_map json__ "TriggerType" TriggerType.of_json in
-      let description = field_map json__ "Description" NonEmptyString.of_json in
+      let triggerType = field_map json__ "triggerType" TriggerType.of_json in
+      let description = field_map json__ "description" NonEmptyString.of_json in
       let guardDutyFindingId =
-        field_map json__ "GuardDutyFindingId" NonEmptyString.of_json in
+        field_map json__ "guardDutyFindingId" NonEmptyString.of_json in
       make ?triggerType ?description ?guardDutyFindingId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the reason the scan was triggered."]
@@ -13526,8 +13524,8 @@ module FilterCriterion =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let filterCondition =
-        field_map json__ "FilterCondition" FilterCondition.of_json in
-      let criterionKey = field_map json__ "CriterionKey" CriterionKey.of_json in
+        field_map json__ "filterCondition" FilterCondition.of_json in
+      let criterionKey = field_map json__ "criterionKey" CriterionKey.of_json in
       make ?filterCondition ?criterionKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13556,7 +13554,7 @@ module OrganizationKubernetesConfiguration =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let auditLogs =
-        field_map_exn json__ "AuditLogs"
+        field_map_exn json__ "auditLogs"
           OrganizationKubernetesAuditLogsConfiguration.of_json in
       make ~auditLogs ()
     let to_json v = composed_to_json to_value v
@@ -13586,7 +13584,7 @@ module OrganizationMalwareProtectionConfiguration =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let scanEc2InstanceWithFindings =
-        field_map json__ "ScanEc2InstanceWithFindings"
+        field_map json__ "scanEc2InstanceWithFindings"
           OrganizationScanEc2InstanceWithFindings.of_json in
       make ?scanEc2InstanceWithFindings ()
     let to_json v = composed_to_json to_value v
@@ -13611,7 +13609,7 @@ module OrganizationS3LogsConfiguration =
       make ~autoEnable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let autoEnable = field_map_exn json__ "AutoEnable" Boolean.of_json in
+      let autoEnable = field_map_exn json__ "autoEnable" Boolean.of_json in
       make ~autoEnable ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13655,10 +13653,10 @@ module OrganizationFeatureConfiguration =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let additionalConfiguration =
-        field_map json__ "AdditionalConfiguration"
+        field_map json__ "additionalConfiguration"
           OrganizationAdditionalConfigurations.of_json in
-      let autoEnable = field_map json__ "AutoEnable" OrgFeatureStatus.of_json in
-      let name = field_map json__ "Name" OrgFeature.of_json in
+      let autoEnable = field_map json__ "autoEnable" OrgFeatureStatus.of_json in
+      let name = field_map json__ "name" OrgFeature.of_json in
       make ?additionalConfiguration ?autoEnable ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13685,8 +13683,8 @@ module UnprocessedAccount =
       make ?result ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let result = field_map json__ "Result" String_.of_json in
-      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let result = field_map json__ "result" String_.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
       make ?result ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13712,7 +13710,7 @@ module KubernetesConfiguration =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let auditLogs =
-        field_map_exn json__ "AuditLogs"
+        field_map_exn json__ "auditLogs"
           KubernetesAuditLogsConfiguration.of_json in
       make ~auditLogs ()
     let to_json v = composed_to_json to_value v
@@ -13741,7 +13739,7 @@ module MalwareProtectionConfiguration =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let scanEc2InstanceWithFindings =
-        field_map json__ "ScanEc2InstanceWithFindings"
+        field_map json__ "scanEc2InstanceWithFindings"
           ScanEc2InstanceWithFindings.of_json in
       make ?scanEc2InstanceWithFindings ()
     let to_json v = composed_to_json to_value v
@@ -13764,7 +13762,7 @@ module S3LogsConfiguration =
       make ~enable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let enable = field_map_exn json__ "Enable" Boolean.of_json in
+      let enable = field_map_exn json__ "enable" Boolean.of_json in
       make ~enable ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13803,10 +13801,10 @@ module MemberFeaturesConfiguration =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let additionalConfiguration =
-        field_map json__ "AdditionalConfiguration"
+        field_map json__ "additionalConfiguration"
           MemberAdditionalConfigurations.of_json in
-      let status = field_map json__ "Status" FeatureStatus.of_json in
-      let name = field_map json__ "Name" OrgFeature.of_json in
+      let status = field_map json__ "status" FeatureStatus.of_json in
+      let name = field_map json__ "name" OrgFeature.of_json in
       make ?additionalConfiguration ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13864,7 +13862,7 @@ module MalwareProtectionPlanTaggingAction =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let status =
-        field_map json__ "Status"
+        field_map json__ "status"
           MalwareProtectionPlanTaggingActionStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
@@ -13892,7 +13890,7 @@ module UpdateS3BucketResource =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let objectPrefixes =
-        field_map json__ "ObjectPrefixes"
+        field_map json__ "objectPrefixes"
           MalwareProtectionPlanObjectPrefixesList.of_json in
       make ?objectPrefixes ()
     let to_json v = composed_to_json to_value v
@@ -13980,10 +13978,10 @@ module DetectorFeatureConfiguration =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let additionalConfiguration =
-        field_map json__ "AdditionalConfiguration"
+        field_map json__ "additionalConfiguration"
           DetectorAdditionalConfigurations.of_json in
-      let status = field_map json__ "Status" FeatureStatus.of_json in
-      let name = field_map json__ "Name" DetectorFeature.of_json in
+      let status = field_map json__ "status" FeatureStatus.of_json in
+      let name = field_map json__ "name" DetectorFeature.of_json in
       make ?additionalConfiguration ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14009,7 +14007,7 @@ module RecoveryPoint =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let backupVaultName =
-        field_map_exn json__ "BackupVaultName" String_.of_json in
+        field_map_exn json__ "backupVaultName" String_.of_json in
       make ~backupVaultName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14046,10 +14044,10 @@ module Destination =
       make ?status ?destinationType ?destinationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let status = field_map json__ "Status" PublishingStatus.of_json in
+      let status = field_map json__ "status" PublishingStatus.of_json in
       let destinationType =
-        field_map json__ "DestinationType" DestinationType.of_json in
-      let destinationId = field_map json__ "DestinationId" String_.of_json in
+        field_map json__ "destinationType" DestinationType.of_json in
+      let destinationId = field_map json__ "destinationId" String_.of_json in
       make ?status ?destinationType ?destinationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14079,8 +14077,8 @@ module AdminAccount =
       make ?adminStatus ?adminAccountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let adminStatus = field_map json__ "AdminStatus" AdminStatus.of_json in
-      let adminAccountId = field_map json__ "AdminAccountId" String_.of_json in
+      let adminStatus = field_map json__ "adminStatus" AdminStatus.of_json in
+      let adminAccountId = field_map json__ "adminAccountId" String_.of_json in
       make ?adminStatus ?adminAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14159,15 +14157,15 @@ module Member =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let administratorId =
-        field_map json__ "AdministratorId" String_.of_json in
-      let updatedAt = field_map json__ "UpdatedAt" String_.of_json in
-      let invitedAt = field_map json__ "InvitedAt" String_.of_json in
+        field_map json__ "administratorId" String_.of_json in
+      let updatedAt = field_map json__ "updatedAt" String_.of_json in
+      let invitedAt = field_map json__ "invitedAt" String_.of_json in
       let relationshipStatus =
-        field_map json__ "RelationshipStatus" String_.of_json in
-      let email = field_map json__ "Email" Email.of_json in
-      let masterId = field_map json__ "MasterId" String_.of_json in
-      let detectorId = field_map json__ "DetectorId" DetectorId.of_json in
-      let accountId = field_map json__ "AccountId" AccountId.of_json in
+        field_map json__ "relationshipStatus" String_.of_json in
+      let email = field_map json__ "email" Email.of_json in
+      let masterId = field_map json__ "masterId" String_.of_json in
+      let detectorId = field_map json__ "detectorId" DetectorId.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
       make ?administratorId ?updatedAt ?invitedAt ?relationshipStatus ?email
         ?masterId ?detectorId ?accountId ()
     let to_json v = composed_to_json to_value v
@@ -14264,18 +14262,18 @@ module MalwareScan =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let scanCompletedAt =
-        field_map json__ "ScanCompletedAt" Timestamp.of_json in
-      let scanStartedAt = field_map json__ "ScanStartedAt" Timestamp.of_json in
+        field_map json__ "scanCompletedAt" Timestamp.of_json in
+      let scanStartedAt = field_map json__ "scanStartedAt" Timestamp.of_json in
       let scanType =
-        field_map json__ "ScanType" MalwareProtectionScanType.of_json in
+        field_map json__ "scanType" MalwareProtectionScanType.of_json in
       let scanResultStatus =
-        field_map json__ "ScanResultStatus" ScanResultStatus.of_json in
+        field_map json__ "scanResultStatus" ScanResultStatus.of_json in
       let scanStatus =
-        field_map json__ "ScanStatus" MalwareProtectionScanStatus.of_json in
-      let scanId = field_map json__ "ScanId" NonEmptyString.of_json in
+        field_map json__ "scanStatus" MalwareProtectionScanStatus.of_json in
+      let scanId = field_map json__ "scanId" NonEmptyString.of_json in
       let resourceType =
-        field_map json__ "ResourceType" MalwareProtectionResourceType.of_json in
-      let resourceArn = field_map json__ "ResourceArn" NonEmptyString.of_json in
+        field_map json__ "resourceType" MalwareProtectionResourceType.of_json in
+      let resourceArn = field_map json__ "resourceArn" NonEmptyString.of_json in
       make ?scanCompletedAt ?scanStartedAt ?scanType ?scanResultStatus
         ?scanStatus ?scanId ?resourceType ?resourceArn ()
     let to_json v = composed_to_json to_value v
@@ -14353,7 +14351,7 @@ module MalwareProtectionPlanSummary =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let malwareProtectionPlanId =
-        field_map json__ "MalwareProtectionPlanId" String_.of_json in
+        field_map json__ "malwareProtectionPlanId" String_.of_json in
       make ?malwareProtectionPlanId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the Malware Protection plan resource."]
@@ -14399,11 +14397,11 @@ module Invitation =
       make ?invitedAt ?relationshipStatus ?invitationId ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let invitedAt = field_map json__ "InvitedAt" String_.of_json in
+      let invitedAt = field_map json__ "invitedAt" String_.of_json in
       let relationshipStatus =
-        field_map json__ "RelationshipStatus" String_.of_json in
-      let invitationId = field_map json__ "InvitationId" String_.of_json in
-      let accountId = field_map json__ "AccountId" AccountId.of_json in
+        field_map json__ "relationshipStatus" String_.of_json in
+      let invitationId = field_map json__ "invitationId" String_.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
       make ?invitedAt ?relationshipStatus ?invitationId ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14497,15 +14495,15 @@ module CoverageResource =
         ?detectorId ?resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
-      let issue = field_map json__ "Issue" String_.of_json in
+      let updatedAt = field_map json__ "updatedAt" Timestamp.of_json in
+      let issue = field_map json__ "issue" String_.of_json in
       let coverageStatus =
-        field_map json__ "CoverageStatus" CoverageStatus.of_json in
+        field_map json__ "coverageStatus" CoverageStatus.of_json in
       let resourceDetails =
-        field_map json__ "ResourceDetails" CoverageResourceDetails.of_json in
-      let accountId = field_map json__ "AccountId" AccountId.of_json in
-      let detectorId = field_map json__ "DetectorId" DetectorId.of_json in
-      let resourceId = field_map json__ "ResourceId" String_.of_json in
+        field_map json__ "resourceDetails" CoverageResourceDetails.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
+      let detectorId = field_map json__ "detectorId" DetectorId.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
       make ?updatedAt ?issue ?coverageStatus ?resourceDetails ?accountId
         ?detectorId ?resourceId ()
     let to_json v = composed_to_json to_value v
@@ -14881,11 +14879,11 @@ module AccountFreeTrialInfo =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let features =
-        field_map json__ "Features"
+        field_map json__ "features"
           FreeTrialFeatureConfigurationsResults.of_json in
       let dataSources =
-        field_map json__ "DataSources" DataSourcesFreeTrial.of_json in
-      let accountId = field_map json__ "AccountId" String_.of_json in
+        field_map json__ "dataSources" DataSourcesFreeTrial.of_json in
+      let accountId = field_map json__ "accountId" String_.of_json in
       make ?features ?dataSources ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14955,16 +14953,16 @@ module OrganizationStatistics =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let countByFeature =
-        field_map json__ "CountByFeature"
+        field_map json__ "countByFeature"
           OrganizationFeatureStatisticsResults.of_json in
       let enabledAccountsCount =
-        field_map json__ "EnabledAccountsCount" Integer.of_json in
+        field_map json__ "enabledAccountsCount" Integer.of_json in
       let activeAccountsCount =
-        field_map json__ "ActiveAccountsCount" Integer.of_json in
+        field_map json__ "activeAccountsCount" Integer.of_json in
       let memberAccountsCount =
-        field_map json__ "MemberAccountsCount" Integer.of_json in
+        field_map json__ "memberAccountsCount" Integer.of_json in
       let totalAccountsCount =
-        field_map json__ "TotalAccountsCount" Integer.of_json in
+        field_map json__ "totalAccountsCount" Integer.of_json in
       make ?countByFeature ?enabledAccountsCount ?activeAccountsCount
         ?memberAccountsCount ?totalAccountsCount ()
     let to_json v = composed_to_json to_value v
@@ -15008,11 +15006,11 @@ module MemberDataSourceConfiguration =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let features =
-        field_map json__ "Features"
+        field_map json__ "features"
           MemberFeaturesConfigurationsResults.of_json in
       let dataSources =
-        field_map json__ "DataSources" DataSourceConfigurationsResult.of_json in
-      let accountId = field_map json__ "AccountId" AccountId.of_json in
+        field_map json__ "dataSources" DataSourceConfigurationsResult.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
       make ?features ?dataSources ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15066,7 +15064,7 @@ module ScanConfigurationRecoveryPoint =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let backupVaultName =
-        field_map json__ "BackupVaultName" NonEmptyString.of_json in
+        field_map json__ "backupVaultName" NonEmptyString.of_json in
       make ?backupVaultName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15135,17 +15133,17 @@ module ScannedResource =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let resourceDetails =
-        field_map json__ "ResourceDetails" ScannedResourceDetails.of_json in
+        field_map json__ "resourceDetails" ScannedResourceDetails.of_json in
       let scanStatusReason =
-        field_map json__ "ScanStatusReason" ScanStatusReason.of_json in
+        field_map json__ "scanStatusReason" ScanStatusReason.of_json in
       let scannedResourceStatus =
-        field_map json__ "ScannedResourceStatus"
+        field_map json__ "scannedResourceStatus"
           MalwareProtectionScanStatus.of_json in
       let scannedResourceType =
-        field_map json__ "ScannedResourceType"
+        field_map json__ "scannedResourceType"
           MalwareProtectionResourceType.of_json in
       let scannedResourceArn =
-        field_map json__ "ScannedResourceArn" NonEmptyString.of_json in
+        field_map json__ "scannedResourceArn" NonEmptyString.of_json in
       make ?resourceDetails ?scanStatusReason ?scannedResourceStatus
         ?scannedResourceType ?scannedResourceArn ()
     let to_json v = composed_to_json to_value v
@@ -15178,9 +15176,9 @@ module CreateS3BucketResource =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let objectPrefixes =
-        field_map json__ "ObjectPrefixes"
+        field_map json__ "objectPrefixes"
           MalwareProtectionPlanObjectPrefixesList.of_json in
-      let bucketName = field_map json__ "BucketName" String_.of_json in
+      let bucketName = field_map json__ "bucketName" String_.of_json in
       make ?objectPrefixes ?bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the protected S3 bucket resource."]
@@ -15205,8 +15203,8 @@ module MalwareProtectionPlanStatusReason =
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let message = field_map json__ "Message" String_.of_json in
-      let code = field_map json__ "Code" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      let code = field_map json__ "code" String_.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15528,22 +15526,22 @@ module Finding =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let associatedAttackSequenceArn =
-        field_map json__ "AssociatedAttackSequenceArn" String_.of_json in
-      let updatedAt = field_map json__ "UpdatedAt" String_.of_json in
-      let type_ = field_map json__ "Type" FindingType.of_json in
-      let title = field_map json__ "Title" String_.of_json in
-      let severity = field_map json__ "Severity" Double.of_json in
-      let service = field_map json__ "Service" Service.of_json in
-      let schemaVersion = field_map json__ "SchemaVersion" String_.of_json in
-      let resource = field_map json__ "Resource" Resource.of_json in
-      let region = field_map json__ "Region" String_.of_json in
-      let partition = field_map json__ "Partition" String_.of_json in
-      let id = field_map json__ "Id" String_.of_json in
-      let description = field_map json__ "Description" String_.of_json in
-      let createdAt = field_map json__ "CreatedAt" String_.of_json in
-      let confidence = field_map json__ "Confidence" Double.of_json in
-      let arn = field_map json__ "Arn" String_.of_json in
-      let accountId = field_map json__ "AccountId" String_.of_json in
+        field_map json__ "associatedAttackSequenceArn" String_.of_json in
+      let updatedAt = field_map json__ "updatedAt" String_.of_json in
+      let type_ = field_map json__ "type" FindingType.of_json in
+      let title = field_map json__ "title" String_.of_json in
+      let severity = field_map json__ "severity" Double.of_json in
+      let service = field_map json__ "service" Service.of_json in
+      let schemaVersion = field_map json__ "schemaVersion" String_.of_json in
+      let resource = field_map json__ "resource" Resource.of_json in
+      let region = field_map json__ "region" String_.of_json in
+      let partition = field_map json__ "partition" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in
+      let description = field_map json__ "description" String_.of_json in
+      let createdAt = field_map json__ "createdAt" String_.of_json in
+      let confidence = field_map json__ "confidence" Double.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
+      let accountId = field_map json__ "accountId" String_.of_json in
       make ?associatedAttackSequenceArn ?updatedAt ?type_ ?title ?severity
         ?service ?schemaVersion ?resource ?region ?partition ?id ?description
         ?createdAt ?confidence ?arn ?accountId ()
@@ -15594,11 +15592,11 @@ module DetectorFeatureConfigurationResult =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let additionalConfiguration =
-        field_map json__ "AdditionalConfiguration"
+        field_map json__ "additionalConfiguration"
           DetectorAdditionalConfigurationResults.of_json in
-      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
-      let status = field_map json__ "Status" FeatureStatus.of_json in
-      let name = field_map json__ "Name" DetectorFeatureResult.of_json in
+      let updatedAt = field_map json__ "updatedAt" Timestamp.of_json in
+      let status = field_map json__ "status" FeatureStatus.of_json in
+      let name = field_map json__ "name" DetectorFeatureResult.of_json in
       make ?additionalConfiguration ?updatedAt ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15713,7 +15711,7 @@ module OrganizationKubernetesConfigurationResult =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let auditLogs =
-        field_map json__ "AuditLogs"
+        field_map json__ "auditLogs"
           OrganizationKubernetesAuditLogsConfigurationResult.of_json in
       make ?auditLogs ()
     let to_json v = composed_to_json to_value v
@@ -15743,7 +15741,7 @@ module OrganizationMalwareProtectionConfigurationResult =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let scanEc2InstanceWithFindings =
-        field_map json__ "ScanEc2InstanceWithFindings"
+        field_map json__ "scanEc2InstanceWithFindings"
           OrganizationScanEc2InstanceWithFindingsResult.of_json in
       make ?scanEc2InstanceWithFindings ()
     let to_json v = composed_to_json to_value v
@@ -15767,7 +15765,7 @@ module OrganizationS3LogsConfigurationResult =
       make ?autoEnable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let autoEnable = field_map json__ "AutoEnable" Boolean.of_json in
+      let autoEnable = field_map json__ "autoEnable" Boolean.of_json in
       make ?autoEnable ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15812,10 +15810,10 @@ module OrganizationFeatureConfigurationResult =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let additionalConfiguration =
-        field_map json__ "AdditionalConfiguration"
+        field_map json__ "additionalConfiguration"
           OrganizationAdditionalConfigurationResults.of_json in
-      let autoEnable = field_map json__ "AutoEnable" OrgFeatureStatus.of_json in
-      let name = field_map json__ "Name" OrgFeature.of_json in
+      let autoEnable = field_map json__ "autoEnable" OrgFeatureStatus.of_json in
+      let name = field_map json__ "name" OrgFeature.of_json in
       make ?additionalConfiguration ?autoEnable ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15958,27 +15956,27 @@ module Scan =
         ?detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let scanType = field_map json__ "ScanType" ScanType.of_json in
+      let scanType = field_map json__ "scanType" ScanType.of_json in
       let attachedVolumes =
-        field_map json__ "AttachedVolumes" VolumeDetails.of_json in
-      let fileCount = field_map json__ "FileCount" PositiveLong.of_json in
-      let totalBytes = field_map json__ "TotalBytes" PositiveLong.of_json in
-      let accountId = field_map json__ "AccountId" AccountId.of_json in
+        field_map json__ "attachedVolumes" VolumeDetails.of_json in
+      let fileCount = field_map json__ "fileCount" PositiveLong.of_json in
+      let totalBytes = field_map json__ "totalBytes" PositiveLong.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
       let scanResultDetails =
-        field_map json__ "ScanResultDetails" ScanResultDetails.of_json in
+        field_map json__ "scanResultDetails" ScanResultDetails.of_json in
       let resourceDetails =
-        field_map json__ "ResourceDetails" ResourceDetails.of_json in
+        field_map json__ "resourceDetails" ResourceDetails.of_json in
       let triggerDetails =
-        field_map json__ "TriggerDetails" TriggerDetails.of_json in
-      let scanEndTime = field_map json__ "ScanEndTime" Timestamp.of_json in
-      let scanStartTime = field_map json__ "ScanStartTime" Timestamp.of_json in
+        field_map json__ "triggerDetails" TriggerDetails.of_json in
+      let scanEndTime = field_map json__ "scanEndTime" Timestamp.of_json in
+      let scanStartTime = field_map json__ "scanStartTime" Timestamp.of_json in
       let failureReason =
-        field_map json__ "FailureReason" NonEmptyString.of_json in
-      let scanStatus = field_map json__ "ScanStatus" ScanStatus.of_json in
-      let scanId = field_map json__ "ScanId" NonEmptyString.of_json in
+        field_map json__ "failureReason" NonEmptyString.of_json in
+      let scanStatus = field_map json__ "scanStatus" ScanStatus.of_json in
+      let scanId = field_map json__ "scanId" NonEmptyString.of_json in
       let adminDetectorId =
-        field_map json__ "AdminDetectorId" DetectorId.of_json in
-      let detectorId = field_map json__ "DetectorId" DetectorId.of_json in
+        field_map json__ "adminDetectorId" DetectorId.of_json in
+      let detectorId = field_map json__ "detectorId" DetectorId.of_json in
       make ?scanType ?attachedVolumes ?fileCount ?totalBytes ?accountId
         ?scanResultDetails ?resourceDetails ?triggerDetails ?scanEndTime
         ?scanStartTime ?failureReason ?scanStatus ?scanId ?adminDetectorId
@@ -16042,8 +16040,8 @@ module AccountDetail =
       make ~email ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let email = field_map_exn json__ "Email" Email.of_json in
-      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      let email = field_map_exn json__ "email" Email.of_json in
+      let accountId = field_map_exn json__ "accountId" AccountId.of_json in
       make ~email ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the account."]
@@ -16066,8 +16064,8 @@ module BadRequestException =
       make ?type_ ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let type_ = field_map json__ "Type" String_.of_json in
-      let message = field_map json__ "Message" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
       make ?type_ ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A bad request exception object."]
@@ -16090,8 +16088,8 @@ module InternalServerErrorException =
       make ?type_ ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let type_ = field_map json__ "Type" String_.of_json in
-      let message = field_map json__ "Message" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
       make ?type_ ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An internal server error exception object."]
@@ -16170,8 +16168,8 @@ module AccessDeniedException =
       make ?type_ ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let type_ = field_map json__ "Type" String_.of_json in
-      let message = field_map json__ "Message" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
       make ?type_ ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An access denied exception object."]
@@ -16200,8 +16198,8 @@ module DestinationProperties =
       make ?kmsKeyArn ?destinationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let kmsKeyArn = field_map json__ "KmsKeyArn" String_.of_json in
-      let destinationArn = field_map json__ "DestinationArn" String_.of_json in
+      let kmsKeyArn = field_map json__ "kmsKeyArn" String_.of_json in
+      let destinationArn = field_map json__ "destinationArn" String_.of_json in
       make ?kmsKeyArn ?destinationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16277,13 +16275,13 @@ module OrganizationDataSourceConfigurations =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let malwareProtection =
-        field_map json__ "MalwareProtection"
+        field_map json__ "malwareProtection"
           OrganizationMalwareProtectionConfiguration.of_json in
       let kubernetes =
-        field_map json__ "Kubernetes"
+        field_map json__ "kubernetes"
           OrganizationKubernetesConfiguration.of_json in
       let s3Logs =
-        field_map json__ "S3Logs" OrganizationS3LogsConfiguration.of_json in
+        field_map json__ "s3Logs" OrganizationS3LogsConfiguration.of_json in
       make ?malwareProtection ?kubernetes ?s3Logs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16390,11 +16388,11 @@ module DataSourceConfigurations =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let malwareProtection =
-        field_map json__ "MalwareProtection"
+        field_map json__ "malwareProtection"
           MalwareProtectionConfiguration.of_json in
       let kubernetes =
-        field_map json__ "Kubernetes" KubernetesConfiguration.of_json in
-      let s3Logs = field_map json__ "S3Logs" S3LogsConfiguration.of_json in
+        field_map json__ "kubernetes" KubernetesConfiguration.of_json in
+      let s3Logs = field_map json__ "s3Logs" S3LogsConfiguration.of_json in
       make ?malwareProtection ?kubernetes ?s3Logs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16479,8 +16477,8 @@ module ScanResourceCriteria =
       make ?exclude ?include_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let exclude = field_map json__ "Exclude" ScanCriterion.of_json in
-      let include_ = field_map json__ "Include" ScanCriterion.of_json in
+      let exclude = field_map json__ "exclude" ScanCriterion.of_json in
+      let include_ = field_map json__ "include" ScanCriterion.of_json in
       make ?exclude ?include_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16507,7 +16505,7 @@ module MalwareProtectionPlanActions =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let tagging =
-        field_map json__ "Tagging" MalwareProtectionPlanTaggingAction.of_json in
+        field_map json__ "tagging" MalwareProtectionPlanTaggingAction.of_json in
       make ?tagging ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16532,7 +16530,7 @@ module UpdateProtectedResource =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let s3Bucket =
-        field_map json__ "S3Bucket" UpdateS3BucketResource.of_json in
+        field_map json__ "s3Bucket" UpdateS3BucketResource.of_json in
       make ?s3Bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16666,7 +16664,7 @@ module FindingCriteria =
       make ?criterion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let criterion = field_map json__ "Criterion" Criterion.of_json in
+      let criterion = field_map json__ "criterion" Criterion.of_json in
       make ?criterion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16834,8 +16832,8 @@ module ConflictException =
       make ?type_ ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let type_ = field_map json__ "Type" String_.of_json in
-      let message = field_map json__ "Message" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
       make ?type_ ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request conflict exception object."]
@@ -16916,11 +16914,11 @@ module StartMalwareScanConfiguration =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let recoveryPoint =
-        field_map json__ "RecoveryPoint" RecoveryPoint.of_json in
+        field_map json__ "recoveryPoint" RecoveryPoint.of_json in
       let incrementalScanDetails =
-        field_map json__ "IncrementalScanDetails"
+        field_map json__ "incrementalScanDetails"
           IncrementalScanDetails.of_json in
-      let role = field_map_exn json__ "Role" NonEmptyString.of_json in
+      let role = field_map_exn json__ "role" NonEmptyString.of_json in
       make ?recoveryPoint ?incrementalScanDetails ~role ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16955,9 +16953,9 @@ module S3ObjectForSendObjectMalwareScan =
       make ?versionId ?key ?bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let versionId = field_map json__ "VersionId" String_.of_json in
-      let key = field_map json__ "Key" String_.of_json in
-      let bucket = field_map json__ "Bucket" String_.of_json in
+      let versionId = field_map json__ "versionId" String_.of_json in
+      let key = field_map json__ "key" String_.of_json in
+      let bucket = field_map json__ "bucket" String_.of_json in
       make ?versionId ?key ?bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17212,7 +17210,7 @@ module ListMalwareScansFilterCriteria =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let listMalwareScansFilterCriterion =
-        field_map json__ "ListMalwareScansFilterCriterion"
+        field_map json__ "filterCriterion"
           ListMalwareScansFilterCriterionList.of_json in
       make ?listMalwareScansFilterCriterion ()
     let to_json v = composed_to_json to_value v
@@ -17243,8 +17241,8 @@ module SortCriteria =
       make ?orderBy ?attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let orderBy = field_map json__ "OrderBy" OrderBy.of_json in
-      let attributeName = field_map json__ "AttributeName" String_.of_json in
+      let orderBy = field_map json__ "orderBy" OrderBy.of_json in
+      let attributeName = field_map json__ "attributeName" String_.of_json in
       make ?orderBy ?attributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17451,7 +17449,7 @@ module CoverageFilterCriteria =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let filterCriterion =
-        field_map json__ "FilterCriterion"
+        field_map json__ "filterCriterion"
           CoverageFilterCriterionList.of_json in
       make ?filterCriterion ()
     let to_json v = composed_to_json to_value v
@@ -17483,9 +17481,9 @@ module CoverageSortCriteria =
       make ?orderBy ?attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let orderBy = field_map json__ "OrderBy" OrderBy.of_json in
+      let orderBy = field_map json__ "orderBy" OrderBy.of_json in
       let attributeName =
-        field_map json__ "AttributeName" CoverageSortKey.of_json in
+        field_map json__ "attributeName" CoverageSortKey.of_json in
       make ?orderBy ?attributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17563,18 +17561,18 @@ module UsageStatistics =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let sumByFeature =
-        field_map json__ "SumByFeature" UsageFeatureResultList.of_json in
+        field_map json__ "sumByFeature" UsageFeatureResultList.of_json in
       let topResources =
-        field_map json__ "TopResources" UsageResourceResultList.of_json in
+        field_map json__ "topResources" UsageResourceResultList.of_json in
       let sumByResource =
-        field_map json__ "SumByResource" UsageResourceResultList.of_json in
+        field_map json__ "sumByResource" UsageResourceResultList.of_json in
       let sumByDataSource =
-        field_map json__ "SumByDataSource" UsageDataSourceResultList.of_json in
+        field_map json__ "sumByDataSource" UsageDataSourceResultList.of_json in
       let topAccountsByFeature =
-        field_map json__ "TopAccountsByFeature"
+        field_map json__ "topAccountsByFeature"
           UsageTopAccountsResultList.of_json in
       let sumByAccount =
-        field_map json__ "SumByAccount" UsageAccountResultList.of_json in
+        field_map json__ "sumByAccount" UsageAccountResultList.of_json in
       make ?sumByFeature ?topResources ?sumByResource ?sumByDataSource
         ?topAccountsByFeature ?sumByAccount ()
     let to_json v = composed_to_json to_value v
@@ -17620,10 +17618,10 @@ module UsageCriteria =
       make ?features ?resources ?dataSources ?accountIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let features = field_map json__ "Features" UsageFeatureList.of_json in
-      let resources = field_map json__ "Resources" ResourceList.of_json in
-      let dataSources = field_map json__ "DataSources" DataSourceList.of_json in
-      let accountIds = field_map json__ "AccountIds" AccountIds.of_json in
+      let features = field_map json__ "features" UsageFeatureList.of_json in
+      let resources = field_map json__ "resources" ResourceList.of_json in
+      let dataSources = field_map json__ "dataSources" DataSourceList.of_json in
+      let accountIds = field_map json__ "accountIds" AccountIds.of_json in
       make ?features ?resources ?dataSources ?accountIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17966,9 +17964,9 @@ module OrganizationDetails =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let organizationStatistics =
-        field_map json__ "OrganizationStatistics"
+        field_map json__ "organizationStatistics"
           OrganizationStatistics.of_json in
-      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let updatedAt = field_map json__ "updatedAt" Timestamp.of_json in
       make ?organizationStatistics ?updatedAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18048,11 +18046,11 @@ module Master =
       make ?invitedAt ?relationshipStatus ?invitationId ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let invitedAt = field_map json__ "InvitedAt" String_.of_json in
+      let invitedAt = field_map json__ "invitedAt" String_.of_json in
       let relationshipStatus =
-        field_map json__ "RelationshipStatus" String_.of_json in
-      let invitationId = field_map json__ "InvitationId" String_.of_json in
-      let accountId = field_map json__ "AccountId" AccountId.of_json in
+        field_map json__ "relationshipStatus" String_.of_json in
+      let invitationId = field_map json__ "invitationId" String_.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
       make ?invitedAt ?relationshipStatus ?invitationId ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18148,20 +18146,20 @@ module GetMalwareScanResultDetails =
         ?scanResultStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let threats = field_map json__ "Threats" ScanResultThreats.of_json in
+      let threats = field_map json__ "threats" ScanResultThreats.of_json in
       let uniqueThreatCount =
-        field_map json__ "UniqueThreatCount" PositiveLong.of_json in
-      let totalBytes = field_map json__ "TotalBytes" PositiveLong.of_json in
+        field_map json__ "uniqueThreatCount" PositiveLong.of_json in
+      let totalBytes = field_map json__ "totalBytes" PositiveLong.of_json in
       let totalFileCount =
-        field_map json__ "TotalFileCount" PositiveLong.of_json in
+        field_map json__ "totalFileCount" PositiveLong.of_json in
       let threatFoundFileCount =
-        field_map json__ "ThreatFoundFileCount" PositiveLong.of_json in
+        field_map json__ "threatFoundFileCount" PositiveLong.of_json in
       let failedFileCount =
-        field_map json__ "FailedFileCount" PositiveLong.of_json in
+        field_map json__ "failedFileCount" PositiveLong.of_json in
       let skippedFileCount =
-        field_map json__ "SkippedFileCount" PositiveLong.of_json in
+        field_map json__ "skippedFileCount" PositiveLong.of_json in
       let scanResultStatus =
-        field_map json__ "ScanResultStatus" ScanResultStatus.of_json in
+        field_map json__ "scanResultStatus" ScanResultStatus.of_json in
       make ?threats ?uniqueThreatCount ?totalBytes ?totalFileCount
         ?threatFoundFileCount ?failedFileCount ?skippedFileCount
         ?scanResultStatus ()
@@ -18202,8 +18200,8 @@ module ResourceNotFoundException =
       make ?type_ ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let type_ = field_map json__ "Type" String_.of_json in
-      let message = field_map json__ "Message" String_.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
       make ?type_ ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The requested resource can't be found."]
@@ -18257,14 +18255,14 @@ module ScanConfiguration =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let recoveryPoint =
-        field_map json__ "RecoveryPoint"
+        field_map json__ "recoveryPoint"
           ScanConfigurationRecoveryPoint.of_json in
       let incrementalScanDetails =
-        field_map json__ "IncrementalScanDetails"
+        field_map json__ "incrementalScanDetails"
           IncrementalScanDetails.of_json in
       let triggerDetails =
-        field_map json__ "TriggerDetails" TriggerDetails.of_json in
-      let role = field_map json__ "Role" NonEmptyString.of_json in
+        field_map json__ "triggerDetails" TriggerDetails.of_json in
+      let role = field_map json__ "role" NonEmptyString.of_json in
       make ?recoveryPoint ?incrementalScanDetails ?triggerDetails ?role ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18317,7 +18315,7 @@ module CreateProtectedResource =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let s3Bucket =
-        field_map json__ "S3Bucket" CreateS3BucketResource.of_json in
+        field_map json__ "s3Bucket" CreateS3BucketResource.of_json in
       make ?s3Bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18540,17 +18538,17 @@ module FindingStatistics =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let groupedBySeverity =
-        field_map json__ "GroupedBySeverity" GroupedBySeverity.of_json in
+        field_map json__ "groupedBySeverity" GroupedBySeverity.of_json in
       let groupedByResource =
-        field_map json__ "GroupedByResource" GroupedByResource.of_json in
+        field_map json__ "groupedByResource" GroupedByResource.of_json in
       let groupedByFindingType =
-        field_map json__ "GroupedByFindingType" GroupedByFindingType.of_json in
+        field_map json__ "groupedByFindingType" GroupedByFindingType.of_json in
       let groupedByDate =
-        field_map json__ "GroupedByDate" GroupedByDate.of_json in
+        field_map json__ "groupedByDate" GroupedByDate.of_json in
       let groupedByAccount =
-        field_map json__ "GroupedByAccount" GroupedByAccount.of_json in
+        field_map json__ "groupedByAccount" GroupedByAccount.of_json in
       let countBySeverity =
-        field_map json__ "CountBySeverity" CountBySeverity.of_json in
+        field_map json__ "countBySeverity" CountBySeverity.of_json in
       make ?groupedBySeverity ?groupedByResource ?groupedByFindingType
         ?groupedByDate ?groupedByAccount ?countBySeverity ()
     let to_json v = composed_to_json to_value v
@@ -18757,10 +18755,10 @@ module CoverageStatistics =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let countByCoverageStatus =
-        field_map json__ "CountByCoverageStatus"
+        field_map json__ "countByCoverageStatus"
           CountByCoverageStatus.of_json in
       let countByResourceType =
-        field_map json__ "CountByResourceType" CountByResourceType.of_json in
+        field_map json__ "countByResourceType" CountByResourceType.of_json in
       make ?countByCoverageStatus ?countByResourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18836,11 +18834,11 @@ module Administrator =
       make ?invitedAt ?relationshipStatus ?invitationId ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let invitedAt = field_map json__ "InvitedAt" String_.of_json in
+      let invitedAt = field_map json__ "invitedAt" String_.of_json in
       let relationshipStatus =
-        field_map json__ "RelationshipStatus" String_.of_json in
-      let invitationId = field_map json__ "InvitationId" String_.of_json in
-      let accountId = field_map json__ "AccountId" AccountId.of_json in
+        field_map json__ "relationshipStatus" String_.of_json in
+      let invitationId = field_map json__ "invitationId" String_.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
       make ?invitedAt ?relationshipStatus ?invitationId ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18890,13 +18888,13 @@ module OrganizationDataSourceConfigurationsResult =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let malwareProtection =
-        field_map json__ "MalwareProtection"
+        field_map json__ "malwareProtection"
           OrganizationMalwareProtectionConfigurationResult.of_json in
       let kubernetes =
-        field_map json__ "Kubernetes"
+        field_map json__ "kubernetes"
           OrganizationKubernetesConfigurationResult.of_json in
       let s3Logs =
-        field_map json__ "S3Logs"
+        field_map json__ "s3Logs"
           OrganizationS3LogsConfigurationResult.of_json in
       make ?malwareProtection ?kubernetes ?s3Logs ()
     let to_json v = composed_to_json to_value v
@@ -18979,7 +18977,7 @@ module FilterCriteria =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let filterCriterion =
-        field_map json__ "FilterCriterion" FilterCriterionList.of_json in
+        field_map json__ "filterCriterion" FilterCriterionList.of_json in
       make ?filterCriterion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19084,7 +19082,7 @@ module UnprocessedDataSourcesResult =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let malwareProtection =
-        field_map json__ "MalwareProtection"
+        field_map json__ "malwareProtection"
           MalwareProtectionConfigurationResult.of_json in
       make ?malwareProtection ()
     let to_json v = composed_to_json to_value v
@@ -19209,11 +19207,11 @@ module UpdateTrustedEntitySetRequest =
         ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let activate = field_map json__ "Activate" Boolean.of_json in
+      let activate = field_map json__ "activate" Boolean.of_json in
       let expectedBucketOwner =
-        field_map json__ "ExpectedBucketOwner" ExpectedBucketOwner.of_json in
-      let location = field_map json__ "Location" Location.of_json in
-      let name = field_map json__ "Name" Name.of_json in
+        field_map json__ "expectedBucketOwner" ExpectedBucketOwner.of_json in
+      let location = field_map json__ "location" Location.of_json in
+      let name = field_map json__ "name" Name.of_json in
       let trustedEntitySetId =
         field_map_exn json__ "TrustedEntitySetId" String_.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
@@ -19350,10 +19348,10 @@ module UpdateThreatIntelSetRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let expectedBucketOwner =
-        field_map json__ "ExpectedBucketOwner" AccountId.of_json in
-      let activate = field_map json__ "Activate" Boolean.of_json in
-      let location = field_map json__ "Location" Location.of_json in
-      let name = field_map json__ "Name" Name.of_json in
+        field_map json__ "expectedBucketOwner" AccountId.of_json in
+      let activate = field_map json__ "activate" Boolean.of_json in
+      let location = field_map json__ "location" Location.of_json in
+      let name = field_map json__ "name" Name.of_json in
       let threatIntelSetId =
         field_map_exn json__ "ThreatIntelSetId" String_.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
@@ -19480,11 +19478,11 @@ module UpdateThreatEntitySetRequest =
         ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let activate = field_map json__ "Activate" Boolean.of_json in
+      let activate = field_map json__ "activate" Boolean.of_json in
       let expectedBucketOwner =
-        field_map json__ "ExpectedBucketOwner" ExpectedBucketOwner.of_json in
-      let location = field_map json__ "Location" Location.of_json in
-      let name = field_map json__ "Name" Name.of_json in
+        field_map json__ "expectedBucketOwner" ExpectedBucketOwner.of_json in
+      let location = field_map json__ "location" Location.of_json in
+      let name = field_map json__ "name" Name.of_json in
       let threatEntitySetId =
         field_map_exn json__ "ThreatEntitySetId" String_.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
@@ -19583,7 +19581,7 @@ module UpdatePublishingDestinationRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let destinationProperties =
-        field_map json__ "DestinationProperties"
+        field_map json__ "destinationProperties"
           DestinationProperties.of_json in
       let destinationId =
         field_map_exn json__ "DestinationId" String_.of_json in
@@ -19709,15 +19707,15 @@ module UpdateOrganizationConfigurationRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let autoEnableOrganizationMembers =
-        field_map json__ "AutoEnableOrganizationMembers"
+        field_map json__ "autoEnableOrganizationMembers"
           AutoEnableMembers.of_json in
       let features =
-        field_map json__ "Features"
+        field_map json__ "features"
           OrganizationFeaturesConfigurations.of_json in
       let dataSources =
-        field_map json__ "DataSources"
+        field_map json__ "dataSources"
           OrganizationDataSourceConfigurations.of_json in
-      let autoEnable = field_map json__ "AutoEnable" Boolean.of_json in
+      let autoEnable = field_map json__ "autoEnable" Boolean.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?autoEnableOrganizationMembers ?features ?dataSources ?autoEnable
         ~detectorId ()
@@ -19783,7 +19781,7 @@ module UpdateMemberDetectorsResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let unprocessedAccounts =
-        field_map json__ "UnprocessedAccounts" UnprocessedAccounts.of_json in
+        field_map json__ "unprocessedAccounts" UnprocessedAccounts.of_json in
       make ?unprocessedAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19834,10 +19832,10 @@ module UpdateMemberDetectorsRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let features =
-        field_map json__ "Features" MemberFeaturesConfigurations.of_json in
+        field_map json__ "features" MemberFeaturesConfigurations.of_json in
       let dataSources =
-        field_map json__ "DataSources" DataSourceConfigurations.of_json in
-      let accountIds = field_map_exn json__ "AccountIds" AccountIds.of_json in
+        field_map json__ "dataSources" DataSourceConfigurations.of_json in
+      let accountIds = field_map_exn json__ "accountIds" AccountIds.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?features ?dataSources ~accountIds ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -19936,10 +19934,10 @@ module UpdateMalwareScanSettingsRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let ebsSnapshotPreservation =
-        field_map json__ "EbsSnapshotPreservation"
+        field_map json__ "ebsSnapshotPreservation"
           EbsSnapshotPreservation.of_json in
       let scanResourceCriteria =
-        field_map json__ "ScanResourceCriteria" ScanResourceCriteria.of_json in
+        field_map json__ "scanResourceCriteria" ScanResourceCriteria.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?ebsSnapshotPreservation ?scanResourceCriteria ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -19993,10 +19991,10 @@ module UpdateMalwareProtectionPlanRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let protectedResource =
-        field_map json__ "ProtectedResource" UpdateProtectedResource.of_json in
+        field_map json__ "protectedResource" UpdateProtectedResource.of_json in
       let actions =
-        field_map json__ "Actions" MalwareProtectionPlanActions.of_json in
-      let role = field_map json__ "Role" String_.of_json in
+        field_map json__ "actions" MalwareProtectionPlanActions.of_json in
+      let role = field_map json__ "role" String_.of_json in
       let malwareProtectionPlanId =
         field_map_exn json__ "MalwareProtectionPlanId" String_.of_json in
       make ?protectedResource ?actions ?role ~malwareProtectionPlanId ()
@@ -20127,10 +20125,10 @@ module UpdateIPSetRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let expectedBucketOwner =
-        field_map json__ "ExpectedBucketOwner" AccountId.of_json in
-      let activate = field_map json__ "Activate" Boolean.of_json in
-      let location = field_map json__ "Location" Location.of_json in
-      let name = field_map json__ "Name" Name.of_json in
+        field_map json__ "expectedBucketOwner" AccountId.of_json in
+      let activate = field_map json__ "activate" Boolean.of_json in
+      let location = field_map json__ "location" Location.of_json in
+      let name = field_map json__ "name" Name.of_json in
       let ipSetId = field_map_exn json__ "IpSetId" String_.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?expectedBucketOwner ?activate ?location ?name ~ipSetId
@@ -20229,9 +20227,9 @@ module UpdateFindingsFeedbackRequest =
       make ?comments ~feedback ~findingIds ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let comments = field_map json__ "Comments" SensitiveString.of_json in
-      let feedback = field_map_exn json__ "Feedback" Feedback.of_json in
-      let findingIds = field_map_exn json__ "FindingIds" FindingIds.of_json in
+      let comments = field_map json__ "comments" SensitiveString.of_json in
+      let feedback = field_map_exn json__ "feedback" Feedback.of_json in
+      let findingIds = field_map_exn json__ "findingIds" FindingIds.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?comments ~feedback ~findingIds ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -20291,7 +20289,7 @@ module UpdateFilterResponse =
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let name = field_map json__ "Name" FilterName.of_json in make ?name ()
+      let name = field_map json__ "name" FilterName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the filter specified by the filter name."]
 module UpdateFilterRequest =
@@ -20363,11 +20361,11 @@ module UpdateFilterRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let findingCriteria =
-        field_map json__ "FindingCriteria" FindingCriteria.of_json in
-      let rank = field_map json__ "Rank" FilterRank.of_json in
-      let action = field_map json__ "Action" FilterAction.of_json in
+        field_map json__ "findingCriteria" FindingCriteria.of_json in
+      let rank = field_map json__ "rank" FilterRank.of_json in
+      let action = field_map json__ "action" FilterAction.of_json in
       let description =
-        field_map json__ "Description" FilterDescription.of_json in
+        field_map json__ "description" FilterDescription.of_json in
       let filterName = field_map_exn json__ "FilterName" String_.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?findingCriteria ?rank ?action ?description ~filterName
@@ -20490,13 +20488,13 @@ module UpdateDetectorRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let features =
-        field_map json__ "Features" DetectorFeatureConfigurations.of_json in
+        field_map json__ "features" DetectorFeatureConfigurations.of_json in
       let dataSources =
-        field_map json__ "DataSources" DataSourceConfigurations.of_json in
+        field_map json__ "dataSources" DataSourceConfigurations.of_json in
       let findingPublishingFrequency =
-        field_map json__ "FindingPublishingFrequency"
+        field_map json__ "findingPublishingFrequency"
           FindingPublishingFrequency.of_json in
-      let enable = field_map json__ "Enable" Boolean.of_json in
+      let enable = field_map json__ "enable" Boolean.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?features ?dataSources ?findingPublishingFrequency ?enable
         ~detectorId ()
@@ -20589,7 +20587,7 @@ module UntagResourceRequest =
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
       let resourceArn =
         field_map_exn json__ "ResourceArn" GuardDutyArn.of_json in
       make ~tagKeys ~resourceArn ()
@@ -20673,7 +20671,7 @@ module UnarchiveFindingsRequest =
       make ~findingIds ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let findingIds = field_map_exn json__ "FindingIds" FindingIds.of_json in
+      let findingIds = field_map_exn json__ "findingIds" FindingIds.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ~findingIds ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -20762,7 +20760,7 @@ module TagResourceRequest =
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let tags = field_map_exn json__ "Tags" TagMap.of_json in
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
       let resourceArn =
         field_map_exn json__ "ResourceArn" GuardDutyArn.of_json in
       make ~tags ~resourceArn ()
@@ -20827,7 +20825,7 @@ module StopMonitoringMembersResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let unprocessedAccounts =
-        field_map json__ "UnprocessedAccounts" UnprocessedAccounts.of_json in
+        field_map json__ "unprocessedAccounts" UnprocessedAccounts.of_json in
       make ?unprocessedAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20860,7 +20858,7 @@ module StopMonitoringMembersRequest =
       make ~accountIds ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let accountIds = field_map_exn json__ "AccountIds" AccountIds.of_json in
+      let accountIds = field_map_exn json__ "accountIds" AccountIds.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ~accountIds ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -20925,7 +20923,7 @@ module StartMonitoringMembersResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let unprocessedAccounts =
-        field_map json__ "UnprocessedAccounts" UnprocessedAccounts.of_json in
+        field_map json__ "unprocessedAccounts" UnprocessedAccounts.of_json in
       make ?unprocessedAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20958,7 +20956,7 @@ module StartMonitoringMembersRequest =
       make ~accountIds ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let accountIds = field_map_exn json__ "AccountIds" AccountIds.of_json in
+      let accountIds = field_map_exn json__ "accountIds" AccountIds.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ~accountIds ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -21029,7 +21027,7 @@ module StartMalwareScanResponse =
       make ?scanId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let scanId = field_map json__ "ScanId" NonEmptyString.of_json in
+      let scanId = field_map json__ "scanId" NonEmptyString.of_json in
       make ?scanId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21072,11 +21070,11 @@ module StartMalwareScanRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let scanConfiguration =
-        field_map json__ "ScanConfiguration"
+        field_map json__ "scanConfiguration"
           StartMalwareScanConfiguration.of_json in
-      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let resourceArn =
-        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ?scanConfiguration ?clientToken ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21163,7 +21161,7 @@ module SendObjectMalwareScanRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let s3Object =
-        field_map json__ "S3Object" S3ObjectForSendObjectMalwareScan.of_json in
+        field_map json__ "s3Object" S3ObjectForSendObjectMalwareScan.of_json in
       make ?s3Object ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21232,9 +21230,9 @@ module ListTrustedEntitySetsResponse =
       make ?nextToken ?trustedEntitySetIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let trustedEntitySetIds =
-        field_map json__ "TrustedEntitySetIds" TrustedEntitySetIds.of_json in
+        field_map json__ "trustedEntitySetIds" TrustedEntitySetIds.of_json in
       make ?nextToken ?trustedEntitySetIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21273,8 +21271,8 @@ module ListTrustedEntitySetsRequest =
       make ?nextToken ?maxResults ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?nextToken ?maxResults ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -21344,9 +21342,9 @@ module ListThreatIntelSetsResponse =
       make ?nextToken ?threatIntelSetIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let threatIntelSetIds =
-        field_map json__ "ThreatIntelSetIds" ThreatIntelSetIds.of_json in
+        field_map json__ "threatIntelSetIds" ThreatIntelSetIds.of_json in
       make ?nextToken ?threatIntelSetIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21385,8 +21383,8 @@ module ListThreatIntelSetsRequest =
       make ?nextToken ?maxResults ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?nextToken ?maxResults ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -21456,9 +21454,9 @@ module ListThreatEntitySetsResponse =
       make ?nextToken ?threatEntitySetIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let threatEntitySetIds =
-        field_map json__ "ThreatEntitySetIds" ThreatEntitySetIds.of_json in
+        field_map json__ "threatEntitySetIds" ThreatEntitySetIds.of_json in
       make ?nextToken ?threatEntitySetIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21497,8 +21495,8 @@ module ListThreatEntitySetsRequest =
       make ?nextToken ?maxResults ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?nextToken ?maxResults ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -21566,7 +21564,7 @@ module ListTagsForResourceResponse =
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let tags = field_map json__ "Tags" TagMap.of_json in make ?tags ()
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists tags for a resource. Tagging is currently supported for detectors, finding filters, IP sets, threat intel sets, and publishing destination, with a limit of 50 tags per resource. When invoked, this operation returns all assigned tags for a given resource."]
@@ -21661,8 +21659,8 @@ module ListPublishingDestinationsResponse =
       make ?nextToken ?destinations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let destinations = field_map json__ "Destinations" Destinations.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let destinations = field_map json__ "destinations" Destinations.of_json in
       make ?nextToken ?destinations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21701,8 +21699,8 @@ module ListPublishingDestinationsRequest =
       make ?nextToken ?maxResults ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?nextToken ?maxResults ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -21773,9 +21771,9 @@ module ListOrganizationAdminAccountsResponse =
       make ?nextToken ?adminAccounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let adminAccounts =
-        field_map json__ "AdminAccounts" AdminAccounts.of_json in
+        field_map json__ "adminAccounts" AdminAccounts.of_json in
       make ?nextToken ?adminAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21805,8 +21803,8 @@ module ListOrganizationAdminAccountsRequest =
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21873,8 +21871,8 @@ module ListMembersResponse =
       make ?nextToken ?members ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let members = field_map json__ "Members" Members.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let members = field_map json__ "members" Members.of_json in
       make ?nextToken ?members ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21921,9 +21919,9 @@ module ListMembersRequest =
       make ?onlyAssociated ?nextToken ?maxResults ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let onlyAssociated = field_map json__ "OnlyAssociated" String_.of_json in
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let onlyAssociated = field_map json__ "onlyAssociated" String_.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?onlyAssociated ?nextToken ?maxResults ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -21991,8 +21989,8 @@ module ListMalwareScansResponse =
       make ?nextToken ?scans ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let scans = field_map json__ "Scans" MalwareScans.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let scans = field_map json__ "scans" MalwareScans.of_json in
       make ?nextToken ?scans ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22042,12 +22040,12 @@ module ListMalwareScansRequest =
       make ?sortCriteria ?filterCriteria ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let sortCriteria = field_map json__ "SortCriteria" SortCriteria.of_json in
+      let sortCriteria = field_map json__ "sortCriteria" SortCriteria.of_json in
       let filterCriteria =
-        field_map json__ "FilterCriteria"
+        field_map json__ "filterCriteria"
           ListMalwareScansFilterCriteria.of_json in
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       make ?sortCriteria ?filterCriteria ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22127,9 +22125,9 @@ module ListMalwareProtectionPlansResponse =
       make ?nextToken ?malwareProtectionPlans ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let malwareProtectionPlans =
-        field_map json__ "MalwareProtectionPlans"
+        field_map json__ "malwareProtectionPlans"
           MalwareProtectionPlansSummary.of_json in
       make ?nextToken ?malwareProtectionPlans ()
     let to_json v = composed_to_json to_value v
@@ -22153,7 +22151,7 @@ module ListMalwareProtectionPlansRequest =
       make ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       make ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22220,8 +22218,8 @@ module ListInvitationsResponse =
       make ?nextToken ?invitations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let invitations = field_map json__ "Invitations" Invitations.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let invitations = field_map json__ "invitations" Invitations.of_json in
       make ?nextToken ?invitations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22251,8 +22249,8 @@ module ListInvitationsRequest =
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22318,8 +22316,8 @@ module ListIPSetsResponse =
       make ?nextToken ?ipSetIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let ipSetIds = field_map json__ "IpSetIds" IpSetIds.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let ipSetIds = field_map json__ "ipSetIds" IpSetIds.of_json in
       make ?nextToken ?ipSetIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22358,8 +22356,8 @@ module ListIPSetsRequest =
       make ?nextToken ?maxResults ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?nextToken ?maxResults ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -22427,8 +22425,8 @@ module ListFindingsResponse =
       make ?nextToken ?findingIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let findingIds = field_map json__ "FindingIds" FindingIds.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let findingIds = field_map json__ "findingIds" FindingIds.of_json in
       make ?nextToken ?findingIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22493,11 +22491,11 @@ module ListFindingsRequest =
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
-      let sortCriteria = field_map json__ "SortCriteria" SortCriteria.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let sortCriteria = field_map json__ "sortCriteria" SortCriteria.of_json in
       let findingCriteria =
-        field_map json__ "FindingCriteria" FindingCriteria.of_json in
+        field_map json__ "findingCriteria" FindingCriteria.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?nextToken ?maxResults ?sortCriteria ?findingCriteria ~detectorId
         ()
@@ -22566,8 +22564,8 @@ module ListFiltersResponse =
       make ?nextToken ?filterNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let filterNames = field_map json__ "FilterNames" FilterNames.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let filterNames = field_map json__ "filterNames" FilterNames.of_json in
       make ?nextToken ?filterNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a paginated list of the current filters."]
@@ -22605,8 +22603,8 @@ module ListFiltersRequest =
       make ?nextToken ?maxResults ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?nextToken ?maxResults ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -22673,8 +22671,8 @@ module ListDetectorsResponse =
       make ?nextToken ?detectorIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let detectorIds = field_map json__ "DetectorIds" DetectorIds.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let detectorIds = field_map json__ "detectorIds" DetectorIds.of_json in
       make ?nextToken ?detectorIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22704,8 +22702,8 @@ module ListDetectorsRequest =
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22775,8 +22773,8 @@ module ListCoverageResponse =
       make ?nextToken ?resources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let resources = field_map json__ "Resources" CoverageResources.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let resources = field_map json__ "resources" CoverageResources.of_json in
       make ?nextToken ?resources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22843,11 +22841,11 @@ module ListCoverageRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let sortCriteria =
-        field_map json__ "SortCriteria" CoverageSortCriteria.of_json in
+        field_map json__ "sortCriteria" CoverageSortCriteria.of_json in
       let filterCriteria =
-        field_map json__ "FilterCriteria" CoverageFilterCriteria.of_json in
-      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json__ "NextToken" String_.of_json in
+        field_map json__ "filterCriteria" CoverageFilterCriteria.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?sortCriteria ?filterCriteria ?maxResults ?nextToken ~detectorId
         ()
@@ -22913,7 +22911,7 @@ module InviteMembersResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let unprocessedAccounts =
-        field_map json__ "UnprocessedAccounts" UnprocessedAccounts.of_json in
+        field_map json__ "unprocessedAccounts" UnprocessedAccounts.of_json in
       make ?unprocessedAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22964,10 +22962,10 @@ module InviteMembersRequest =
       make ?message ?disableEmailNotification ~accountIds ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let message = field_map json__ "Message" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
       let disableEmailNotification =
-        field_map json__ "DisableEmailNotification" Boolean.of_json in
-      let accountIds = field_map_exn json__ "AccountIds" AccountIds.of_json in
+        field_map json__ "disableEmailNotification" Boolean.of_json in
+      let accountIds = field_map_exn json__ "accountIds" AccountIds.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?message ?disableEmailNotification ~accountIds ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -23038,9 +23036,9 @@ module GetUsageStatisticsResponse =
       make ?nextToken ?usageStatistics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let usageStatistics =
-        field_map json__ "UsageStatistics" UsageStatistics.of_json in
+        field_map json__ "usageStatistics" UsageStatistics.of_json in
       make ?nextToken ?usageStatistics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23110,13 +23108,13 @@ module GetUsageStatisticsRequest =
         ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
-      let unit = field_map json__ "Unit" String_.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let unit = field_map json__ "unit" String_.of_json in
       let usageCriteria =
-        field_map_exn json__ "UsageCriteria" UsageCriteria.of_json in
+        field_map_exn json__ "usageCriteria" UsageCriteria.of_json in
       let usageStatisticType =
-        field_map_exn json__ "UsageStatisticType" UsageStatisticType.of_json in
+        field_map_exn json__ "usageStatisticsType" UsageStatisticType.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?nextToken ?maxResults ?unit ~usageCriteria ~usageStatisticType
         ~detectorId ()
@@ -23247,16 +23245,16 @@ module GetTrustedEntitySetResponse =
         ?expectedBucketOwner ?location ?format ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let errorDetails = field_map json__ "ErrorDetails" String_.of_json in
-      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
-      let tags = field_map json__ "Tags" TagMap.of_json in
-      let status = field_map json__ "Status" TrustedEntitySetStatus.of_json in
+      let errorDetails = field_map json__ "errorDetails" String_.of_json in
+      let updatedAt = field_map json__ "updatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let status = field_map json__ "status" TrustedEntitySetStatus.of_json in
       let expectedBucketOwner =
-        field_map json__ "ExpectedBucketOwner" ExpectedBucketOwner.of_json in
-      let location = field_map json__ "Location" Location.of_json in
-      let format = field_map json__ "Format" TrustedEntitySetFormat.of_json in
-      let name = field_map json__ "Name" Name.of_json in
+        field_map json__ "expectedBucketOwner" ExpectedBucketOwner.of_json in
+      let location = field_map json__ "location" Location.of_json in
+      let format = field_map json__ "format" TrustedEntitySetFormat.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?errorDetails ?updatedAt ?createdAt ?tags ?status
         ?expectedBucketOwner ?location ?format ?name ()
     let to_json v = composed_to_json to_value v
@@ -23391,12 +23389,12 @@ module GetThreatIntelSetResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let expectedBucketOwner =
-        field_map json__ "ExpectedBucketOwner" AccountId.of_json in
-      let tags = field_map json__ "Tags" TagMap.of_json in
-      let status = field_map json__ "Status" ThreatIntelSetStatus.of_json in
-      let location = field_map json__ "Location" Location.of_json in
-      let format = field_map json__ "Format" ThreatIntelSetFormat.of_json in
-      let name = field_map json__ "Name" Name.of_json in
+        field_map json__ "expectedBucketOwner" AccountId.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let status = field_map json__ "status" ThreatIntelSetStatus.of_json in
+      let location = field_map json__ "location" Location.of_json in
+      let format = field_map json__ "format" ThreatIntelSetFormat.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?expectedBucketOwner ?tags ?status ?location ?format ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23561,16 +23559,16 @@ module GetThreatEntitySetResponse =
         ?expectedBucketOwner ?location ?format ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let errorDetails = field_map json__ "ErrorDetails" String_.of_json in
-      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
-      let tags = field_map json__ "Tags" TagMap.of_json in
-      let status = field_map json__ "Status" ThreatEntitySetStatus.of_json in
+      let errorDetails = field_map json__ "errorDetails" String_.of_json in
+      let updatedAt = field_map json__ "updatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let status = field_map json__ "status" ThreatEntitySetStatus.of_json in
       let expectedBucketOwner =
-        field_map json__ "ExpectedBucketOwner" ExpectedBucketOwner.of_json in
-      let location = field_map json__ "Location" Location.of_json in
-      let format = field_map json__ "Format" ThreatEntitySetFormat.of_json in
-      let name = field_map json__ "Name" Name.of_json in
+        field_map json__ "expectedBucketOwner" ExpectedBucketOwner.of_json in
+      let location = field_map json__ "location" Location.of_json in
+      let format = field_map json__ "format" ThreatEntitySetFormat.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?errorDetails ?updatedAt ?createdAt ?tags ?status
         ?expectedBucketOwner ?location ?format ?name ()
     let to_json v = composed_to_json to_value v
@@ -23679,9 +23677,9 @@ module GetRemainingFreeTrialDaysResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let unprocessedAccounts =
-        field_map json__ "UnprocessedAccounts" UnprocessedAccounts.of_json in
+        field_map json__ "unprocessedAccounts" UnprocessedAccounts.of_json in
       let accounts =
-        field_map json__ "Accounts" AccountFreeTrialInfos.of_json in
+        field_map json__ "accounts" AccountFreeTrialInfos.of_json in
       make ?unprocessedAccounts ?accounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23714,7 +23712,7 @@ module GetRemainingFreeTrialDaysRequest =
       make ~accountIds ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let accountIds = field_map_exn json__ "AccountIds" AccountIds.of_json in
+      let accountIds = field_map_exn json__ "accountIds" AccountIds.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ~accountIds ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -23779,7 +23777,7 @@ module GetOrganizationStatisticsResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let organizationDetails =
-        field_map json__ "OrganizationDetails" OrganizationDetails.of_json in
+        field_map json__ "organizationDetails" OrganizationDetails.of_json in
       make ?organizationDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23848,8 +23846,8 @@ module GetMembersResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let unprocessedAccounts =
-        field_map json__ "UnprocessedAccounts" UnprocessedAccounts.of_json in
-      let members = field_map json__ "Members" Members.of_json in
+        field_map json__ "unprocessedAccounts" UnprocessedAccounts.of_json in
+      let members = field_map json__ "members" Members.of_json in
       make ?unprocessedAccounts ?members ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23882,7 +23880,7 @@ module GetMembersRequest =
       make ~accountIds ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let accountIds = field_map_exn json__ "AccountIds" AccountIds.of_json in
+      let accountIds = field_map_exn json__ "accountIds" AccountIds.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ~accountIds ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -23958,10 +23956,9 @@ module GetMemberDetectorsResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let unprocessedAccounts =
-        field_map json__ "UnprocessedAccounts" UnprocessedAccounts.of_json in
+        field_map json__ "unprocessedAccounts" UnprocessedAccounts.of_json in
       let memberDataSourceConfigurations =
-        field_map json__ "MemberDataSourceConfigurations"
-          MemberDataSourceConfigurations.of_json in
+        field_map json__ "members" MemberDataSourceConfigurations.of_json in
       make ?unprocessedAccounts ?memberDataSourceConfigurations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23992,7 +23989,7 @@ module GetMemberDetectorsRequest =
       make ~accountIds ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let accountIds = field_map_exn json__ "AccountIds" AccountIds.of_json in
+      let accountIds = field_map_exn json__ "accountIds" AccountIds.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ~accountIds ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -24053,7 +24050,7 @@ module GetMasterAccountResponse =
       make ?master ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let master = field_map json__ "Master" Master.of_json in
+      let master = field_map json__ "master" Master.of_json in
       make ?master ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -24154,10 +24151,10 @@ module GetMalwareScanSettingsResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let ebsSnapshotPreservation =
-        field_map json__ "EbsSnapshotPreservation"
+        field_map json__ "ebsSnapshotPreservation"
           EbsSnapshotPreservation.of_json in
       let scanResourceCriteria =
-        field_map json__ "ScanResourceCriteria" ScanResourceCriteria.of_json in
+        field_map json__ "scanResourceCriteria" ScanResourceCriteria.of_json in
       make ?ebsSnapshotPreservation ?scanResourceCriteria ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -24417,35 +24414,35 @@ module GetMalwareScanResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let scanResultDetails =
-        field_map json__ "ScanResultDetails"
+        field_map json__ "scanResultDetails"
           GetMalwareScanResultDetails.of_json in
       let scanCompletedAt =
-        field_map json__ "ScanCompletedAt" Timestamp.of_json in
-      let scanStartedAt = field_map json__ "ScanStartedAt" Timestamp.of_json in
+        field_map json__ "scanCompletedAt" Timestamp.of_json in
+      let scanStartedAt = field_map json__ "scanStartedAt" Timestamp.of_json in
       let scanType =
-        field_map json__ "ScanType" MalwareProtectionScanType.of_json in
+        field_map json__ "scanType" MalwareProtectionScanType.of_json in
       let scanStatusReason =
-        field_map json__ "ScanStatusReason" ScanStatusReason.of_json in
+        field_map json__ "scanStatusReason" ScanStatusReason.of_json in
       let scanStatus =
-        field_map json__ "ScanStatus" MalwareProtectionScanStatus.of_json in
-      let scanCategory = field_map json__ "ScanCategory" ScanCategory.of_json in
+        field_map json__ "scanStatus" MalwareProtectionScanStatus.of_json in
+      let scanCategory = field_map json__ "scanCategory" ScanCategory.of_json in
       let scanConfiguration =
-        field_map json__ "ScanConfiguration" ScanConfiguration.of_json in
+        field_map json__ "scanConfiguration" ScanConfiguration.of_json in
       let scannedResources =
-        field_map json__ "ScannedResources" ScannedResources.of_json in
+        field_map json__ "scannedResources" ScannedResources.of_json in
       let failedResourcesCount =
-        field_map json__ "FailedResourcesCount" NonNegativeInteger.of_json in
+        field_map json__ "failedResourcesCount" NonNegativeInteger.of_json in
       let skippedResourcesCount =
-        field_map json__ "SkippedResourcesCount" NonNegativeInteger.of_json in
+        field_map json__ "skippedResourcesCount" NonNegativeInteger.of_json in
       let scannedResourcesCount =
-        field_map json__ "ScannedResourcesCount" NonNegativeInteger.of_json in
+        field_map json__ "scannedResourcesCount" NonNegativeInteger.of_json in
       let resourceType =
-        field_map json__ "ResourceType" MalwareProtectionResourceType.of_json in
-      let resourceArn = field_map json__ "ResourceArn" NonEmptyString.of_json in
+        field_map json__ "resourceType" MalwareProtectionResourceType.of_json in
+      let resourceArn = field_map json__ "resourceArn" NonEmptyString.of_json in
       let adminDetectorId =
-        field_map json__ "AdminDetectorId" DetectorId.of_json in
-      let detectorId = field_map json__ "DetectorId" DetectorId.of_json in
-      let scanId = field_map json__ "ScanId" NonEmptyString.of_json in
+        field_map json__ "adminDetectorId" DetectorId.of_json in
+      let detectorId = field_map json__ "detectorId" DetectorId.of_json in
+      let scanId = field_map json__ "scanId" NonEmptyString.of_json in
       make ?scanResultDetails ?scanCompletedAt ?scanStartedAt ?scanType
         ?scanStatusReason ?scanStatus ?scanCategory ?scanConfiguration
         ?scannedResources ?failedResourcesCount ?skippedResourcesCount
@@ -24615,19 +24612,19 @@ module GetMalwareProtectionPlanResponse =
         ?protectedResource ?role ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let tags = field_map json__ "Tags" TagMap.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let statusReasons =
-        field_map json__ "StatusReasons"
+        field_map json__ "statusReasons"
           MalwareProtectionPlanStatusReasonsList.of_json in
       let status =
-        field_map json__ "Status" MalwareProtectionPlanStatus.of_json in
-      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+        field_map json__ "status" MalwareProtectionPlanStatus.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       let actions =
-        field_map json__ "Actions" MalwareProtectionPlanActions.of_json in
+        field_map json__ "actions" MalwareProtectionPlanActions.of_json in
       let protectedResource =
-        field_map json__ "ProtectedResource" CreateProtectedResource.of_json in
-      let role = field_map json__ "Role" String_.of_json in
-      let arn = field_map json__ "Arn" String_.of_json in
+        field_map json__ "protectedResource" CreateProtectedResource.of_json in
+      let role = field_map json__ "role" String_.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
       make ?tags ?statusReasons ?status ?createdAt ?actions
         ?protectedResource ?role ?arn ()
     let to_json v = composed_to_json to_value v
@@ -24718,7 +24715,7 @@ module GetInvitationsCountResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let invitationsCount =
-        field_map json__ "InvitationsCount" Integer.of_json in
+        field_map json__ "invitationsCount" Integer.of_json in
       make ?invitationsCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -24825,12 +24822,12 @@ module GetIPSetResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let expectedBucketOwner =
-        field_map json__ "ExpectedBucketOwner" AccountId.of_json in
-      let tags = field_map json__ "Tags" TagMap.of_json in
-      let status = field_map json__ "Status" IpSetStatus.of_json in
-      let location = field_map json__ "Location" Location.of_json in
-      let format = field_map json__ "Format" IpSetFormat.of_json in
-      let name = field_map json__ "Name" Name.of_json in
+        field_map json__ "expectedBucketOwner" AccountId.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let status = field_map json__ "status" IpSetStatus.of_json in
+      let location = field_map json__ "location" Location.of_json in
+      let format = field_map json__ "format" IpSetFormat.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?expectedBucketOwner ?tags ?status ?location ?format ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the IPSet specified by the ipSetId."]
@@ -24928,9 +24925,9 @@ module GetFindingsStatisticsResponse =
       make ?nextToken ?findingStatistics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let findingStatistics =
-        field_map json__ "FindingStatistics" FindingStatistics.of_json in
+        field_map json__ "findingStatistics" FindingStatistics.of_json in
       make ?nextToken ?findingStatistics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -25005,13 +25002,13 @@ module GetFindingsStatisticsRequest =
         ?findingStatisticTypes ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let maxResults = field_map json__ "MaxResults" MaxResults100.of_json in
-      let orderBy = field_map json__ "OrderBy" OrderBy.of_json in
-      let groupBy = field_map json__ "GroupBy" GroupByType.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults100.of_json in
+      let orderBy = field_map json__ "orderBy" OrderBy.of_json in
+      let groupBy = field_map json__ "groupBy" GroupByType.of_json in
       let findingCriteria =
-        field_map json__ "FindingCriteria" FindingCriteria.of_json in
+        field_map json__ "findingCriteria" FindingCriteria.of_json in
       let findingStatisticTypes =
-        field_map json__ "FindingStatisticTypes"
+        field_map json__ "findingStatisticTypes"
           FindingStatisticTypes.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?maxResults ?orderBy ?groupBy ?findingCriteria
@@ -25073,7 +25070,7 @@ module GetFindingsResponse =
       make ?findings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let findings = field_map json__ "Findings" Findings.of_json in
+      let findings = field_map json__ "findings" Findings.of_json in
       make ?findings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -25113,8 +25110,8 @@ module GetFindingsRequest =
       make ?sortCriteria ~findingIds ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let sortCriteria = field_map json__ "SortCriteria" SortCriteria.of_json in
-      let findingIds = field_map_exn json__ "FindingIds" FindingIds.of_json in
+      let sortCriteria = field_map json__ "sortCriteria" SortCriteria.of_json in
+      let findingIds = field_map_exn json__ "findingIds" FindingIds.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?sortCriteria ~findingIds ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -25211,14 +25208,14 @@ module GetFilterResponse =
       make ?tags ?findingCriteria ?rank ?action ?description ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let tags = field_map json__ "Tags" TagMap.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let findingCriteria =
-        field_map json__ "FindingCriteria" FindingCriteria.of_json in
-      let rank = field_map json__ "Rank" FilterRank.of_json in
-      let action = field_map json__ "Action" FilterAction.of_json in
+        field_map json__ "findingCriteria" FindingCriteria.of_json in
+      let rank = field_map json__ "rank" FilterRank.of_json in
+      let action = field_map json__ "action" FilterAction.of_json in
       let description =
-        field_map json__ "Description" FilterDescription.of_json in
-      let name = field_map json__ "Name" FilterName.of_json in
+        field_map json__ "description" FilterDescription.of_json in
+      let name = field_map json__ "name" FilterName.of_json in
       make ?tags ?findingCriteria ?rank ?action ?description ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -25374,18 +25371,18 @@ module GetDetectorResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let features =
-        field_map json__ "Features"
+        field_map json__ "features"
           DetectorFeatureConfigurationsResults.of_json in
-      let tags = field_map json__ "Tags" TagMap.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let dataSources =
-        field_map json__ "DataSources" DataSourceConfigurationsResult.of_json in
-      let updatedAt = field_map json__ "UpdatedAt" String_.of_json in
-      let status = field_map json__ "Status" DetectorStatus.of_json in
-      let serviceRole = field_map json__ "ServiceRole" String_.of_json in
+        field_map json__ "dataSources" DataSourceConfigurationsResult.of_json in
+      let updatedAt = field_map json__ "updatedAt" String_.of_json in
+      let status = field_map json__ "status" DetectorStatus.of_json in
+      let serviceRole = field_map json__ "serviceRole" String_.of_json in
       let findingPublishingFrequency =
-        field_map json__ "FindingPublishingFrequency"
+        field_map json__ "findingPublishingFrequency"
           FindingPublishingFrequency.of_json in
-      let createdAt = field_map json__ "CreatedAt" String_.of_json in
+      let createdAt = field_map json__ "createdAt" String_.of_json in
       make ?features ?tags ?dataSources ?updatedAt ?status ?serviceRole
         ?findingPublishingFrequency ?createdAt ()
     let to_json v = composed_to_json to_value v
@@ -25475,7 +25472,7 @@ module GetCoverageStatisticsResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let coverageStatistics =
-        field_map json__ "CoverageStatistics" CoverageStatistics.of_json in
+        field_map json__ "coverageStatistics" CoverageStatistics.of_json in
       make ?coverageStatistics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -25520,10 +25517,10 @@ module GetCoverageStatisticsRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let statisticsType =
-        field_map_exn json__ "StatisticsType"
+        field_map_exn json__ "statisticsType"
           CoverageStatisticsTypeList.of_json in
       let filterCriteria =
-        field_map json__ "FilterCriteria" CoverageFilterCriteria.of_json in
+        field_map json__ "filterCriteria" CoverageFilterCriteria.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ~statisticsType ?filterCriteria ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -25587,7 +25584,7 @@ module GetAdministratorAccountResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let administrator =
-        field_map json__ "Administrator" Administrator.of_json in
+        field_map json__ "administrator" Administrator.of_json in
       make ?administrator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -25689,7 +25686,7 @@ module EnableOrganizationAdminAccountRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let adminAccountId =
-        field_map_exn json__ "AdminAccountId" String_.of_json in
+        field_map_exn json__ "adminAccountId" String_.of_json in
       make ~adminAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -25753,7 +25750,7 @@ module DisassociateMembersResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let unprocessedAccounts =
-        field_map json__ "UnprocessedAccounts" UnprocessedAccounts.of_json in
+        field_map json__ "unprocessedAccounts" UnprocessedAccounts.of_json in
       make ?unprocessedAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -25786,7 +25783,7 @@ module DisassociateMembersRequest =
       make ~accountIds ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let accountIds = field_map_exn json__ "AccountIds" AccountIds.of_json in
+      let accountIds = field_map_exn json__ "accountIds" AccountIds.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ~accountIds ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -26016,7 +26013,7 @@ module DisableOrganizationAdminAccountRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let adminAccountId =
-        field_map_exn json__ "AdminAccountId" String_.of_json in
+        field_map_exn json__ "adminAccountId" String_.of_json in
       make ~adminAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -26125,16 +26122,16 @@ module DescribePublishingDestinationResponse =
         ?status ?destinationType ?destinationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let tags = field_map json__ "Tags" TagMap.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let destinationProperties =
-        field_map json__ "DestinationProperties"
+        field_map json__ "destinationProperties"
           DestinationProperties.of_json in
       let publishingFailureStartTimestamp =
-        field_map json__ "PublishingFailureStartTimestamp" Long.of_json in
-      let status = field_map json__ "Status" PublishingStatus.of_json in
+        field_map json__ "publishingFailureStartTimestamp" Long.of_json in
+      let status = field_map json__ "status" PublishingStatus.of_json in
       let destinationType =
-        field_map json__ "DestinationType" DestinationType.of_json in
-      let destinationId = field_map json__ "DestinationId" String_.of_json in
+        field_map json__ "destinationType" DestinationType.of_json in
+      let destinationId = field_map json__ "destinationId" String_.of_json in
       make ?tags ?destinationProperties ?publishingFailureStartTimestamp
         ?status ?destinationType ?destinationId ()
     let to_json v = composed_to_json to_value v
@@ -26287,18 +26284,18 @@ module DescribeOrganizationConfigurationResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let autoEnableOrganizationMembers =
-        field_map json__ "AutoEnableOrganizationMembers"
+        field_map json__ "autoEnableOrganizationMembers"
           AutoEnableMembers.of_json in
-      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let features =
-        field_map json__ "Features"
+        field_map json__ "features"
           OrganizationFeaturesConfigurationsResults.of_json in
       let dataSources =
-        field_map json__ "DataSources"
+        field_map json__ "dataSources"
           OrganizationDataSourceConfigurationsResult.of_json in
       let memberAccountLimitReached =
-        field_map json__ "MemberAccountLimitReached" Boolean.of_json in
-      let autoEnable = field_map json__ "AutoEnable" Boolean.of_json in
+        field_map json__ "memberAccountLimitReached" Boolean.of_json in
+      let autoEnable = field_map json__ "autoEnable" Boolean.of_json in
       make ?autoEnableOrganizationMembers ?nextToken ?features ?dataSources
         ?memberAccountLimitReached ?autoEnable ()
     let to_json v = composed_to_json to_value v
@@ -26338,8 +26335,8 @@ module DescribeOrganizationConfigurationRequest =
       make ?nextToken ?maxResults ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?nextToken ?maxResults ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -26406,8 +26403,8 @@ module DescribeMalwareScansResponse =
       make ?nextToken ?scans ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let nextToken = field_map json__ "NextToken" String_.of_json in
-      let scans = field_map json__ "Scans" Scans.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let scans = field_map json__ "scans" Scans.of_json in
       make ?nextToken ?scans ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -26475,12 +26472,12 @@ module DescribeMalwareScansRequest =
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let sortCriteria = field_map json__ "SortCriteria" SortCriteria.of_json in
+      let sortCriteria = field_map json__ "sortCriteria" SortCriteria.of_json in
       let filterCriteria =
-        field_map json__ "FilterCriteria" FilterCriteria.of_json in
+        field_map json__ "filterCriteria" FilterCriteria.of_json in
       let maxResults =
-        field_map json__ "MaxResults" IntegerValueWithMax.of_json in
-      let nextToken = field_map json__ "NextToken" String_.of_json in
+        field_map json__ "maxResults" IntegerValueWithMax.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?sortCriteria ?filterCriteria ?maxResults ?nextToken ~detectorId
         ()
@@ -26889,7 +26886,7 @@ module DeleteMembersResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let unprocessedAccounts =
-        field_map json__ "UnprocessedAccounts" UnprocessedAccounts.of_json in
+        field_map json__ "unprocessedAccounts" UnprocessedAccounts.of_json in
       make ?unprocessedAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -26922,7 +26919,7 @@ module DeleteMembersRequest =
       make ~accountIds ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let accountIds = field_map_exn json__ "AccountIds" AccountIds.of_json in
+      let accountIds = field_map_exn json__ "accountIds" AccountIds.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ~accountIds ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -27014,7 +27011,7 @@ module DeleteInvitationsResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let unprocessedAccounts =
-        field_map json__ "UnprocessedAccounts" UnprocessedAccounts.of_json in
+        field_map json__ "unprocessedAccounts" UnprocessedAccounts.of_json in
       make ?unprocessedAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -27039,7 +27036,7 @@ module DeleteInvitationsRequest =
       make ~accountIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let accountIds = field_map_exn json__ "AccountIds" AccountIds.of_json in
+      let accountIds = field_map_exn json__ "accountIds" AccountIds.of_json in
       make ~accountIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -27342,7 +27339,7 @@ module DeclineInvitationsResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let unprocessedAccounts =
-        field_map json__ "UnprocessedAccounts" UnprocessedAccounts.of_json in
+        field_map json__ "unprocessedAccounts" UnprocessedAccounts.of_json in
       make ?unprocessedAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -27367,7 +27364,7 @@ module DeclineInvitationsRequest =
       make ~accountIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let accountIds = field_map_exn json__ "AccountIds" AccountIds.of_json in
+      let accountIds = field_map_exn json__ "accountIds" AccountIds.of_json in
       make ~accountIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -27431,7 +27428,7 @@ module CreateTrustedEntitySetResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let trustedEntitySetId =
-        field_map json__ "TrustedEntitySetId" String_.of_json in
+        field_map json__ "trustedEntitySetId" String_.of_json in
       make ?trustedEntitySetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -27518,15 +27515,15 @@ module CreateTrustedEntitySetRequest =
         ~format ~name ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let tags = field_map json__ "Tags" TagMap.of_json in
-      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
-      let activate = field_map_exn json__ "Activate" Boolean.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let activate = field_map_exn json__ "activate" Boolean.of_json in
       let expectedBucketOwner =
-        field_map json__ "ExpectedBucketOwner" ExpectedBucketOwner.of_json in
-      let location = field_map_exn json__ "Location" Location.of_json in
+        field_map json__ "expectedBucketOwner" ExpectedBucketOwner.of_json in
+      let location = field_map_exn json__ "location" Location.of_json in
       let format =
-        field_map_exn json__ "Format" TrustedEntitySetFormat.of_json in
-      let name = field_map_exn json__ "Name" Name.of_json in
+        field_map_exn json__ "format" TrustedEntitySetFormat.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?tags ?clientToken ~activate ?expectedBucketOwner ~location
         ~format ~name ~detectorId ()
@@ -27600,7 +27597,7 @@ module CreateThreatIntelSetResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let threatIntelSetId =
-        field_map json__ "ThreatIntelSetId" String_.of_json in
+        field_map json__ "threatIntelSetId" String_.of_json in
       make ?threatIntelSetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -27686,13 +27683,13 @@ module CreateThreatIntelSetRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let expectedBucketOwner =
-        field_map json__ "ExpectedBucketOwner" AccountId.of_json in
-      let tags = field_map json__ "Tags" TagMap.of_json in
-      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
-      let activate = field_map_exn json__ "Activate" Boolean.of_json in
-      let location = field_map_exn json__ "Location" Location.of_json in
-      let format = field_map_exn json__ "Format" ThreatIntelSetFormat.of_json in
-      let name = field_map_exn json__ "Name" Name.of_json in
+        field_map json__ "expectedBucketOwner" AccountId.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let activate = field_map_exn json__ "activate" Boolean.of_json in
+      let location = field_map_exn json__ "location" Location.of_json in
+      let format = field_map_exn json__ "format" ThreatIntelSetFormat.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?expectedBucketOwner ?tags ?clientToken ~activate ~location
         ~format ~name ~detectorId ()
@@ -27758,7 +27755,7 @@ module CreateThreatEntitySetResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let threatEntitySetId =
-        field_map json__ "ThreatEntitySetId" String_.of_json in
+        field_map json__ "threatEntitySetId" String_.of_json in
       make ?threatEntitySetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -27845,15 +27842,15 @@ module CreateThreatEntitySetRequest =
         ~format ~name ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let tags = field_map json__ "Tags" TagMap.of_json in
-      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
-      let activate = field_map_exn json__ "Activate" Boolean.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let activate = field_map_exn json__ "activate" Boolean.of_json in
       let expectedBucketOwner =
-        field_map json__ "ExpectedBucketOwner" ExpectedBucketOwner.of_json in
-      let location = field_map_exn json__ "Location" Location.of_json in
+        field_map json__ "expectedBucketOwner" ExpectedBucketOwner.of_json in
+      let location = field_map_exn json__ "location" Location.of_json in
       let format =
-        field_map_exn json__ "Format" ThreatEntitySetFormat.of_json in
-      let name = field_map_exn json__ "Name" Name.of_json in
+        field_map_exn json__ "format" ThreatEntitySetFormat.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?tags ?clientToken ~activate ?expectedBucketOwner ~location
         ~format ~name ~detectorId ()
@@ -27939,7 +27936,7 @@ module CreateSampleFindingsRequest =
       make ?findingTypes ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let findingTypes = field_map json__ "FindingTypes" FindingTypes.of_json in
+      let findingTypes = field_map json__ "findingTypes" FindingTypes.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?findingTypes ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -28000,7 +27997,7 @@ module CreatePublishingDestinationResponse =
       make ?destinationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let destinationId = field_map json__ "DestinationId" String_.of_json in
+      let destinationId = field_map json__ "destinationId" String_.of_json in
       make ?destinationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -28064,13 +28061,13 @@ module CreatePublishingDestinationRequest =
         ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let tags = field_map json__ "Tags" TagMap.of_json in
-      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let destinationProperties =
-        field_map_exn json__ "DestinationProperties"
+        field_map_exn json__ "destinationProperties"
           DestinationProperties.of_json in
       let destinationType =
-        field_map_exn json__ "DestinationType" DestinationType.of_json in
+        field_map_exn json__ "destinationType" DestinationType.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?tags ?clientToken ~destinationProperties ~destinationType
         ~detectorId ()
@@ -28136,7 +28133,7 @@ module CreateMembersResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let unprocessedAccounts =
-        field_map json__ "UnprocessedAccounts" UnprocessedAccounts.of_json in
+        field_map json__ "unprocessedAccounts" UnprocessedAccounts.of_json in
       make ?unprocessedAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -28170,7 +28167,7 @@ module CreateMembersRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let accountDetails =
-        field_map_exn json__ "AccountDetails" AccountDetails.of_json in
+        field_map_exn json__ "accountDetails" AccountDetails.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ~accountDetails ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -28253,7 +28250,7 @@ module CreateMalwareProtectionPlanResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let malwareProtectionPlanId =
-        field_map json__ "MalwareProtectionPlanId" String_.of_json in
+        field_map json__ "malwareProtectionPlanId" String_.of_json in
       make ?malwareProtectionPlanId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -28308,14 +28305,14 @@ module CreateMalwareProtectionPlanRequest =
       make ?tags ?actions ~protectedResource ~role ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let tags = field_map json__ "Tags" TagMap.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let actions =
-        field_map json__ "Actions" MalwareProtectionPlanActions.of_json in
+        field_map json__ "actions" MalwareProtectionPlanActions.of_json in
       let protectedResource =
-        field_map_exn json__ "ProtectedResource"
+        field_map_exn json__ "protectedResource"
           CreateProtectedResource.of_json in
-      let role = field_map_exn json__ "Role" String_.of_json in
-      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let role = field_map_exn json__ "role" String_.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       make ?tags ?actions ~protectedResource ~role ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -28383,7 +28380,7 @@ module CreateIPSetResponse =
       make ?ipSetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let ipSetId = field_map json__ "IpSetId" String_.of_json in
+      let ipSetId = field_map json__ "ipSetId" String_.of_json in
       make ?ipSetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -28468,13 +28465,13 @@ module CreateIPSetRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let expectedBucketOwner =
-        field_map json__ "ExpectedBucketOwner" AccountId.of_json in
-      let tags = field_map json__ "Tags" TagMap.of_json in
-      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
-      let activate = field_map_exn json__ "Activate" Boolean.of_json in
-      let location = field_map_exn json__ "Location" Location.of_json in
-      let format = field_map_exn json__ "Format" IpSetFormat.of_json in
-      let name = field_map_exn json__ "Name" Name.of_json in
+        field_map json__ "expectedBucketOwner" AccountId.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let activate = field_map_exn json__ "activate" Boolean.of_json in
+      let location = field_map_exn json__ "location" Location.of_json in
+      let format = field_map_exn json__ "format" IpSetFormat.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?expectedBucketOwner ?tags ?clientToken ~activate ~location
         ~format ~name ~detectorId ()
@@ -28536,7 +28533,7 @@ module CreateFilterResponse =
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let name = field_map json__ "Name" FilterName.of_json in make ?name ()
+      let name = field_map json__ "name" FilterName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a filter using the specified finding criteria. The maximum number of saved filters per Amazon Web Services account per Region is 100. For more information, see Quotas for GuardDuty."]
@@ -28622,15 +28619,15 @@ module CreateFilterRequest =
         ~name ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let tags = field_map json__ "Tags" TagMap.of_json in
-      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let findingCriteria =
-        field_map_exn json__ "FindingCriteria" FindingCriteria.of_json in
-      let rank = field_map json__ "Rank" FilterRank.of_json in
-      let action = field_map json__ "Action" FilterAction.of_json in
+        field_map_exn json__ "findingCriteria" FindingCriteria.of_json in
+      let rank = field_map json__ "rank" FilterRank.of_json in
+      let action = field_map json__ "action" FilterAction.of_json in
       let description =
-        field_map json__ "Description" FilterDescription.of_json in
-      let name = field_map_exn json__ "Name" FilterName.of_json in
+        field_map json__ "description" FilterDescription.of_json in
+      let name = field_map_exn json__ "name" FilterName.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ?tags ?clientToken ~findingCriteria ?rank ?action ?description
         ~name ~detectorId ()
@@ -28704,9 +28701,9 @@ module CreateDetectorResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let unprocessedDataSources =
-        field_map json__ "UnprocessedDataSources"
+        field_map json__ "unprocessedDataSources"
           UnprocessedDataSourcesResult.of_json in
-      let detectorId = field_map json__ "DetectorId" DetectorId.of_json in
+      let detectorId = field_map json__ "detectorId" DetectorId.of_json in
       make ?unprocessedDataSources ?detectorId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -28780,15 +28777,15 @@ module CreateDetectorRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
       let features =
-        field_map json__ "Features" DetectorFeatureConfigurations.of_json in
-      let tags = field_map json__ "Tags" TagMap.of_json in
+        field_map json__ "features" DetectorFeatureConfigurations.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let dataSources =
-        field_map json__ "DataSources" DataSourceConfigurations.of_json in
+        field_map json__ "dataSources" DataSourceConfigurations.of_json in
       let findingPublishingFrequency =
-        field_map json__ "FindingPublishingFrequency"
+        field_map json__ "findingPublishingFrequency"
           FindingPublishingFrequency.of_json in
-      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
-      let enable = field_map_exn json__ "Enable" Boolean.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let enable = field_map_exn json__ "enable" Boolean.of_json in
       make ?features ?tags ?dataSources ?findingPublishingFrequency
         ?clientToken ~enable ()
     let to_json v = composed_to_json to_value v
@@ -28872,7 +28869,7 @@ module ArchiveFindingsRequest =
       make ~findingIds ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let findingIds = field_map_exn json__ "FindingIds" FindingIds.of_json in
+      let findingIds = field_map_exn json__ "findingIds" FindingIds.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ~findingIds ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -28964,8 +28961,8 @@ module AcceptInvitationRequest =
       make ~invitationId ~masterId ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let invitationId = field_map_exn json__ "InvitationId" String_.of_json in
-      let masterId = field_map_exn json__ "MasterId" String_.of_json in
+      let invitationId = field_map_exn json__ "invitationId" String_.of_json in
+      let masterId = field_map_exn json__ "masterId" String_.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ~invitationId ~masterId ~detectorId ()
     let to_json v = composed_to_json to_value v
@@ -29059,9 +29056,9 @@ module AcceptAdministratorInvitationRequest =
       make ~invitationId ~administratorId ~detectorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json json__ =
-      let invitationId = field_map_exn json__ "InvitationId" String_.of_json in
+      let invitationId = field_map_exn json__ "invitationId" String_.of_json in
       let administratorId =
-        field_map_exn json__ "AdministratorId" String_.of_json in
+        field_map_exn json__ "administratorId" String_.of_json in
       let detectorId = field_map_exn json__ "DetectorId" DetectorId.of_json in
       make ~invitationId ~administratorId ~detectorId ()
     let to_json v = composed_to_json to_value v

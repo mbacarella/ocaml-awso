@@ -287,7 +287,20 @@ let string_of_json ~kind = function
 let timestamp_of_json = function
   | `String s -> s
   | `Float f -> Float.to_string f
-  | _ -> failwith "Expected string representing a timestamp"
+  | `Int i -> Int.to_string i
+  | `Intlit i -> i
+  | _ -> failwith "Expected string or number representing a timestamp"
+;;
+
+let%expect_test "timestamp_of_json" =
+  [ `String "2026-08-05T21:45:02Z"; `Float 1.5; `Int 1_754_000_000; `Intlit "1754000000" ]
+  |> List.iter ~f:(fun json -> printf "%s\n" (timestamp_of_json json));
+  [%expect
+    {|
+    2026-08-05T21:45:02Z
+    1.5
+    1754000000
+    1754000000 |}]
 ;;
 
 let list_of_json ~kind ~of_json = function
