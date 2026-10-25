@@ -1,0 +1,12 @@
+(executable
+ (name solo5_ec2)
+ (libraries
+  awso-async.ebs
+  awso-async.ec2
+  awso-async
+  core_unix.command_unix
+  core_unix.filename_unix
+  core_unix.time_float_unix
+  cryptokit)
+ (preprocess
+  (pps ppx_jane)))
